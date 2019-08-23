@@ -5,13 +5,19 @@ Interferometry is a simple GUI for interferogram evaluation. Heavily under const
 Advanced description will be added soon.
 
 # Lastest upgrades:
-  - New logic, resizeable app
+  - Added Tools --> Generator, currently working on its bugs
+  - New program structure
   - Added automated detection for load data.
   - Added Swap axes + some bugfixes
   - Added FFT ( Gaussian Window filtering and IFFT next)
   - Added Modify data panel
 
-  
+### Known issues
+* At the moment the evaluation methods not working properly, rewriting them soon.  
+* Unit selector has no effect yet
+* The data loading AI sometimes produces unexpected results, currently being reviewed.
+* There might be unnecessary imports
+* Generator core is under development, inconsistencies might occur.
 
 
 ### Coming soon..
@@ -29,7 +35,7 @@ These things will be implemented:
 
 ### Installation
 
-Interferogram requires [Python 3+](https://www.python.org/downloads/) to run.
+Interferogram requires [Python 3](https://www.python.org/downloads/) to run.
 
 Please install the following packages:
 * [PyQt5](https://pypi.org/project/PyQt5/)

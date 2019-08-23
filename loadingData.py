@@ -1,6 +1,9 @@
 '''
 This file helps to load in data with auto detection features. Bugs might be encountered, currently working on fix.
 
+
+UNSTABLE.
+
 '''
 
 import numpy as np
@@ -53,6 +56,7 @@ def readData(file):
 		test = False
 	else:
 		test = True
+	# print(hasHeader(file))
 	if hasHeader(file):
 		for string in toLookFor:
 			indexes = getMatches(string, df.columns.to_numpy(), n=1, cutoff = 0.66)
@@ -89,7 +93,7 @@ def readData(file):
 				df.iloc[0,item[0][0]] = 'crowded'
 				if df.iloc[0,item[0][0]] == 'crowded':
 					df = df.drop(df.columns[item[0][0]], axis=1)
-					# print(df)
+					# print('df')
 			except:
 				pass
 		elif item[1] in yAxis:
@@ -98,7 +102,8 @@ def readData(file):
 				df.iloc[0,item[0][0]] = 'crowded'
 				if df.iloc[0,item[0][0]] == 'crowded':
 					df = df.drop(df.columns[item[0][0]], axis=1)
-					# print(df)
+					# print('f')
+				# print(initSpectrumY[:3])
 			except:
 				pass
 		elif item[1] in refAxis:
@@ -107,7 +112,7 @@ def readData(file):
 				df.iloc[0,item[0][0]] = 'crowded'
 				if df.iloc[0,item[0][0]] == 'crowded':
 					df = df.drop(df.columns[item[0][0]], axis=1)
-					# print(df)
+					# print('ddf')
 			except:
 				pass
 
@@ -117,7 +122,7 @@ def readData(file):
 				df.iloc[0,item[0][0]] = 'crowded'
 				if df.iloc[0,item[0][0]] == 'crowded':
 					df = df.drop(df.columns[item[0][0]], axis=1)
-					# print(df)
+					# print('dfdd')
 			except:
 				pass
 
@@ -156,9 +161,9 @@ def readData(file):
 	return initSpectrumX, initSpectrumY, ref, sam
 
 
-# x,y,reference,sample = readData('examples/autodetect.txt')
+# x,y,reference,sample = readData('examples/KURVA.txt')
 
-# print(x)
-# print(y)
-# print(reference)
-# print(sample)
+# print(x[:3])
+# print(y[:3])
+# print(reference[:3])
+# print(sample[:3])

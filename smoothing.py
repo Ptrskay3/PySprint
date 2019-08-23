@@ -1,7 +1,6 @@
 """
 Methods for manipulating the loaded data
 
-
 """
 
 

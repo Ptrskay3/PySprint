@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QWidget, QMessageBox, QPushButton
 class Help(QWidget):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("Help")
-        MainWindow.setFixedSize(801, 500)
+        MainWindow.setFixedSize(801, 530)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
@@ -29,9 +29,9 @@ class Help(QWidget):
         self.textArea.insertHtml("<a href='https://github.com/Ptrskay3/Interferometry'>GitHub</a>\n  ")
         self.textArea.textCursor().insertHtml('\n\n or send an email to <b>leeh123peter@gmail.com</b>')
         self.textArea.setOpenExternalLinks(True)
-        # self.exbtn = QPushButton('Exit', self.centralwidget)
-        # self.exbtn.move(350,460)
-        # self.exbtn.clicked.connect(self.close)
+        self.exbtn = QPushButton('Close', self.centralwidget)
+        self.exbtn.move(350,460)
+        self.exbtn.clicked.connect(self.close)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 26))

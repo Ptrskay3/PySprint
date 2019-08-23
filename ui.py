@@ -1,10 +1,12 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
-from mplwidget import MplWidget
-from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, 
-QDialog, QPushButton, QVBoxLayout, QComboBox, QCheckBox, QLabel,QAction, qApp, QTextEdit, QSpacerItem, QSizePolicy,QHBoxLayout, QGroupBox, QTableWidgetItem)
-from PyQt5.QtCore import Qt, pyqtSignal, QObject, pyqtSlot
-from PyQt5.QtGui import QIcon, QCursor
+# -*- coding: utf-8 -*-
 
+# Form implementation generated from reading ui file 'MainWindow.ui'
+#
+# Created by: PyQt5 UI code generator 5.11.3
+#
+# WARNING! All changes made in this file will be lost!
+
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_Interferometry(object):
     def setupUi(self, Interferometry):
@@ -47,7 +49,6 @@ class Ui_Interferometry(object):
         self.editTab.setObjectName("editTab")
         self.savgolTab = QtWidgets.QWidget()
         self.savgolTab.setObjectName("savgolTab")
-        self.savgolTab.setStyleSheet(" background-color: rgb(240,240,240);")
         self.horizontalLayoutWidget_8 = QtWidgets.QWidget(self.savgolTab)
         self.horizontalLayoutWidget_8.setGeometry(QtCore.QRect(40, 30, 261, 211))
         self.horizontalLayoutWidget_8.setObjectName("horizontalLayoutWidget_8")
@@ -68,7 +69,6 @@ class Ui_Interferometry(object):
         self.editTab.addTab(self.savgolTab, "")
         self.peakTab = QtWidgets.QWidget()
         self.peakTab.setObjectName("peakTab")
-        self.peakTab.setStyleSheet(" background-color: rgb(240,240,240);")
         self.horizontalLayoutWidget_10 = QtWidgets.QWidget(self.peakTab)
         self.horizontalLayoutWidget_10.setGeometry(QtCore.QRect(40, 30, 261, 211))
         self.horizontalLayoutWidget_10.setObjectName("horizontalLayoutWidget_10")
@@ -93,21 +93,19 @@ class Ui_Interferometry(object):
         self.editTab.addTab(self.peakTab, "")
         self.convolTab = QtWidgets.QWidget()
         self.convolTab.setObjectName("convolTab")
-        self.convolTab.setStyleSheet(" background-color: rgb(240,240,240);")
-        self.widget = QtWidgets.QWidget(self.convolTab)
-        self.widget.setGeometry(QtCore.QRect(40, 30, 259, 209))
-        self.widget.setObjectName("widget")
-        self.verticalLayout_14 = QtWidgets.QVBoxLayout(self.widget)
+        self.layoutWidget = QtWidgets.QWidget(self.convolTab)
+        self.layoutWidget.setGeometry(QtCore.QRect(40, 30, 259, 209))
+        self.layoutWidget.setObjectName("layoutWidget")
+        self.verticalLayout_14 = QtWidgets.QVBoxLayout(self.layoutWidget)
         self.verticalLayout_14.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_14.setObjectName("verticalLayout_14")
-        self.convolutionStd = QtWidgets.QLineEdit(self.widget)
+        self.convolutionStd = QtWidgets.QLineEdit(self.layoutWidget)
         self.convolutionStd.setMinimumSize(QtCore.QSize(0, 40))
         self.convolutionStd.setObjectName("convolutionStd")
         self.verticalLayout_14.addWidget(self.convolutionStd)
         self.editTab.addTab(self.convolTab, "")
         self.cutTab = QtWidgets.QWidget()
         self.cutTab.setObjectName("cutTab")
-        self.cutTab.setStyleSheet(" background-color: rgb(240,240,240);")
         self.horizontalLayoutWidget_9 = QtWidgets.QWidget(self.cutTab)
         self.horizontalLayoutWidget_9.setGeometry(QtCore.QRect(40, 30, 261, 211))
         self.horizontalLayoutWidget_9.setObjectName("horizontalLayoutWidget_9")
@@ -179,12 +177,12 @@ class Ui_Interferometry(object):
         self.tableWidget.setMinimumSize(QtCore.QSize(0, 735))
         self.tableWidget.setBaseSize(QtCore.QSize(379, 738))
         self.tableWidget.setObjectName("tableWidget")
-        self.verticalLayout.addWidget(self.tableWidget)
         self.tableWidget.setColumnCount(2)
         self.tableWidget.setRowCount(5)
         self.tableWidget.setHorizontalHeaderLabels(["Angular frequency", "Intensity"])
         self.tableWidget.setSizeAdjustPolicy(
         QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.verticalLayout.addWidget(self.tableWidget)
         spacerItem7 = QtWidgets.QSpacerItem(20, 1, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         self.verticalLayout.addItem(spacerItem7)
         self.gridLayout_7.addLayout(self.verticalLayout, 1, 0, 2, 1)
@@ -200,22 +198,19 @@ class Ui_Interferometry(object):
         self.methodWidget = QtWidgets.QTabWidget(self.centralwidget)
         self.methodWidget.setMinimumSize(QtCore.QSize(0, 290))
         self.methodWidget.setBaseSize(QtCore.QSize(869, 249))
-        self.methodWidget.setAutoFillBackground(True)
+        self.methodWidget.setAutoFillBackground(False)
         self.methodWidget.setTabsClosable(False)
         self.methodWidget.setMovable(False)
         self.methodWidget.setTabBarAutoHide(False)
         self.methodWidget.setObjectName("methodWidget")
-        # self.methodWidget.setStyleSheet("QTabBar::tab:!selected {background: silver;}")
         self.sppTab = QtWidgets.QWidget()
         self.sppTab.setObjectName("sppTab")
-        self.sppTab.setStyleSheet(" background-color: rgb(240,240,240);")
         self.label = QtWidgets.QLabel(self.sppTab)
         self.label.setGeometry(QtCore.QRect(370, 100, 97, 16))
         self.label.setObjectName("label")
         self.methodWidget.addTab(self.sppTab, "")
         self.cffTab = QtWidgets.QWidget()
         self.cffTab.setObjectName("cffTab")
-        self.cffTab.setStyleSheet(" background-color: rgb(240,240,240);")
         self.horizontalLayout_15 = QtWidgets.QHBoxLayout(self.cffTab)
         self.horizontalLayout_15.setObjectName("horizontalLayout_15")
         self.verticalLayout_9 = QtWidgets.QVBoxLayout()
@@ -281,7 +276,6 @@ class Ui_Interferometry(object):
         self.methodWidget.addTab(self.cffTab, "")
         self.mmTab = QtWidgets.QWidget()
         self.mmTab.setObjectName("mmTab")
-        self.mmTab.setStyleSheet(" background-color: rgb(240,240,240);")
         self.verticalLayoutWidget_8 = QtWidgets.QWidget(self.mmTab)
         self.verticalLayoutWidget_8.setGeometry(QtCore.QRect(10, 10, 872, 249))
         self.verticalLayoutWidget_8.setObjectName("verticalLayoutWidget_8")
@@ -324,7 +318,6 @@ class Ui_Interferometry(object):
         self.methodWidget.addTab(self.mmTab, "")
         self.fftTab = QtWidgets.QWidget()
         self.fftTab.setObjectName("fftTab")
-        self.fftTab.setStyleSheet(" background-color: rgb(240,240,240);")
         self.verticalLayoutWidget_9 = QtWidgets.QWidget(self.fftTab)
         self.verticalLayoutWidget_9.setGeometry(QtCore.QRect(10, 10, 872, 249))
         self.verticalLayoutWidget_9.setObjectName("verticalLayoutWidget_9")
@@ -410,6 +403,8 @@ class Ui_Interferometry(object):
         self.actionUndo.setObjectName("actionUndo")
         self.actionRedo = QtWidgets.QAction(Interferometry)
         self.actionRedo.setObjectName("actionRedo")
+        self.actionGenerator = QtWidgets.QAction(Interferometry)
+        self.actionGenerator.setObjectName("actionGenerator")
         self.menuFile.addAction(self.actionSave_log_file)
         self.menuFile.addAction(self.actionSave_current_data)
         self.menuFile.addAction(self.actionLoad_data_manually)
@@ -418,13 +413,23 @@ class Ui_Interferometry(object):
         self.menuEdit.addAction(self.actionUndo)
         self.menuEdit.addAction(self.actionRedo)
         self.menuHelp.addAction(self.actionAbout)
+        self.menuPreferences.addAction(self.actionGenerator)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuPreferences.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
 
+        self.savgolTab.setStyleSheet(" background-color: rgb(240,240,240);")
+        self.peakTab.setStyleSheet(" background-color: rgb(240,240,240);")
+        self.convolTab.setStyleSheet(" background-color: rgb(240,240,240);")
+        self.cutTab.setStyleSheet(" background-color: rgb(240,240,240);")
+        self.sppTab.setStyleSheet(" background-color: rgb(240,240,240);")
+        self.cffTab.setStyleSheet(" background-color: rgb(240,240,240);")
+        self.mmTab.setStyleSheet(" background-color: rgb(240,240,240);")
+        self.fftTab.setStyleSheet(" background-color: rgb(240,240,240);")
+
         self.retranslateUi(Interferometry)
-        self.editTab.setCurrentIndex(1)
+        self.editTab.setCurrentIndex(3)
         self.methodWidget.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(Interferometry)
 
@@ -476,7 +481,7 @@ class Ui_Interferometry(object):
         self.menuFile.setTitle(_translate("Interferometry", "File"))
         self.menuEdit.setTitle(_translate("Interferometry", "Edit"))
         self.menuHelp.setTitle(_translate("Interferometry", "Help"))
-        self.menuPreferences.setTitle(_translate("Interferometry", "Preferences"))
+        self.menuPreferences.setTitle(_translate("Interferometry", "Tools"))
         self.actionSave_log_file.setText(_translate("Interferometry", "Save log file"))
         self.actionSave_current_data.setText(_translate("Interferometry", "Save current data"))
         self.actionLoad_data_manually.setText(_translate("Interferometry", "Load data manually"))
@@ -484,6 +489,7 @@ class Ui_Interferometry(object):
         self.actionAbout.setText(_translate("Interferometry", "About"))
         self.actionUndo.setText(_translate("Interferometry", "Undo"))
         self.actionRedo.setText(_translate("Interferometry", "Redo"))
+        self.actionGenerator.setText(_translate("Interferometry", "Generator"))
 
 from mplwidget import MplWidget
 

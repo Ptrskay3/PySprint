@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-
-"""
-under constr.
-
-"""
+##############################
+#
+#
+# Rewriting comes next.
+#
+#
+##############################
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -32,6 +34,7 @@ def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPos
 		raise ValueError('Something went wrong...')
 
 	Xdata = initSpectrumX
+	#ide jön majd a zajszűrés, min maxok kiválasztása valahogyan
 	SSPinData, SSPindex = findNearest(Xdata, SPPosition)
 	maxInd = argrelextrema(Ydata, np.greater)
 	minInd = argrelextrema(Ydata, np.less)
@@ -60,8 +63,8 @@ def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPos
 		dispersion = np.zeros_like(popt)
 
 		for num in range(len(popt)):
-			dispersion[num] = popt[num]*factorial(num)	
-			if showGraph == True:		
+			dispersion[num] = popt[num]*factorial(num)
+			if showGraph == True:	
 				fig = plt.figure()
 				fig.canvas.set_window_title('Min-Max method')
 				plt.plot(fullXValues, fullYValues,'ro',label = 'dataset')
@@ -103,8 +106,12 @@ def cosFitForPMCFF(x,c0, c1, b0, b1, b2, b3, b4, b5):
 
 def SSP():
 	pass
-
-def PMCFFMethod(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, p0=[1, 1, 1, 1, 1, 1, 1, 1], showGraph = False): #showgraphot kéne beleírni
+############################################################################
+#
+#  A RELATÍV KÖRFREKVENCIÁRA KELL ILLESZTENI, ÁT KELL DOLGOZNI.
+#
+############################################################################
+def PMCFFMethod(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, p0=[1, 1, 1, 1, 1, 1, 1, 1], showGraph = False):
 	"""
 	Phase modulated cosine function fit method. p0 is the array containing inital parameters for fitting.
 	initSpectrumX default to angular frequency
