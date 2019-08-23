@@ -12,6 +12,7 @@ from generatorUI import Ui_GeneratorWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
 import numpy as np
 import pandas as pd
+import time
 from mplwidget import MplWidget
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, 
 QDialog, QPushButton, QVBoxLayout, QComboBox, QCheckBox, QLabel,QAction, qApp, QTextEdit, QSpacerItem, QSizePolicy,QHBoxLayout, QGroupBox, QTableWidgetItem)
@@ -125,11 +126,7 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.temp = self.a
             self.a = self.b
             self.b = self.temp
-            self.MplWidget.canvas.axes.clear()
-            self.MplWidget.canvas.axes.grid()
-            self.MplWidget.canvas.axes.plot(self.a, np.abs(self.b))
-            self.MplWidget.canvas.axes.set_ylabel("Intensity")
-            self.MplWidget.canvas.draw()
+            self.redrawGraph()
             if len(self.a)<400:
                         for row_number in range(len(self.a)):
                             self.tableWidget.insertRow(row_number)
@@ -354,7 +351,7 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     self.MplWidget.canvas.axes.clear()
                     t, w = cutData(self.a, self.b, self.refY, self.samY, startValue = float(self.sliceStart.text()),
                      endValue = float(self.sliceStop.text()))
-                    self.MplWidget.canvas.axes.plot(t, np.abs(w))
+                    self.MplWidget.canvas.axes.plot(t, w)
                     self.MplWidget.canvas.axes.grid()
                     self.MplWidget.canvas.axes.set_ylabel("Intensity")
                     # self.MplWidget.canvas.axes.set_xlabel("Angular frequency")
@@ -368,7 +365,7 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     self.MplWidget.canvas.axes.clear()
                     t,w  = cutData(self.a, self.b ,[], [], startValue = float(self.sliceStart.text()),
                      endValue = float(self.sliceStop.text()))
-                    self.MplWidget.canvas.axes.plot(t, np.abs(w))
+                    self.MplWidget.canvas.axes.plot(t, w)
                     self.MplWidget.canvas.axes.grid()
                     self.MplWidget.canvas.axes.set_ylabel("Intensity")
                     # self.MplWidget.canvas.axes.set_xlabel("Angular frequency")
@@ -616,11 +613,18 @@ class generatorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
             self.delimiterLine.setText(',')
 
         if self.comboBox.currentText() == 'frequency':
-            self.xAxisData, self.yAxisData, self.refData, self.samData =  generatorFreq(start = float(self.startLine.text()),
-                stop = float(self.stopLine.text()), center = float(self.centerLine.text()), delay = float(self.delayLine.text()), 
-                GD = float(self.GDLine.text()), GDD = float(self.startLine.text()), TOD = float(self.TODLine.text()), FOD = float(self.FODLine.text()), 
-                QOD = float(self.QODLine.text()), resolution = float(self.resolutionLine.text()), delimiter = self.delimiterLine.text(), pulseWidth = float(self.pulseLine.text()), 
-                includeArms = self.armCheck.isChecked())
+            try:
+                self.pushButton_4.setStyleSheet('background-color: None')
+                self.xAxisData, self.yAxisData, self.refData, self.samData =  generatorFreq(start = float(self.startLine.text()),
+                    stop = float(self.stopLine.text()), center = float(self.centerLine.text()), delay = float(self.delayLine.text()), 
+                    GD = float(self.GDLine.text()), GDD = float(self.startLine.text()), TOD = float(self.TODLine.text()), FOD = float(self.FODLine.text()), 
+                    QOD = float(self.QODLine.text()), resolution = float(self.resolutionLine.text()), delimiter = self.delimiterLine.text(), pulseWidth = float(self.pulseLine.text()), 
+                    includeArms = self.armCheck.isChecked())
+            except:
+                self.pushButton_4.setStyleSheet(" background-color: rgb(240,0,0); color: rgb(255,255,255);")
+                
+                
+
 
 
         if self.comboBox.currentText() == 'wavelength':
@@ -638,7 +642,7 @@ class generatorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
             self.delimiterLine.setText(',')
         options = QFileDialog.Options()
         name = QFileDialog.getSaveFileName(self, 'Save File','','Text(*.txt)', options=options)
-        print(len(self.xAxisData))
+        # print(len(self.xAxisData))
         try:
             with open(name[0], 'w') as f:
                 if self.armCheck.isChecked():

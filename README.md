@@ -24,13 +24,11 @@ Advanced description will be added soon.
 
 These things will be implemented:
 * ERROR HANDLING!
-* Stationary Phase Point Method (SPP) and dependencies
-* Fourier Transform Method (FFT) and dependencies
+* Stationary Phase Point Method (SPP)
+* Fourier Transform Method (FFT) 
 * Selectable units both for angular frequency and wavelength
 * Possible performance enhancement by improving algorithms
-* Possible new data manipulating features..
-
-
+* Possible new data manipulating features
 
 
 ### Installation
