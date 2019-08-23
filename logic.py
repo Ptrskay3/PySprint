@@ -88,9 +88,13 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         if self.gaussianCut2.text() == '':
             self.gaussianCut2.setText('40')
         if len(self.a)>0 and len(self.b)>0:
-            xx = cutWithGaussian(self.b, spike= float(self.gaussianCut.text()), sigma = float(self.gaussianCut2.text()))
+            xx = cutWithGaussian(self.a ,self.b, spike= float(self.gaussianCut.text()), sigma = float(self.gaussianCut2.text()))
             self.b = xx
-            self.redrawGraph()
+            self.MplWidget.canvas.axes.clear()
+            self.MplWidget.canvas.axes.grid()
+            self.MplWidget.canvas.axes.plot(self.a, np.abs(self.b))
+            self.MplWidget.canvas.axes.set_ylabel("Intensity")
+            self.MplWidget.canvas.draw()
 
 
 
@@ -380,7 +384,10 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 Ydata = (self.b-self.refY-self.samY)/(2*np.sqrt(self.refY*self.samY))
                 Xdata = self.a
                 self.MplWidget.canvas.axes.clear()
-                self.MplWidget.canvas.axes.plot(Xdata, Ydata)
+                if np.iscomplexobj(Ydata):
+                    self.MplWidget.canvas.axes.plot(Xdata, np.abs(Ydata))
+                else:
+                    self.MplWidget.canvas.axes.plot(Xdata, Ydata)
                 self.MplWidget.canvas.axes.set_ylabel("Intensity")
                 # self.MplWidget.canvas.axes.set_xlabel("Angular frequency")
                 self.MplWidget.canvas.axes.grid()
@@ -397,8 +404,10 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             Ydata = self.b
             Xdata = self.a
             self.MplWidget.canvas.axes.clear()
-            self.MplWidget.canvas.axes.plot(Xdata, Ydata)
-            self.MplWidget.canvas.axes.set_ylabel("Intensity")
+            if np.iscomplexobj(Ydata):
+                self.MplWidget.canvas.axes.plot(Xdata, np.abs(Ydata))
+            else:
+                self.MplWidget.canvas.axes.plot(Xdata, Ydata)
             # self.MplWidget.canvas.axes.set_xlabel("Angular frequency")
             self.MplWidget.canvas.axes.grid()
             self.MplWidget.canvas.draw()

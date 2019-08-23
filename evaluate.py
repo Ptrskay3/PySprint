@@ -165,8 +165,8 @@ def FFT(initSpectrumX, initSpectrumY):
 def gaussianWindow(t ,tau, standardDev):
 	return np.exp(-(t-tau)**6/(2*standardDev**6))
 
-def cutWithGaussian(initSpectrumY, spike, sigma):
-	Ydata = initSpectrumY * gaussianWindow(initSpectrumY, tau = spike, standardDev=sigma)
+def cutWithGaussian( initSpectrumX ,initSpectrumY, spike, sigma):
+	Ydata = initSpectrumY * gaussianWindow(initSpectrumX, tau = spike, standardDev=sigma) ## ebbe kéne az X tengely is ám!!!!!
 	# Ydata = initSpectrumY * scipy.signal.windows.gaussian(len(initSpectrumY), std=sigma)
 	return Ydata
 
