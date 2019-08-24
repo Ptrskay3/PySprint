@@ -12,12 +12,13 @@ Advanced description will be added soon.
   - Added FFT ( Gaussian Window filtering and IFFT next)
   - Added Modify data panel
 
-### Known issues
-* At the moment the evaluation methods not working properly, rewriting them soon.  
+### Known issuesn
+* Evaluation methods can produce wrong results, currently developing them
 * Unit selector has no effect yet
 * The data loading AI sometimes produces unexpected results, currently being reviewed.
 * There might be unnecessary imports
 * Generator core is under development, inconsistencies might occur.
+* Some buttons has no effect yet.
 
 
 ### Coming soon..
@@ -37,7 +38,7 @@ Interferogram requires [Python 3](https://www.python.org/downloads/) to run.
 
 Please install the following packages:
 * [PyQt5](https://pypi.org/project/PyQt5/)
-* numpy, scipy, matplotlib, pandas
+* numpy, scipy, matplotlib, pandas, lmfit, numdifftools
 
 With command line:
 ```sh
@@ -46,6 +47,8 @@ $ pip install numpy
 $ pip install scipy
 $ pip install pandas
 $ pip install matplotlib
+$ pip install lmfit
+$ pip install numdifftools
 ```
 
 With conda run:

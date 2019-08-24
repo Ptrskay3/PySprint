@@ -19,7 +19,7 @@ QDialog, QPushButton, QVBoxLayout, QComboBox, QCheckBox, QLabel,QAction, qApp, Q
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, pyqtSlot
 from PyQt5.QtGui import QIcon, QCursor
 from datetime import datetime
-from evaluate import minMaxMethod, PMCFFMethod, FFT, cutWithGaussian, gaussianWindow  #, IFFT
+from evaluate import minMaxMethod, PMCFFMethod, FFT, cutWithGaussian, gaussianWindow , IFFT, argsAndCompute
 from help import Help
 from smoothing import savgolFilter, findPeaks, convolution, interpolateData, cutData
 from loadingData import readData
@@ -33,6 +33,7 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     a = np.array([])
     b = np.array([])
     temp = np.array([])
+    fftContainer = np.array([])
 
     def __init__(self, parent=None):
         super(mainProgram, self).__init__(parent)
@@ -51,7 +52,7 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.iSampleArm_2.clicked.connect(lambda i: self.sampleArmClicked(i, self.samX))
         self.doFFT.clicked.connect(self.fftHandler)
         self.doCut.clicked.connect(self.gaussianCutFunction)
-        self.doIFFT.clicked.connect(self.testt)
+        self.doIFFT.clicked.connect(self.ifftHandler)
         self.actionAbout.triggered.connect(self.openHelp)
         self.actionSave_current_data.triggered.connect(self.saveLoadedData)
         self.actionSave_log_file.triggered.connect(self.saveOutput)
@@ -90,38 +91,29 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         if len(self.a)>0 and len(self.b)>0:
             xx = cutWithGaussian(self.a ,self.b, spike= float(self.gaussianCut.text()), sigma = float(self.gaussianCut2.text()))
             self.b = xx
-            self.MplWidget.canvas.axes.clear()
-            self.MplWidget.canvas.axes.grid()
-            self.MplWidget.canvas.axes.plot(self.a, np.abs(self.b))
-            self.MplWidget.canvas.axes.set_ylabel("Intensity")
-            self.MplWidget.canvas.draw()
+            self.redrawGraph()
 
 
 
     def fftHandler(self):
         if len(self.a)>0 and len(self.b)>0:
             # self.temp = self.a
+            self.fftContainer = self.a
             self.a, self.b = FFT(self.a, self.b)
-            self.MplWidget.canvas.axes.clear()
-            self.MplWidget.canvas.axes.grid()
-            self.MplWidget.canvas.axes.plot(self.a, np.abs(self.b))
-            self.MplWidget.canvas.axes.set_ylabel("Intensity")
-            self.MplWidget.canvas.axes.set_xlabel("Time")
-            self.MplWidget.canvas.draw()
+            self.redrawGraph()
             self.messageOutput('FFT applied to data. Some functions may behave differently. The absolute value is plotted.')
         else:
             self.messageOutput('No data is loaded.')
 
-#átdolgozandó, így nem jó
-    # def ifftHandler(self):
-    #     if len(self.a)>0 and len(self.b)>0 and len(self.temp)>0:
-    #         iffX, iffY = IFFT(self.a, self.b, self.temp)
-    #         self.MplWidget.canvas.axes.clear()
-    #         self.MplWidget.canvas.axes.grid()
-    #         self.MplWidget.canvas.axes.plot(iffX, iffY)
-    #         self.MplWidget.canvas.axes.set_ylabel("Intensity")
-    #         # self.MplWidget.canvas.axes.set_xlabel("Time")
-    #         self.MplWidget.canvas.draw()
+
+    def ifftHandler(self):
+        if len(self.a)>0 and len(self.b)>0 and len(self.fftContainer)>0:
+            self.b = IFFT(self.b)
+            self.a = self.fftContainer
+            self.fftContainer = np.array([])
+            self.redrawGraph()
+            self.messageOutput('IFFT done. ')
+            
 
     @waitingEffects
     def swapAxes(self):
@@ -416,7 +408,7 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         # print(self.samY[1])
         # print(self.refY[1])
 
-    @pyqtSlot(int)
+    @pyqtSlot(float)
     def referenceArmClicked(self, refX, refY):
         options = QFileDialog.Options()
         referenceName, _ = QFileDialog.getOpenFileName(None,"Reference arm spectrum", "","All Files (*);;Text Files (*.txt)", options=options)
@@ -426,7 +418,7 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         except:
             self.messageOutput('Failed')
     
-    @pyqtSlot(int)   
+    @pyqtSlot(float)   
     def sampleArmClicked(self, samX, samY):
         options = QFileDialog.Options()       
         sampleName, _ = QFileDialog.getOpenFileName(None,"Sample arm spectrum", "","All Files (*);;Text Files (*.txt)", options=options)
@@ -437,7 +429,7 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         except:
             self.messageOutput('Failed')
 
-    @pyqtSlot(int) 
+    @pyqtSlot(float) 
     def loadData(self, a, b): 
             options = QFileDialog.Options()
             fileName, _ = QFileDialog.getOpenFileName(None,"Load interferogram", "","All Files (*);;Text Files (*.txt)", options=options)
@@ -496,12 +488,10 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             if self.initQOD.text() == '':
                 self.initQOD.setText('1')
             try:
-                # self.logOutput.insertPlainText('Calculating..\n')
                 cFF = PMCFFMethod(self.a, self.b ,self.refY, self.samY, 
                     p0=[1,1,1, float(self.initGD.text()), float(self.initGDD.text()), float(self.initTOD.text()), float(self.initFOD.text()),
-                    float(self.initQOD.text())], showGraph = False)
+                    float(self.initQOD.text())]) 
                 labels = ['GD', 'GDD', 'TOD', 'FOD', 'QOD']
-                self.logOutput.insertPlainText('\n'+str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))+ ':')
                 self.messageOutput('Using Cosine function fit method..')
                 try:
                     for item in range(len(cFF)):
@@ -509,13 +499,12 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
                 except Exception as e:
                     self.messageOutput('You might need to provide initial guess for parameters.')
+                    self.messageOutput(e)
             except Exception as e:
                 self.messageOutput(e)
 
         if self.methodWidget.currentIndex() == 0 or self.methodWidget.currentIndex() == 3:
-            self.logOutput.insertPlainText('\n' + str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + ':')
-            self.logOutput.insertPlainText('\n Not implemented yet.\n')
-            self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
+            self.messageOutput('not implemented')
             
 
     def saveOutput(self):
