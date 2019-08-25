@@ -5,14 +5,13 @@ Interferometry is a simple GUI for interferogram evaluation. Heavily under const
 Advanced description will be added soon.
 
 # Lastest upgrades:
+  - Added IFFT, calcuating phase comes next
   - Min-max method now uses a better fitting algorithm, fit report can be displayed
   - Peaks now send values to min-max method
   - Added Tools --> Generator, currently working on its bugs
   - New program structure
   - Added automated detection for load data.
-  - Added Swap axes + some bugfixes
-  - Added FFT ( Gaussian Window filtering and IFFT next)
-  - Added Modify data panel
+
 
 ### Known issuesn
 * Evaluation methods can produce wrong results, currently developing them
