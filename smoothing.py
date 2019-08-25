@@ -66,6 +66,10 @@ def findPeaks(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax = 
 				ind = np.where(Ydata[minIndexes[0]] == element)
 				testX = np.append(testX, Xdata[minIndexes[0]][ind])
 
+		# plt.plot(Xdata, Ydata)
+		# plt.plot(Xdata[maxIndexes[0]],Ydata[maxIndexes[0]], 'ro')
+		# plt.plot(testX, test, 'b*')
+		# plt.show()
 		return Xdata[maxIndexes[0]], Ydata[maxIndexes[0]], testX, test
 	elif len(referenceArmY) == 0 or len(sampleArmY) == 0:
 		Ydata = initSpectrumY
@@ -91,9 +95,15 @@ def findPeaks(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax = 
 		# 	testXEdit = testX[:len(test)]
 		# elif len(test)>len(testX):
 		# 	testEdit = test[:len(testX)]
+		# plt.plot(Xdata, Ydata)
+		# plt.plot(Xdata[maxIndexes[0]],Ydata[maxIndexes[0]], 'ro')
+		# plt.plot(testX, test, 'b*')
+		# plt.show()
 		return Xdata[maxIndexes[0]], Ydata[maxIndexes[0]], testX, test
 
 
+# a, b, c, d = np.loadtxt('examples/teszt.txt', unpack= True, delimiter=',')
+# findPeaks(a,b,c,d)
 
 def convolution(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, standev = 200):
 	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:

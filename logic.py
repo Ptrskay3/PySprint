@@ -99,7 +99,6 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
 
     def fftHandler(self):
         if len(self.a)>0 and len(self.b)>0:
-            # self.temp = self.a
             self.fftContainer = self.a
             self.a, self.b = FFT(self.a, self.b)
             self.redrawGraph()
@@ -266,7 +265,7 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                  proMin = float(self.peaksMin.text()), threshold = float(self.peaksThreshold.text()))
                 self.MplWidget.canvas.axes.grid()
                 self.MplWidget.canvas.axes.plot(self.a, ((self.b-self.refY-self.samY)/(2*np.sqrt(self.refY*self.samY))))
-                self.MplWidget.canvas.axes.plot(j, k, 'ko')
+                self.MplWidget.canvas.axes.plot(j, k, 'ro')
                 self.MplWidget.canvas.axes.plot(l, m, 'ko')
                 self.MplWidget.canvas.axes.set_ylabel("Intensity")
                 # self.MplWidget.canvas.axes.set_xlabel("Angular frequency")
@@ -279,7 +278,7 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                  proMin = float(self.peaksMin.text()), threshold = float(self.peaksThreshold.text()))
                 self.MplWidget.canvas.axes.plot(self.a, self.b)
                 self.MplWidget.canvas.axes.grid()
-                self.MplWidget.canvas.axes.plot(j, k, 'ko')
+                self.MplWidget.canvas.axes.plot(j, k, 'ro')
                 self.MplWidget.canvas.axes.plot(l, m, 'ko')
                 self.MplWidget.canvas.axes.set_ylabel("Intensity")
                 # self.MplWidget.canvas.axes.set_xlabel("Angular frequency")
@@ -581,7 +580,7 @@ class generatorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
                 Ydata = (self.yAxisData-self.refData-self.samData)/(2*np.sqrt(self.refData*self.samData))
                 Xdata = self.xAxisData
                 self.plotWidget.canvas.axes.clear()
-                self.plotWidget.canvas.axes.plot(Xdata, Ydata)
+                self.plotWidget.canvas.axes.plot(Xdata, Ydata, 'r')
                 self.plotWidget.canvas.axes.grid()
                 self.plotWidget.canvas.draw()
             else:
@@ -595,7 +594,7 @@ class generatorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
             Ydata = self.yAxisData
             Xdata = self.xAxisData
             self.plotWidget.canvas.axes.clear()
-            self.plotWidget.canvas.axes.plot(Xdata, Ydata)
+            self.plotWidget.canvas.axes.plot(Xdata, Ydata, 'r')
             self.plotWidget.canvas.axes.grid()
             self.plotWidget.canvas.draw()
 

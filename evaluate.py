@@ -56,7 +56,7 @@ def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPos
 		raise ValueError('Something went wrong...')
 
 	Xdata = initSpectrumX
-	SSPinData, SSPindex = findNearest(Xdata, SPPosition)
+	SPPValue, SSPindex = findNearest(Xdata,SPPosition)
 	if len(maxx) == 0 or len(minx) == 0:
 		maxInd = argrelextrema(Ydata, np.greater)
 		minInd = argrelextrema(Ydata, np.less)
@@ -65,7 +65,12 @@ def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPos
 	else:
 		maxx = maxx
 		minx = minx
-	# ?????????
+
+	# plt.plot(Xdata, Ydata)
+	# plt.plot(maxx, np.zeros_like(maxx), 'o')
+	# plt.plot(minx, np.zeros_like(minx), 'o')
+	# plt.show()
+
 	relNegMaxFreqs = np.array([a for a in (Xdata[SSPindex]-maxx) if a<0])
 	relNegMinFreqs= np.array([b for b in (Xdata[SSPindex]-minx) if b<0])
 	relNegFreqs = relNegMaxFreqs
@@ -75,6 +80,7 @@ def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPos
 	relPosMinFreqs= np.array([d for d in (Xdata[SSPindex]-minx) if d>0])
 	relPosFreqs = relPosMinFreqs
 	relPosFreqs = sorted(np.append(relPosFreqs,relPosMaxFreqs))
+
 	negValues = np.zeros_like(relNegFreqs)
 	posValues = np.zeros_like(relPosFreqs)
 	for freq in range(len(relPosFreqs)):
@@ -83,11 +89,14 @@ def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPos
 		negValues[freq] = np.pi*(freq+1)
 	fullXValues = np.append(relPosFreqs, relNegFreqs) 
 	fullYValues = np.append(posValues, negValues)
-	# end of ????????????
+	fullXValues = np.append(fullXValues, 0)
+	fullYValues = np.append(fullYValues, 0)
+
+	 # maybe np.polyfit can be added there
 	try:
 		fitModel = Model(polynomialFit)
 		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1, b4 = 1, b5 = 1)
-		result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='nelder')
+		result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') #nelder
 		dispersion = []
 		dispersion_std = []
 		for name, par in result.params.items():
@@ -99,6 +108,9 @@ def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPos
 			dispersion[idx] =  dispersion[idx] / factorial(idx+1) 
 			dispersion_std[idx] =  dispersion_std[idx] / factorial(idx+1) 
 		fit_report = result.fit_report()
+		# plt.plot(fullXValues, fullYValues, 'o')
+		# plt.plot(fullXValues, result.best_fit, 'r*')
+		# plt.show()
 		"""OLD
 		# popt, pcov = curve_fit(polynomialFit, fullXValues, fullYValues)
 		# dispersion = np.zeros_like(popt)
@@ -116,8 +128,7 @@ def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPos
 		"""
 		return dispersion, dispersion_std, fit_report
 	except:
-		return ['Optimal','parameters', 'not', 'found', '.'], [], []
-
+		return ['Optimal','parameters', 'not', 'found', '.'], ['','','','',''], []
 
 
 
@@ -131,6 +142,11 @@ def polynomialFit(x, b0, b1, b2, b3, b4, b5):
 	b5 = QOD / 120
 	"""
 	return b0+b1*x+b2*x**2+b3*x**3+b4*x**4+b5*x**5
+
+""" Tesing
+# a, b, c, d = np.loadtxt('examples/teszt.txt', unpack= True, delimiter=',')
+# ds, dss, res=  minMaxMethod(a,b,c,d, 2.5)
+"""
 
 
 def findNearest(array, value):
@@ -228,7 +244,7 @@ def FFT(initSpectrumX, initSpectrumY):
 	__returns__
 	
 	freq: 
-	array with the tranfromed x axis
+	array with the transformed x axis
 
 	yf:
 	array with the transformed y data
