@@ -14,6 +14,7 @@ Advanced description will be added soon.
 
 
 ### Known issues
+* The log dialog produces bugs
 * Evaluation methods can produce wrong results, currently developing them
 * The data loading AI sometimes produces unexpected results, currently being reviewed.
 * There might be unnecessary imports
