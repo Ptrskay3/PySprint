@@ -13,7 +13,7 @@ Advanced description will be added soon.
   - Added automated detection for load data.
 
 
-### Known issuesn
+### Known issues
 * Evaluation methods can produce wrong results, currently developing them
 * The data loading AI sometimes produces unexpected results, currently being reviewed.
 * There might be unnecessary imports
