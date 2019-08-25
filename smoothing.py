@@ -50,7 +50,9 @@ def savgolFilter(initSpectrumX, initSpectrumY ,referenceArmY, sampleArmY, window
 		pass
 
 
-def findPeaks(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax = 1, proMin =1, threshold= 0.1):         # VALAMI HIBA LEHET ITT!
+
+#too many duplicates, needs a rewrite
+def findPeaks(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax = 1, proMin =1, threshold= 0.1):   
 	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:
 		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
 		Xdata = initSpectrumX
@@ -58,7 +60,7 @@ def findPeaks(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax = 
 		Ydata = 1/Ydata
 		minIndexes = find_peaks(Ydata, prominence = proMin)
 		Ydata = 1/Ydata
-		test = np.array([]) # átdolgozandó még..
+		test = np.array([]) 
 		testX = np.array([])
 		for element in Ydata[minIndexes[0]]:
 			if element > threshold or element < -threshold:
@@ -66,6 +68,8 @@ def findPeaks(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax = 
 				ind = np.where(Ydata[minIndexes[0]] == element)
 				testX = np.append(testX, Xdata[minIndexes[0]][ind])
 
+		if len(Xdata[maxIndexes[0]]) != len(Ydata[maxIndexes[0]]) or len(testX) != len(test):
+			raise ValueError('Something went wrong, try to cut the edges of data.')
 		# plt.plot(Xdata, Ydata)
 		# plt.plot(Xdata[maxIndexes[0]],Ydata[maxIndexes[0]], 'ro')
 		# plt.plot(testX, test, 'b*')
@@ -85,7 +89,8 @@ def findPeaks(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax = 
 				test = np.append(test, element)
 				ind = np.where(Ydata[minIndexes[0]] == element)
 				testX = np.append(testX, Xdata[minIndexes[0]][ind])
-
+		if len(Xdata[maxIndexes[0]]) != len(Ydata[maxIndexes[0]]) or len(testX) != len(test):
+			raise ValueError('Something went wrong, try to cut the edges of data.')
 		# if len(Xdata[maxIndexes[0]]) > Ydata[maxIndexes[0]]:
 		# 	XEdited = (Xdata[maxIndexes[0]])[:len(Xdata[maxIndexes[0]])]
 		# elif len(Ydata[maxIndexes[0]]) > Xdata[maxIndexes[0]]:
@@ -102,7 +107,7 @@ def findPeaks(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax = 
 		return Xdata[maxIndexes[0]], Ydata[maxIndexes[0]], testX, test
 
 
-# a, b, c, d = np.loadtxt('examples/teszt.txt', unpack= True, delimiter=',')
+# b, a, c, d = np.loadtxt('examples/autodetect.txt', unpack= True, delimiter=',', skiprows = 10)
 # findPeaks(a,b,c,d)
 
 def convolution(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, standev = 200):

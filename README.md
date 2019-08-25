@@ -5,6 +5,7 @@ Interferometry is a simple GUI for interferogram evaluation. Heavily under const
 Advanced description will be added soon.
 
 # Lastest upgrades:
+  - Added some tooltips + Min-max method has new options now.
   - Added IFFT, calcuating phase comes next
   - Min-max method now uses a better fitting algorithm, fit report can be displayed
   - Peaks now send values to min-max method

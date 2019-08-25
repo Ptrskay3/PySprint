@@ -11,8 +11,9 @@ from smoothing import savgolFilter, findPeaks, convolution, interpolateData, cut
 
 
 # input unit can be added as new arg
+# meg lehetne adni hogy polyoder = 2, 3, 4, 5 és melyikre illesszen!
 
-def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPosition, maxx=[], minx=[]):
+def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPosition, maxx=[], minx=[], fitOrder = 5, showGraph = False):
 	"""
 	Minimum-maximum method 
 	(*CURRENTLY ACCEPTS UNITS ONLY IN PHz)
@@ -33,6 +34,12 @@ def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPos
 	
 	maxx and minx:
 	arrays containing the accepted minimal and maximal places from other functions
+
+	fitOrder:
+	int, degree of polynomial to fit data
+
+	showGraph:
+	bool, if True returns a matplotlib plot and pauses execution until closing the window
 
 	__returns__
 
@@ -89,14 +96,33 @@ def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPos
 		negValues[freq] = np.pi*(freq+1)
 	fullXValues = np.append(relPosFreqs, relNegFreqs) 
 	fullYValues = np.append(posValues, negValues)
-	fullXValues = np.append(fullXValues, 0)
-	fullYValues = np.append(fullYValues, 0)
+	# fullXValues = np.append(fullXValues, 0)
+	# fullYValues = np.append(fullYValues, 0)
 
-	 # maybe np.polyfit can be added there
-	try:
-		fitModel = Model(polynomialFit)
+	 
+	if fitOrder == 5:
+		fitModel = Model(polynomialFit5)
 		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1, b4 = 1, b5 = 1)
 		result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') #nelder
+	elif fitOrder == 4:
+		fitModel = Model(polynomialFit4)
+		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1, b4 = 1)
+		result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') 
+	elif fitOrder == 3:
+		fitModel = Model(polynomialFit3)
+		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1)
+		result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') 
+	elif fitOrder == 2:
+		fitModel = Model(polynomialFit2)
+		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1)
+		result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') 
+	elif fitOrder == 1:
+		fitModel = Model(polynomialFit1)
+		params = fitModel.make_params(b0 = 0, b1 = 1)
+		result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') 
+	else:
+		raise ValueError('Order is out of range, please select from [1,5]')
+	try:
 		dispersion = []
 		dispersion_std = []
 		for name, par in result.params.items():
@@ -106,13 +132,21 @@ def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPos
 		dispersion_std = dispersion_std[1:]
 		for idx in range(len(dispersion)):
 			dispersion[idx] =  dispersion[idx] / factorial(idx+1) 
-			dispersion_std[idx] =  dispersion_std[idx] / factorial(idx+1) 
+			dispersion_std[idx] =  dispersion_std[idx] / factorial(idx+1)
+		while len(dispersion)<5:
+			dispersion.append(0)
+			dispersion_std.append(0) 
 		fit_report = result.fit_report()
-		# plt.plot(fullXValues, fullYValues, 'o')
-		# plt.plot(fullXValues, result.best_fit, 'r*')
-		# plt.show()
+		if showGraph:
+			fig = plt.figure(figsize=(7,7))
+			fig.canvas.set_window_title('Min-max method fitted')
+			plt.plot(fullXValues, fullYValues, 'o', label = 'dataset')
+			plt.plot(fullXValues, result.best_fit, 'r*', label = 'fitted')
+			plt.legend()
+			plt.grid()
+			plt.show()
 		"""OLD
-		# popt, pcov = curve_fit(polynomialFit, fullXValues, fullYValues)
+		# popt, pcov = curve_fit(polynomialFit5, fullXValues, fullYValues)
 		# dispersion = np.zeros_like(popt)
 		# for num in range(len(popt)):
 		# 	dispersion[num] = popt[num]*factorial(num)
@@ -128,11 +162,12 @@ def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPos
 		"""
 		return dispersion, dispersion_std, fit_report
 	except:
-		return ['Optimal','parameters', 'not', 'found', '.'], ['','','','',''], []
+		return ['Optimal', 'params', 'not', 'found', '.'], ['','','','',''], []
 
 
 
-def polynomialFit(x, b0, b1, b2, b3, b4, b5):
+
+def polynomialFit5(x, b0, b1, b2, b3, b4, b5):
 	"""
 	Taylor polynomial for fit
 	b1 = GD
@@ -142,6 +177,41 @@ def polynomialFit(x, b0, b1, b2, b3, b4, b5):
 	b5 = QOD / 120
 	"""
 	return b0+b1*x+b2*x**2+b3*x**3+b4*x**4+b5*x**5
+
+def polynomialFit4(x, b0, b1, b2, b3, b4):
+	"""
+	Taylor polynomial for fit
+	b1 = GD
+	b2 = GDD / 2
+	b3 = TOD / 6
+	b4 = FOD / 24
+	"""
+	return b0+b1*x+b2*x**2+b3*x**3+b4*x**4
+
+def polynomialFit3(x, b0, b1, b2, b3):
+	"""
+	Taylor polynomial for fit
+	b1 = GD
+	b2 = GDD / 2
+	b3 = TOD / 6
+
+	"""
+	return b0+b1*x+b2*x**2+b3*x**3
+
+def polynomialFit2(x, b0, b1, b2):
+	"""
+	Taylor polynomial for fit
+	b1 = GD
+	b2 = GDD / 2
+	"""
+	return b0+b1*x+b2*x**2
+
+def polynomialFit1(x, b0, b1):
+	"""
+	Taylor polynomial for fit
+	b1 = GD
+	"""
+	return b0+b1*x
 
 """ Tesing
 # a, b, c, d = np.loadtxt('examples/teszt.txt', unpack= True, delimiter=',')

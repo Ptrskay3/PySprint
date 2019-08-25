@@ -60,6 +60,18 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.actionSave_log_file.triggered.connect(self.saveOutput)
         self.actionExit.triggered.connect(self.close)
         self.actionGenerator.triggered.connect(self.openGenerator)
+        self.btn_load.setToolTip('Load in data. Can be different type (see documentation)')
+        self.swapButton.setToolTip('Swaps the two columns and redraws graph.')
+        self.resetButton.setToolTip('Erases all data from memory.')
+        self.refreshGraph.setToolTip('Redraws graph with the current data. If arms are loaded shows normalized graph.')
+        self.temporalApplyButton.setToolTip('Shows preview of data with the given parameters.')
+        self.commitChanges.setToolTip('Applies changes to data.')
+        self.doFFT.setToolTip('Perfoms FFT on current data.')
+        self.doCut.setToolTip('Applies a gaussian window with parameters defined on the right.')
+        self.doIFFT.setToolTip('Perfoms IFFT on current data.')
+        self.checkGraph.setToolTip('Show a plot with the dataset and fitted curve.')
+        self.mmPoly.setToolTip('Assumed maximum order of dispersion.')
+        self.printCheck.setToolTip('Include lmfit report in the log.')
 
     def openHelp(self):
         self.window1 = helpWindow(self)
@@ -150,20 +162,22 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 self.peaksMin.setText('0.1')
             if self.peaksThreshold.text() == '':
                 self.peaksThreshold.setText('0.1')
-
-            if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
-                j, k, l, m = findPeaks(self.a, self.b, self.refY, self.samY, proMax = float(self.peaksMax.text()),
-                 proMin = float(self.peaksMin.text()), threshold = float(self.peaksThreshold.text()))
-                self.maxx = j
-                self.minx = l 
-            elif len(self.a) == 0:
-                pass
-            elif len(self.refY) == 0 or len(self.samY) == 0:
-                j, k, l, m = findPeaks(self.a, self.b, self.refY, self.samY, proMax = float(self.peaksMax.text()),
-                 proMin = float(self.peaksMin.text()), threshold = float(self.peaksThreshold.text()))
-                self.maxx = j
-                self.minx = l 
-            self.messageOutput('Points were recorded for min-max method.')
+            try:
+                if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
+                    j, k, l, m = findPeaks(self.a, self.b, self.refY, self.samY, proMax = float(self.peaksMax.text()),
+                     proMin = float(self.peaksMin.text()), threshold = float(self.peaksThreshold.text()))
+                    self.maxx = j
+                    self.minx = l 
+                elif len(self.a) == 0:
+                    pass
+                elif len(self.refY) == 0 or len(self.samY) == 0:
+                    j, k, l, m = findPeaks(self.a, self.b, self.refY, self.samY, proMax = float(self.peaksMax.text()),
+                     proMin = float(self.peaksMin.text()), threshold = float(self.peaksThreshold.text()))
+                    self.maxx = j
+                    self.minx = l 
+                self.messageOutput('Points were recorded for min-max method.')
+            except Exception as e:
+                self.messageOutput(e)
 
 
         if self.editTab.currentIndex() == 0:
@@ -258,31 +272,33 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 self.peaksMin.setText('0.1')
             if self.peaksThreshold.text() == '':
                 self.peaksThreshold.setText('0.1')
-
-            if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
-                self.MplWidget.canvas.axes.clear()
-                j, k, l, m = findPeaks(self.a, self.b, self.refY, self.samY, proMax = float(self.peaksMax.text()),
-                 proMin = float(self.peaksMin.text()), threshold = float(self.peaksThreshold.text()))
-                self.MplWidget.canvas.axes.grid()
-                self.MplWidget.canvas.axes.plot(self.a, ((self.b-self.refY-self.samY)/(2*np.sqrt(self.refY*self.samY))))
-                self.MplWidget.canvas.axes.plot(j, k, 'ro')
-                self.MplWidget.canvas.axes.plot(l, m, 'ko')
-                self.MplWidget.canvas.axes.set_ylabel("Intensity")
-                # self.MplWidget.canvas.axes.set_xlabel("Angular frequency")
-                self.MplWidget.canvas.draw()
-            elif len(self.a) == 0:
-                pass
-            elif len(self.refY) == 0 or len(self.samY) == 0:
-                self.MplWidget.canvas.axes.clear()
-                j, k, l, m = findPeaks(self.a, self.b, self.refY, self.samY, proMax = float(self.peaksMax.text()),
-                 proMin = float(self.peaksMin.text()), threshold = float(self.peaksThreshold.text()))
-                self.MplWidget.canvas.axes.plot(self.a, self.b)
-                self.MplWidget.canvas.axes.grid()
-                self.MplWidget.canvas.axes.plot(j, k, 'ro')
-                self.MplWidget.canvas.axes.plot(l, m, 'ko')
-                self.MplWidget.canvas.axes.set_ylabel("Intensity")
-                # self.MplWidget.canvas.axes.set_xlabel("Angular frequency")
-                self.MplWidget.canvas.draw()
+            try:
+                if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
+                    self.MplWidget.canvas.axes.clear()
+                    j, k, l, m = findPeaks(self.a, self.b, self.refY, self.samY, proMax = float(self.peaksMax.text()),
+                     proMin = float(self.peaksMin.text()), threshold = float(self.peaksThreshold.text()))
+                    self.MplWidget.canvas.axes.grid()
+                    self.MplWidget.canvas.axes.plot(self.a, ((self.b-self.refY-self.samY)/(2*np.sqrt(self.refY*self.samY))))
+                    self.MplWidget.canvas.axes.plot(j, k, 'ro')
+                    self.MplWidget.canvas.axes.plot(l, m, 'ko')
+                    self.MplWidget.canvas.axes.set_ylabel("Intensity")
+                    # self.MplWidget.canvas.axes.set_xlabel("Angular frequency")
+                    self.MplWidget.canvas.draw()
+                elif len(self.a) == 0:
+                    pass
+                elif len(self.refY) == 0 or len(self.samY) == 0:
+                    self.MplWidget.canvas.axes.clear()
+                    j, k, l, m = findPeaks(self.a, self.b, self.refY, self.samY, proMax = float(self.peaksMax.text()),
+                     proMin = float(self.peaksMin.text()), threshold = float(self.peaksThreshold.text()))
+                    self.MplWidget.canvas.axes.plot(self.a, self.b)
+                    self.MplWidget.canvas.axes.grid()
+                    self.MplWidget.canvas.axes.plot(j, k, 'ro')
+                    self.MplWidget.canvas.axes.plot(l, m, 'ko')
+                    self.MplWidget.canvas.axes.set_ylabel("Intensity")
+                    # self.MplWidget.canvas.axes.set_xlabel("Angular frequency")
+                    self.MplWidget.canvas.draw()
+            except Exception as e:
+                self.messageOutput(e)
 
 
         if self.editTab.currentIndex() == 0:
@@ -481,12 +497,15 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     @waitingEffects
     def getit(self):
         if self.methodWidget.currentIndex() == 2:
+            if self.mmPoly.text() == '':
+                self.mmPoly.setText('5')
             try:
-                disp, disp_std, fit_report = minMaxMethod(self.a, self.b,  self.refY, self.samY, float(self.getSPP.text()), self.maxx, self.minx)
+                disp, disp_std, fit_report = minMaxMethod(self.a, self.b,  self.refY, self.samY, float(self.getSPP.text()), self.maxx, self.minx,
+                    int(self.mmPoly.text()), showGraph = self.checkGraph.isChecked())
                 labels = ['GD', 'GDD', 'TOD', 'FOD', 'QOD']
                 self.messageOutput('Using Min-max method.')
                 for item in range(len(disp)):
-                    self.logOutput.insertPlainText(' '+ labels[item] +' =  ' + str(disp[item]) +'+/-' + str(disp_std[item]) + ' 1/fs^'+str(item+1)+'\n')
+                    self.logOutput.insertPlainText(' '+ labels[item] +' =  ' + str(disp[item]) +' +/- ' + str(disp_std[item]) + ' 1/fs^'+str(item+1)+'\n')
                 if self.printCheck.isChecked():
                     self.messageOutput(fit_report)
                 self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
