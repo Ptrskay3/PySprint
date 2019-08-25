@@ -34,6 +34,8 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     b = np.array([])
     temp = np.array([])
     fftContainer = np.array([])
+    minx = np.array([])
+    maxx = np.array([])
 
     def __init__(self, parent=None):
         super(mainProgram, self).__init__(parent)
@@ -149,7 +151,20 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 self.peaksMin.setText('0.1')
             if self.peaksThreshold.text() == '':
                 self.peaksThreshold.setText('0.1')
-            ## ez majd az MM methoddal kell összekötni, jelenleg nem csinál semmit
+
+            if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
+                j, k, l, m = findPeaks(self.a, self.b, self.refY, self.samY, proMax = float(self.peaksMax.text()),
+                 proMin = float(self.peaksMin.text()), threshold = float(self.peaksThreshold.text()))
+                self.maxx = j
+                self.minx = l 
+            elif len(self.a) == 0:
+                pass
+            elif len(self.refY) == 0 or len(self.samY) == 0:
+                j, k, l, m = findPeaks(self.a, self.b, self.refY, self.samY, proMax = float(self.peaksMax.text()),
+                 proMin = float(self.peaksMin.text()), threshold = float(self.peaksThreshold.text()))
+                self.maxx = j
+                self.minx = l 
+            self.messageOutput('Points were recorded for min-max method.')
 
 
         if self.editTab.currentIndex() == 0:
@@ -468,11 +483,13 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     def getit(self):
         if self.methodWidget.currentIndex() == 2:
             try:
-                mMm = minMaxMethod(self.a, self.b,  self.refY, self.samY, float(self.getSPP.text()), showGraph = False)
+                disp, disp_std, fit_report = minMaxMethod(self.a, self.b,  self.refY, self.samY, float(self.getSPP.text()), self.maxx, self.minx)
                 labels = ['GD', 'GDD', 'TOD', 'FOD', 'QOD']
                 self.messageOutput('Using Min-max method.')
-                for item in range(len(mMm)-1):
-                    self.logOutput.insertPlainText(' '+ labels[item] +' =  ' + str(mMm[item+1]) +'  1/fs^'+str(item+1)+'\n')
+                for item in range(len(disp)):
+                    self.logOutput.insertPlainText(' '+ labels[item] +' =  ' + str(disp[item]) +'+/-' + str(disp_std[item]) + ' 1/fs^'+str(item+1)+'\n')
+                if self.printCheck.isChecked():
+                    self.messageOutput(fit_report)
                 self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
             except Exception as e:
                 self.messageOutput(str(e))

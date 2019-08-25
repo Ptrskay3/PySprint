@@ -5,6 +5,8 @@ Interferometry is a simple GUI for interferogram evaluation. Heavily under const
 Advanced description will be added soon.
 
 # Lastest upgrades:
+  - Min-max method now uses a better fitting algorithm, fit report can be displayed
+  - Peaks now send values to min-max method
   - Added Tools --> Generator, currently working on its bugs
   - New program structure
   - Added automated detection for load data.
@@ -14,7 +16,6 @@ Advanced description will be added soon.
 
 ### Known issuesn
 * Evaluation methods can produce wrong results, currently developing them
-* Unit selector has no effect yet
 * The data loading AI sometimes produces unexpected results, currently being reviewed.
 * There might be unnecessary imports
 * Generator core is under development, inconsistencies might occur.

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_Interferometry(object):
@@ -321,6 +322,9 @@ class Ui_Interferometry(object):
         self.horizontalLayout_18.addWidget(self.getSPP)
         spacerItem33 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_18.addItem(spacerItem33)
+        self.printCheck = QtWidgets.QCheckBox(self.verticalLayoutWidget_8)
+        self.printCheck.setObjectName("printCheck")
+        self.horizontalLayout_18.addWidget(self.printCheck)
         self.verticalLayout_10.addLayout(self.horizontalLayout_18)
         self.methodWidget.addTab(self.mmTab, "")
         self.fftTab = QtWidgets.QWidget()
@@ -448,7 +452,7 @@ class Ui_Interferometry(object):
 
         self.retranslateUi(Interferometry)
         self.editTab.setCurrentIndex(3)
-        self.methodWidget.setCurrentIndex(3)
+        self.methodWidget.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(Interferometry)
 
     def retranslateUi(self, Interferometry):
@@ -489,6 +493,7 @@ class Ui_Interferometry(object):
         self.iReferenceArm_2.setText(_translate("Interferometry", "Reference Arm"))
         self.iSampleArm_2.setText(_translate("Interferometry", "Sample Arm"))
         self.getSPP.setPlaceholderText(_translate("Interferometry", "Type reference point position there"))
+        self.printCheck.setText(_translate("Interferometry", "Print fit report"))
         self.methodWidget.setTabText(self.methodWidget.indexOf(self.mmTab), _translate("Interferometry", "MM"))
         self.doFFT.setText(_translate("Interferometry", "1.  FFT"))
         self.doCut.setText(_translate("Interferometry", "2.  Window"))

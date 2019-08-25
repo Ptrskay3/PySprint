@@ -13,12 +13,13 @@ from scipy.optimize import curve_fit
 from scipy.signal import argrelextrema
 import scipy
 from math import factorial
+from lmfit import Model
 from smoothing import savgolFilter, findPeaks, convolution, interpolateData, cutData, findNearest
 
 
 #majd új argumentumként a mértékegységet bele kell vinni, ez a legjobb megoldás talán
 
-def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPosition, showGraph=False):
+def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPosition, maxx=[], minx=[]):
 	"""
 	Minimum-maximum method
 	Takes in the interferogram with the reference and sample arm spectra, and also the SPP Position as argument.
@@ -36,10 +37,14 @@ def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPos
 	Xdata = initSpectrumX
 	#ide jön majd a zajszűrés, min maxok kiválasztása valahogyan
 	SSPinData, SSPindex = findNearest(Xdata, SPPosition)
-	maxInd = argrelextrema(Ydata, np.greater)
-	minInd = argrelextrema(Ydata, np.less)
-	maxx = Xdata[maxInd]
-	minx = Xdata[minInd]
+	if len(maxx) == 0 or len(minx) == 0:
+		maxInd = argrelextrema(Ydata, np.greater)
+		minInd = argrelextrema(Ydata, np.less)
+		maxx = Xdata[maxInd]
+		minx = Xdata[minInd]
+	else:
+		maxx = maxx
+		minx = minx
 	#######
 	relNegMaxFreqs = np.array([a for a in (Xdata[SSPindex]-maxx) if a<0])
 	relNegMinFreqs= np.array([b for b in (Xdata[SSPindex]-minx) if b<0])
@@ -60,26 +65,36 @@ def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPos
 	fullYValues = np.append(posValues, negValues)
 	
 	try:
-		popt, pcov = curve_fit(polynomialFit, fullXValues, fullYValues)
-		dispersion = np.zeros_like(popt)
-
-		for num in range(len(popt)):
-			dispersion[num] = popt[num]*factorial(num)
-			if showGraph == True:	
-				fig = plt.figure()
-				fig.canvas.set_window_title('Min-Max method')
-				plt.plot(fullXValues, fullYValues,'ro',label = 'dataset')
-				plt.plot(fullXValues, polynomialFit(fullXValues, *popt),'k*', label = 'fitted')
-				plt.legend()
-				plt.xlabel('$\Delta \omega or \Delta \lambda$')
-				plt.ylabel('Phase')
-				plt.grid()
-				plt.show()
-			else:
-				pass
-		return dispersion
-	except Exception as e:
-		return e
+		fitModel = Model(polynomialFit)
+		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1, b4 = 1, b5 = 1)
+		result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='nelder')
+		dispersion = []
+		dispersion_std = []
+		for name, par in result.params.items():
+			dispersion.append(par.value)
+			dispersion_std.append(par.stderr)
+		dispersion = dispersion[1:]
+		dispersion_std = dispersion_std[1:]
+		for idx in range(len(dispersion)):
+			dispersion[idx] = factorial(idx+1) * dispersion[idx]
+			dispersion_std[idx] = factorial(idx+1) * dispersion_std[idx]
+		fit_report = result.fit_report()
+		# popt, pcov = curve_fit(polynomialFit, fullXValues, fullYValues)
+		# dispersion = np.zeros_like(popt)
+		# for num in range(len(popt)):
+		# 	dispersion[num] = popt[num]*factorial(num)
+			# fig = plt.figure()
+			# fig.canvas.set_window_title('Min-Max method')
+			# plt.plot(fullXValues, fullYValues,'ro',label = 'dataset')
+			# plt.plot(fullXValues, polynomialFit(fullXValues, *popt),'k*', label = 'fitted')
+			# plt.legend()
+			# plt.xlabel('$\Delta \omega or \Delta \lambda$')
+			# plt.ylabel('Phase')
+			# plt.grid()
+			# plt.show()
+		return dispersion, dispersion_std, fit_report
+	except:
+		return ['Optimal','parameters', 'not', 'found', '.'], [], []
 
 
 
