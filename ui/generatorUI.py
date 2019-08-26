@@ -275,7 +275,7 @@ class Ui_GeneratorWindow(object):
         self.pushButton_3.setText(_translate("GeneratorWindow", "_currently_unused_"))
         self.pushButton_4.setText(_translate("GeneratorWindow", "Generate and preview"))
 
-from plotwidget import PlotWidget
+from ui.plotwidget import PlotWidget
 
 if __name__ == "__main__":
     import sys

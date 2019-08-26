@@ -11,17 +11,6 @@ from scipy.interpolate import interp1d
 
 
 
-def findNearest(array, value):
-	#Finds the nearest element to the given value in the array
-	#returns tuple: (element, element's index)
-	
-    array = np.asarray(array)
-    idx = (np.abs(value - array)).argmin()
-    return array[idx], idx
-
-
-
-
 def savgolFilter(initSpectrumX, initSpectrumY ,referenceArmY, sampleArmY, window = 101, order = 3):
 	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:
 		try:
@@ -147,6 +136,7 @@ def interpolateData(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY):
 
 
 def cutData(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, startValue=-9999, endValue=9999):
+	from .evaluate import findNearest
 	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:
 			Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
 			Xdata = initSpectrumX

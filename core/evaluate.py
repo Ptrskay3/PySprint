@@ -7,11 +7,10 @@ from scipy.signal import argrelextrema
 import scipy
 from math import factorial
 from lmfit import Model
-from smoothing import savgolFilter, findPeaks, convolution, interpolateData, cutData, findNearest
 
 
 # input unit can be added as new arg
-# meg lehetne adni hogy polyoder = 2, 3, 4, 5 és melyikre illesszen!
+
 
 def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPosition, maxx=[], minx=[], fitOrder = 5, showGraph = False):
 	"""
@@ -321,6 +320,7 @@ def FFT(initSpectrumX, initSpectrumY):
 	array with the transformed y data
 
 	"""
+	from .smoothing import interpolateData
 	if len(initSpectrumX) > 0 and len(initSpectrumY) > 0:
 		Xdata, Ydata = interpolateData(initSpectrumX, initSpectrumY, [],[])
 		freq = scipy.fftpack.fftfreq(len(Xdata), d=(Xdata[3]-Xdata[2]))

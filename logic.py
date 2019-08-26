@@ -6,24 +6,26 @@
 #
 ##################################################
 
-
-from ui import Ui_Interferometry
-from generatorUI import Ui_GeneratorWindow
+# PyQt5 imports
 from PyQt5 import QtCore, QtGui, QtWidgets
-import numpy as np
-import pandas as pd
-import time
-from mplwidget import MplWidget
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, 
 QDialog, QPushButton, QVBoxLayout, QComboBox, QCheckBox, QLabel,QAction, qApp, QTextEdit, QSpacerItem, QSizePolicy,QHBoxLayout, QGroupBox, QTableWidgetItem)
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, pyqtSlot
 from PyQt5.QtGui import QIcon, QCursor
+# ui imports
+from ui.ui import Ui_Interferometry
+from ui.generatorUI import Ui_GeneratorWindow
+from ui.aboutUI import Help
+from ui.mplwidget import MplWidget
+#other packages
+import numpy as np
+import pandas as pd
 from datetime import datetime
-from evaluate import minMaxMethod, PMCFFMethod, FFT, cutWithGaussian, gaussianWindow , IFFT, argsAndCompute
-from help import Help
-from smoothing import savgolFilter, findPeaks, convolution, interpolateData, cutData
-from loadingData import readData
-from generatorCore import generatorFreq, generatorWave
+#core imports
+from core.evaluate import minMaxMethod, PMCFFMethod, FFT, cutWithGaussian, gaussianWindow , IFFT, argsAndCompute
+from core.smoothing import savgolFilter, findPeaks, convolution, interpolateData, cutData
+from core.loading import readData
+from core.generator import generatorFreq, generatorWave
 
 class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     samX = np.array([])
