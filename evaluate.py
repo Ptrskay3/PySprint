@@ -63,7 +63,8 @@ def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPos
 		raise ValueError('Something went wrong...')
 
 	Xdata = initSpectrumX
-	SPPValue, SSPindex = findNearest(Xdata,SPPosition)
+
+	_, SSPindex = findNearest(Xdata,SPPosition)
 	if len(maxx) == 0 or len(minx) == 0:
 		maxInd = argrelextrema(Ydata, np.greater)
 		minInd = argrelextrema(Ydata, np.less)
