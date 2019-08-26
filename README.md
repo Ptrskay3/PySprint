@@ -23,7 +23,7 @@ Advanced description will be added soon.
 * Some buttons has no effect yet.
 
 
-### Coming soon..
+### To-do list
 
 These things will be implemented:
 * ERROR HANDLING!
@@ -40,7 +40,8 @@ Interferogram requires [Python 3](https://www.python.org/downloads/) to run.
 
 Please install the following packages:
 * [PyQt5](https://pypi.org/project/PyQt5/)
-* numpy, scipy, matplotlib, pandas, lmfit, numdifftools
+* numpy, scipy, matplotlib, pandas
+* [lmfit](https://lmfit.github.io/lmfit-py/), numdifftools
 
 With command line:
 ```sh
@@ -57,6 +58,11 @@ With conda run:
 
 ```sh
 conda install -c dsdale24 pyqt5
+
+conda install -c conda-forge lmfit
+conda install -c conda-forge/label/gcc7 lmfit
+conda install -c conda-forge/label/broken lmfit
+conda install -c conda-forge/label/cf201901 lmfit 
 ```
 
 ## To Run

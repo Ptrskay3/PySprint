@@ -32,7 +32,7 @@ def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPos
 	float, the reference point to calculate order
 	
 	maxx and minx:
-	arrays containing the accepted minimal and maximal places from other functions
+	arrays containing the accepted minimal and maximal places (recieved from another functions)
 
 	fitOrder:
 	int, degree of polynomial to fit data

@@ -83,6 +83,7 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.window2 = generatorWindow(self)
         self.window2.show()
 
+
     def messageOutput(self, text):
         self.logOutput.insertPlainText('\n' + str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + ':')
         self.logOutput.insertPlainText('\n {}\n\n'.format(str(text)))
@@ -589,7 +590,7 @@ class generatorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
         self.setupUi(self)
         self.setWindowIcon(QtGui.QIcon('icon.png'))
         self.closeButton.clicked.connect(self.close)
-        # self.pushButton_4.clicked.connect(self.previewData)
+        # self.pushButton_3.clicked.connect(self.emitData)
         self.pushButton_4.clicked.connect(self.generateData)
         self.pushButton_2.clicked.connect(self.saveAs)
         self.armCheck.setChecked(True)
@@ -657,10 +658,6 @@ class generatorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
                     includeArms = self.armCheck.isChecked())
             except:
                 self.pushButton_4.setStyleSheet(" background-color: rgb(240,0,0); color: rgb(255,255,255);")
-                
-                
-
-
 
         if self.comboBox.currentText() == 'wavelength':
             try:
@@ -693,3 +690,6 @@ class generatorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
                    np.savetxt(name[0], np.column_stack((self.xAxisData, self.yAxisData)), delimiter = str(self.delimiterLine.text()))
         except:
             pass
+
+    # def emitData(self):
+        # mainProgram.a, mainProgram.b, mainProgram.refY, mainProgram.samY = self.xAxisData, self.yAxisData, self.refData ,self.samData
