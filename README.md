@@ -5,6 +5,7 @@ Interferometry is a simple GUI for interferogram evaluation. Heavily under const
 Advanced description will be added soon.
 
 # Lastest upgrades:
+  - Added SPP Panel
   - Added some tooltips + Min-max method has new options now.
   - Added IFFT, calcuating phase comes next
   - Min-max method now uses a better fitting algorithm, fit report can be displayed
@@ -15,6 +16,7 @@ Advanced description will be added soon.
 
 
 ### Known issues
+* SPP Panel is under testing
 * The log dialog produces bugs
 * Evaluation methods can produce wrong results, currently developing them
 * The data loading AI sometimes produces unexpected results, currently being reviewed.
@@ -27,7 +29,6 @@ Advanced description will be added soon.
 
 These things will be implemented:
 * ERROR HANDLING!
-* Stationary Phase Point Method (SPP)
 * Fourier Transform Method (FFT) 
 * Selectable units both for angular frequency and wavelength
 * Possible performance enhancement by improving algorithms
