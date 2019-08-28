@@ -1,33 +1,32 @@
-# Interferometry
+# Interferometry [2019]
 
 
-Interferometry is a simple GUI for interferogram evaluation. Heavily under construction.
-Advanced description will be added soon.
+Interferometry is a UI for interferogram evaluation. Under construction, error handling is non-existant for the time being.
+I will add an advanced description later on. 
 
 # Lastest upgrades:
   - Added SPP Panel
   - Added some tooltips + Min-max method has new options now.
-  - Added IFFT, calcuating phase comes next
+  - Added IFFT
   - Min-max method now uses a better fitting algorithm, fit report can be displayed
   - Peaks now send values to min-max method
-  - Added Tools --> Generator, currently working on its bugs
+  - Added Tools --> Generator
   - New program structure
   - Added automated detection for load data.
 
 
 ### Known issues
-* SPP Panel is under testing
+* SPP Panel might have tons of issues
 * The log dialog produces bugs
-* Evaluation methods can produce wrong results, currently developing them
+* Evaluation methods can produce wrong results
 * The data loading AI sometimes produces unexpected results, currently being reviewed.
 * There might be unnecessary imports
-* Generator core is under development, inconsistencies might occur.
+* Generator core is pre-alpha.
 * Some buttons has no effect yet.
 
 
 ### To-do list
 
-These things will be implemented:
 * ERROR HANDLING!
 * Fourier Transform Method (FFT) 
 * Selectable units both for angular frequency and wavelength
@@ -61,9 +60,9 @@ With conda run:
 conda install -c dsdale24 pyqt5
 
 conda install -c conda-forge lmfit
-conda install -c conda-forge/label/gcc7 lmfit
-conda install -c conda-forge/label/broken lmfit
-conda install -c conda-forge/label/cf201901 lmfit 
+or conda install -c conda-forge/label/gcc7 lmfit
+or conda install -c conda-forge/label/broken lmfit
+or conda install -c conda-forge/label/cf201901 lmfit 
 ```
 
 ## To Run

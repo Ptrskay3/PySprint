@@ -761,11 +761,11 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
             self.widget.canvas.axes.set_ylabel('fs')
             self.widget.canvas.axes.grid()
             self.widget.canvas.draw()
-            self.GDSPP.setText(str(disp[0]) + ' +/- ' + str(disp_std[0])+ '1/fs')
-            self.GDDSPP.setText(str(disp[1]) + ' +/- ' + str(disp_std[1])+ '1/fs^2')
-            self.TODSPP.setText(str(disp[2]) + ' +/- ' + str(disp_std[2])+ '1/fs^3')
-            self.FODSPP.setText(str(disp[3]) + ' +/- ' + str(disp_std[3])+ '1/fs^4')
-            self.QODSPP.setText(str(disp[4]) + ' +/- ' + str(disp_std[4])+ '1/fs^5')
+            self.GDSPP.setText(str(disp[0]) + ' +/- ' + str(disp_std[0])+ ' 1/fs')
+            self.GDDSPP.setText(str(disp[1]) + ' +/- ' + str(disp_std[1])+ ' 1/fs^2')
+            self.TODSPP.setText(str(disp[2]) + ' +/- ' + str(disp_std[2])+ ' 1/fs^3')
+            self.FODSPP.setText(str(disp[3]) + ' +/- ' + str(disp_std[3])+ ' 1/fs^4')
+            self.QODSPP.setText(str(disp[4]) + ' +/- ' + str(disp_std[4])+ ' 1/fs^5')
         except Exception as e:
             self.messageOutput('Some values might be missing. Fit order must be lower or equal than the number of data points.\n' + str(e))
 
@@ -897,10 +897,32 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         if curr == -1:
             pass
         else:
-
-            if (len(self.xData[curr]) > 0) and (len(self.yRef[curr]) > 0) and (len(self.ySam[curr]) > 0) and (len(self.yData[curr])>0):
-                if len(self.xData[curr]) == len(self.ySam[curr]) and len(self.xData[curr]) == len(self.yRef[curr]):
-                    Ydata = (self.yData[curr]-self.yRef[curr]-self.ySam[curr])/(2*np.sqrt(self.yRef[curr]*self.ySam[curr]))
+            try:
+                if (len(self.xData[curr]) > 0) and (len(self.yRef[curr]) > 0) and (len(self.ySam[curr]) > 0) and (len(self.yData[curr])>0):
+                    if len(self.xData[curr]) == len(self.ySam[curr]) and len(self.xData[curr]) == len(self.yRef[curr]):
+                        Ydata = (self.yData[curr]-self.yRef[curr]-self.ySam[curr])/(2*np.sqrt(self.yRef[curr]*self.ySam[curr]))
+                        Xdata = self.xData[curr]
+                        self.widget.canvas.axes.clear()
+                        self.widget.canvas.axes.plot(Xdata, Ydata, 'r')
+                        try:
+                            if self.xpoints[curr][0] == 0:
+                                pass
+                            else:
+                                colors = ['blue','orange','green','purple']
+                                self.widget.canvas.axes.scatter(self.xpoints[curr], self.ypoints[curr], color = colors, s = 80, zorder = 99)
+                        except:
+                            pass
+                        self.widget.canvas.axes.grid()
+                        self.widget.canvas.draw()
+                    else:
+                        pass
+                elif len(self.xData[curr]) == 0:
+                    self.widget.canvas.axes.clear()
+                    self.widget.canvas.axes.text(0.42, 0.47, 'No data to plot')
+                    self.widget.canvas.axes.grid()
+                    self.widget.canvas.draw()
+                elif len(self.yRef[curr]) == 0 or len(self.ySam[curr]) == 0:
+                    Ydata = self.yData[curr]
                     Xdata = self.xData[curr]
                     self.widget.canvas.axes.clear()
                     self.widget.canvas.axes.plot(Xdata, Ydata, 'r')
@@ -914,32 +936,12 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
                         pass
                     self.widget.canvas.axes.grid()
                     self.widget.canvas.draw()
-                else:
-                    pass
-            elif len(self.xData[curr]) == 0:
-                self.widget.canvas.axes.clear()
-                self.widget.canvas.axes.text(0.42, 0.47, 'No data to plot')
-                self.widget.canvas.axes.grid()
-                self.widget.canvas.draw()
-            elif len(self.yRef[curr]) == 0 or len(self.ySam[curr]) == 0:
-                Ydata = self.yData[curr]
-                Xdata = self.xData[curr]
-                self.widget.canvas.axes.clear()
-                self.widget.canvas.axes.plot(Xdata, Ydata, 'r')
                 try:
-                    if self.xpoints[curr][0] == 0:
-                        pass
-                    else:
-                        colors = ['blue','orange','green','purple']
-                        self.widget.canvas.axes.scatter(self.xpoints[curr], self.ypoints[curr], color = colors, s = 80, zorder = 99)
+                    self.delayLine.setText(str(self.delays[curr]))
                 except:
-                    pass
-                self.widget.canvas.axes.grid()
-                self.widget.canvas.draw()
-            try:
-                self.delayLine.setText(str(self.delays[curr]))
+                    print('not assigned')
             except:
-                print('not assigned')
+                pass
 
 
     def loadUp(self):
@@ -981,7 +983,6 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         self.ypoints = [[None]]*20
         self.delays = np.array([None]*20)
         self.cid = None
-        self.widget.canvas.axes.clear()
         self.treeWidget.clear() 
 
     def recordDelay(self):
