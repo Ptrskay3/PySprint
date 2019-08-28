@@ -22,7 +22,6 @@ setuptools.setup(
         'scipy', 
         'matplotlib',
         'pandas', 
-        'PyQt5', 
         'lmfit'
       ],
 
