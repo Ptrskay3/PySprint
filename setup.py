@@ -12,14 +12,19 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Ptrskay3/Interferometry",
-    install_requires=[
-          'numpy','scipy', 'matplotlib', 'pandas', 'PyQt5', 'lmfit'
-      ],
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
         "Development Status :: 2 - Pre-Alpha",
     ],
+    install_requires=[
+        'numpy',
+        'scipy', 
+        'matplotlib',
+        'pandas', 
+        'PyQt5', 
+        'lmfit'
+      ],
 
 
 )
