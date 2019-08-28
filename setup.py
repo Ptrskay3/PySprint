@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.0.1",
     author="Péter Leéh",
     author_email="leeh123peter@gmail.com",
-    description="UI for specrally refined interferometry",
+    description="UI for spectrally refined interferometry",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Ptrskay3/Interferometry",
