@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'kiserleti.ui'
+# Form implementation generated from reading ui file 'kiserleti_spp.ui'
 #
-# Created by: PyQt5 UI code generator 5.11.3
+# Created by: PyQt5 UI code generator 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
 
+
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 class Ui_Interferometry(object):
     def setupUi(self, Interferometry):
@@ -219,9 +221,12 @@ class Ui_Interferometry(object):
         self.methodWidget.setObjectName("methodWidget")
         self.sppTab = QtWidgets.QWidget()
         self.sppTab.setObjectName("sppTab")
-        self.label = QtWidgets.QLabel(self.sppTab)
-        self.label.setGeometry(QtCore.QRect(370, 100, 97, 16))
-        self.label.setObjectName("label")
+        self.verticalLayout_4 = QtWidgets.QVBoxLayout(self.sppTab)
+        self.verticalLayout_4.setObjectName("verticalLayout_4")
+        self.pushButton = QtWidgets.QPushButton(self.sppTab)
+        self.pushButton.setMinimumSize(QtCore.QSize(0, 100))
+        self.pushButton.setObjectName("pushButton")
+        self.verticalLayout_4.addWidget(self.pushButton)
         self.methodWidget.addTab(self.sppTab, "")
         self.cffTab = QtWidgets.QWidget()
         self.cffTab.setObjectName("cffTab")
@@ -451,7 +456,6 @@ class Ui_Interferometry(object):
         self.menubar.addAction(self.menuPreferences.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
 
-
         self.tableWidget.setColumnCount(2)
         self.tableWidget.setRowCount(5)
         self.tableWidget.setHorizontalHeaderLabels(["Angular frequency", "Intensity"])
@@ -469,7 +473,7 @@ class Ui_Interferometry(object):
 
         self.retranslateUi(Interferometry)
         self.editTab.setCurrentIndex(3)
-        self.methodWidget.setCurrentIndex(2)
+        self.methodWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(Interferometry)
 
     def retranslateUi(self, Interferometry):
@@ -497,7 +501,7 @@ class Ui_Interferometry(object):
         self.comboBox.setItemText(0, _translate("Interferometry", "PHz"))
         self.comboBox.setItemText(1, _translate("Interferometry", "nm"))
         self.comboBox.setItemText(2, _translate("Interferometry", "Ångström"))
-        self.label.setText(_translate("Interferometry", "Not implemented"))
+        self.pushButton.setText(_translate("Interferometry", "Open Interface"))
         self.methodWidget.setTabText(self.methodWidget.indexOf(self.sppTab), _translate("Interferometry", "SPP"))
         self.iReferenceArm.setText(_translate("Interferometry", "Reference Arm"))
         self.iSampleArm.setText(_translate("Interferometry", "Sample Arm"))
@@ -534,8 +538,8 @@ class Ui_Interferometry(object):
         self.actionGenerator.setText(_translate("Interferometry", "Generator"))
         self.actionUnit_converter.setText(_translate("Interferometry", "Unit converter"))
         self.actionOpen_documentation.setText(_translate("Interferometry", "Open documentation"))
-
 from ui.mplwidget import MplWidget
+
 
 if __name__ == "__main__":
     import sys
@@ -545,4 +549,3 @@ if __name__ == "__main__":
     ui.setupUi(Interferometry)
     Interferometry.show()
     sys.exit(app.exec_())
-

@@ -154,7 +154,14 @@ def cutData(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, startValue=
 	else:
 		pass
 
+def find_nearest(array,value):
+    idx = (np.abs(array-value)).argmin()
+    dist = np.abs(array[idx]-value)
+    return array[idx], idx
 
+def find_closest(xValue, xArray, yArray):
+    value,index = find_nearest(xArray, xValue)
+    return value, yArray[index]
 # arr = np.array([5,3,0,1,4])
 # arrY = np.array([4,5,6,7,8])
 # # indee = np.where((arr > 0) & (arr < 4) )

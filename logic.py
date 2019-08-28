@@ -8,7 +8,7 @@
 
 # PyQt5 imports
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, 
+from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QTreeWidget, QTreeWidgetItem, QAbstractItemView,
 QDialog, QPushButton, QVBoxLayout, QComboBox, QCheckBox, QLabel,QAction, qApp, QTextEdit, QSpacerItem, QSizePolicy,QHBoxLayout, QGroupBox, QTableWidgetItem)
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, pyqtSlot
 from PyQt5.QtGui import QIcon, QCursor
@@ -17,13 +17,15 @@ from ui.ui import Ui_Interferometry
 from ui.generatorUI import Ui_GeneratorWindow
 from ui.aboutUI import Help
 from ui.mplwidget import MplWidget
+from ui.SPPUI import Ui_SPP
 #other packages
 import numpy as np
 import pandas as pd
 from datetime import datetime
+import matplotlib
 #core imports
-from core.evaluate import minMaxMethod, PMCFFMethod, FFT, cutWithGaussian, gaussianWindow , IFFT, argsAndCompute
-from core.smoothing import savgolFilter, findPeaks, convolution, interpolateData, cutData
+from core.evaluate import minMaxMethod, PMCFFMethod, FFT, cutWithGaussian, gaussianWindow , IFFT, argsAndCompute, SPP
+from core.smoothing import savgolFilter, findPeaks, convolution, interpolateData, cutData, find_closest
 from core.loading import readData
 from core.generator import generatorFreq, generatorWave
 
@@ -62,6 +64,8 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.actionSave_log_file.triggered.connect(self.saveOutput)
         self.actionExit.triggered.connect(self.close)
         self.actionGenerator.triggered.connect(self.openGenerator)
+        self.pushButton.clicked.connect(self.openSPPanel)
+        # self.actionUnit_converter.triggered.connect(self.runTutorial)
         self.btn_load.setToolTip('Load in data. Can be different type (see documentation)')
         self.swapButton.setToolTip('Swaps the two columns and redraws graph.')
         self.resetButton.setToolTip('Erases all data from memory.')
@@ -82,6 +86,10 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     def openGenerator(self):
         self.window2 = generatorWindow(self)
         self.window2.show()
+
+    def openSPPanel(self):
+        self.window3 = SPPWindow(self)
+        self.window3.show()
 
 
     def messageOutput(self, text):
@@ -254,6 +262,10 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.b = []
         self.refY = []
         self.samY = []
+        self.fftContainer = []
+        self.minx = []
+        self.maxx = []
+        self.temp = []
         self.MplWidget.canvas.axes.clear()
         self.MplWidget.canvas.draw()
         self.messageOutput('Data cleared.')
@@ -570,6 +582,30 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         except:
             pass
 
+
+    # def runTutorial(self):
+    #     self.a, self.b, self.refY, self.samY = readData('examples/fft.txt')
+    #     if len(self.a)<400:
+    #         for row_number in range(len(self.a)):
+    #             self.tableWidget.insertRow(row_number)
+    #             for item in range(len(self.a)):
+    #                 self.tableWidget.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.a[item])))
+    #             for item in range(len(self.b)):
+    #                 self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
+    #     else:
+    #         for row_number in range(400):
+    #             self.tableWidget.insertRow(row_number)
+    #             for item in range(400):
+    #                 self.tableWidget.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.a[item])))
+    #             for item in range(400):
+    #                 self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
+    #     self.tableWidget.resizeRowsToContents()
+    #     self.tableWidget.resizeColumnsToContents()
+    #     self.redrawGraph()
+    #     self.tutorial1 = QMessageBox.about(self, "Tutorial", "I loaded in some example data for you. You can manipulate the data on the right panel and use the methods below. ")
+
+
+
 class helpWindow(QtWidgets.QMainWindow, Help):
     def __init__(self, parent=None):
         super(helpWindow, self).__init__(parent)
@@ -693,3 +729,272 @@ class generatorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
 
     # def emitData(self):
         # mainProgram.a, mainProgram.b, mainProgram.refY, mainProgram.samY = self.xAxisData, self.yAxisData, self.refData ,self.samData
+    
+class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
+    def __init__(self, parent=None):
+        super(SPPWindow, self).__init__(parent)
+        self.setupUi(self)
+        self.setWindowIcon(QtGui.QIcon('icon.png'))
+        self.treeWidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.loadButton.clicked.connect(self.loadUp)
+        self.treeWidget.itemSelectionChanged.connect(self.fillSPP)
+        self.pushButton.clicked.connect(self.recordDelay)
+        self.treeWidget.itemSelectionChanged.connect(self.previewData)
+        self.pushButton_7.clicked.connect(self.deleteItem)
+        self.pushButton_2.clicked.connect(self.pressed)
+        self.pushButton_3.clicked.connect(self.released)
+        self.pushButton_4.clicked.connect(self.editSPP)
+        self.pushButton_6.clicked.connect(self.doSPP)
+        self.pushButton_5.clicked.connect(self.cleanUp)
+
+
+    def doSPP(self):
+        self.widget.canvas.axes.clear()
+        if self.fitOrderLine.text() == '':
+            self.fitOrderLine.setText('4')
+        try:
+            xs, ys, disp, disp_std, bestFit = SPP(delays = self.delays, omegas = self.xpoints, fitOrder = int(self.fitOrderLine.text()))
+            self.widget.canvas.axes.clear()
+            self.widget.canvas.axes.plot(xs, ys,'o', label = 'data')
+            self.widget.canvas.axes.plot(xs, bestFit, 'r--', label = 'fit')
+            self.widget.canvas.axes.legend()
+            self.widget.canvas.axes.set_ylabel('fs')
+            self.widget.canvas.axes.grid()
+            self.widget.canvas.draw()
+            self.GDSPP.setText(str(disp[0]) + ' +/- ' + str(disp_std[0])+ '1/fs')
+            self.GDDSPP.setText(str(disp[1]) + ' +/- ' + str(disp_std[1])+ '1/fs^2')
+            self.TODSPP.setText(str(disp[2]) + ' +/- ' + str(disp_std[2])+ '1/fs^3')
+            self.FODSPP.setText(str(disp[3]) + ' +/- ' + str(disp_std[3])+ '1/fs^4')
+            self.QODSPP.setText(str(disp[4]) + ' +/- ' + str(disp_std[4])+ '1/fs^5')
+        except Exception as e:
+            self.messageOutput('Some values might be missing. Fit order must be lower or equal than the number of data points.\n' + str(e))
+
+
+    def onclick(self, event):
+        global ix, iy
+        ix, iy = event.xdata, event.ydata
+        curr = self.treeWidget.currentIndex().row()
+        x = self.xData[curr]
+        if len(self.ySam[curr]) == 0:
+            y = self.yData[curr]
+        else:
+            y = (self.yData[curr]-self.yRef[curr]-self.ySam[curr])/(2*np.sqrt(self.yRef[curr]*self.ySam[curr]))
+        ix, iy= find_closest(ix, x, y)
+
+        self.xtemporal.append(ix)
+        self.ytemporal.append(iy)
+
+        colors = ['black','green','blue','yellow']
+        self.widget.canvas.axes.scatter(ix, iy, cmap=matplotlib.colors.ListedColormap(colors), s = 80, zorder = 99)
+        self.widget.canvas.draw()
+
+        if len(self.xtemporal) == 4:
+            self.widget.canvas.mpl_disconnect(self.cid)
+            self.messageOutput('Clicks are no longer recorded.')
+        return 
+    
+    def messageOutput(self, text):
+        self.messageBox.insertPlainText(str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + ':')
+        self.messageBox.insertPlainText('\n {}\n\n'.format(str(text)))
+        self.messageBox.verticalScrollBar().setValue(self.messageBox.verticalScrollBar().maximum())
+
+    def pressed(self):
+        self.cid = self.widget.canvas.mpl_connect('button_press_event', self.onclick)
+        self.pushButton_2.setText('Activated')
+
+    def released(self):
+        self.widget.canvas.mpl_disconnect(self.cid)
+        curr = self.treeWidget.currentIndex().row()
+        while len(self.xtemporal)< 4:
+            self.xtemporal.append(None)
+        while len(self.ytemporal) < 4:
+            self.ytemporal.append(None)
+        self.ypoints[curr] = self.ytemporal
+        self.xpoints[curr]= self.xtemporal
+        self.ytemporal = []
+        self.xtemporal = []
+        self.pushButton_2.setText('Clickable SPP')
+        try:
+            self.SPP1.setText(str(self.xpoints[curr][0]))
+        except:
+            pass
+        try:
+            self.SPP2.setText(str(self.xpoints[curr][1]))
+        except:
+            pass
+        try:
+            self.SPP3.setText(str(self.xpoints[curr][2]))
+        except:
+            pass
+        try:
+            self.SPP4.setText(str(self.xpoints[curr][3]))
+        except:
+            pass
+        self.previewData()
+
+
+
+    def fillSPP(self):
+        curr = self.treeWidget.currentIndex().row()
+        try:
+            self.SPP1.setText(str(self.xpoints[curr][0]))
+        except:
+            self.SPP1.setText(str(None))
+        try:
+            self.SPP2.setText(str(self.xpoints[curr][1]))
+        except:
+            self.SPP2.setText(str(None))
+        try:
+            self.SPP3.setText(str(self.xpoints[curr][2]))
+        except:
+            self.SPP3.setText(str(None))
+        try:
+            self.SPP4.setText(str(self.xpoints[curr][3]))
+        except:
+            self.SPP4.setText(str(None))
+
+    def editSPP(self):
+        curr = self.treeWidget.currentIndex().row()
+        try:
+            xval1, yval1 = find_closest(float(self.SPP1.text()), self.xData[curr], self.yData[curr])
+            self.xtemporal.append(xval1)
+            self.ytemporal.append(yval1)
+        except:
+            pass
+        try:
+            xval2, yval2 = find_closest(float(self.SPP2.text()), self.xData[curr], self.yData[curr])
+            self.xtemporal.append(xval2)
+            self.ytemporal.append(yval2)
+        except:
+            pass
+        try:
+            xval3, yval3 = find_closest(float(self.SPP3.text()), self.xData[curr], self.yData[curr])
+            self.xtemporal.append(xval3)
+            self.ytemporal.append(yval3)
+        except:
+            pass
+        try:
+            xval4, yval4 = find_closest(float(self.SPP4.text()), self.xData[curr], self.yData[curr])
+            self.xtemporal.append(xval4)
+            self.ytemporal.append(yval4)
+        except:
+            pass
+
+        while len(self.xtemporal)< 4:
+            self.xtemporal.append(None)
+        while len(self.ytemporal) < 4:
+            self.ytemporal.append(None)
+        self.ypoints[curr] = self.ytemporal
+        self.xpoints[curr]= self.xtemporal
+        self.ytemporal = []
+        self.xtemporal = []
+        self.previewData()
+
+
+    def previewData(self):
+        curr = self.treeWidget.currentIndex().row()
+        self.delayLine.setText('')
+        if curr == -1:
+            pass
+        else:
+
+            if (len(self.xData[curr]) > 0) and (len(self.yRef[curr]) > 0) and (len(self.ySam[curr]) > 0) and (len(self.yData[curr])>0):
+                if len(self.xData[curr]) == len(self.ySam[curr]) and len(self.xData[curr]) == len(self.yRef[curr]):
+                    Ydata = (self.yData[curr]-self.yRef[curr]-self.ySam[curr])/(2*np.sqrt(self.yRef[curr]*self.ySam[curr]))
+                    Xdata = self.xData[curr]
+                    self.widget.canvas.axes.clear()
+                    self.widget.canvas.axes.plot(Xdata, Ydata, 'r')
+                    try:
+                        if self.xpoints[curr][0] == 0:
+                            pass
+                        else:
+                            colors = ['blue','orange','green','purple']
+                            self.widget.canvas.axes.scatter(self.xpoints[curr], self.ypoints[curr], color = colors, s = 80, zorder = 99)
+                    except:
+                        pass
+                    self.widget.canvas.axes.grid()
+                    self.widget.canvas.draw()
+                else:
+                    pass
+            elif len(self.xData[curr]) == 0:
+                self.widget.canvas.axes.clear()
+                self.widget.canvas.axes.text(0.42, 0.47, 'No data to plot')
+                self.widget.canvas.axes.grid()
+                self.widget.canvas.draw()
+            elif len(self.yRef[curr]) == 0 or len(self.ySam[curr]) == 0:
+                Ydata = self.yData[curr]
+                Xdata = self.xData[curr]
+                self.widget.canvas.axes.clear()
+                self.widget.canvas.axes.plot(Xdata, Ydata, 'r')
+                try:
+                    if self.xpoints[curr][0] == 0:
+                        pass
+                    else:
+                        colors = ['blue','orange','green','purple']
+                        self.widget.canvas.axes.scatter(self.xpoints[curr], self.ypoints[curr], color = colors, s = 80, zorder = 99)
+                except:
+                    pass
+                self.widget.canvas.axes.grid()
+                self.widget.canvas.draw()
+            try:
+                self.delayLine.setText(str(self.delays[curr]))
+            except:
+                print('not assigned')
+
+
+    def loadUp(self):
+        options = QFileDialog.Options()
+        fileName, _ = QFileDialog.getOpenFileName(None,"Load interferogram", "","All Files (*);;Text Files (*.txt)", options=options)
+        try:
+            actualCount = self.treeWidget.topLevelItemCount()
+            if fileName:
+                xx, yy, vv, ww = readData(fileName)
+                self.xData.append(xx)
+                self.yData.append(yy)
+                self.yRef.append(vv)
+                self.ySam.append(ww)
+                l1 = QTreeWidgetItem([fileName.split('/')[-1]])
+                self.treeWidget.addTopLevelItem(l1)
+            self.previewData()
+        except Exception as e:
+            print(e)
+
+    def deleteItem(self):
+        try:
+            curr = self.treeWidget.currentIndex().row()
+            #ez nem biztos hogy kell
+            self.delays[curr] = 0
+            self.xpoints[curr] = 0
+            self.ypoints[curr] = 0
+            self.treeWidget.currentItem().setHidden(True)
+        except:
+            pass
+
+    def cleanUp(self):
+        self.xData = []
+        self.yData = []
+        self.ySam = []
+        self.yRef = []
+        self.xtemporal = []
+        self.ytemporal = []
+        self.xpoints = [[None]]*20
+        self.ypoints = [[None]]*20
+        self.delays = np.array([None]*20)
+        self.cid = None
+        self.widget.canvas.axes.clear()
+        self.treeWidget.clear() 
+
+    def recordDelay(self):
+        curr = self.treeWidget.currentIndex().row()
+        if curr == -1:
+            pass
+        elif curr == 0:
+            try:
+                self.delays[0]= float(self.delayLine.text())
+            except:
+                pass
+        else:
+            try:
+                self.delays[curr] = float(self.delayLine.text())
+            except:
+                pass

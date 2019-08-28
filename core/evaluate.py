@@ -7,6 +7,8 @@ from scipy.signal import argrelextrema
 import scipy
 from math import factorial
 from lmfit import Model
+from itertools import chain
+
 
 
 # input unit can be added as new arg
@@ -240,8 +242,70 @@ def cosFitForPMCFF(x,c0, c1, b0, b1, b2, b3, b4, b5):
 	return c0 + c1*np.cos(b0+b1*x+b2*x**2+b3*x**3+b4*x**4+b5*x**5)
 
 
-def SSP():
-	pass
+
+def SPP(delays,omegas, fitOrder= 4): #def SPP(delays,omegas, reference, fitOrder= 4):
+	extracted_omegas = []
+	delays = delays[delays != np.array(None)]
+	for element in omegas:
+		item = [x for x in element if x is not None]
+		extracted_omegas.append(item)
+
+	new_delays = []
+	for idx in range(len(extracted_omegas)):
+		if len(extracted_omegas[idx])>1:
+			value = delays[idx]
+			item_to_add = [value]*(len(extracted_omegas[idx]))
+			new_delays.append(item_to_add)
+		if len(extracted_omegas[idx]) == 1:
+			value = delays[idx]
+			new_delays.append([value])
+
+	delays_unpacked = []
+	omegas_unpacked = []
+	for element in extracted_omegas:
+		for item in element:
+			omegas_unpacked.append(item)
+	delays_unpacked = list(chain.from_iterable(new_delays))
+
+	# # omegas_unpacked = [x-reference for x in omegas_unpacked]
+
+	# print(omegas_unpacked)
+	# print(delays_unpacked)
+	try:
+
+		if fitOrder == 2:
+			fitModel = Model(polynomialFit2)
+			params = fitModel.make_params(b0 = 1, b1 = 1, b2 = 1)
+			result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
+		if fitOrder == 3:
+			fitModel = Model(polynomialFit3)
+			params = fitModel.make_params(b0 = 1, b1 = 1, b2 = 1, b3 = 3)
+			result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
+		if fitOrder == 4:
+			fitModel = Model(polynomialFit4)
+			params = fitModel.make_params(b0 = 1, b1 = 1, b2 = 1, b3=1, b4 =1)
+			result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
+		if fitOrder == 1:
+			fitModel = Model(polynomialFit1)
+			params = fitModel.make_params(b0 = 1, b1 = 1)
+			result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
+		dispersion = []
+		dispersion_std = []
+		for name, par in result.params.items():
+			dispersion.append(par.value)
+			dispersion_std.append(par.stderr)
+		for idx in range(len(dispersion)):
+			dispersion[idx] =  dispersion[idx]*factorial(idx) 
+			dispersion_std[idx] =  dispersion_std[idx] * factorial(idx)
+		while len(dispersion)<5:
+			dispersion.append(0)
+			dispersion_std.append(0) 
+		bf = result.best_fit
+	except Exception as e:
+		return e
+
+	return omegas_unpacked, delays_unpacked, dispersion, dispersion_std, bf
+
 
 
 def PMCFFMethod(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, p0=[1, 1, 1, 1, 1, 1, 1, 1]):
