@@ -59,7 +59,7 @@ def findPeaks(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax=1,
 		# plt.plot(Xdata[maxIndexes[0]],Ydata[maxIndexes[0]], 'ro')
 		# plt.plot(testX, test, 'b*')
 		# plt.show()
-		return Xdata[maxIndexes[0]], Ydata[maxIndexes[0]], testX, test
+		return Xdata[maxIndexes[0]], Ydata[maxIndexes[0]], testX, testY
 	elif len(referenceArmY) == 0 or len(sampleArmY) == 0:
 		Ydata = initSpectrumY
 		Xdata = initSpectrumX
