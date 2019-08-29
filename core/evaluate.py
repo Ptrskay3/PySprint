@@ -7,16 +7,10 @@ from scipy.signal import argrelextrema
 import scipy
 from math import factorial
 from lmfit import Model
-from itertools import chain
 
-
-
-# input unit can be added as new arg
-
-
-def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPosition, maxx=[], minx=[], fitOrder = 5, showGraph = False):
+def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPosition, maxx=[], minx=[], fitOrder=5, showGraph=False):
 	"""
-	Minimum-maximum method 
+	Calculates the dispersion with minimum-maximum method 
 	(*CURRENTLY ACCEPTS UNITS ONLY IN PHz)
 
 	__inputs__
@@ -34,7 +28,7 @@ def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPos
 	float, the reference point to calculate order
 	
 	maxx and minx:
-	arrays containing the accepted minimal and maximal places (recieved from another functions)
+	arrays containing the accepted minimal and maximal places (usually received from other methods)
 
 	fitOrder:
 	int, degree of polynomial to fit data
@@ -75,11 +69,6 @@ def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPos
 		maxx = maxx
 		minx = minx
 
-	# plt.plot(Xdata, Ydata)
-	# plt.plot(maxx, np.zeros_like(maxx), 'o')
-	# plt.plot(minx, np.zeros_like(minx), 'o')
-	# plt.show()
-
 	relNegMaxFreqs = np.array([a for a in (Xdata[SSPindex]-maxx) if a<0])
 	relNegMinFreqs= np.array([b for b in (Xdata[SSPindex]-minx) if b<0])
 	relNegFreqs = relNegMaxFreqs
@@ -98,10 +87,7 @@ def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPos
 		negValues[freq] = np.pi*(freq+1)
 	fullXValues = np.append(relPosFreqs, relNegFreqs) 
 	fullYValues = np.append(posValues, negValues)
-	# fullXValues = np.append(fullXValues, 0)
-	# fullYValues = np.append(fullYValues, 0)
 
-	 
 	if fitOrder == 5:
 		fitModel = Model(polynomialFit5)
 		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1, b4 = 1, b5 = 1)
@@ -243,52 +229,63 @@ def cosFitForPMCFF(x,c0, c1, b0, b1, b2, b3, b4, b5):
 
 
 
-def SPP(delays,omegas, fitOrder= 4): #def SPP(delays,omegas, reference, fitOrder= 4):
-	extracted_omegas = []
+def SPP(delays, omegas, fitOrder=4): #def SPP(delays,omegas, reference, fitOrder= 4):
+	"""
+	Calculates the dispersion from SPP's positions and delays.
+	
+	Attributes:
+
+	delays:
+	numpy.array-like, the time delays in fs
+
+	omegas:
+	list, in form of [[SPP1, SPP2, SPP3, SPP4],[SPP1, SPP2, SPP3, SPP4], ..]
+	for lesser SPP cases replace elements with None:
+	[[SPP1, None, None, None],[SPP1, None, None, None], ..]
+
+	fitOrder:
+	order of polynomial to fit the given data
+
+	returns:
+
+	delays and SPP positions as numpy.array
+
+	dispersion:
+	array with shape and values:[GD, GDD, TOD, FOD, QOD]
+
+	dispersion_std:
+	array with the standard deviation for dispersion [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
+
+	bf:
+	array with best fitting curve 
+	"""
+
 	delays = delays[delays != np.array(None)]
-	for element in omegas:
-		item = [x for x in element if x is not None]
-		extracted_omegas.append(item)
-
-	new_delays = []
-	for idx in range(len(extracted_omegas)):
-		if len(extracted_omegas[idx])>1:
-			value = delays[idx]
-			item_to_add = [value]*(len(extracted_omegas[idx]))
-			new_delays.append(item_to_add)
-		if len(extracted_omegas[idx]) == 1:
-			value = delays[idx]
-			new_delays.append([value])
-
-	delays_unpacked = []
 	omegas_unpacked = []
-	for element in extracted_omegas:
-		for item in element:
-			omegas_unpacked.append(item)
-	delays_unpacked = list(chain.from_iterable(new_delays))
-
-	# # omegas_unpacked = [x-reference for x in omegas_unpacked]
-
-	# print(omegas_unpacked)
-	# print(delays_unpacked)
+	delays_unpacked = []
+	for delay, element in zip(delays, omegas):
+		item = [x for x in element if x is not None]
+		omegas_unpacked.extend(item)
+		delays_unpacked.extend(len(item) * [delay])
 	try:
-
 		if fitOrder == 2:
 			fitModel = Model(polynomialFit2)
 			params = fitModel.make_params(b0 = 1, b1 = 1, b2 = 1)
 			result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
-		if fitOrder == 3:
+		elif fitOrder == 3:
 			fitModel = Model(polynomialFit3)
 			params = fitModel.make_params(b0 = 1, b1 = 1, b2 = 1, b3 = 3)
 			result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
-		if fitOrder == 4:
+		elif fitOrder == 4:
 			fitModel = Model(polynomialFit4)
 			params = fitModel.make_params(b0 = 1, b1 = 1, b2 = 1, b3=1, b4 =1)
 			result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
-		if fitOrder == 1:
+		elif fitOrder == 1:
 			fitModel = Model(polynomialFit1)
 			params = fitModel.make_params(b0 = 1, b1 = 1)
 			result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
+		else:
+			raise ValueError('Out of range')
 		dispersion = []
 		dispersion_std = []
 		for name, par in result.params.items():
@@ -301,10 +298,9 @@ def SPP(delays,omegas, fitOrder= 4): #def SPP(delays,omegas, reference, fitOrder
 			dispersion.append(0)
 			dispersion_std.append(0) 
 		bf = result.best_fit
+		return omegas_unpacked, delays_unpacked, dispersion, dispersion_std, bf
 	except Exception as e:
 		return e
-
-	return omegas_unpacked, delays_unpacked, dispersion, dispersion_std, bf
 
 
 
@@ -333,7 +329,8 @@ def PMCFFMethod(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, p0=[1, 
 	array with shape and values:[GD, GDD, TOD, FOD, QOD]
 
 	"""
-	bounds=((-1, -1, -1, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf), (1, 1, 1, np.inf, np.inf, np.inf, np.inf, np.inf))
+	bounds=((-1, -1, -1, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf), 
+		    (1, 1, 1, np.inf, np.inf, np.inf, np.inf, np.inf))
 	if len(initSpectrumY) > 0 and len(referenceArmY) > 0 and len(sampleArmY) > 0:
 		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
 		Ydata = np.asarray(Ydata)

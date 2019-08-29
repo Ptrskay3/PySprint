@@ -11,7 +11,7 @@ from scipy.interpolate import interp1d
 
 
 
-def savgolFilter(initSpectrumX, initSpectrumY ,referenceArmY, sampleArmY, window = 101, order = 3):
+def savgolFilter(initSpectrumX, initSpectrumY ,referenceArmY, sampleArmY, window=101, order=3):
 	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:
 		try:
 			Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
@@ -41,7 +41,7 @@ def savgolFilter(initSpectrumX, initSpectrumY ,referenceArmY, sampleArmY, window
 
 
 #too many duplicates, needs a rewrite
-def findPeaks(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax = 1, proMin =1, threshold= 0.1):   
+def findPeaks(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax=1, proMin=1, threshold=0.1):   
 	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:
 		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
 		Xdata = initSpectrumX
@@ -99,7 +99,7 @@ def findPeaks(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax = 
 # b, a, c, d = np.loadtxt('examples/autodetect.txt', unpack= True, delimiter=',', skiprows = 10)
 # findPeaks(a,b,c,d)
 
-def convolution(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, standev = 200):
+def convolution(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, standev=200):
 	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:
 		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
 		Xdata = initSpectrumX
@@ -156,7 +156,6 @@ def cutData(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, startValue=
 
 def find_nearest(array,value):
     idx = (np.abs(array-value)).argmin()
-    dist = np.abs(array[idx]-value)
     return array[idx], idx
 
 def find_closest(xValue, xArray, yArray):

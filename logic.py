@@ -1,29 +1,24 @@
-###################################################
-#
-#
-# 
-#
-#
-##################################################
+"""
+The main logic behind the UI functions.
+"""
 
-# PyQt5 imports
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QTreeWidget, QTreeWidgetItem, QAbstractItemView,
 QDialog, QPushButton, QVBoxLayout, QComboBox, QCheckBox, QLabel,QAction, qApp, QTextEdit, QSpacerItem, QSizePolicy,QHBoxLayout, QGroupBox, QTableWidgetItem)
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, pyqtSlot
 from PyQt5.QtGui import QIcon, QCursor
-# ui imports
+
 from ui.ui import Ui_Interferometry
 from ui.generatorUI import Ui_GeneratorWindow
 from ui.aboutUI import Help
 from ui.mplwidget import MplWidget
 from ui.SPPUI import Ui_SPP
-#other packages
+
 import numpy as np
 import pandas as pd
 from datetime import datetime
 import matplotlib
-#core imports
+
 from core.evaluate import minMaxMethod, PMCFFMethod, FFT, cutWithGaussian, gaussianWindow , IFFT, argsAndCompute, SPP
 from core.smoothing import savgolFilter, findPeaks, convolution, interpolateData, cutData, find_closest
 from core.loading import readData
@@ -91,7 +86,6 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.window3 = SPPWindow(self)
         self.window3.show()
 
-
     def messageOutput(self, text):
         self.logOutput.insertPlainText('\n' + str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + ':')
         self.logOutput.insertPlainText('\n {}\n\n'.format(str(text)))
@@ -107,7 +101,6 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 QApplication.restoreOverrideCursor()
         return new_function
 
-
     def gaussianCutFunction(self):
         if self.gaussianCut.text() == '':
             self.gaussianCut.setText('100')
@@ -118,8 +111,6 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.b = xx
             self.redrawGraph()
 
-
-
     def fftHandler(self):
         if len(self.a)>0 and len(self.b)>0:
             self.fftContainer = self.a
@@ -129,7 +120,6 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         else:
             self.messageOutput('No data is loaded.')
 
-
     def ifftHandler(self):
         if len(self.a)>0 and len(self.b)>0 and len(self.fftContainer)>0:
             self.b = IFFT(self.b)
@@ -138,7 +128,6 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.redrawGraph()
             self.messageOutput('IFFT done. ')
             
-
     @waitingEffects
     def swapAxes(self):
         self.tableWidget.setRowCount(0)
@@ -163,7 +152,6 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                         self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
             self.tableWidget.resizeRowsToContents()
             self.tableWidget.resizeColumnsToContents()
-
 
     def commitToData(self):
         if self.editTab.currentIndex() == 1:
@@ -273,7 +261,6 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.tableWidget.setRowCount(5)
         self.tableWidget.setColumnCount(2)
         self.tableWidget.setHorizontalHeaderLabels(["Angular frequency", "Intensity"])
-
 
     def testt(self):
         print(self.editTab.currentIndex())
@@ -413,7 +400,6 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     self.MplWidget.canvas.draw()
                 except:
                     self.messageOutput('Invalid values encountered..')
-
 
     def redrawGraph(self):
         if (len(self.a) > 0) and (len(self.refY) > 0) and (len(self.samY) > 0) and (len(self.b)>0):
@@ -556,7 +542,6 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         if self.methodWidget.currentIndex() == 0 or self.methodWidget.currentIndex() == 3:
             self.messageOutput('not implemented')
             
-
     def saveOutput(self):
         options = QFileDialog.Options()
         name = QFileDialog.getSaveFileName(self, 'Save File','','Text(*.txt)', options=options)
@@ -566,7 +551,6 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 f.write(text)
         except:
             pass
-
 
     def saveLoadedData(self):
         options = QFileDialog.Options()
@@ -614,14 +598,13 @@ class helpWindow(QtWidgets.QMainWindow, Help):
         self.exbtn.clicked.connect(self.close)
 
 
-
 class generatorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
     xAxisData = np.array([])
     yAxisData = np.array([])
     refData = np.array([])
     samData = np.array([])
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super(generatorWindow, self).__init__(parent)
         self.setupUi(self)
         self.setWindowIcon(QtGui.QIcon('icon.png'))
@@ -655,8 +638,6 @@ class generatorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
             self.plotWidget.canvas.axes.plot(Xdata, Ydata, 'r')
             self.plotWidget.canvas.axes.grid()
             self.plotWidget.canvas.draw()
-
-
 
     def generateData(self):
         if self.startLine.text()=='':
@@ -708,7 +689,6 @@ class generatorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
         
         self.previewData()
         
-
     def saveAs(self):
         if self.delimiterLine.text == '':
             self.delimiterLine.setText(',')
@@ -727,8 +707,6 @@ class generatorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
         except:
             pass
 
-    # def emitData(self):
-        # mainProgram.a, mainProgram.b, mainProgram.refY, mainProgram.samY = self.xAxisData, self.yAxisData, self.refData ,self.samData
     
 class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
     def __init__(self, parent=None):
@@ -746,7 +724,6 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         self.pushButton_4.clicked.connect(self.editSPP)
         self.pushButton_6.clicked.connect(self.doSPP)
         self.pushButton_5.clicked.connect(self.cleanUp)
-
 
     def doSPP(self):
         self.widget.canvas.axes.clear()
@@ -768,7 +745,6 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
             self.QODSPP.setText(str(disp[4]) + ' +/- ' + str(disp_std[4])+ ' 1/fs^5')
         except Exception as e:
             self.messageOutput('Some values might be missing. Fit order must be lower or equal than the number of data points.\n' + str(e))
-
 
     def onclick(self, event):
         global ix, iy
@@ -832,8 +808,6 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
             pass
         self.previewData()
 
-
-
     def fillSPP(self):
         curr = self.treeWidget.currentIndex().row()
         try:
@@ -890,7 +864,6 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         self.xtemporal = []
         self.previewData()
 
-
     def previewData(self):
         curr = self.treeWidget.currentIndex().row()
         self.delayLine.setText('')
@@ -942,7 +915,6 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
                     print('not assigned')
             except:
                 pass
-
 
     def loadUp(self):
         options = QFileDialog.Options()
