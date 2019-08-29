@@ -3,7 +3,6 @@ Methods for manipulating the loaded data
 
 """
 
-
 import numpy as np 
 import matplotlib.pyplot as plt
 from scipy.signal import find_peaks, savgol_filter, gaussian, convolve
@@ -11,12 +10,9 @@ from scipy.interpolate import interp1d
 
 
 
-def savgolFilter(initSpectrumX, initSpectrumY ,referenceArmY, sampleArmY, window=101, order=3):
+def savgolFilter(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, window=101, order=3):
 	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:
-		try:
-			Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
-		except ValueError as error:
-			print(error)
+		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
 		Xdata = initSpectrumX
 		xint, yint = interpolateData(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
 	elif len(initSpectrumY) == 0:
@@ -49,15 +45,15 @@ def findPeaks(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax=1,
 		Ydata = 1/Ydata
 		minIndexes = find_peaks(Ydata, prominence = proMin)
 		Ydata = 1/Ydata
-		test = np.array([]) 
+		testY = np.array([]) 
 		testX = np.array([])
 		for element in Ydata[minIndexes[0]]:
 			if element > threshold or element < -threshold:
-				test = np.append(test, element)
+				testY = np.append(testY, element)
 				ind = np.where(Ydata[minIndexes[0]] == element)
 				testX = np.append(testX, Xdata[minIndexes[0]][ind])
 
-		if len(Xdata[maxIndexes[0]]) != len(Ydata[maxIndexes[0]]) or len(testX) != len(test):
+		if len(Xdata[maxIndexes[0]]) != len(Ydata[maxIndexes[0]]) or len(testX) != len(testY):
 			raise ValueError('Something went wrong, try to cut the edges of data.')
 		# plt.plot(Xdata, Ydata)
 		# plt.plot(Xdata[maxIndexes[0]],Ydata[maxIndexes[0]], 'ro')
@@ -71,14 +67,14 @@ def findPeaks(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax=1,
 		Ydata = 1/Ydata 
 		minIndexes = find_peaks(Ydata, prominence = proMin)
 		Ydata = 1/Ydata
-		test = np.array([]) # átdolgozandó még..
+		testY = np.array([]) # átdolgozandó még..
 		testX = np.array([])
 		for element in Ydata[minIndexes[0]]:
 			if element > threshold or element < -threshold:
-				test = np.append(test, element)
+				testY = np.append(testY, element)
 				ind = np.where(Ydata[minIndexes[0]] == element)
 				testX = np.append(testX, Xdata[minIndexes[0]][ind])
-		if len(Xdata[maxIndexes[0]]) != len(Ydata[maxIndexes[0]]) or len(testX) != len(test):
+		if len(Xdata[maxIndexes[0]]) != len(Ydata[maxIndexes[0]]) or len(testX) != len(testY):
 			raise ValueError('Something went wrong, try to cut the edges of data.')
 		# if len(Xdata[maxIndexes[0]]) > Ydata[maxIndexes[0]]:
 		# 	XEdited = (Xdata[maxIndexes[0]])[:len(Xdata[maxIndexes[0]])]
@@ -93,7 +89,7 @@ def findPeaks(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax=1,
 		# plt.plot(Xdata[maxIndexes[0]],Ydata[maxIndexes[0]], 'ro')
 		# plt.plot(testX, test, 'b*')
 		# plt.show()
-		return Xdata[maxIndexes[0]], Ydata[maxIndexes[0]], testX, test
+		return Xdata[maxIndexes[0]], Ydata[maxIndexes[0]], testX, testY
 
 
 # b, a, c, d = np.loadtxt('examples/autodetect.txt', unpack= True, delimiter=',', skiprows = 10)
@@ -136,10 +132,9 @@ def interpolateData(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY):
 
 
 def cutData(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, startValue=-9999, endValue=9999):
-	from .evaluate import findNearest
 	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:
-			Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
-			Xdata = initSpectrumX
+		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
+		Xdata = initSpectrumX
 	elif len(initSpectrumY) == 0:
 		pass
 	elif len(referenceArmY) == 0 or len(sampleArmY) == 0:
@@ -149,8 +144,8 @@ def cutData(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, startValue=
 	if startValue < endValue:
 		lowItem, lowIndex = findNearest(Xdata, startValue)
 		highItem, highIndex = findNearest(Xdata, endValue)
-		neededIndex = np.where((Xdata>=lowItem) & (Xdata<=highItem))
-		return Xdata[neededIndex], Ydata[neededIndex]
+		mask = np.where((Xdata>=lowItem) & (Xdata<=highItem))
+		return Xdata[mask], Ydata[mask]
 	else:
 		pass
 

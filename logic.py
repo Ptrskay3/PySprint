@@ -24,7 +24,7 @@ from core.smoothing import savgolFilter, findPeaks, convolution, interpolateData
 from core.loading import readData
 from core.generator import generatorFreq, generatorWave
 
-class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
+class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     samX = np.array([])
     samY = np.array([])
     refX = np.array([])
@@ -37,7 +37,7 @@ class mainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     maxx = np.array([])
 
     def __init__(self, parent=None):
-        super(mainProgram, self).__init__(parent)
+        super(MainProgram, self).__init__(parent)
         self.setupUi(self)
         self.setWindowIcon(QtGui.QIcon('icon.png'))
         self.calculate.clicked.connect(self.getit)

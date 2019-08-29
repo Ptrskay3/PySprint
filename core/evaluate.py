@@ -8,7 +8,7 @@ import scipy
 from math import factorial
 from lmfit import Model
 
-def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY , sampleArmY, SPPosition, maxx=[], minx=[], fitOrder=5, showGraph=False):
+def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, SPPosition, maxx=[], minx=[], fitOrder=5, showGraph=False):
 	"""
 	Calculates the dispersion with minimum-maximum method 
 	(*CURRENTLY ACCEPTS UNITS ONLY IN PHz)
