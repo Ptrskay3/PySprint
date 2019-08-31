@@ -1,7 +1,6 @@
 """
 The main logic behind the UI functions.
 """
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QTreeWidget, QTreeWidgetItem, QAbstractItemView,
 QDialog, QPushButton, QVBoxLayout, QComboBox, QCheckBox, QLabel,QAction, qApp, QTextEdit, QSpacerItem, QSizePolicy,QHBoxLayout, QGroupBox, QTableWidgetItem)
@@ -19,12 +18,13 @@ import pandas as pd
 from datetime import datetime
 import matplotlib
 
-from core.evaluate import minMaxMethod, PMCFFMethod, FFT, cutWithGaussian, gaussianWindow , IFFT, argsAndCompute, SPP
-from core.smoothing import savgolFilter, findPeaks, convolution, interpolateData, cutData, find_closest
-from core.loading import readData
+from core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, gaussian_window , ifft_method, spp_method
+from core.smoothing import savgol, find_peak, convolution, interpolate_data, cut_data, find_closest
+from core.loading import read_data
 from core.generator import generatorFreq, generatorWave
 
 class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
+    """ The main window class, opened when main.py ran."""
     samX = np.array([])
     samY = np.array([])
     refX = np.array([])
@@ -40,26 +40,26 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         super(MainProgram, self).__init__(parent)
         self.setupUi(self)
         self.setWindowIcon(QtGui.QIcon('icon.png'))
-        self.calculate.clicked.connect(self.getit)
-        self.btn_load.clicked.connect(lambda i: self.loadData(i, self.a))
-        self.swapButton.clicked.connect(self.swapAxes)
-        self.temporalApplyButton.clicked.connect(self.temporalApply)
-        self.commitChanges.clicked.connect(self.commitToData)
-        self.resetButton.clicked.connect(self.resetAll)
-        self.refreshGraph.clicked.connect(self.redrawGraph)
-        self.iReferenceArm.clicked.connect(lambda i: self.referenceArmClicked(i, self.refX))
-        self.iSampleArm.clicked.connect(lambda i: self.sampleArmClicked(i, self.samX))
-        self.iReferenceArm_2.clicked.connect(lambda i: self.referenceArmClicked(i, self.refX))
-        self.iSampleArm_2.clicked.connect(lambda i: self.sampleArmClicked(i, self.samX))
-        self.doFFT.clicked.connect(self.fftHandler)
-        self.doCut.clicked.connect(self.gaussianCutFunction)
-        self.doIFFT.clicked.connect(self.ifftHandler)
-        self.actionAbout.triggered.connect(self.openHelp)
-        self.actionSave_current_data.triggered.connect(self.saveLoadedData)
-        self.actionSave_log_file.triggered.connect(self.saveOutput)
+        self.calculate.clicked.connect(self.get_it)
+        self.btn_load.clicked.connect(lambda i: self.load_data(i, self.a))
+        self.swapButton.clicked.connect(self.swap_axes)
+        self.temporalApplyButton.clicked.connect(self.apply_on_plot)
+        self.commitChanges.clicked.connect(self.commit_to_data)
+        self.resetButton.clicked.connect(self.reset_all)
+        self.refreshGraph.clicked.connect(self.redraw_graph)
+        self.iReferenceArm.clicked.connect(lambda i: self.ref_arm_clicked(i, self.refX))
+        self.iSampleArm.clicked.connect(lambda i: self.sam_arm_clicked(i, self.samX))
+        self.iReferenceArm_2.clicked.connect(lambda i: self.ref_arm_clicked(i, self.refX))
+        self.iSampleArm_2.clicked.connect(lambda i: self.sam_arm_clicked(i, self.samX))
+        self.doFFT.clicked.connect(self.fft_handler)
+        self.doCut.clicked.connect(self.gauss_cut_func)
+        self.doIFFT.clicked.connect(self.ifft_handler)
+        self.actionAbout.triggered.connect(self.open_help)
+        self.actionSave_current_data.triggered.connect(self.save_curr_data)
+        self.actionSave_log_file.triggered.connect(self.save_output)
         self.actionExit.triggered.connect(self.close)
-        self.actionGenerator.triggered.connect(self.openGenerator)
-        self.pushButton.clicked.connect(self.openSPPanel)
+        self.actionGenerator.triggered.connect(self.open_generator)
+        self.pushButton.clicked.connect(self.open_sppanel)
         # self.actionUnit_converter.triggered.connect(self.runTutorial)
         self.btn_load.setToolTip('Load in data. Can be different type (see documentation)')
         self.swapButton.setToolTip('Swaps the two columns and redraws graph.')
@@ -74,25 +74,30 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.mmPoly.setToolTip('Assumed maximum order of dispersion.')
         self.printCheck.setToolTip('Include lmfit report in the log.')
 
-    def openHelp(self):
-        self.window1 = helpWindow(self)
+    def open_help(self):
+        """ Opens up help window."""
+        self.window1 = HelpWindow(self)
         self.window1.show()
 
-    def openGenerator(self):
-        self.window2 = generatorWindow(self)
+    def open_generator(self):
+        """ Opens up generator window"""
+        self.window2 = GeneratorWindow(self)
         self.window2.show()
 
-    def openSPPanel(self):
+    def open_sppanel(self):
+        """ Opens up SPP Interface"""
         self.window3 = SPPWindow(self)
         self.window3.show()
 
-    def messageOutput(self, text):
+    def msg_output(self, text):
+        """ Prints to the log dialog"""
         self.logOutput.insertPlainText('\n' + str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + ':')
         self.logOutput.insertPlainText('\n {}\n\n'.format(str(text)))
         self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
 
 
-    def waitingEffects(function):
+    def waiting_effects(function):
+        """ Decorator to show loading cursor"""
         def new_function(self):
             QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
             try:
@@ -101,41 +106,45 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 QApplication.restoreOverrideCursor()
         return new_function
 
-    def gaussianCutFunction(self):
+    def gauss_cut_func(self):
+        """ On FFT tab perfoms a cut with 6 order gaussian """
         if self.gaussianCut.text() == '':
             self.gaussianCut.setText('100')
         if self.gaussianCut2.text() == '':
             self.gaussianCut2.setText('40')
         if len(self.a)>0 and len(self.b)>0:
-            xx = cutWithGaussian(self.a ,self.b, spike= float(self.gaussianCut.text()), sigma = float(self.gaussianCut2.text()))
+            xx = cut_gaussian(self.a ,self.b, spike= float(self.gaussianCut.text()), sigma = float(self.gaussianCut2.text()))
             self.b = xx
-            self.redrawGraph()
+            self.redraw_graph()
 
-    def fftHandler(self):
+    def fft_handler(self):
+        """ On FFT tab perfoms FFT on currently loaded data"""
         if len(self.a)>0 and len(self.b)>0:
             self.fftContainer = self.a
-            self.a, self.b = FFT(self.a, self.b)
-            self.redrawGraph()
-            self.messageOutput('FFT applied to data. Some functions may behave differently. The absolute value is plotted.')
+            self.a, self.b = fft_method(self.a, self.b)
+            self.redraw_graph()
+            self.msg_output('FFT applied to data. Some functions may behave differently. The absolute value is plotted.')
         else:
-            self.messageOutput('No data is loaded.')
+            self.msg_output('No data is loaded.')
 
-    def ifftHandler(self):
+    def ifft_handler(self):
+        """ On FFt tab perfoms IFFT on currently loaded data""" 
         if len(self.a)>0 and len(self.b)>0 and len(self.fftContainer)>0:
-            self.b = IFFT(self.b)
+            self.b = ifft_method(self.b)
             self.a = self.fftContainer
             self.fftContainer = np.array([])
-            self.redrawGraph()
-            self.messageOutput('IFFT done. ')
+            self.redraw_graph()
+            self.msg_output('IFFT done. ')
             
-    @waitingEffects
-    def swapAxes(self):
+    @waiting_effects
+    def swap_axes(self):
+        """ Changes the x and y axis"""
         self.tableWidget.setRowCount(0)
         if len(self.a)>0:
             self.temp = self.a
             self.a = self.b
             self.b = self.temp
-            self.redrawGraph()
+            self.redraw_graph()
             if len(self.a)<400:
                         for row_number in range(len(self.a)):
                             self.tableWidget.insertRow(row_number)
@@ -153,7 +162,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.tableWidget.resizeRowsToContents()
             self.tableWidget.resizeColumnsToContents()
 
-    def commitToData(self):
+    def commit_to_data(self):
+        """ On the data manipulation tab applies the current function with the given parameters to the loaded dataset."""
         if self.editTab.currentIndex() == 1:
             if self.peaksMax.text() == '':
                 self.peaksMax.setText('0.1')
@@ -163,20 +173,20 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 self.peaksThreshold.setText('0.1')
             try:
                 if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
-                    j, k, l, m = findPeaks(self.a, self.b, self.refY, self.samY, proMax = float(self.peaksMax.text()),
+                    j, k, l, m = find_peak(self.a, self.b, self.refY, self.samY, proMax = float(self.peaksMax.text()),
                      proMin = float(self.peaksMin.text()), threshold = float(self.peaksThreshold.text()))
                     self.maxx = j
                     self.minx = l 
                 elif len(self.a) == 0:
                     pass
                 elif len(self.refY) == 0 or len(self.samY) == 0:
-                    j, k, l, m = findPeaks(self.a, self.b, self.refY, self.samY, proMax = float(self.peaksMax.text()),
+                    j, k, l, m = find_peak(self.a, self.b, self.refY, self.samY, proMax = float(self.peaksMax.text()),
                      proMin = float(self.peaksMin.text()), threshold = float(self.peaksThreshold.text()))
                     self.maxx = j
                     self.minx = l 
-                self.messageOutput('Points were recorded for min-max method.')
+                self.msg_output('Points were recorded for min-max method.')
             except Exception as e:
-                self.messageOutput(e)
+                self.msg_output(e)
 
 
         if self.editTab.currentIndex() == 0:
@@ -187,20 +197,20 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
 
             if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
                 if len(self.a) == len(self.refY) and len(self.a) == len(self.samY):
-                    self.a, self.b = savgolFilter(self.a, self.b ,self.refY, self.samY, window = int(self.savgolWindow.text()), 
+                    self.a, self.b = savgol(self.a, self.b ,self.refY, self.samY, window = int(self.savgolWindow.text()), 
                         order = int(self.savgolOrder.text()))
                     self.refY = []
                     self.samY = []
-                    self.messageOutput('Reference and sample arm is now merged and the spectrum is normalized.')
+                    self.msg_output('Reference and sample arm is now merged and the spectrum is normalized.')
                 else:
-                    self.messageOutput('Data shapes are different. Operation canceled.')
+                    self.msg_output('Data shapes are different. Operation canceled.')
             elif len(self.a) == 0:
                 pass
             elif len(self.refY) == 0 or len(self.samY) == 0:
-                self.a, self.b = savgolFilter(self.a, self.b ,[], [], window = int(self.savgolWindow.text()), 
+                self.a, self.b = savgol(self.a, self.b ,[], [], window = int(self.savgolWindow.text()), 
                     order = int(self.savgolOrder.text()))
 
-            self.redrawGraph()
+            self.redraw_graph()
 
         if self.editTab.currentIndex() == 2:
             if self.convolutionStd.text() == '':
@@ -210,15 +220,15 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     self.a, self.b = convolution(self.a, self.b, self.refY, self.samY, standev = float(self.convolutionStd.text()))
                     self.refY = []
                     self.samY = []
-                    self.messageOutput('Reference and sample arm is now merged and the spectrum is normalized.')
+                    self.msg_output('Reference and sample arm is now merged and the spectrum is normalized.')
                 else:
-                    self.messageOutput('Data shapes are different. Operation canceled.')
+                    self.msg_output('Data shapes are different. Operation canceled.')
             elif len(self.a) == 0:
                 pass
             elif len(self.refY) == 0 or len(self.samY) == 0:
                 self.a, self.b = convolution(self.a, self.b ,[], [], standev = float(self.convolutionStd.text()))
 
-            self.redrawGraph()
+            self.redraw_graph()
         
         if self.editTab.currentIndex() == 3:
             if self.sliceStart.text() =='':
@@ -228,24 +238,25 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
 
             if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
                 if len(self.a) == len(self.refY) and len(self.a) == len(self.b):
-                    self.a, self.b = cutData(self.a, self.b, self.refY, self.samY, startValue = float(self.sliceStart.text()),
+                    self.a, self.b = cut_data(self.a, self.b, self.refY, self.samY, startValue = float(self.sliceStart.text()),
                      endValue = float(self.sliceStop.text()))
                     self.refY = []
                     self.samY = []
-                    self.messageOutput('Reference and sample arm is now merged and the spectrum is normalized.')
+                    self.msg_output('Reference and sample arm is now merged and the spectrum is normalized.')
                 else:
-                    self.messageOutput('Data shapes are different. Operation canceled')
+                    self.msg_output('Data shapes are different. Operation canceled')
             elif len(self.a) == 0:
                 pass
             elif len(self.refY) == 0 or len(self.samY) == 0:
                 try:
-                    self.a, self.b  = cutData(self.a, self.b ,[], [], startValue = float(self.sliceStart.text()),
+                    self.a, self.b  = cut_data(self.a, self.b ,[], [], startValue = float(self.sliceStart.text()),
                      endValue = float(self.sliceStop.text()))
                 except:
-                    self.messageOutput('Invalid values encountered..')
-            self.redrawGraph()
+                    self.msg_output('Invalid values encountered..')
+            self.redraw_graph()
 
-    def resetAll(self):
+    def reset_all(self):
+        """ Clears all the loaded data and plot."""
         self.a = []
         self.b = []
         self.refY = []
@@ -256,7 +267,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.temp = []
         self.MplWidget.canvas.axes.clear()
         self.MplWidget.canvas.draw()
-        self.messageOutput('Data cleared.')
+        self.msg_output('Data cleared.')
         self.tableWidget.clear()
         self.tableWidget.setRowCount(5)
         self.tableWidget.setColumnCount(2)
@@ -266,7 +277,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         print(self.editTab.currentIndex())
         print(self.editTab.currentWidget())
 
-    def temporalApply(self):
+    def apply_on_plot(self):
+        """ On the data manipulation tab applies the current function but only shows the plot and doesn't commit the changes."""
         if self.editTab.currentIndex() == 1:
             if self.peaksMax.text() == '':
                 self.peaksMax.setText('0.1')
@@ -277,7 +289,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             try:
                 if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
                     self.MplWidget.canvas.axes.clear()
-                    j, k, l, m = findPeaks(self.a, self.b, self.refY, self.samY, proMax = float(self.peaksMax.text()),
+                    j, k, l, m = find_peak(self.a, self.b, self.refY, self.samY, proMax = float(self.peaksMax.text()),
                      proMin = float(self.peaksMin.text()), threshold = float(self.peaksThreshold.text()))
                     self.MplWidget.canvas.axes.grid()
                     self.MplWidget.canvas.axes.plot(self.a, ((self.b-self.refY-self.samY)/(2*np.sqrt(self.refY*self.samY))))
@@ -290,7 +302,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     pass
                 elif len(self.refY) == 0 or len(self.samY) == 0:
                     self.MplWidget.canvas.axes.clear()
-                    j, k, l, m = findPeaks(self.a, self.b, self.refY, self.samY, proMax = float(self.peaksMax.text()),
+                    j, k, l, m = find_peak(self.a, self.b, self.refY, self.samY, proMax = float(self.peaksMax.text()),
                      proMin = float(self.peaksMin.text()), threshold = float(self.peaksThreshold.text()))
                     self.MplWidget.canvas.axes.plot(self.a, self.b)
                     self.MplWidget.canvas.axes.grid()
@@ -300,7 +312,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     # self.MplWidget.canvas.axes.set_xlabel("Angular frequency")
                     self.MplWidget.canvas.draw()
             except Exception as e:
-                self.messageOutput(e)
+                self.msg_output(e)
 
 
         if self.editTab.currentIndex() == 0:
@@ -314,7 +326,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 self.MplWidget.canvas.axes.clear()
                 try:
                     if len(self.a) == len(self.refY) and len(self.a) == len(self.samY):
-                        m, n = savgolFilter(self.a, self.b ,self.refY, self.samY, window = int(self.savgolWindow.text()), 
+                        m, n = savgol(self.a, self.b ,self.refY, self.samY, window = int(self.savgolWindow.text()), 
                             order = int(self.savgolOrder.text()))
                         self.MplWidget.canvas.axes.plot(m, n)
                         self.MplWidget.canvas.axes.grid()
@@ -322,17 +334,17 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                         # self.MplWidget.canvas.axes.set_xlabel("Angular frequency")
                         self.MplWidget.canvas.draw()
                     else:
-                        self.messageOutput('Data shapes are different. Operation canceled.')
+                        self.msg_output('Data shapes are different. Operation canceled.')
 
 
                 except:
-                    self.messageOutput('Polynomial order must be less than window..')
+                    self.msg_output('Polynomial order must be less than window..')
             elif len(self.a) == 0:
                 pass
             elif len(self.refY) == 0 or len(self.samY) == 0:
                 self.MplWidget.canvas.axes.clear()
                 try:
-                    m, n = savgolFilter(self.a, self.b ,[], [], window = int(self.savgolWindow.text()), 
+                    m, n = savgol(self.a, self.b ,[], [], window = int(self.savgolWindow.text()), 
                         order = int(self.savgolOrder.text()))
                     self.MplWidget.canvas.axes.plot(m, n)
                     self.MplWidget.canvas.axes.grid()
@@ -340,7 +352,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     # self.MplWidget.canvas.axes.set_xlabel("Angular frequency")
                     self.MplWidget.canvas.draw()
                 except:
-                    self.messageOutput('Polynomial order must be less than window.')
+                    self.msg_output('Polynomial order must be less than window.')
 
         if self.editTab.currentIndex() == 2:
             if self.convolutionStd.text() == '':
@@ -355,7 +367,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     # self.MplWidget.canvas.axes.set_xlabel("Angular frequency")
                     self.MplWidget.canvas.draw()
                 else:
-                    self.messageOutput('Data shapes are different. Operation canceled.')
+                    self.msg_output('Data shapes are different. Operation canceled.')
 
             elif len(self.a) == 0:
                 pass
@@ -377,7 +389,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
                 if len(self.a) == len(self.refY) and len(self.a) == len(self.samY):
                     self.MplWidget.canvas.axes.clear()
-                    t, w = cutData(self.a, self.b, self.refY, self.samY, startValue = float(self.sliceStart.text()),
+                    t, w = cut_data(self.a, self.b, self.refY, self.samY, startValue = float(self.sliceStart.text()),
                      endValue = float(self.sliceStop.text()))
                     self.MplWidget.canvas.axes.plot(t, w)
                     self.MplWidget.canvas.axes.grid()
@@ -385,13 +397,13 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     # self.MplWidget.canvas.axes.set_xlabel("Angular frequency")
                     self.MplWidget.canvas.draw()
                 else:
-                    self.messageOutput('Data shapes are different. Operation canceled.')
+                    self.msg_output('Data shapes are different. Operation canceled.')
             elif len(self.a) == 0:
                 pass
             elif len(self.refY) == 0 or len(self.samY) == 0:
                 try:
                     self.MplWidget.canvas.axes.clear()
-                    t,w  = cutData(self.a, self.b ,[], [], startValue = float(self.sliceStart.text()),
+                    t,w  = cut_data(self.a, self.b ,[], [], startValue = float(self.sliceStart.text()),
                      endValue = float(self.sliceStop.text()))
                     self.MplWidget.canvas.axes.plot(t, w)
                     self.MplWidget.canvas.axes.grid()
@@ -399,9 +411,10 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     # self.MplWidget.canvas.axes.set_xlabel("Angular frequency")
                     self.MplWidget.canvas.draw()
                 except:
-                    self.messageOutput('Invalid values encountered..')
+                    self.msg_output('Invalid values encountered..')
 
-    def redrawGraph(self):
+    def redraw_graph(self):
+        """ Function to update the plot"""
         if (len(self.a) > 0) and (len(self.refY) > 0) and (len(self.samY) > 0) and (len(self.b)>0):
             if len(self.a) == len(self.samY) and len(self.a) == len(self.refY):
                 Ydata = (self.b-self.refY-self.samY)/(2*np.sqrt(self.refY*self.samY))
@@ -416,7 +429,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 self.MplWidget.canvas.axes.grid()
                 self.MplWidget.canvas.draw()
             else:
-                self.messageOutput('Data shapes are different. Operation canceled.')
+                self.msg_output('Data shapes are different. Operation canceled.')
 
         elif len(self.a) == 0:
             self.MplWidget.canvas.axes.clear()
@@ -434,23 +447,22 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             # self.MplWidget.canvas.axes.set_xlabel("Angular frequency")
             self.MplWidget.canvas.axes.grid()
             self.MplWidget.canvas.draw()
-        # print(self.a[1])
-        # print(self.b[1])
-        # print(self.samY[1])
-        # print(self.refY[1])
+
 
     @pyqtSlot(float)
-    def referenceArmClicked(self, refX, refY):
+    def ref_arm_clicked(self, refX, refY):
+        """ Loads in the reference arm data"""
         options = QFileDialog.Options()
         referenceName, _ = QFileDialog.getOpenFileName(None,"Reference arm spectrum", "","All Files (*);;Text Files (*.txt)", options=options)
         try:
             if referenceName:
                 self.refX, self.refY= np.loadtxt(referenceName, usecols=(0,1), unpack = True, delimiter =',')
         except:
-            self.messageOutput('Failed')
+            self.msg_output('Failed')
     
     @pyqtSlot(float)   
-    def sampleArmClicked(self, samX, samY):
+    def sam_arm_clicked(self, samX, samY):
+        """ Loads in the sample arm data"""
         options = QFileDialog.Options()       
         sampleName, _ = QFileDialog.getOpenFileName(None,"Sample arm spectrum", "","All Files (*);;Text Files (*.txt)", options=options)
         try:
@@ -458,60 +470,62 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 self.samX, self.samY= np.loadtxt(sampleName, usecols=(0,1), unpack = True, delimiter = ',')
           
         except:
-            self.messageOutput('Failed')
+            self.msg_output('Failed')
 
     @pyqtSlot(float) 
-    def loadData(self, a, b): 
-            options = QFileDialog.Options()
-            fileName, _ = QFileDialog.getOpenFileName(None,"Load interferogram", "","All Files (*);;Text Files (*.txt)", options=options)
-            try:
-                if fileName:
-                    self.tableWidget.setRowCount(0)
-                    try:
-                        self.a, self.b, self.refY, self.samY = readData(fileName)
-                    except:
-                        self.messageOutput('Auto-detect failed, attempting to load again..')  
-                        self.a, self.b = np.loadtxt(fileName, usecols=(0,1), unpack = True, delimiter =',')  
-                        self.messageOutput('Done')
-                    if len(self.a)<400:
-                        for row_number in range(len(self.a)):
-                            self.tableWidget.insertRow(row_number)
-                            for item in range(len(self.a)):
-                                self.tableWidget.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.a[item])))
-                            for item in range(len(self.b)):
-                                self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
-                    else:
-                        for row_number in range(400):
-                            self.tableWidget.insertRow(row_number)
-                            for item in range(400):
-                                self.tableWidget.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.a[item])))
-                            for item in range(400):
-                                self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
-            
-                self.redrawGraph()
-                # print(self.refY[:3])
-            except Exception as e:
-                self.messageOutput(e)
-            self.tableWidget.resizeColumnsToContents()
-            self.tableWidget.resizeRowsToContents()
+    def load_data(self, a, b): 
+        """ Loads in the data with AI. If that fails, loads in manually with np.loadtxt."""
+        options = QFileDialog.Options()
+        fileName, _ = QFileDialog.getOpenFileName(None,"Load interferogram", "","All Files (*);;Text Files (*.txt)", options=options)
+        try:
+            if fileName:
+                self.tableWidget.setRowCount(0)
+                try:
+                    self.a, self.b, self.refY, self.samY = read_data(fileName)
+                except:
+                    self.msg_output('Auto-detect failed, attempting to load again..')  
+                    self.a, self.b = np.loadtxt(fileName, usecols=(0,1), unpack = True, delimiter =',')  
+                    self.msg_output('Done')
+                if len(self.a)<400:
+                    for row_number in range(len(self.a)):
+                        self.tableWidget.insertRow(row_number)
+                        for item in range(len(self.a)):
+                            self.tableWidget.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.a[item])))
+                        for item in range(len(self.b)):
+                            self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
+                else:
+                    for row_number in range(400):
+                        self.tableWidget.insertRow(row_number)
+                        for item in range(400):
+                            self.tableWidget.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.a[item])))
+                        for item in range(400):
+                            self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
+        
+            self.redraw_graph()
+            # print(self.refY[:3])
+        except Exception as e:
+            self.msg_output(e)
+        self.tableWidget.resizeColumnsToContents()
+        self.tableWidget.resizeRowsToContents()
    
-    @waitingEffects
-    def getit(self):
+    @waiting_effects
+    def get_it(self):
+        """ If everything's set, calculates the dispersion."""
         if self.methodWidget.currentIndex() == 2:
             if self.mmPoly.text() == '':
                 self.mmPoly.setText('5')
             try:
-                disp, disp_std, fit_report = minMaxMethod(self.a, self.b,  self.refY, self.samY, float(self.getSPP.text()), self.maxx, self.minx,
+                disp, disp_std, fit_report = min_max_method(self.a, self.b,  self.refY, self.samY, float(self.getSPP.text()), self.maxx, self.minx,
                     int(self.mmPoly.text()), showGraph = self.checkGraph.isChecked())
                 labels = ['GD', 'GDD', 'TOD', 'FOD', 'QOD']
-                self.messageOutput('Using Min-max method.')
+                self.msg_output('Using Min-max method.')
                 for item in range(len(disp)):
                     self.logOutput.insertPlainText(' '+ labels[item] +' =  ' + str(disp[item]) +' +/- ' + str(disp_std[item]) + ' 1/fs^'+str(item+1)+'\n')
                 if self.printCheck.isChecked():
-                    self.messageOutput(fit_report)
+                    self.msg_output(fit_report)
                 self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
             except Exception as e:
-                self.messageOutput(str(e))
+                self.msg_output(str(e))
         if self.methodWidget.currentIndex() == 1:
             if self.initGD.text() == '':
                 self.initGD.setText('1')
@@ -524,25 +538,28 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             if self.initQOD.text() == '':
                 self.initQOD.setText('1')
             try:
-                cFF = PMCFFMethod(self.a, self.b ,self.refY, self.samY, 
+                cFF = cff_method(self.a, self.b ,self.refY, self.samY, 
                     p0=[1,1,1, float(self.initGD.text()), float(self.initGDD.text()), float(self.initTOD.text()), float(self.initFOD.text()),
                     float(self.initQOD.text())]) 
                 labels = ['GD', 'GDD', 'TOD', 'FOD', 'QOD']
-                self.messageOutput('Using Cosine function fit method..')
+                self.msg_output('Using Cosine function fit method..')
                 try:
                     for item in range(len(cFF)):
                         self.logOutput.insertPlainText(' '+ labels[item] +' =  ' + str(cFF[item]) +'  1/fs^'+str(item+1)+'\n')
                     self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
                 except Exception as e:
-                    self.messageOutput('You might need to provide initial guess for parameters.')
-                    self.messageOutput(e)
+                    self.msg_output('You might need to provide initial guess for parameters.')
+                    self.msg_output(e)
             except Exception as e:
-                self.messageOutput(e)
+                self.msg_output(e)
 
-        if self.methodWidget.currentIndex() == 0 or self.methodWidget.currentIndex() == 3:
-            self.messageOutput('not implemented')
+        if self.methodWidget.currentIndex() == 3:
+            self.msg_output('not implemented')
+        if  self.methodWidget.currentIndex() == 3:
+            self.msg_output('Please use the interface for SPP method.')
             
-    def saveOutput(self):
+    def save_output(self):
+        """ Saves the logoutput to a txt file."""
         options = QFileDialog.Options()
         name = QFileDialog.getSaveFileName(self, 'Save File','','Text(*.txt)', options=options)
         try:
@@ -552,7 +569,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         except:
             pass
 
-    def saveLoadedData(self):
+    def save_curr_data(self):
+        """ Saves the currently loaded data into a .txt file."""
         options = QFileDialog.Options()
         name = QFileDialog.getSaveFileName(self, 'Save File','','Text(*.txt)', options=options)
         try:
@@ -562,7 +580,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 elif len(self.refY) == 0 or len(self.samY == 0):
                     np.savetxt(name[0], np.transpose([self.a, self.b]), delimiter = ',')
                 else:
-                    self.messageOutput('Something went wrong.')
+                    self.msg_output('Something went wrong.')
         except:
             pass
 
@@ -585,37 +603,40 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     #                 self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
     #     self.tableWidget.resizeRowsToContents()
     #     self.tableWidget.resizeColumnsToContents()
-    #     self.redrawGraph()
+    #     self.redraw_graph()
     #     self.tutorial1 = QMessageBox.about(self, "Tutorial", "I loaded in some example data for you. You can manipulate the data on the right panel and use the methods below. ")
 
 
 
-class helpWindow(QtWidgets.QMainWindow, Help):
+class HelpWindow(QtWidgets.QMainWindow, Help):
+    """ Class for the help window."""
     def __init__(self, parent=None):
-        super(helpWindow, self).__init__(parent)
+        super(HelpWindow, self).__init__(parent)
         self.setupUi(self)
         self.setWindowIcon(QtGui.QIcon('icon.png'))
         self.exbtn.clicked.connect(self.close)
 
 
-class generatorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
+class GeneratorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
+    """ Class for the generator window."""
     xAxisData = np.array([])
     yAxisData = np.array([])
     refData = np.array([])
     samData = np.array([])
 
     def __init__(self, parent=None):
-        super(generatorWindow, self).__init__(parent)
+        super(GeneratorWindow, self).__init__(parent)
         self.setupUi(self)
         self.setWindowIcon(QtGui.QIcon('icon.png'))
         self.closeButton.clicked.connect(self.close)
         # self.pushButton_3.clicked.connect(self.emitData)
-        self.pushButton_4.clicked.connect(self.generateData)
-        self.pushButton_2.clicked.connect(self.saveAs)
+        self.pushButton_4.clicked.connect(self.generate_data)
+        self.pushButton_2.clicked.connect(self.save_as)
         self.armCheck.setChecked(True)
         self.delimiterLine.setText(',')
 
-    def previewData(self):
+    def preview_data(self):
+        """Function to update plot."""
         if (len(self.xAxisData) > 0) and (len(self.refData) > 0) and (len(self.samData) > 0) and (len(self.yAxisData)>0):
             if len(self.xAxisData) == len(self.samData) and len(self.xAxisData) == len(self.refData):
                 Ydata = (self.yAxisData-self.refData-self.samData)/(2*np.sqrt(self.refData*self.samData))
@@ -639,7 +660,8 @@ class generatorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
             self.plotWidget.canvas.axes.grid()
             self.plotWidget.canvas.draw()
 
-    def generateData(self):
+    def generate_data(self):
+        """ Function to generate the dataset. If fails, the button changes to red."""
         if self.startLine.text()=='':
             self.startLine.setText('2')
         if self.stopLine.text()=='':
@@ -687,9 +709,10 @@ class generatorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
             except:
                 self.pushButton_4.setStyleSheet(" background-color: rgb(240,0,0); color: rgb(255,255,255);")
         
-        self.previewData()
+        self.preview_data()
         
-    def saveAs(self):
+    def save_as(self):
+        """ Function to save the generated dataset."""
         if self.delimiterLine.text == '':
             self.delimiterLine.setText(',')
         options = QFileDialog.Options()
@@ -709,28 +732,30 @@ class generatorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
 
     
 class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
+    """ Class for the SPP Interface"""
     def __init__(self, parent=None):
         super(SPPWindow, self).__init__(parent)
         self.setupUi(self)
         self.setWindowIcon(QtGui.QIcon('icon.png'))
         self.treeWidget.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.loadButton.clicked.connect(self.loadUp)
-        self.treeWidget.itemSelectionChanged.connect(self.fillSPP)
-        self.pushButton.clicked.connect(self.recordDelay)
-        self.treeWidget.itemSelectionChanged.connect(self.previewData)
-        self.pushButton_7.clicked.connect(self.deleteItem)
+        self.loadButton.clicked.connect(self.load_up)
+        self.treeWidget.itemSelectionChanged.connect(self.fill_SPP)
+        self.pushButton.clicked.connect(self.record_delay)
+        self.treeWidget.itemSelectionChanged.connect(self.preview_data)
+        self.pushButton_7.clicked.connect(self.delete_item)
         self.pushButton_2.clicked.connect(self.pressed)
         self.pushButton_3.clicked.connect(self.released)
-        self.pushButton_4.clicked.connect(self.editSPP)
-        self.pushButton_6.clicked.connect(self.doSPP)
-        self.pushButton_5.clicked.connect(self.cleanUp)
+        self.pushButton_4.clicked.connect(self.edit_SPP)
+        self.pushButton_6.clicked.connect(self.do_SPP)
+        self.pushButton_5.clicked.connect(self.clean_up)
 
-    def doSPP(self):
+    def do_SPP(self):
+        """ Applies the SPP method to the given dataset, if fails it leaves a message."""
         self.widget.canvas.axes.clear()
         if self.fitOrderLine.text() == '':
             self.fitOrderLine.setText('4')
         try:
-            xs, ys, disp, disp_std, bestFit = SPP(delays = self.delays, omegas = self.xpoints, fitOrder = int(self.fitOrderLine.text()))
+            xs, ys, disp, disp_std, bestFit = spp_method(delays = self.delays, omegas = self.xpoints, fitOrder = int(self.fitOrderLine.text()))
             self.widget.canvas.axes.clear()
             self.widget.canvas.axes.plot(xs, ys,'o', label = 'data')
             self.widget.canvas.axes.plot(xs, bestFit, 'r--', label = 'fit')
@@ -744,9 +769,10 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
             self.FODSPP.setText(str(disp[3]) + ' +/- ' + str(disp_std[3])+ ' 1/fs^4')
             self.QODSPP.setText(str(disp[4]) + ' +/- ' + str(disp_std[4])+ ' 1/fs^5')
         except Exception as e:
-            self.messageOutput('Some values might be missing. Fit order must be lower or equal than the number of data points.\n' + str(e))
+            self.msg_output('Some values might be missing. Fit order must be lower or equal than the number of data points.\n' + str(e))
 
-    def onclick(self, event):
+    def on_clicked(self, event):
+        """ Function to record clicks on plot."""
         global ix, iy
         ix, iy = event.xdata, event.ydata
         curr = self.treeWidget.currentIndex().row()
@@ -766,19 +792,22 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
 
         if len(self.xtemporal) == 4:
             self.widget.canvas.mpl_disconnect(self.cid)
-            self.messageOutput('Clicks are no longer recorded.')
+            self.msg_output('Clicks are no longer recorded.')
         return 
     
-    def messageOutput(self, text):
+    def msg_output(self, text):
+        """ Prints messages to the log widget."""
         self.messageBox.insertPlainText(str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + ':')
         self.messageBox.insertPlainText('\n {}\n\n'.format(str(text)))
         self.messageBox.verticalScrollBar().setValue(self.messageBox.verticalScrollBar().maximum())
 
     def pressed(self):
-        self.cid = self.widget.canvas.mpl_connect('button_press_event', self.onclick)
+        """ Function to record clicks on plot."""
+        self.cid = self.widget.canvas.mpl_connect('button_press_event', self.on_clicked)
         self.pushButton_2.setText('Activated')
 
     def released(self):
+        """ Function to record clicked points on the plot"""
         self.widget.canvas.mpl_disconnect(self.cid)
         curr = self.treeWidget.currentIndex().row()
         while len(self.xtemporal)< 4:
@@ -806,9 +835,10 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
             self.SPP4.setText(str(self.xpoints[curr][3]))
         except:
             pass
-        self.previewData()
+        self.preview_data()
 
-    def fillSPP(self):
+    def fill_SPP(self):
+        """ Function to fill up SPP lines. If not given, pass."""
         curr = self.treeWidget.currentIndex().row()
         try:
             self.SPP1.setText(str(self.xpoints[curr][0]))
@@ -827,7 +857,8 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         except:
             self.SPP4.setText(str(None))
 
-    def editSPP(self):
+    def edit_SPP(self):
+        """ Function to allow user to type in or edit SPP's"""
         curr = self.treeWidget.currentIndex().row()
         try:
             xval1, yval1 = find_closest(float(self.SPP1.text()), self.xData[curr], self.yData[curr])
@@ -862,9 +893,10 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         self.xpoints[curr]= self.xtemporal
         self.ytemporal = []
         self.xtemporal = []
-        self.previewData()
+        self.preview_data()
 
-    def previewData(self):
+    def preview_data(self):
+        """ Function to update plot."""
         curr = self.treeWidget.currentIndex().row()
         self.delayLine.setText('')
         if curr == -1:
@@ -916,24 +948,26 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
             except:
                 pass
 
-    def loadUp(self):
+    def load_up(self):
+        """ Function to load file into Tree widget"""
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getOpenFileName(None,"Load interferogram", "","All Files (*);;Text Files (*.txt)", options=options)
         try:
             actualCount = self.treeWidget.topLevelItemCount()
             if fileName:
-                xx, yy, vv, ww = readData(fileName)
+                xx, yy, vv, ww = read_data(fileName)
                 self.xData.append(xx)
                 self.yData.append(yy)
                 self.yRef.append(vv)
                 self.ySam.append(ww)
                 l1 = QTreeWidgetItem([fileName.split('/')[-1]])
                 self.treeWidget.addTopLevelItem(l1)
-            self.previewData()
+            self.preview_data()
         except Exception as e:
             print(e)
 
-    def deleteItem(self):
+    def delete_item(self):
+        """ Function to delete a file from the Tree widget."""
         try:
             curr = self.treeWidget.currentIndex().row()
             #ez nem biztos hogy kell
@@ -944,7 +978,8 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         except:
             pass
 
-    def cleanUp(self):
+    def clean_up(self):
+        """ Deletes all the data which is loaded in."""
         self.xData = []
         self.yData = []
         self.ySam = []
@@ -957,7 +992,8 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         self.cid = None
         self.treeWidget.clear() 
 
-    def recordDelay(self):
+    def record_delay(self):
+        """ Function which allows user to type in delays."""
         curr = self.treeWidget.currentIndex().row()
         if curr == -1:
             pass

@@ -19,7 +19,7 @@ refAxis = toLookFor[8:10]
 samAxis = toLookFor[10:]
 
 
-def getMatches(word, possibilities, n=3, cutoff=0.7):
+def get_matches(word, possibilities, n=3, cutoff=0.7):
     if not n >  0:
         raise ValueError("n must be > 0: %r" % (n,))
     if not 0.0 <= cutoff <= 1.0:
@@ -36,7 +36,7 @@ def getMatches(word, possibilities, n=3, cutoff=0.7):
     result = _nlargest(n, result)
     return [x for score, x in result]
 
-def hasHeader(file, nrows=20):
+def has_header(file, nrows=20):
 	try:
 		df = pd.read_csv(file, header=None, nrows=nrows)
 	except:
@@ -45,7 +45,7 @@ def hasHeader(file, nrows=20):
 	return tuple(df.dtypes) != tuple(df_header.dtypes)
 
 
-def readData(file):
+def read_data(file):
 	matches = []
 	initSpectrumX = np.array([])
 	initSpectrumY = np.array([])
@@ -56,10 +56,10 @@ def readData(file):
 		test = False
 	else:
 		test = True
-	# print(hasHeader(file))
-	if hasHeader(file):
+	# print(has_header(file))
+	if has_header(file):
 		for string in toLookFor:
-			indexes = getMatches(string, df.columns.to_numpy(), n=1, cutoff = 0.66)
+			indexes = get_matches(string, df.columns.to_numpy(), n=1, cutoff = 0.66)
 			if len(indexes)>0:
 				matches.append([indexes,string])
 	else:
@@ -161,7 +161,7 @@ def readData(file):
 	return initSpectrumX, initSpectrumY, ref, sam
 
 
-# x,y,reference,sample = readData('examples/KURVA.txt')
+# x,y,reference,sample = read_data('examples/KURVA.txt')
 
 # print(x[:3])
 # print(y[:3])

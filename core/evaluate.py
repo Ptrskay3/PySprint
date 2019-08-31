@@ -8,7 +8,7 @@ import scipy
 from math import factorial
 from lmfit import Model
 
-def minMaxMethod(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, SPPosition, maxx=[], minx=[], fitOrder=5, showGraph=False):
+def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, SPPosition, maxx=[], minx=[], fitOrder=5, showGraph=False):
 	"""
 	Calculates the dispersion with minimum-maximum method 
 	(*CURRENTLY ACCEPTS UNITS ONLY IN PHz)
@@ -229,7 +229,7 @@ def cosFitForPMCFF(x,c0, c1, b0, b1, b2, b3, b4, b5):
 
 
 
-def SPP(delays, omegas, fitOrder=4): #def SPP(delays,omegas, reference, fitOrder= 4):
+def spp_method(delays, omegas, fitOrder=4): #def SPP(delays,omegas, reference, fitOrder= 4):
 	"""
 	Calculates the dispersion from SPP's positions and delays.
 	
@@ -304,7 +304,7 @@ def SPP(delays, omegas, fitOrder=4): #def SPP(delays,omegas, reference, fitOrder
 
 
 
-def PMCFFMethod(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, p0=[1, 1, 1, 1, 1, 1, 1, 1]):
+def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, p0=[1, 1, 1, 1, 1, 1, 1, 1]):
 	"""
 	Phase modulated cosine function fit method. 
 	(*CURRENTLY ACCEPTS UNITS ONLY IN PHz)
@@ -360,7 +360,7 @@ def PMCFFMethod(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, p0=[1, 
 
 
 
-def FFT(initSpectrumX, initSpectrumY):
+def fft_method(initSpectrumX, initSpectrumY):
 	"""
 	Perfoms FFT on data
 
@@ -381,16 +381,16 @@ def FFT(initSpectrumX, initSpectrumY):
 	array with the transformed y data
 
 	"""
-	from .smoothing import interpolateData
+	from .smoothing import interpolate_data
 	if len(initSpectrumX) > 0 and len(initSpectrumY) > 0:
-		Xdata, Ydata = interpolateData(initSpectrumX, initSpectrumY, [],[])
+		Xdata, Ydata = interpolate_data(initSpectrumX, initSpectrumY, [],[])
 		freq = scipy.fftpack.fftfreq(len(Xdata), d=(Xdata[3]-Xdata[2]))
 		yf = scipy.fftpack.fft(Ydata)
 		return freq, yf
 	if len(initSpectrumX) == 0:
 		pass
 
-def gaussianWindow(t ,tau, standardDev):
+def gaussian_window(t ,tau, standardDev):
 	"""
 	__inputs__
 	t:
@@ -409,7 +409,7 @@ def gaussianWindow(t ,tau, standardDev):
 	"""
 	return np.exp(-(t-tau)**6/(2*standardDev**6))
 
-def cutWithGaussian(initSpectrumX ,initSpectrumY, spike, sigma):
+def cut_gaussian(initSpectrumX ,initSpectrumY, spike, sigma):
 	"""
 	Applies gaussian window with the given params.
 
@@ -434,12 +434,12 @@ def cutWithGaussian(initSpectrumX ,initSpectrumY, spike, sigma):
 	
 	"""
 
-	Ydata = initSpectrumY * gaussianWindow(initSpectrumX, tau = spike, standardDev=sigma) 
+	Ydata = initSpectrumY * gaussian_window(initSpectrumX, tau = spike, standardDev=sigma) 
 	# Ydata = initSpectrumY * scipy.signal.windows.gaussian(len(initSpectrumY), std=sigma)
 	return Ydata
 
 
-def IFFT(initSpectrumY):
+def ifft_method(initSpectrumY):
 	"""
 	Perfoms IFFT on data
 
@@ -462,16 +462,18 @@ def IFFT(initSpectrumY):
 		pass
 
 # under testing..
-def argsAndCompute(initSpectrumX, initSpectrumY):
-	angles = np.angle(initSpectrumY)
-	Xdata = initSpectrumX
-	popt, pcov = curve_fit(polynomialFit, Xdata, angles)
-	fig1 = plt.figure()
-	plt.plot(Xdata, angles,'ro',label = 'dataset')
-	plt.plot(Xdata, polynomialFit(Xdata, *popt),'k*', label = 'fitted')
-	plt.legend()
-	plt.grid()
-	plt.show()
+
+
+# def argsAndCompute(initSpectrumX, initSpectrumY):
+# 	angles = np.angle(initSpectrumY)
+# 	Xdata = initSpectrumX
+# 	popt, pcov = curve_fit(polynomialFit, Xdata, angles)
+# 	fig1 = plt.figure()
+# 	plt.plot(Xdata, angles,'ro',label = 'dataset')
+# 	plt.plot(Xdata, polynomialFit(Xdata, *popt),'k*', label = 'fitted')
+# 	plt.legend()
+# 	plt.grid()
+# 	plt.show()
 
 """#TESZT
 a, b = np.loadtxt('examples/fft.txt', unpack = True, delimiter = ',')
