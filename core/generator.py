@@ -2,15 +2,15 @@
 Sample generator
 """
 import numpy as np 	
-from datetime import datetime
+# from datetime import datetime
 
 C_LIGHT = 299.793
 
-def _ensureInput(start, stop, center, resolution):
+def _ensure_input(start, stop, center, resolution):
 	if start >= stop:
 		raise ValueError('start value must be less than stop')
 	if center < start or center > stop:
-		raise ValueError('center must be between start and  stop')	
+		raise ValueError('center must be between start and stop')	
 	if resolution > (stop-start):
 		raise ValueError('resolution is too big')
 	else:
@@ -22,7 +22,7 @@ def _disp(x ,GD=0, GDD=0, TOD=0, FOD=0, QOD=0):
 
 def generatorFreq(start, stop, center ,delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1,
 					 delimiter=',',pulseWidth=0.02, includeArms=False):
-	_ensureInput(start, stop, center, resolution)
+	_ensure_input(start, stop, center, resolution)
 	deltaL = delay 
 	omega0 = center 
 	window = pulseWidth
@@ -49,7 +49,7 @@ def generatorFreq(start, stop, center ,delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, 
 
 def generatorWave(start, stop, center ,delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1, 
 					delimiter=',',pulseWidth=0.02, includeArms=False):
-	_ensureInput(start, stop, center, resolution)
+	_ensure_input(start, stop, center, resolution)
 	deltaL = delay 
 	omega0 = (2*np.pi*C_LIGHT)/center 
 	window = pulseWidth
