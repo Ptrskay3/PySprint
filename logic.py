@@ -555,7 +555,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
 
         if self.methodWidget.currentIndex() == 3:
             self.msg_output('not implemented')
-        if  self.methodWidget.currentIndex() == 3:
+        if  self.methodWidget.currentIndex() == 0:
             self.msg_output('Please use the interface for SPP method.')
             
     def save_output(self):

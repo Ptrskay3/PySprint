@@ -381,7 +381,7 @@ def fft_method(initSpectrumX, initSpectrumY):
 	array with the transformed y data
 
 	"""
-	from .smoothing import interpolate_data
+	from .edit_features import interpolate_data
 	if len(initSpectrumX) > 0 and len(initSpectrumY) > 0:
 		Xdata, Ydata = interpolate_data(initSpectrumX, initSpectrumY, [],[])
 		freq = scipy.fftpack.fftfreq(len(Xdata), d=(Xdata[3]-Xdata[2]))
