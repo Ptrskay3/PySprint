@@ -32,7 +32,7 @@ I will add an advanced description later on.
 * Selectable units both for angular frequency and wavelength
 * Possible performance enhancement by improving algorithms
 * Possible new data manipulating features
-
+* Interferometer base dispersion should be added for calibration. 
 
 ### Installation
 

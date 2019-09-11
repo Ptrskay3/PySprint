@@ -326,8 +326,8 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, p0=[1, 1
 	else:
 		raise ValueError('No data..')
 	Xdata = np.asarray(initSpectrumX)
-
-	try: ## will be replaced with lmfit 
+	#TODO: replace with lmfit
+	try:  
 		popt, pcov = curve_fit(cosFitForPMCFF, Xdata, Ydata, p0, maxfev = 5000, bounds = bounds)
 		dispersion = np.zeros_like(popt)[:-3]
 		for num in range(len(popt)-3):
