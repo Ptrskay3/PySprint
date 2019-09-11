@@ -8,7 +8,7 @@ import scipy
 from math import factorial
 from lmfit import Model
 
-def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, SPPosition, maxx=[], minx=[], fitOrder=5, showGraph=False):
+def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_point, maxx=[], minx=[], fitOrder=5, showGraph=False):
 	"""
 	Calculates the dispersion with minimum-maximum method 
 	(*CURRENTLY ACCEPTS UNITS ONLY IN PHz)
@@ -24,7 +24,7 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, SPPo
 	referenceArmY, sampleArmY:
 	arrays containing the reference and sample arm spectra evaluated at initSpectrumX
 
-	SPPosition:
+	ref_point:
 	float, the reference point to calculate order
 	
 	maxx and minx:
@@ -48,7 +48,7 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, SPPo
 	lmfit report object
 	"""
 
-	if (len(initSpectrumX) > 0) and (len(referenceArmY) > 0) and (len(sampleArmY) > 0) and (SPPosition is not None):
+	if (len(initSpectrumX) > 0) and (len(referenceArmY) > 0) and (len(sampleArmY) > 0) and (ref_point is not None):
 		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
 	elif (len(referenceArmY) == 0) or (len(sampleArmY) == 0):
 		Ydata = initSpectrumY
@@ -59,7 +59,7 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, SPPo
 
 	Xdata = initSpectrumX
 
-	_, SSPindex = findNearest(Xdata,SPPosition)
+	_, SSPindex = findNearest(Xdata,ref_point)
 	if len(maxx) == 0 or len(minx) == 0:
 		maxInd = argrelextrema(Ydata, np.greater)
 		minInd = argrelextrema(Ydata, np.less)
@@ -133,21 +133,6 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, SPPo
 			plt.legend()
 			plt.grid()
 			plt.show()
-		"""OLD
-		# popt, pcov = curve_fit(polynomialFit5, fullXValues, fullYValues)
-		# dispersion = np.zeros_like(popt)
-		# for num in range(len(popt)):
-		# 	dispersion[num] = popt[num]*factorial(num)
-			# fig = plt.figure()
-			# fig.canvas.set_window_title('Min-Max method')
-			# plt.plot(fullXValues, fullYValues,'ro',label = 'dataset')
-			# plt.plot(fullXValues, polynomialFit(fullXValues, *popt),'k*', label = 'fitted')
-			# plt.legend()
-			# plt.xlabel('$\Delta \omega or \Delta \lambda$')
-			# plt.ylabel('Phase')
-			# plt.grid()
-			# plt.show()
-		"""
 		return dispersion, dispersion_std, fit_report
 	except:
 		return ['Optimal', 'params', 'not', 'found', '.'], ['','','','',''], []
