@@ -64,9 +64,12 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.actionGenerator.triggered.connect(self.open_generator)
         self.actionSettings.triggered.connect(self.open_settings)
         self.pushButton.clicked.connect(self.open_sppanel)
-
-        self.show_dialog()
-        
+        self.cb = QCheckBox('Do not show this message again.', self.centralwidget)
+        self.msgbox = QMessageBox(self)
+        self.msgbox.setText('Welcome to Interferometry!\nDo not forget to set the defaults at Edit --> Settings. For more details, see documentation.')
+        self.msgbox.setWindowTitle('Interferometry')
+        self.msgbox.setCheckBox(self.cb)
+        self.msgbox.setStandardButtons(QMessageBox.Ok)
         self.tableWidget.setColumnCount(2)
         self.tableWidget.setRowCount(5)
         self.tableWidget.setHorizontalHeaderLabels(["Angular frequency", "Intensity"])
@@ -96,17 +99,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
 
     # FIXME: IS IT POSSIBLE TO EXEC THE MAINWINDOW BEFORE SHOWING THIS MESSAGE?
 
-    def show_dialog(self):
-        self.cb = QCheckBox('Do not show this message again.', self.centralwidget)
-        self.msgbox = QMessageBox(self)
-        self.msgbox.setText('Welcome to Interferometry!\nDo not forget to set the defaults at Edit --> Settings. For more details, see documentation.')
-        self.msgbox.setWindowTitle('Interferometry')
-        self.msgbox.setCheckBox(self.cb)
-        self.msgbox.setStandardButtons(QMessageBox.Ok)
-        if self.settings.value('show') == 'True':
-            self.msgbox.exec_()
-        if self.cb.isChecked():
-            self.settings.setValue('show', False)
+
+
 
 
 

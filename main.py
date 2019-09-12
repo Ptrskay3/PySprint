@@ -11,6 +11,12 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
     my_interface = MainProgram()
     my_interface.show()
+    if my_interface.settings.value('show') == 'True':
+    	my_interface.msgbox.exec_()
+    	if my_interface.cb.isChecked():
+           my_interface.settings.setValue('show', False)
+    else:
+    	pass
     sys.exit(app.exec_())
 
 if __name__ == "__main__":
