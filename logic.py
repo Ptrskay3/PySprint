@@ -540,7 +540,6 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                             self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
         
             self.redraw_graph()
-            # print(self.refY[:3])
         except Exception as e:
             self.msg_output(e)
         self.tableWidget.resizeColumnsToContents()
@@ -558,9 +557,12 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 labels = ['GD', 'GDD', 'TOD', 'FOD', 'QOD']
                 calibrate_label = [self.settings.value('GD'), self.settings.value('GDD'), self.settings.value('TOD'), 
                                    self.settings.value('FOD'),self.settings.value('QOD')]
+                calibrate_std_label = [self.settings.value('GD_std'), self.settings.value('GDD_std'), self.settings.value('TOD_std'),
+                                       self.settings.value('FOD_std'), self.settings.value('QOD_std')]
                 self.msg_output('Using Min-max method.')
                 for item in range(len(disp)):
-                    self.logOutput.insertPlainText(' '+ labels[item] +' =  ' + str(float(disp[item])-float(calibrate_label[item])) +' +/- ' + str(disp_std[item]) + ' 1/fs^'+str(item+1)+'\n')
+                    self.logOutput.insertPlainText(' '+ labels[item] +' =  ' + str(float(disp[item])-float(calibrate_label[item])) +' +/- ' 
+                                                   + str(float(disp_std[item]) + float(calibrate_std_label[item]) ) + ' 1/fs^'+str(item+1)+'\n')
                 if self.printCheck.isChecked():
                     self.msg_output(fit_report)
                 self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
@@ -672,7 +674,6 @@ class GeneratorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
         self.setupUi(self)
         self.setWindowIcon(QtGui.QIcon('icon.png'))
         self.closeButton.clicked.connect(self.close)
-        # self.pushButton_3.clicked.connect(self.emitData)
         self.pushButton_4.clicked.connect(self.generate_data)
         self.pushButton_2.clicked.connect(self.save_as)
         self.armCheck.setChecked(True)
@@ -848,11 +849,34 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
                 corr_QOD = float(disp[4]) - float(self.settings.value('QOD'))
             else:
                 corr_QOD = disp[4]
-            self.GDSPP.setText(str(corr_GD) + ' +/- ' + str(disp_std[0])+ ' 1/fs')
-            self.GDDSPP.setText(str(corr_GDD) + ' +/- ' + str(disp_std[1])+ ' 1/fs^2')
-            self.TODSPP.setText(str(corr_TOD) + ' +/- ' + str(disp_std[2])+ ' 1/fs^3')
-            self.FODSPP.setText(str(corr_FOD) + ' +/- ' + str(disp_std[3])+ ' 1/fs^4')
-            self.QODSPP.setText(str(corr_QOD) + ' +/- ' + str(disp_std[4])+ ' 1/fs^5')
+
+
+            if disp_std[0] != 0:
+                corr_GD_std = float(disp_std[0]) + float(self.settings.value('GD_std'))
+            else:
+                corr_GD_std = disp_std[0]
+            if disp_std[1] != 0:
+                corr_GDD_std = float(disp_std[1]) + float(self.settings.value('GDD_std'))
+            else:
+                corr_GDD_std = disp_std[1]
+            if disp_std[2] != 0:
+                corr_TOD_std = float(disp_std[2]) + float(self.settings.value('TOD_std'))
+            else:
+                corr_TOD_std = disp_std[2]            
+            if disp_std[3] != 0:
+                corr_FOD_std = float(disp_std[3]) + float(self.settings.value('FOD_std'))
+            else:
+                corr_FOD_std = disp_std[3]
+            if disp_std[4] != 0:
+                corr_QOD_std = float(disp_std[4]) + float(self.settings.value('QOD_std'))
+            else:
+                corr_QOD_std = disp_std[4]
+
+            self.GDSPP.setText(str(corr_GD) + ' +/- ' + str(corr_GD_std)+ ' 1/fs')
+            self.GDDSPP.setText(str(corr_GDD) + ' +/- ' + str(corr_GDD_std)+ ' 1/fs^2')
+            self.TODSPP.setText(str(corr_TOD) + ' +/- ' + str(corr_TOD_std)+ ' 1/fs^3')
+            self.FODSPP.setText(str(corr_FOD) + ' +/- ' + str(corr_FOD_std)+ ' 1/fs^4')
+            self.QODSPP.setText(str(corr_QOD) + ' +/- ' + str(corr_QOD_std)+ ' 1/fs^5')
         except Exception as e:
             self.msg_output('Some values might be missing. Fit order must be lower or equal than the number of data points.\n' + str(e))
 
@@ -1109,6 +1133,13 @@ class SettingsWindow(QtWidgets.QMainWindow, Ui_SettingsWindow):
         self.def_TOD.setText(self.settings.value('TOD'))
         self.def_FOD.setText(self.settings.value('FOD'))
         self.def_QOD.setText(self.settings.value('QOD'))
+        self.label_7.setVisible(False)
+        self.def_GD_std.setText(self.settings.value('GD_std'))
+        self.def_GDD_std.setText(self.settings.value('GDD_std'))
+        self.def_TOD_std.setText(self.settings.value('TOD_std'))
+        self.def_FOD_std.setText(self.settings.value('FOD_std'))
+        self.def_QOD_std.setText(self.settings.value('QOD_std'))
+
         self.pushButton_2.clicked.connect(self.reset_event)
         self.pushButton_3.clicked.connect(self.save_event)
 
@@ -1119,6 +1150,11 @@ class SettingsWindow(QtWidgets.QMainWindow, Ui_SettingsWindow):
         self.settings.setValue('TOD', self.def_TOD.text())
         self.settings.setValue('FOD', self.def_FOD.text())
         self.settings.setValue('QOD', self.def_QOD.text())
+        self.settings.setValue('GD_std', self.def_GD_std.text())
+        self.settings.setValue('GDD_std', self.def_GDD_std.text())
+        self.settings.setValue('TOD_std', self.def_TOD_std.text())
+        self.settings.setValue('FOD_std', self.def_FOD_std.text())
+        self.settings.setValue('QOD_std', self.def_QOD_std.text())
         self.settings.setValue('size', self.size())
         self.settings.setValue('pos', self.pos())
         e.accept()
@@ -1129,6 +1165,11 @@ class SettingsWindow(QtWidgets.QMainWindow, Ui_SettingsWindow):
         self.def_TOD.setText('0')
         self.def_FOD.setText('0')
         self.def_QOD.setText('0')
+        self.def_GD_std.setText('0')
+        self.def_GDD_std.setText('0')
+        self.def_TOD_std.setText('0')
+        self.def_FOD_std.setText('0')
+        self.def_QOD_std.setText('0')
         self.label_7.setVisible(True)
 
     def save_event(self):
