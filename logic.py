@@ -68,7 +68,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.pushButton.clicked.connect(self.open_sppanel)
         self.cb = QCheckBox('Do not show this message again.', self.centralwidget)
         self.msgbox = QMessageBox(self)
-        self.msgbox.setText('Welcome to Interferometry!\nDo not forget to set the defaults at Edit --> Settings. For more details, see documentation.')
+        self.msgbox.setText('Welcome to Interferometry!\nDo not forget to set the calibration at Edit --> Settings. For more details, see documentation.')
         self.msgbox.setWindowTitle('Interferometry')
         self.msgbox.setCheckBox(self.cb)
         self.msgbox.setStandardButtons(QMessageBox.Ok)
@@ -85,7 +85,6 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.cffTab.setStyleSheet(" background-color: rgb(240,240,240);")
         self.mmTab.setStyleSheet(" background-color: rgb(240,240,240);")
         self.fftTab.setStyleSheet(" background-color: rgb(240,240,240);")
-        # self.actionUnit_converter.triggered.connect(self.runTutorial)
         self.btn_load.setToolTip('Load in data. Can be different type (see documentation)')
         self.swapButton.setToolTip('Swaps the two columns and redraws graph.')
         self.resetButton.setToolTip('Erases all data from memory.')
@@ -98,12 +97,14 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.checkGraph.setToolTip('Show a plot with the dataset and fitted curve.')
         self.mmPoly.setToolTip('Assumed maximum order of dispersion.')
         self.printCheck.setToolTip('Include lmfit report in the log.')
-
-    # FIXME: IS IT POSSIBLE TO EXEC THE MAINWINDOW BEFORE SHOWING THIS MESSAGE?
-
-
+        self.resize(self.settings.value('main_size', QtCore.QSize(1800, 921)))
+        self.move(self.settings.value('main_pos', QtCore.QPoint(50, 50)))
 
 
+    def closeEvent(self, e):
+        self.settings.setValue('main_size', self.size())
+        self.settings.setValue('main_pos', self.pos())
+        e.accept()
 
 
     def open_help(self):
@@ -555,9 +556,11 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 disp, disp_std, fit_report = min_max_method(self.a, self.b,  self.refY, self.samY, float(self.getSPP.text()), self.maxx, self.minx,
                     int(self.mmPoly.text()), showGraph = self.checkGraph.isChecked())
                 labels = ['GD', 'GDD', 'TOD', 'FOD', 'QOD']
+                calibrate_label = [self.settings.value('GD'), self.settings.value('GDD'), self.settings.value('TOD'), 
+                                   self.settings.value('FOD'),self.settings.value('QOD')]
                 self.msg_output('Using Min-max method.')
                 for item in range(len(disp)):
-                    self.logOutput.insertPlainText(' '+ labels[item] +' =  ' + str(disp[item]) +' +/- ' + str(disp_std[item]) + ' 1/fs^'+str(item+1)+'\n')
+                    self.logOutput.insertPlainText(' '+ labels[item] +' =  ' + str(float(disp[item])-float(calibrate_label[item])) +' +/- ' + str(disp_std[item]) + ' 1/fs^'+str(item+1)+'\n')
                 if self.printCheck.isChecked():
                     self.msg_output(fit_report)
                 self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
@@ -579,10 +582,13 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     p0=[1,1,1, float(self.initGD.text()), float(self.initGDD.text()), float(self.initTOD.text()), float(self.initFOD.text()),
                     float(self.initQOD.text())]) 
                 labels = ['GD', 'GDD', 'TOD', 'FOD', 'QOD']
+                calibrate_label = [self.settings.value('GD'), self.settings.value('GDD'), self.settings.value('TOD'), 
+                                   self.settings.value('FOD'),self.settings.value('QOD')]
                 self.msg_output('Using Cosine function fit method..')
                 try:
                     for item in range(len(cFF)):
-                        self.logOutput.insertPlainText(' '+ labels[item] +' =  ' + str(cFF[item]) +'  1/fs^'+str(item+1)+'\n')
+                        self.logOutput.insertPlainText(' '+ labels[item] +' =  ' + str(float(cFF[item])-float(calibrate_label[item])) 
+                                                       +'  1/fs^'+str(item+1)+'\n')
                     self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
                 except Exception as e:
                     self.msg_output('You might need to provide initial guess for parameters.')
@@ -671,6 +677,17 @@ class GeneratorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
         self.pushButton_2.clicked.connect(self.save_as)
         self.armCheck.setChecked(True)
         self.delimiterLine.setText(',')
+        self.settings = QSettings("_settings.ini", QSettings.IniFormat)
+        self.settings.setFallbacksEnabled(False)
+        self.resize(self.settings.value('gen_size', QtCore.QSize(984, 877)))
+        self.move(self.settings.value('gen_pos', QtCore.QPoint(50, 50)))
+
+
+    def closeEvent(self, e):
+        self.settings.setValue('gen_size', self.size())
+        self.settings.setValue('gen_pos', self.pos())
+        e.accept()
+
 
     def preview_data(self):
         """Function to update plot."""
@@ -782,9 +799,20 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         self.pushButton_7.clicked.connect(self.delete_item)
         self.pushButton_2.clicked.connect(self.pressed)
         self.pushButton_3.clicked.connect(self.released)
+        self.settings = QSettings("_settings.ini", QSettings.IniFormat)
+        self.settings.setFallbacksEnabled(False)
         self.pushButton_4.clicked.connect(self.edit_SPP)
         self.pushButton_6.clicked.connect(self.do_SPP)
         self.pushButton_5.clicked.connect(self.clean_up)
+
+        self.resize(self.settings.value('spp_size', QtCore.QSize(1302, 832)))
+        self.move(self.settings.value('spp_pos', QtCore.QPoint(50, 50)))
+
+
+    def closeEvent(self, e):
+        self.settings.setValue('spp_size', self.size())
+        self.settings.setValue('spp_pos', self.pos())
+        e.accept()
 
     def do_SPP(self):
         """ Applies the SPP method to the given dataset, if fails it leaves a message."""
@@ -800,11 +828,31 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
             self.widget.canvas.axes.set_ylabel('fs')
             self.widget.canvas.axes.grid()
             self.widget.canvas.draw()
-            self.GDSPP.setText(str(disp[0]) + ' +/- ' + str(disp_std[0])+ ' 1/fs')
-            self.GDDSPP.setText(str(disp[1]) + ' +/- ' + str(disp_std[1])+ ' 1/fs^2')
-            self.TODSPP.setText(str(disp[2]) + ' +/- ' + str(disp_std[2])+ ' 1/fs^3')
-            self.FODSPP.setText(str(disp[3]) + ' +/- ' + str(disp_std[3])+ ' 1/fs^4')
-            self.QODSPP.setText(str(disp[4]) + ' +/- ' + str(disp_std[4])+ ' 1/fs^5')
+            if disp[0] != 0:
+                corr_GD = float(disp[0])- float(self.settings.value('GD'))
+            else:
+                corr_GD = disp[0]
+            if disp[1] != 0:
+                corr_GDD = float(disp[1]) - float(self.settings.value('GDD'))
+            else:
+                corr_GDD = disp[1]
+            if disp[2] != 0:
+                corr_TOD = float(disp[2]) - float(self.settings.value('TOD'))
+            else:
+                corr_TOD = disp[2]            
+            if disp[3] != 0:
+                corr_FOD = float(disp[3]) - float(self.settings.value('FOD'))
+            else:
+                corr_FOD = disp[3]
+            if disp[4] != 0:
+                corr_QOD = float(disp[4]) - float(self.settings.value('QOD'))
+            else:
+                corr_QOD = disp[4]
+            self.GDSPP.setText(str(corr_GD) + ' +/- ' + str(disp_std[0])+ ' 1/fs')
+            self.GDDSPP.setText(str(corr_GDD) + ' +/- ' + str(disp_std[1])+ ' 1/fs^2')
+            self.TODSPP.setText(str(corr_TOD) + ' +/- ' + str(disp_std[2])+ ' 1/fs^3')
+            self.FODSPP.setText(str(corr_FOD) + ' +/- ' + str(disp_std[3])+ ' 1/fs^4')
+            self.QODSPP.setText(str(corr_QOD) + ' +/- ' + str(disp_std[4])+ ' 1/fs^5')
         except Exception as e:
             self.msg_output('Some values might be missing. Fit order must be lower or equal than the number of data points.\n' + str(e))
 
@@ -1062,6 +1110,7 @@ class SettingsWindow(QtWidgets.QMainWindow, Ui_SettingsWindow):
         self.def_FOD.setText(self.settings.value('FOD'))
         self.def_QOD.setText(self.settings.value('QOD'))
         self.pushButton_2.clicked.connect(self.reset_event)
+        self.pushButton_3.clicked.connect(self.save_event)
 
 
     def closeEvent(self, e):
@@ -1080,6 +1129,9 @@ class SettingsWindow(QtWidgets.QMainWindow, Ui_SettingsWindow):
         self.def_TOD.setText('0')
         self.def_FOD.setText('0')
         self.def_QOD.setText('0')
+        self.label_7.setVisible(True)
+
+    def save_event(self):
         self.label_7.setVisible(True)
 
 
