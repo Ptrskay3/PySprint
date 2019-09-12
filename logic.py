@@ -24,6 +24,8 @@ from core.edit_features import savgol, find_peak, convolution, interpolate_data,
 from core.loading import read_data
 from core.generator import generatorFreq, generatorWave
 
+
+
 class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     """ The main window class, opened when main.py is run."""
     samX = np.array([])
