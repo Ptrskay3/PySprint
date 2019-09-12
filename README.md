@@ -5,6 +5,7 @@ Interferometry is a UI for interferogram evaluation. Under construction, error h
 I will add an advanced description later on. 
 
 # Lastest upgrades:
+  - Added Settings panel
   - Added SPP Panel
   - Added some tooltips + Min-max method has new options now.
   - Added IFFT

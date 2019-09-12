@@ -2,9 +2,9 @@
 The main logic behind the UI functions.
 """
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QTreeWidget, QTreeWidgetItem, QAbstractItemView,
+from PyQt5.QtWidgets import (QMainWindow, QDialogButtonBox, QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QTreeWidget, QTreeWidgetItem, QAbstractItemView,
 QDialog, QPushButton, QVBoxLayout, QComboBox, QCheckBox, QLabel,QAction, qApp, QTextEdit, QSpacerItem, QSizePolicy,QHBoxLayout, QGroupBox, QTableWidgetItem)
-from PyQt5.QtCore import Qt, pyqtSignal, QObject, pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSignal, QObject, pyqtSlot, QSettings
 from PyQt5.QtGui import QIcon, QCursor
 
 from ui.ui import Ui_Interferometry
@@ -12,6 +12,7 @@ from ui.generatorUI import Ui_GeneratorWindow
 from ui.aboutUI import Help
 from ui.mplwidget import MplWidget
 from ui.SPPUI import Ui_SPP
+from ui.settings_dialog import Ui_SettingsWindow
 
 import numpy as np
 import pandas as pd
@@ -40,6 +41,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         super(MainProgram, self).__init__(parent)
         self.setupUi(self)
         self.setWindowIcon(QtGui.QIcon('icon.png'))
+        self.settings = QSettings("_settings.ini", QSettings.IniFormat)
+        self.settings.setFallbacksEnabled(False)
         self.calculate.clicked.connect(self.get_it)
         self.btn_load.clicked.connect(lambda i: self.load_data(i, self.a))
         self.swapButton.clicked.connect(self.swap_axes)
@@ -59,7 +62,24 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.actionSave_log_file.triggered.connect(self.save_output)
         self.actionExit.triggered.connect(self.close)
         self.actionGenerator.triggered.connect(self.open_generator)
+        self.actionSettings.triggered.connect(self.open_settings)
         self.pushButton.clicked.connect(self.open_sppanel)
+
+        # self.show_dialog()
+        
+        self.tableWidget.setColumnCount(2)
+        self.tableWidget.setRowCount(5)
+        self.tableWidget.setHorizontalHeaderLabels(["Angular frequency", "Intensity"])
+        self.tableWidget.setSizeAdjustPolicy(
+        QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.savgolTab.setStyleSheet(" background-color: rgb(240,240,240);")
+        self.peakTab.setStyleSheet(" background-color: rgb(240,240,240);")
+        self.convolTab.setStyleSheet(" background-color: rgb(240,240,240);")
+        self.cutTab.setStyleSheet(" background-color: rgb(240,240,240);")
+        self.sppTab.setStyleSheet(" background-color: rgb(240,240,240);")
+        self.cffTab.setStyleSheet(" background-color: rgb(240,240,240);")
+        self.mmTab.setStyleSheet(" background-color: rgb(240,240,240);")
+        self.fftTab.setStyleSheet(" background-color: rgb(240,240,240);")
         # self.actionUnit_converter.triggered.connect(self.runTutorial)
         self.btn_load.setToolTip('Load in data. Can be different type (see documentation)')
         self.swapButton.setToolTip('Swaps the two columns and redraws graph.')
@@ -74,10 +94,29 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.mmPoly.setToolTip('Assumed maximum order of dispersion.')
         self.printCheck.setToolTip('Include lmfit report in the log.')
 
+    #FIXME: DO AN OPENING MESSAGE..
+
+    # def show_dialog(self):
+    #     self.cb = QCheckBox('Do not show this message again.', self.centralwidget)
+    #     self.msgbox = QMessageBox(self)
+    #     self.msgbox.setText('Welcome to Interferometry!\nDo not forget to set the defaults at Edit --> Settings. For more details, see documentation.')
+    #     self.msgbox.setWindowTitle('Interferometry')
+    #     self.msgbox.setCheckBox(self.cb)
+    #     self.msgbox.setStandardButtons(QMessageBox.Ok)
+    #     if self.settings.value('show') == 'True':
+    #         self.msgbox.exec_()
+    #     self.msgbox.buttonClicked.connect(self.btn_click)
+
+
+    # def btn_click(self):
+    #     if self.cb.isChecked():
+    #         self.settings.setValue('show', False)
+
     def open_help(self):
         """ Opens up help window."""
         self.window1 = HelpWindow(self)
         self.window1.show()
+        print(self.settings.value('GD'))
 
     def open_generator(self):
         """ Opens up generator window"""
@@ -88,6 +127,10 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         """ Opens up SPP Interface"""
         self.window3 = SPPWindow(self)
         self.window3.show()
+
+    def open_settings(self):
+        self.window4 = SettingsWindow(self)
+        self.window4.show()
 
     def msg_output(self, text):
         """ Prints to the log dialog"""
@@ -486,7 +529,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     self.msg_output('Auto-detect failed, attempting to load again..')  
                     self.a, self.b = np.loadtxt(fileName, usecols=(0,1), unpack = True, delimiter =',')  
                     self.msg_output('Done')
-                if len(self.a)<400:
+                if len(self.a)<100:
                     for row_number in range(len(self.a)):
                         self.tableWidget.insertRow(row_number)
                         for item in range(len(self.a)):
@@ -494,11 +537,11 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                         for item in range(len(self.b)):
                             self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
                 else:
-                    for row_number in range(400):
+                    for row_number in range(100):
                         self.tableWidget.insertRow(row_number)
-                        for item in range(400):
+                        for item in range(100):
                             self.tableWidget.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.a[item])))
-                        for item in range(400):
+                        for item in range(100):
                             self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
         
             self.redraw_graph()
@@ -1007,3 +1050,42 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
                 self.delays[curr] = float(self.delayLine.text())
             except:
                 pass
+
+
+class SettingsWindow(QtWidgets.QMainWindow, Ui_SettingsWindow):
+    def __init__(self, parent=None):
+        super(SettingsWindow, self).__init__(parent)
+        self.setupUi(self)
+        self.setWindowIcon(QtGui.QIcon('icon.png'))
+        self.pushButton.clicked.connect(self.close)
+        self.settings = QSettings("_settings.ini", QSettings.IniFormat)
+        self.settings.setFallbacksEnabled(False)
+        self.resize(self.settings.value('size', QtCore.QSize(270, 225)))
+        self.move(self.settings.value('pos', QtCore.QPoint(50, 50)))
+        self.def_GD.setText(self.settings.value('GD'))
+        self.def_GDD.setText(self.settings.value('GDD'))
+        self.def_TOD.setText(self.settings.value('TOD'))
+        self.def_FOD.setText(self.settings.value('FOD'))
+        self.def_QOD.setText(self.settings.value('QOD'))
+        self.pushButton_2.clicked.connect(self.reset_event)
+
+
+    def closeEvent(self, e):
+        self.settings.setValue('GD', self.def_GD.text())
+        self.settings.setValue('GDD', self.def_GDD.text())
+        self.settings.setValue('TOD', self.def_TOD.text())
+        self.settings.setValue('FOD', self.def_FOD.text())
+        self.settings.setValue('QOD', self.def_QOD.text())
+        self.settings.setValue('size', self.size())
+        self.settings.setValue('pos', self.pos())
+        e.accept()
+
+    def reset_event(self):
+        self.def_GD.setText('0')
+        self.def_GDD.setText('0')
+        self.def_TOD.setText('0')
+        self.def_FOD.setText('0')
+        self.def_QOD.setText('0')
+        self.label_7.setVisible(True)
+
+

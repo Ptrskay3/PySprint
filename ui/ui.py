@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'kiserleti_spp.ui'
+# Form implementation generated from reading ui file 'ujabb.ui'
 #
 # Created by: PyQt5 UI code generator 5.13.0
 #
@@ -190,6 +190,9 @@ class Ui_Interferometry(object):
         self.horizontalLayout_8.addWidget(self.comboBox)
         spacerItem16 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_8.addItem(spacerItem16)
+        self.label = QtWidgets.QLabel(self.centralwidget)
+        self.label.setObjectName("label")
+        self.horizontalLayout_8.addWidget(self.label)
         self.verticalLayout.addLayout(self.horizontalLayout_8)
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
         self.tableWidget.setMinimumSize(QtCore.QSize(0, 735))
@@ -442,11 +445,14 @@ class Ui_Interferometry(object):
         self.actionUnit_converter.setObjectName("actionUnit_converter")
         self.actionOpen_documentation = QtWidgets.QAction(Interferometry)
         self.actionOpen_documentation.setObjectName("actionOpen_documentation")
+        self.actionSettings = QtWidgets.QAction(Interferometry)
+        self.actionSettings.setObjectName("actionSettings")
         self.menuFile.addAction(self.actionSave_log_file)
         self.menuFile.addAction(self.actionSave_current_data)
         self.menuFile.addAction(self.actionLoad_data_manually)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExit)
+        self.menuEdit.addAction(self.actionSettings)
         self.menuHelp.addAction(self.actionAbout)
         self.menuHelp.addAction(self.actionOpen_documentation)
         self.menuPreferences.addAction(self.actionGenerator)
@@ -455,21 +461,6 @@ class Ui_Interferometry(object):
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuPreferences.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
-
-        self.tableWidget.setColumnCount(2)
-        self.tableWidget.setRowCount(5)
-        self.tableWidget.setHorizontalHeaderLabels(["Angular frequency", "Intensity"])
-        self.tableWidget.setSizeAdjustPolicy(
-        QtWidgets.QAbstractScrollArea.AdjustToContents)
-
-        self.savgolTab.setStyleSheet(" background-color: rgb(240,240,240);")
-        self.peakTab.setStyleSheet(" background-color: rgb(240,240,240);")
-        self.convolTab.setStyleSheet(" background-color: rgb(240,240,240);")
-        self.cutTab.setStyleSheet(" background-color: rgb(240,240,240);")
-        self.sppTab.setStyleSheet(" background-color: rgb(240,240,240);")
-        self.cffTab.setStyleSheet(" background-color: rgb(240,240,240);")
-        self.mmTab.setStyleSheet(" background-color: rgb(240,240,240);")
-        self.fftTab.setStyleSheet(" background-color: rgb(240,240,240);")
 
         self.retranslateUi(Interferometry)
         self.editTab.setCurrentIndex(3)
@@ -501,6 +492,7 @@ class Ui_Interferometry(object):
         self.comboBox.setItemText(0, _translate("Interferometry", "PHz"))
         self.comboBox.setItemText(1, _translate("Interferometry", "nm"))
         self.comboBox.setItemText(2, _translate("Interferometry", "Ångström"))
+        self.label.setText(_translate("Interferometry", "Data preview"))
         self.pushButton.setText(_translate("Interferometry", "Open Interface"))
         self.methodWidget.setTabText(self.methodWidget.indexOf(self.sppTab), _translate("Interferometry", "SPP"))
         self.iReferenceArm.setText(_translate("Interferometry", "Reference Arm"))
@@ -538,6 +530,7 @@ class Ui_Interferometry(object):
         self.actionGenerator.setText(_translate("Interferometry", "Generator"))
         self.actionUnit_converter.setText(_translate("Interferometry", "Unit converter"))
         self.actionOpen_documentation.setText(_translate("Interferometry", "Open documentation"))
+        self.actionSettings.setText(_translate("Interferometry", "Settings"))
 from ui.mplwidget import MplWidget
 
 
