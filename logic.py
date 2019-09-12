@@ -65,7 +65,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.actionSettings.triggered.connect(self.open_settings)
         self.pushButton.clicked.connect(self.open_sppanel)
 
-        # self.show_dialog()
+        self.show_dialog()
         
         self.tableWidget.setColumnCount(2)
         self.tableWidget.setRowCount(5)
@@ -94,23 +94,21 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.mmPoly.setToolTip('Assumed maximum order of dispersion.')
         self.printCheck.setToolTip('Include lmfit report in the log.')
 
-    #FIXME: DO AN OPENING MESSAGE..
+    # FIXME: IS IT POSSIBLE TO EXEC THE MAINWINDOW BEFORE SHOWING THIS MESSAGE?
 
-    # def show_dialog(self):
-    #     self.cb = QCheckBox('Do not show this message again.', self.centralwidget)
-    #     self.msgbox = QMessageBox(self)
-    #     self.msgbox.setText('Welcome to Interferometry!\nDo not forget to set the defaults at Edit --> Settings. For more details, see documentation.')
-    #     self.msgbox.setWindowTitle('Interferometry')
-    #     self.msgbox.setCheckBox(self.cb)
-    #     self.msgbox.setStandardButtons(QMessageBox.Ok)
-    #     if self.settings.value('show') == 'True':
-    #         self.msgbox.exec_()
-    #     self.msgbox.buttonClicked.connect(self.btn_click)
+    def show_dialog(self):
+        self.cb = QCheckBox('Do not show this message again.', self.centralwidget)
+        self.msgbox = QMessageBox(self)
+        self.msgbox.setText('Welcome to Interferometry!\nDo not forget to set the defaults at Edit --> Settings. For more details, see documentation.')
+        self.msgbox.setWindowTitle('Interferometry')
+        self.msgbox.setCheckBox(self.cb)
+        self.msgbox.setStandardButtons(QMessageBox.Ok)
+        if self.settings.value('show') == 'True':
+            self.msgbox.exec_()
+        if self.cb.isChecked():
+            self.settings.setValue('show', False)
 
 
-    # def btn_click(self):
-    #     if self.cb.isChecked():
-    #         self.settings.setValue('show', False)
 
     def open_help(self):
         """ Opens up help window."""
