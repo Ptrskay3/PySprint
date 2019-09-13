@@ -320,7 +320,7 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_poin
 	array with shape and values:[GD, GDD, TOD, FOD, QOD]
 
 	"""
-	# TODO: BOUNDS WILL BE SET LATER ..
+	# TODO: BOUNDS WILL BE SET ACCORDINGLY  ..
 	bounds=((-100, -1000, -1000, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf), 
 		    (100, 1000, 1000, np.inf, np.inf, np.inf, np.inf, np.inf))
 	if len(initSpectrumY) > 0 and len(referenceArmY) > 0 and len(sampleArmY) > 0:
@@ -336,7 +336,7 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_poin
 	Xdata = np.asarray(initSpectrumX)
 	#TODO: replace with lmfit
 	try:  
-		popt, pcov = curve_fit(cosFitForPMCFF, Xdata-ref_point, Ydata, p0, maxfev = 10000, bounds = bounds)
+		popt, pcov = curve_fit(cosFitForPMCFF, Xdata-ref_point, Ydata, p0, maxfev = 8000, bounds = bounds)
 		dispersion = np.zeros_like(popt)[:-3]
 		for num in range(len(popt)-3):
 			dispersion[num] = popt[num+3]/factorial(num)
@@ -349,7 +349,7 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_poin
 		# plt.show()
 		return dispersion, cosFitForPMCFF(Xdata-ref_point, *popt)
 	except RuntimeError:
-		raise ValueError('Max tries reached.. \nParameters could not be estimated.')
+		raise ValueError('Max tries reached.. \n Parameters could not be estimated.')
 
 
 
@@ -402,7 +402,7 @@ def gaussian_window(t ,tau, standardDev, order):
 	"""
 	return np.exp(-(t-tau)**order/(2*standardDev**order))
 
-def cut_gaussian(initSpectrumX ,initSpectrumY, spike, sigma, win_order):
+def cut_gaussian(initSpectrumX, initSpectrumY, spike, sigma, win_order):
 	"""
 	Applies gaussian window with the given params.
 
@@ -468,12 +468,14 @@ def ifft_method(initSpectrumX, initSpectrumY, interpolate = True):
 
 def args_comp(initSpectrumX, initSpectrumY, fitOrder = 5, showGraph=False):
 	angles = np.angle(initSpectrumY)
+	###shifting to [0, 2pi]
+	# angles = (angles + 2 * np.pi) % (2 * np.pi)
 	Xdata = initSpectrumX
 	Ydata = np.unwrap(angles)
 	if fitOrder == 5:
 		fitModel = Model(polynomialFit5)
 		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1, b4 = 1, b5 = 1)
-		result = fitModel.fit(Ydata, x=Xdata, params = params, method ='leastsq') #nelder
+		result = fitModel.fit(Ydata, x=Xdata, params = params, method ='leastsq') 
 	elif fitOrder == 4:
 		fitModel = Model(polynomialFit4)
 		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1, b4 = 1)
@@ -517,7 +519,6 @@ def args_comp(initSpectrumX, initSpectrumY, fitOrder = 5, showGraph=False):
 			plt.show()
 		return dispersion, dispersion_std, fit_report
 	except Exception as e:
-		# return ['0', '0', '0', '0', '0'], ['0','0','0','0','0'], []
 		print(e)
 
 

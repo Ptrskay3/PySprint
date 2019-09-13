@@ -1,6 +1,5 @@
 import sys
 from logic import MainProgram
-
 try:
 	from PyQt5 import QtWidgets
 except ImportError:

@@ -169,7 +169,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.a = self.fftContainer
             self.redraw_graph()
             self.fftContainer = np.array([])
-            self.msg_output('FFT applied to data. Some functions may behave differently. The absolute value is plotted.')
+            self.msg_output('FFT done.')
         else:
             self.msg_output('No data is loaded.')
 
@@ -182,6 +182,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             # self.fftContainer = np.array([])
             self.redraw_graph()
             self.msg_output('IFFT done. ')
+        else:
+            self.msg_output('No data is loaded.')
             
     @waiting_effects
     def swap_axes(self):
@@ -569,11 +571,12 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 calibrate_std_label = [self.settings.value('GD_std'), self.settings.value('GDD_std'), self.settings.value('TOD_std'),
                                        self.settings.value('FOD_std'), self.settings.value('QOD_std')]
                 self.msg_output('Using Min-max method.')
+                if self.printCheck.isChecked():
+                    self.msg_output(str('Using Min-max method.. \n ' + fit_report))
                 for item in range(len(disp)):
                     self.logOutput.insertPlainText(' '+ labels[item] +' =  ' + str(float(disp[item])-float(calibrate_label[item])) +' +/- ' 
                                                    + str(float(disp_std[item]) + float(calibrate_std_label[item]) ) + ' 1/fs^'+str(item+1)+'\n')
-                if self.printCheck.isChecked():
-                    self.msg_output(fit_report)
+
                 self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
             except Exception as e:
                 self.msg_output(str(e))
