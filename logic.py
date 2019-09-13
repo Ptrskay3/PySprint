@@ -101,6 +101,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.resize(self.settings.value('main_size', QtCore.QSize(1800, 921)))
         self.move(self.settings.value('main_pos', QtCore.QPoint(50, 50)))
         self.CFF_fitnow.clicked.connect(self.cff_fit)
+        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+G"), self, self.open_generator)
 
 
     def closeEvent(self, e):
