@@ -295,9 +295,7 @@ def spp_method(delays, omegas, fitOrder=4): #def SPP(delays,omegas, reference, f
 		return e
 
 
-#TODO: FIT TO RELATIVE FREQUENCY!
-
-def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, p0=[1, 1, 1, 1, 1, 1, 1, 1]):
+def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_point=0 , p0=[1, 1, 1, 1, 1, 1, 1, 1]):
 	"""
 	Phase modulated cosine function fit method. 
 	(*CURRENTLY ACCEPTS UNITS ONLY IN PHz)
@@ -334,10 +332,11 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, p0=[1, 1
 		Ydata = np.asarray(initSpectrumY)
 	else:
 		raise ValueError('No data..')
+
 	Xdata = np.asarray(initSpectrumX)
 	#TODO: replace with lmfit
 	try:  
-		popt, pcov = curve_fit(cosFitForPMCFF, Xdata, Ydata, p0, maxfev = 10000, bounds = bounds)
+		popt, pcov = curve_fit(cosFitForPMCFF, Xdata-ref_point, Ydata, p0, maxfev = 10000, bounds = bounds)
 		dispersion = np.zeros_like(popt)[:-3]
 		for num in range(len(popt)-3):
 			dispersion[num] = popt[num+3]/factorial(num)
@@ -348,9 +347,10 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, p0=[1, 1
 		# plt.legend()
 		# plt.grid()
 		# plt.show()
-		return dispersion, cosFitForPMCFF(Xdata, *popt)
+		return dispersion, cosFitForPMCFF(Xdata-ref_point, *popt)
 	except RuntimeError:
 		raise ValueError('Max tries reached..')
+
 
 
 

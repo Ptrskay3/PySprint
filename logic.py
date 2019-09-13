@@ -594,8 +594,10 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 self.CFF_c1.setText('1')
             if self.CFF_c2.text()== '':
                 self.CFF_c2.setText('1')
+            if self.CFF_ref.text() == '':
+                self.CFF_ref.setText('2.5')
             try:
-                cFF, _ = cff_method(self.a, self.b ,self.refY, self.samY, 
+                cFF, _ = cff_method(self.a, self.b ,self.refY, self.samY, float(self.CFF_ref.text()),
                     p0=[float(self.CFF_c1.text()),float(self.CFF_c2.text()),float(self.CFF_b0.text()), float(self.initGD.text()),
                         float(self.initGDD.text()), float(self.initTOD.text()), float(self.initFOD.text()), float(self.initQOD.text())]) 
                 labels = ['GD', 'GDD', 'TOD', 'FOD', 'QOD']
@@ -672,8 +674,10 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.CFF_c1.setText('1')
         if self.CFF_c2.text()== '':
             self.CFF_c2.setText('1')
+        if self.CFF_ref.text() == '':
+            self.CFF_ref.setText('2.5')
         try:
-            disp, curr_fit = cff_method(self.a, self.b ,self.refY, self.samY, 
+            disp, curr_fit = cff_method(self.a, self.b ,self.refY, self.samY, float(self.CFF_ref.text()),
                               p0=[float(self.CFF_c1.text()), float(self.CFF_c2.text()), float(self.CFF_b0.text()), float(self.initGD.text()),
                               float(self.initGDD.text()), float(self.initTOD.text()), float(self.initFOD.text()), float(self.initQOD.text())])
             self.MplWidget.canvas.axes.clear()
