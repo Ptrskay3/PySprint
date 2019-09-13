@@ -132,7 +132,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
 
     def msg_output(self, text):
         """ Prints to the log dialog"""
-        self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
+        self.logOutput.clear()
         self.logOutput.insertPlainText('\n' + str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + ':')
         self.logOutput.insertPlainText('\n {}\n\n'.format(str(text)))
         self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())

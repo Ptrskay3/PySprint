@@ -1,40 +1,30 @@
 # Interferometry [2019]
 
 
-Interferometry is a UI for interferogram evaluation. Under construction, error handling is non-existant for the time being.
+Interferometry is a UI for interferogram evaluation. Under construction.
 I will add an advanced description later on. 
 
 # Lastest upgrades:
+  - Eval. methods are improved
   - Windows remember their last state, they open as they were closed
   - Added Settings panel for calibration
   - Added SPP Panel
-  - Added some tooltips + Min-max method has new options now.
-  - Added IFFT
-  - Min-max method now uses a better fitting algorithm, fit report can be displayed
-  - Peaks now send values to min-max method
-  - Added Tools --> Generator
-  - New program structure
-  - Added automated detection for load data.
-
 
 ### Known issues
-* SPP Panel might have tons of issues
-* The log dialog produces bugs
-* Evaluation methods can produce wrong results
+* SPP Panel data storage should be rewritten
+* Evaluation methods still performing bad
 * The data loading AI sometimes produces unexpected results, currently being reviewed.
 * There might be unnecessary imports
-* Generator core is pre-alpha.
 * Some buttons has no effect yet.
 
 
 ### To-do list
 
 * ERROR HANDLING!
-* Fourier Transform Method (FFT) 
-* Selectable units both for angular frequency and wavelength
+* Selectable units
 * Possible performance enhancement by improving algorithms
-* Possible new data manipulating features
-* Interferometer base dispersion should be added for calibration. 
+* Possible new data manipulating features + new options for existing ones
+
 
 ### Installation
 
