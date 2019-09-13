@@ -28,7 +28,7 @@ I will add an advanced description later on.
 
 ### Installation
 
-Interferogram requires [Python 3](https://www.python.org/downloads/) to run.
+Interferometry requires [Python 3](https://www.python.org/downloads/) to run.
 
 Please install the following packages:
 * [PyQt5](https://pypi.org/project/PyQt5/)
