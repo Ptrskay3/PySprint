@@ -5,9 +5,13 @@ import numpy as np
 from scipy.optimize import curve_fit
 from scipy.signal import argrelextrema
 import scipy
-from math import factorial
-from lmfit import Model
 import operator
+from math import factorial
+_has_lmfit = True
+try:
+	from lmfit import Model
+except ImportError:
+	_has_lmfit = False
 
 def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_point, maxx=[], minx=[], fitOrder=5, showGraph=False):
 	"""
@@ -318,7 +322,7 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, p0=[1, 1
 	array with shape and values:[GD, GDD, TOD, FOD, QOD]
 
 	"""
-	# FIXME: BOUNDS WILL BE SET LATER ..
+	# TODO: BOUNDS WILL BE SET LATER ..
 	bounds=((-100, -1000, -1000, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf), 
 		    (100, 1000, 1000, np.inf, np.inf, np.inf, np.inf, np.inf))
 	if len(initSpectrumY) > 0 and len(referenceArmY) > 0 and len(sampleArmY) > 0:

@@ -4,7 +4,7 @@ Methods for manipulating the loaded data
 """
 import numpy as np 
 import matplotlib.pyplot as plt
-from scipy.signal import find_peaks, savgol_filter, gaussian, convolve
+from scipy.signal import find_peaks, savgol_filter, gaussian, convolve #, find_peaks_cwt
 from scipy.interpolate import interp1d
 from .evaluate import findNearest
 
@@ -33,7 +33,33 @@ def savgol(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, window=101, 
 	else:
 		pass
 
+# def cwt(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax=1, proMin=1, threshold=0.1):   
+# 	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:
+# 		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
+# 	if len(initSpectrumX) == 0:
+# 		raise
+# 	elif len(referenceArmY) == 0 or len(sampleArmY) == 0:
+# 		Ydata = initSpectrumY
+# 	Xdata = initSpectrumX
 
+# 	maxIndexes = find_peaks_cwt(Ydata, np.arange(1, 50)) 
+# 	Ydata_rec = 1/Ydata
+# 	minIndexes = find_peaks_cwt(Ydata_rec, np.arange(1, 1000))
+
+# 	min_idx = []
+# 	max_idx = []
+
+# 	for idx in maxIndexes:
+# 		if np.abs(Ydata[idx]) > threshold:
+# 			max_idx.append(idx)
+# 	for idx in minIndexes:
+# 		if np.abs(Ydata[idx]) > threshold:
+# 			min_idx.append(idx)
+
+# 	if len(Xdata[max_idx]) != len(Ydata[max_idx]) or len(Xdata[min_idx]) != len(Ydata[min_idx]):
+# 		raise ValueError('Something went wrong, try to cut the edges of data.')
+
+# 	return Xdata[max_idx], Ydata[max_idx], Xdata[min_idx], Ydata[min_idx]
 
 def find_peak(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax=1, proMin=1, threshold=0.1):   
 	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:

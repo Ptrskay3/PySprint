@@ -20,7 +20,7 @@ from datetime import datetime
 import matplotlib
 
 from core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, gaussian_window , ifft_method, spp_method, args_comp
-from core.edit_features import savgol, find_peak, convolution, interpolate_data, cut_data, find_closest
+from core.edit_features import savgol, find_peak, convolution, interpolate_data, cut_data, find_closest#, cwt
 from core.loading import read_data
 from core.generator import generatorFreq, generatorWave
 
