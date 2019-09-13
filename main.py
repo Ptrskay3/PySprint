@@ -6,11 +6,10 @@ try:
 except ImportError:
 	print('PyQt5 is essential to run this program.')
 
-
 def main():
     app = QtWidgets.QApplication(sys.argv)
     my_interface = MainProgram()
-    my_interface.show()
+    my_interface.showMaximized()
     if my_interface.settings.value('show') == 'True':
     	my_interface.msgbox.exec_()
     	if my_interface.cb.isChecked():

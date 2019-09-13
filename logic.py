@@ -19,7 +19,7 @@ import pandas as pd
 from datetime import datetime
 import matplotlib
 
-from core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, gaussian_window , ifft_method, spp_method
+from core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, gaussian_window , ifft_method, spp_method, args_comp
 from core.edit_features import savgol, find_peak, convolution, interpolate_data, cut_data, find_closest
 from core.loading import read_data
 from core.generator import generatorFreq, generatorWave
@@ -56,9 +56,9 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.iSampleArm.clicked.connect(lambda i: self.sam_arm_clicked(i, self.samX))
         self.iReferenceArm_2.clicked.connect(lambda i: self.ref_arm_clicked(i, self.refX))
         self.iSampleArm_2.clicked.connect(lambda i: self.sam_arm_clicked(i, self.samX))
-        self.doFFT.clicked.connect(self.fft_handler)
+        self.doFFT.clicked.connect(self.ifft_handler)
         self.doCut.clicked.connect(self.gauss_cut_func)
-        self.doIFFT.clicked.connect(self.ifft_handler)
+        self.doIFFT.clicked.connect(self.fft_handler)
         self.actionAbout.triggered.connect(self.open_help)
         self.actionSave_current_data.triggered.connect(self.save_curr_data)
         self.actionSave_log_file.triggered.connect(self.save_output)
@@ -77,6 +77,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.tableWidget.setHorizontalHeaderLabels(["Angular frequency", "Intensity"])
         self.tableWidget.setSizeAdjustPolicy(
         QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.interpolate_cb.setChecked(True)
         self.savgolTab.setStyleSheet(" background-color: rgb(240,240,240);")
         self.peakTab.setStyleSheet(" background-color: rgb(240,240,240);")
         self.convolTab.setStyleSheet(" background-color: rgb(240,240,240);")
@@ -99,6 +100,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.printCheck.setToolTip('Include lmfit report in the log.')
         self.resize(self.settings.value('main_size', QtCore.QSize(1800, 921)))
         self.move(self.settings.value('main_pos', QtCore.QPoint(50, 50)))
+        self.CFF_fitnow.clicked.connect(self.cff_fit)
 
 
     def closeEvent(self, e):
@@ -129,6 +131,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
 
     def msg_output(self, text):
         """ Prints to the log dialog"""
+        self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
         self.logOutput.insertPlainText('\n' + str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + ':')
         self.logOutput.insertPlainText('\n {}\n\n'.format(str(text)))
         self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
@@ -150,27 +153,32 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.gaussianCut.setText('100')
         if self.gaussianCut2.text() == '':
             self.gaussianCut2.setText('40')
+        if self.window_order.text() == '':
+            self.window_order.setText('6')
         if len(self.a)>0 and len(self.b)>0:
-            xx = cut_gaussian(self.a ,self.b, spike= float(self.gaussianCut.text()), sigma = float(self.gaussianCut2.text()))
+            xx = cut_gaussian(self.a ,self.b, spike= float(self.gaussianCut.text()), sigma = float(self.gaussianCut2.text()),
+                              win_order = int(self.window_order.text()))
             self.b = xx
             self.redraw_graph()
 
     def fft_handler(self):
         """ On FFT tab perfoms FFT on currently loaded data"""
         if len(self.a)>0 and len(self.b)>0:
-            self.fftContainer = self.a
-            self.a, self.b = fft_method(self.a, self.b)
+            self.b = fft_method(self.b)
+            self.a = self.fftContainer
             self.redraw_graph()
+            self.fftContainer = np.array([])
             self.msg_output('FFT applied to data. Some functions may behave differently. The absolute value is plotted.')
         else:
             self.msg_output('No data is loaded.')
 
     def ifft_handler(self):
         """ On FFt tab perfoms IFFT on currently loaded data""" 
-        if len(self.a)>0 and len(self.b)>0 and len(self.fftContainer)>0:
-            self.b = ifft_method(self.b)
-            self.a = self.fftContainer
-            self.fftContainer = np.array([])
+        if len(self.a)>0 and len(self.b)>0:
+            self.fftContainer = self.a
+            self.a, self.b = ifft_method(self.a ,self.b, interpolate = self.interpolate_cb.isChecked())
+            # self.a = self.fftContainer
+            # self.fftContainer = np.array([])
             self.redraw_graph()
             self.msg_output('IFFT done. ')
             
@@ -579,10 +587,16 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 self.initFOD.setText('1')
             if self.initQOD.text() == '':
                 self.initQOD.setText('1')
+            if self.CFF_b0.text()== '':
+                self.CFF_b0.setText('1')
+            if self.CFF_c1.text()== '':
+                self.CFF_c1.setText('1')
+            if self.CFF_c2.text()== '':
+                self.CFF_c2.setText('1')
             try:
-                cFF = cff_method(self.a, self.b ,self.refY, self.samY, 
-                    p0=[1,1,1, float(self.initGD.text()), float(self.initGDD.text()), float(self.initTOD.text()), float(self.initFOD.text()),
-                    float(self.initQOD.text())]) 
+                cFF, _ = cff_method(self.a, self.b ,self.refY, self.samY, 
+                    p0=[float(self.CFF_c1.text()),float(self.CFF_c2.text()),float(self.CFF_b0.text()), float(self.initGD.text()),
+                        float(self.initGDD.text()), float(self.initTOD.text()), float(self.initFOD.text()), float(self.initQOD.text())]) 
                 labels = ['GD', 'GDD', 'TOD', 'FOD', 'QOD']
                 calibrate_label = [self.settings.value('GD'), self.settings.value('GDD'), self.settings.value('TOD'), 
                                    self.settings.value('FOD'),self.settings.value('QOD')]
@@ -599,7 +613,17 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 self.msg_output(e)
 
         if self.methodWidget.currentIndex() == 3:
-            self.msg_output('not implemented')
+            disp, disp_std, bf = args_comp(self.a, self.b, showGraph = self.fft_cb.isChecked(), fitOrder = int(self.fft_fitOrder.text()))
+            labels = ['GD', 'GDD', 'TOD', 'FOD', 'QOD']
+            calibrate_label = [self.settings.value('GD'), self.settings.value('GDD'), self.settings.value('TOD'), 
+                               self.settings.value('FOD'),self.settings.value('QOD')]
+            calibrate_std_label = [self.settings.value('GD_std'), self.settings.value('GDD_std'), self.settings.value('TOD_std'),
+                                   self.settings.value('FOD_std'), self.settings.value('QOD_std')]
+            self.msg_output('Using FFT method.')
+            for item in range(len(disp)):
+                self.logOutput.insertPlainText(' '+ labels[item] +' =  ' + str(float(disp[item])-float(calibrate_label[item])) +' +/- ' 
+                                                   + str(float(disp_std[item]) + float(calibrate_std_label[item]) ) + ' 1/fs^'+str(item+1)+'\n')
+
         if  self.methodWidget.currentIndex() == 0:
             self.msg_output('Please use the interface for SPP method.')
             
@@ -628,6 +652,36 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     self.msg_output('Something went wrong.')
         except:
             pass
+
+    @waiting_effects
+    def cff_fit(self):
+        if self.initGD.text() == '':
+            self.initGD.setText('1')
+        if self.initGDD.text() == '':
+            self.initGDD.setText('1')
+        if self.initTOD.text() == '':
+            self.initTOD.setText('1')
+        if self.initFOD.text() == '':
+            self.initFOD.setText('1')
+        if self.initQOD.text() == '':
+            self.initQOD.setText('1')
+        if self.CFF_b0.text()== '':
+            self.CFF_b0.setText('1')
+        if self.CFF_c1.text()== '':
+            self.CFF_c1.setText('1')
+        if self.CFF_c2.text()== '':
+            self.CFF_c2.setText('1')
+        try:
+            disp, curr_fit = cff_method(self.a, self.b ,self.refY, self.samY, 
+                              p0=[float(self.CFF_c1.text()), float(self.CFF_c2.text()), float(self.CFF_b0.text()), float(self.initGD.text()),
+                              float(self.initGDD.text()), float(self.initTOD.text()), float(self.initFOD.text()), float(self.initQOD.text())])
+            self.MplWidget.canvas.axes.clear()
+            self.redraw_graph()
+            self.MplWidget.canvas.axes.plot(self.a, curr_fit, 'r--')
+            self.MplWidget.canvas.draw()
+        except Exception as e:
+            self.msg_output(e)
+
 
 
     # def runTutorial(self):
@@ -724,7 +778,7 @@ class GeneratorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
         if self.centerLine.text()=='':
             self.centerLine.setText('2.5')
         if self.pulseLine.text()=='':
-            self.pulseLine.setText('0.002')
+            self.pulseLine.setText('10')
         if self.resolutionLine.text()=='':
             self.resolutionLine.setText('0.1')
         if self.delayLine.text()=='':

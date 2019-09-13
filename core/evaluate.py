@@ -7,6 +7,7 @@ from scipy.signal import argrelextrema
 import scipy
 from math import factorial
 from lmfit import Model
+import operator
 
 def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_point, maxx=[], minx=[], fitOrder=5, showGraph=False):
 	"""
@@ -85,8 +86,10 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 		posValues[freq] = np.pi*(freq+1)
 	for freq in range(len(relNegFreqs)):
 		negValues[freq] = np.pi*(freq+1)
-	fullXValues = np.append(relPosFreqs, relNegFreqs) 
-	fullYValues = np.append(posValues, negValues)
+	x_s = np.append(relPosFreqs, relNegFreqs) 
+	y_s = np.append(posValues, negValues)
+	L = sorted(zip(x_s,y_s), key=operator.itemgetter(0))
+	fullXValues, fullYValues = zip(*L)
 
 	if fitOrder == 5:
 		fitModel = Model(polynomialFit5)
@@ -315,8 +318,9 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, p0=[1, 1
 	array with shape and values:[GD, GDD, TOD, FOD, QOD]
 
 	"""
-	bounds=((-1, -1, -1, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf), 
-		    (1, 1, 1, np.inf, np.inf, np.inf, np.inf, np.inf))
+	# FIXME: BOUNDS WILL BE SET LATER ..
+	bounds=((-100, -1000, -1000, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf), 
+		    (100, 1000, 1000, np.inf, np.inf, np.inf, np.inf, np.inf))
 	if len(initSpectrumY) > 0 and len(referenceArmY) > 0 and len(sampleArmY) > 0:
 		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
 		Ydata = np.asarray(Ydata)
@@ -329,7 +333,7 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, p0=[1, 1
 	Xdata = np.asarray(initSpectrumX)
 	#TODO: replace with lmfit
 	try:  
-		popt, pcov = curve_fit(cosFitForPMCFF, Xdata, Ydata, p0, maxfev = 5000, bounds = bounds)
+		popt, pcov = curve_fit(cosFitForPMCFF, Xdata, Ydata, p0, maxfev = 10000, bounds = bounds)
 		dispersion = np.zeros_like(popt)[:-3]
 		for num in range(len(popt)-3):
 			dispersion[num] = popt[num+3]/factorial(num)
@@ -340,13 +344,14 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, p0=[1, 1
 		# plt.legend()
 		# plt.grid()
 		# plt.show()
-		return dispersion
+		return dispersion, cosFitForPMCFF(Xdata, *popt)
 	except RuntimeError:
-		return ['Optimal','parameters', 'not', 'found', '.']
+		raise ValueError('Max tries reached..')
 
 
 
-def fft_method(initSpectrumX, initSpectrumY):
+
+def fft_method(initSpectrumY):
 	"""
 	Perfoms FFT on data
 
@@ -367,16 +372,14 @@ def fft_method(initSpectrumX, initSpectrumY):
 	array with the transformed y data
 
 	"""
-	from .edit_features import interpolate_data
-	if len(initSpectrumX) > 0 and len(initSpectrumY) > 0:
-		Xdata, Ydata = interpolate_data(initSpectrumX, initSpectrumY, [],[])
-		freq = scipy.fftpack.fftfreq(len(Xdata), d=(Xdata[3]-Xdata[2]))
+	if len(initSpectrumY) > 0:
+		Ydata = initSpectrumY
 		yf = scipy.fftpack.fft(Ydata)
-		return freq, yf
-	if len(initSpectrumX) == 0:
+		return yf
+	if len(initSpectrumY) == 0:
 		pass
 
-def gaussian_window(t ,tau, standardDev):
+def gaussian_window(t ,tau, standardDev, order):
 	"""
 	__inputs__
 	t:
@@ -393,9 +396,9 @@ def gaussian_window(t ,tau, standardDev):
 
 
 	"""
-	return np.exp(-(t-tau)**6/(2*standardDev**6))
+	return np.exp(-(t-tau)**order/(2*standardDev**order))
 
-def cut_gaussian(initSpectrumX ,initSpectrumY, spike, sigma):
+def cut_gaussian(initSpectrumX ,initSpectrumY, spike, sigma, win_order):
 	"""
 	Applies gaussian window with the given params.
 
@@ -420,12 +423,14 @@ def cut_gaussian(initSpectrumX ,initSpectrumY, spike, sigma):
 	
 	"""
 
-	Ydata = initSpectrumY * gaussian_window(initSpectrumX, tau = spike, standardDev=sigma) 
+	Ydata = initSpectrumY * gaussian_window(initSpectrumX, tau = spike, standardDev=sigma, order = win_order) 
 	# Ydata = initSpectrumY * scipy.signal.windows.gaussian(len(initSpectrumY), std=sigma)
 	return Ydata
 
 
-def ifft_method(initSpectrumY):
+#unwrap
+
+def ifft_method(initSpectrumX, initSpectrumY, interpolate = True):
 	"""
 	Perfoms IFFT on data
 
@@ -440,26 +445,77 @@ def ifft_method(initSpectrumY):
 	array with the transformed y data
 
 	"""
-	if len(initSpectrumY)>0:
+	from .edit_features import interpolate_data
+	if len(initSpectrumY)>0 and len(initSpectrumX)>0:
 		Ydata = initSpectrumY
-		yf = scipy.fftpack.ifft(Ydata)
-		return yf 
+		Xdata = initSpectrumX
 	else:
-		pass
+		raise
+	if interpolate:
+		Xdata, Ydata = interpolate_data(initSpectrumX, initSpectrumY, [],[])
+	yf = scipy.fftpack.ifft(Ydata)
+	freq = scipy.fftpack.fftfreq(len(Xdata), d=(Xdata[3]-Xdata[2]))
+	return freq, yf 
+	
+	
 
 # under testing..
 
 
-# def argsAndCompute(initSpectrumX, initSpectrumY):
-# 	angles = np.angle(initSpectrumY)
-# 	Xdata = initSpectrumX
-# 	popt, pcov = curve_fit(polynomialFit, Xdata, angles)
-# 	fig1 = plt.figure()
-# 	plt.plot(Xdata, angles,'ro',label = 'dataset')
-# 	plt.plot(Xdata, polynomialFit(Xdata, *popt),'k*', label = 'fitted')
-# 	plt.legend()
-# 	plt.grid()
-# 	plt.show()
+def args_comp(initSpectrumX, initSpectrumY, fitOrder = 5, showGraph=False):
+	angles = np.angle(initSpectrumY)
+	Xdata = initSpectrumX
+	Ydata = np.unwrap(angles)
+	if fitOrder == 5:
+		fitModel = Model(polynomialFit5)
+		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1, b4 = 1, b5 = 1)
+		result = fitModel.fit(Ydata, x=Xdata, params = params, method ='leastsq') #nelder
+	elif fitOrder == 4:
+		fitModel = Model(polynomialFit4)
+		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1, b4 = 1)
+		result = fitModel.fit(Ydata, x=Xdata, params = params, method ='leastsq') 
+	elif fitOrder == 3:
+		fitModel = Model(polynomialFit3)
+		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1)
+		result = fitModel.fit(Ydata, x=Xdata, params = params, method ='leastsq') 
+	elif fitOrder == 2:
+		fitModel = Model(polynomialFit2)
+		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1)
+		result = fitModel.fit(Ydata, x=Xdata, params = params, method ='leastsq') 
+	elif fitOrder == 1:
+		fitModel = Model(polynomialFit1)
+		params = fitModel.make_params(b0 = 0, b1 = 1)
+		result = fitModel.fit(Ydata, x=Xdata, params = params, method ='leastsq') 
+	else:
+		raise ValueError('Order is out of range, please select from [1,5]')
+	try:
+		dispersion = []
+		dispersion_std = []
+		for name, par in result.params.items():
+			dispersion.append(par.value)
+			dispersion_std.append(par.stderr)
+		dispersion = dispersion[1:]
+		dispersion_std = dispersion_std[1:]
+		for idx in range(len(dispersion)):
+			dispersion[idx] =  dispersion[idx] / factorial(idx+1) 
+			dispersion_std[idx] =  dispersion_std[idx] / factorial(idx+1)
+		while len(dispersion)<5:
+			dispersion.append(0)
+			dispersion_std.append(0) 
+		fit_report = result.fit_report()
+		if showGraph:
+			fig = plt.figure(figsize=(7,7))
+			fig.canvas.set_window_title('Phase')
+			plt.plot(Xdata, Ydata, 'o', label = 'dataset')
+			plt.plot(Xdata, result.best_fit, 'r--', label = 'fitted')
+			plt.legend()
+			plt.grid()
+			plt.show()
+		return dispersion, dispersion_std, fit_report
+	except Exception as e:
+		# return ['0', '0', '0', '0', '0'], ['0','0','0','0','0'], []
+		print(e)
+
 
 """#TESZT
 a, b = np.loadtxt('examples/fft.txt', unpack = True, delimiter = ',')

@@ -251,7 +251,7 @@ class Ui_GeneratorWindow(object):
         self.startLine.setPlaceholderText(_translate("GeneratorWindow", "PHz or nm"))
         self.stopLine.setPlaceholderText(_translate("GeneratorWindow", "PHz or nm"))
         self.centerLine.setPlaceholderText(_translate("GeneratorWindow", "PHz or nm"))
-        self.pulseLine.setPlaceholderText(_translate("GeneratorWindow", "0.02"))
+        self.pulseLine.setPlaceholderText(_translate("GeneratorWindow", "fs"))
         self.resolutionLine.setPlaceholderText(_translate("GeneratorWindow", "nm"))
         self.delayLine.setPlaceholderText(_translate("GeneratorWindow", "fs"))
         self.label_7.setText(_translate("GeneratorWindow", "GD"))
