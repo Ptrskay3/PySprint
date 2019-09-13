@@ -349,7 +349,7 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_poin
 		# plt.show()
 		return dispersion, cosFitForPMCFF(Xdata-ref_point, *popt)
 	except RuntimeError:
-		raise ValueError('Max tries reached..')
+		raise ValueError('Max tries reached.. \nParameters could not be estimated.')
 
 
 

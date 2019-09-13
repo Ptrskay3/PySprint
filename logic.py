@@ -806,7 +806,7 @@ class GeneratorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
                 self.pushButton_4.setStyleSheet('background-color: None')
                 self.xAxisData, self.yAxisData, self.refData, self.samData =  generatorFreq(start = float(self.startLine.text()),
                     stop = float(self.stopLine.text()), center = float(self.centerLine.text()), delay = float(self.delayLine.text()), 
-                    GD = float(self.GDLine.text()), GDD = float(self.startLine.text()), TOD = float(self.TODLine.text()), FOD = float(self.FODLine.text()), 
+                    GD = float(self.GDLine.text()), GDD = float(self.GDDLine.text()), TOD = float(self.TODLine.text()), FOD = float(self.FODLine.text()), 
                     QOD = float(self.QODLine.text()), resolution = float(self.resolutionLine.text()), delimiter = self.delimiterLine.text(), pulseWidth = float(self.pulseLine.text()), 
                     includeArms = self.armCheck.isChecked())
             except:
@@ -817,7 +817,7 @@ class GeneratorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
                 self.pushButton_4.setStyleSheet('background-color: None')
                 self.xAxisData, self.yAxisData, self.refData, self.samData =  generatorWave(start = float(self.startLine.text()),
                     stop = float(self.stopLine.text()), center = float(self.centerLine.text()), delay = float(self.delayLine.text()), 
-                    GD = float(self.GDLine.text()), GDD = float(self.startLine.text()), TOD = float(self.TODLine.text()), FOD = float(self.FODLine.text()), 
+                    GD = float(self.GDLine.text()), GDD = float(self.GDDLine.text()), TOD = float(self.TODLine.text()), FOD = float(self.FODLine.text()), 
                     QOD = float(self.QODLine.text()), resolution = float(self.resolutionLine.text()), delimiter = self.delimiterLine.text(), pulseWidth = float(self.pulseLine.text()), 
                     includeArms = self.armCheck.isChecked())
             except:
