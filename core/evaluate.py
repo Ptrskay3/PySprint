@@ -203,14 +203,14 @@ def findNearest(array, value):
 
 def cosFitForPMCFF(x,c0, c1, b0, b1, b2, b3, b4, b5):
 	"""
-	Helper function for Phase Modulated Cosine Function Fit 
+	Auxiliary function for Phase Modulated Cosine Function Fit 
 	b1 = GD
 	b2 = GDD / 2
 	b3 = TOD / 6
 	b4 = FOD / 24
 	b5 = QOD / 120
 	"""
-	return c0 + c1*np.cos(b0+b1*x+b2*x**2+b3*x**3+b4*x**4+b5*x**5)
+	return c0 + c1*np.cos(b0 + b1*x + b2*x**2 + b3*x**3 +b4*x**4 + b5*x**5)
 
 
 
@@ -288,6 +288,7 @@ def spp_method(delays, omegas, fitOrder=4): #def SPP(delays,omegas, reference, f
 		return e
 
 
+#TODO: FIT TO RELATIVE FREQUENCY!
 
 def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, p0=[1, 1, 1, 1, 1, 1, 1, 1]):
 	"""
