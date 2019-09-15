@@ -1,12 +1,12 @@
 """
 NOT PART OF THE MAIN PROGRAM YET.
+CURRENTLY POORLY WRITTEN, BUT IT WORKS.. I WILL UPDATE IT SOON.
 
 """
 
 import numpy as np 
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt 
-
 
 def find_nearest(array, value):
 	#Finds the nearest element to the given value in the array
@@ -17,20 +17,24 @@ def find_nearest(array, value):
     return array[idx], idx
 
 
-def cos_fit(x,c0, c1, b0, b1, b2, b3):
-	"""
-	Auxiliary function for Phase Modulated Cosine Function Fit 
-	b1 = GD
-	b2 = GDD / 2
-	b3 = TOD / 6
-	b4 = FOD / 24
-	b5 = QOD / 120
-	"""
+def cos_fit1(x,c0, c1, b0, b1):
+	return c0 + c1*np.cos(b0 + b1*x)
+
+def cos_fit2(x,c0, c1, b0, b1, b2):
+	return c0 + c1*np.cos(b0 + b1*x + b2*x**2)
+
+def cos_fit4(x,c0, c1, b0, b1, b2, b3, b4):
+	return c0 + c1*np.cos(b0 + b1*x + b2*x**2 + b3*x**3 + b4*x**4)
+
+def cos_fit5(x,c0, c1, b0, b1, b2, b3, b4, b5):
+	return c0 + c1*np.cos(b0 + b1*x + b2*x**2 + b3*x**3 + b4*x**4 + b5*x**5)
+
+def cos_fit3(x,c0, c1, b0, b1, b2, b3):
 	return c0 + c1*np.cos(b0 + b1*x + b2*x**2 + b3*x**3)
 
 class FitOptimizer(object):
 
-	def __init__(self, x, y, ref, sam, func = None, p0 = []):
+	def __init__(self, x, y, ref, sam, func = None, p0 = [], outfunc= None):
 		self.x = x
 		self.y = y
 		self.ref = ref
@@ -60,7 +64,10 @@ class FitOptimizer(object):
 		self.p0 = [1, 1, 1, 1, 1, 1]
 		self.popt = p0
 		self._init_set = False
-		
+		self.counter = 0
+		self.obj = None
+		self.outfunc = None
+
 
 	def set_initial_region(self, percent, center):
 		""" Determines the initial region to fit"""
@@ -121,73 +128,85 @@ class FitOptimizer(object):
 		return 1 - (ss_res / ss_tot)
 
 	
-	def show_fit(self, time = 0.2):
+	def show_fit(self, time = 2, obj = None):
 		try:
-			plt.figure(figsize = (8,6))
-			plt.plot(self.x, self._y_norm,'k',label = 'Original')
-			plt.plot(self._x_curr, self._y_curr, 'bo', label = 'Affected data')
-			plt.plot(self._x_curr, self.func(self._x_curr, *self.popt), 'r--', label = 'Fit')
-			plt.grid()
-			plt.legend()
-			plt.show(block=False)
-			plt.pause(time)
-			plt.close()
+			# self.obj.plot(self.x, self._y_norm,'k',label = 'Original')
+			# self.obj.pause(time)
+			self.obj.axes.plot(self._x_curr, self._y_curr, 'ko', label = 'Affected data')
+			self.obj.axes.plot(self._x_curr, self.func(self._x_curr, *self.popt), 'r--', label = 'Fit')
+			# obj.grid()
+			# obj.legend()
+			self.obj.draw()
+			# self.obj.show()
+			# self.obj.pause(time)
+
+			# self.obj.axes.clear()
+			# obj.show()
 		except:
-			print('aborting..')
+			# print('a')
+			pass
 			# plt.figure()
 			# plt.plot(self._x_curr, self._y_curr)
 			# plt.show()
 			# print('passed..')
 
-	def run_loop(self, r_extend_by, r_threshold, max_tries = 1000, show_steps = False):
+	def run_loop(self, r_extend_by, r_threshold, outfunc, max_tries = 1000, show_steps = False):
 		if self._init_set == False:
 			raise ValueError('Set the initial conditions.')
 		self._make_fit()
 		# self._perturb_param(0)
-		# self.show_fit()
-		counter = 1
+		self.show_fit(self.obj)
 		# good_step = 0
 		while self._fit_goodness() > r_threshold:
 			# good_step += 1
 			self._extend_region(r_extend_by)
 			self._make_fit()
+			# outfunc(str(self.counter))
 			if show_steps:
-				self.show_fit()
-			counter +=1
-			if counter % 1000 == 0:
-				print('Currect tries:', counter)
+				self.show_fit(self.obj)
+			self.counter +=1
+			if self.counter % 1000 == 0:
+				outfunc('Currect tries:{}'.format(self.counter))
 			if self._make_fit() == True:
-				self.show_fit(50)
-				print('The overall fit goodness is: ', self._fit_goodness())
-				print('The params were:', self.popt)
-				print('steps :', counter)
+				self.show_fit(50, self.obj)
+				outfunc('The overall fit goodness is:{}'.format(self._fit_goodness()))
+				outfunc('The params were:{}'.format(self.popt))
+				# print('steps :', self.counter)
 				break
-			if counter == max_tries:
-				self.show_fit(50)
-				print('Max tries ({}) reached.. try another initial params.'.format(max_tries))
+			if self.counter == max_tries:
+				self.show_fit(50, self.obj)
+				outfunc('Max tries ({}) reached.. try another initial params.'.format(max_tries))
 				break
 				
 		while self._fit_goodness() < r_threshold:
 			self._make_fit()
 			# self._perturb_param(good_step+1)
-			counter +=1
-			if counter % 1000 == 0:
-				print('Currect tries:', counter)
+			# outfunc(str(self.counter))
+
+			self.counter +=1
+			if self.counter % 1000 == 0:
+				outfunc('Currect tries:{}'.format(self.counter))
 			# if counter % 50 == 0:
 				# self.show_fit()
-			if counter == max_tries:
-				self.show_fit(50)
-				print('Max tries ({}) reached.. try another initial params.'.format(max_tries))
+			if self.counter == max_tries:
+				self.show_fit(50, obj=plt)
+				outfunc('Max tries ({}) reached.. try another initial params.'.format(max_tries))
+				self.popt = []
 				break
+	
+	def report(self):
+		return self.popt, self.counter
+	
 
-
-a, b, c, d = np.loadtxt('tesztt.txt', delimiter = ',', unpack = True ) # f.set_initial_region(0.15, 2.5) #f.run_loop(r_extend_by = 0.05, r_threshold = 0.79, max_tries = 20000, show_steps = True)
+# a, b, c, d = np.loadtxt('E:/int_new/Interferometry/examples/teszt.txt', delimiter = ',', unpack = True ) # f.set_initial_region(0.15, 2.5) #f.run_loop(r_extend_by = 0.05, r_threshold = 0.79, max_tries = 20000, show_steps = True)
 # a, b, c, d = np.loadtxt('FOD.txt', delimiter = ',', unpack = True )
 
-f = FitOptimizer(a,b,c,d, func = cos_fit)
-f.set_initial_region(0.15, 2.50)
-f.run_loop(r_extend_by = 0.1, r_threshold = 0.85, max_tries = 10000, show_steps = True)
-
+# f = FitOptimizer(a,b,c,d, func = cos_fit)
+# f.obj = plt
+# f.set_initial_region(0.2, 2.4)
+# f.run_loop(r_extend_by = 0.1, r_threshold = 0.85,outfunc = print, max_tries = 10000, show_steps = True)
+# parameters = f.report()
+# print(parameters)
 
 
 

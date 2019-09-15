@@ -235,6 +235,7 @@ class Ui_GeneratorWindow(object):
         self.statusbar.setObjectName("statusbar")
         GeneratorWindow.setStatusBar(self.statusbar)
 
+
         self.retranslateUi(GeneratorWindow)
         QtCore.QMetaObject.connectSlotsByName(GeneratorWindow)
 

@@ -1,5 +1,7 @@
 """
 The main logic behind the UI functions.
+
+CFF FIT CURRENTLY DISABLED, UI NEEDS NEW QLINEEDITS TO WORK PROPERLY.. FIXING IT SOON.
 """
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QMainWindow, QDialogButtonBox, QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QTreeWidget, QTreeWidgetItem, QAbstractItemView,
@@ -23,6 +25,10 @@ from core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, 
 from core.edit_features import savgol, find_peak, convolution, interpolate_data, cut_data, find_closest#, cwt
 from core.loading import read_data
 from core.generator import generatorFreq, generatorWave
+
+
+"""UNDER DEV"""
+from under_dev.cff_fitting import FitOptimizer, cos_fit1, cos_fit2, cos_fit3, cos_fit5, cos_fit4
 
 
 
@@ -100,7 +106,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.printCheck.setToolTip('Include lmfit report in the log.')
         self.resize(self.settings.value('main_size', QtCore.QSize(1800, 921)))
         self.move(self.settings.value('main_pos', QtCore.QPoint(50, 50)))
-        self.CFF_fitnow.clicked.connect(self.cff_fit)
+        # self.CFF_fitnow.clicked.connect(self.cff_fit)
+        self.CFF_fitnow.clicked.connect(self.cff_fit_optimizer)
         QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+G"), self, self.open_generator)
 
 
@@ -691,6 +698,65 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         except Exception as e:
             self.msg_output(e)
 
+###################################### UNDER_DEV ###############################
+
+    def cff_fit_optimizer(self):
+        self.redraw_graph()
+        if self.initGD.text() == '':
+            self.initGD.setText('1')
+        if self.initGDD.text() == '':
+            self.initGDD.setText('1')
+        if self.initTOD.text() == '':
+            self.initTOD.setText('1')
+        if self.initFOD.text() == '':
+            self.initFOD.setText('0')
+        if self.initQOD.text() == '':
+            self.initQOD.setText('0')
+        if self.CFF_b0.text()== '':
+            self.CFF_b0.setText('1')
+        if self.CFF_c1.text()== '':
+            self.CFF_c1.setText('1')
+        if self.CFF_c2.text()== '':
+            self.CFF_c2.setText('1')
+        if self.CFF_ref.text() == '':
+            self.CFF_ref.setText('2.5')
+
+        #majd így bele kell vinni
+        if self.initQOD.text() =='0':
+            fit_func = cos_fit4
+        elif self.initQOD.text() == '0' and self.initFOD.text() == '0':
+            fit_func = cos_fit3
+        elif self.initTOD.text() == '0' and self.initQOD.text() == '0' and self.initFOD.text() == '0':
+            fit_func = cos_fit2
+        elif self.initGDD.text() == '0' and self.initTOD.text() == '0' and self.initQOD.text() == '0' and self.initFOD.text() == '0':
+            fit_func = cos_fit1
+        else:
+            fit_func = cos_fit5
+
+        new_fit = FitOptimizer(self.a, self.b, self.refY, self.samY, func = fit_func)
+        new_fit.obj = self.MplWidget.canvas
+        if fit_func == cos_fit5:
+            new_fit.p0 = [float(self.CFF_c1.text()), float(self.CFF_c2.text()), float(self.CFF_b0.text()),
+                          float(self.initGD.text()), float(self.initGDD.text())*2, float(self.initTOD.text())*6,
+                          float(self.initFOD.text())*24, float(self.initQOD.text())*120]
+        elif fit_func == cos_fit4:
+            new_fit.p0 = [float(self.CFF_c1.text()), float(self.CFF_c2.text()), float(self.CFF_b0.text()),
+                          float(self.initGD.text()), float(self.initGDD.text())*2, float(self.initTOD.text())*6,
+                          float(self.initFOD.text())*24]
+        elif fit_func == cos_fit3:
+            new_fit.p0 = [float(self.CFF_c1.text()), float(self.CFF_c2.text()), float(self.CFF_b0.text()),
+                          float(self.initGD.text()), float(self.initGDD.text())*2, float(self.initTOD.text())*6]
+        elif fit_func == cos_fit2:
+            new_fit.p0 = [float(self.CFF_c1.text()), float(self.CFF_c2.text()), float(self.CFF_b0.text()),
+                          float(self.initGD.text()), float(self.initGDD.text())*2]
+        elif fit_func == cos_fit1:
+            new_fit.p0 = [float(self.CFF_c1.text()), float(self.CFF_c2.text()), float(self.CFF_b0.text()),
+                          float(self.initGD.text())]
+
+        new_fit.set_initial_region(0.2, 2.4)
+        new_fit.run_loop(r_extend_by = 0.1, r_threshold = 0.85, outfunc = self.msg_output, max_tries = 10000, show_steps = True)
+        # print(new_fit.report())
+
 
 
     # def runTutorial(self):
@@ -714,7 +780,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     #     self.redraw_graph()
     #     self.tutorial1 = QMessageBox.about(self, "Tutorial", "I loaded in some example data for you. You can manipulate the data on the right panel and use the methods below. ")
 
-
+################################## UNDER DEV #########################################
 
 class HelpWindow(QtWidgets.QMainWindow, Help):
     """ Class for the help window."""
