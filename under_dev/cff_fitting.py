@@ -64,7 +64,7 @@ class FitOptimizer(object):
 		else:
 			self._y_norm = (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 		self.func = func
-		self.p0 = [1, 1, 1, 1, 1, 1]
+		# self.p0 = [1, 1, 1, 1, 1, 1]
 		self.popt = p0
 		self._init_set = False
 		self.counter = 0
@@ -135,7 +135,7 @@ class FitOptimizer(object):
 		try:
 			# self.obj.plot(self.x, self._y_norm,'k',label = 'Original')
 			# self.obj.pause(time)
-			self.obj.axes.plot(self._x_curr, self._y_curr, 'ko', label = 'Affected data')
+			self.obj.axes.plot(self._x_curr, self._y_curr, 'k-', label = 'Affected data')
 			self.obj.axes.plot(self._x_curr, self.func(self._x_curr, *self.popt), 'r--', label = 'Fit')
 			# obj.grid()
 			# obj.legend()
@@ -165,11 +165,11 @@ class FitOptimizer(object):
 			self._extend_region(r_extend_by)
 			self._make_fit()
 			# outfunc(str(self.counter))
-			if show_steps:
-				self.show_fit(self.obj)
+			# if show_steps:
+				# self.show_fit(self.obj)
 			self.counter +=1
-			if self.counter % 1000 == 0:
-				outfunc('Currect tries:{}'.format(self.counter))
+			# if self.counter % 1000 == 0:
+				# outfunc('Currect tries:{}'.format(self.counter))
 			if self._make_fit() == True:
 				self.show_fit(50, self.obj)
 				# outfunc('The overall fit goodness is:{}'.format(self._fit_goodness()))
@@ -178,7 +178,7 @@ class FitOptimizer(object):
 				break
 			if self.counter == max_tries:
 				self.show_fit(50, self.obj)
-				outfunc('Max tries ({}) reached.. try another initial params.'.format(max_tries))
+				outfunc('Max tries ({}) reached.. try another initial params.\n You can set the bounds at Edit --> Settings.'.format(max_tries))
 				break
 				
 		while self._fit_goodness() < r_threshold:
@@ -187,13 +187,13 @@ class FitOptimizer(object):
 			# outfunc(str(self.counter))
 
 			self.counter +=1
-			if self.counter % 1000 == 0:
-				outfunc('Currect tries:{}'.format(self.counter))
+			# if self.counter % 1000 == 0:
+				# outfunc('Currect tries:{}'.format(self.counter))
 			# if counter % 50 == 0:
 				# self.show_fit()
 			if self.counter == max_tries:
-				self.show_fit(50, obj=plt)
-				outfunc('Max tries ({}) reached.. try another initial params.'.format(max_tries))
+				self.show_fit(50, self.obj)
+				outfunc('Max tries ({}) reached.. try another initial params.\n You can set the bounds at Edit --> Settings.'.format(max_tries))
 				self.popt = []
 				break
 	
