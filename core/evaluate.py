@@ -177,8 +177,7 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 			plt.show()
 		return dispersion, dispersion_std, fit_report
 	except Exception as e:
-		raise ValueError('Unexpected results, aborting..')
-	
+		return e	
 
 
 def polynomialFit5(x, b0, b1, b2, b3, b4, b5):
@@ -295,36 +294,40 @@ def spp_method(delays, omegas, fitOrder=4): #def SPP(delays,omegas, reference, f
 		omegas_unpacked.extend(item)
 		delays_unpacked.extend(len(item) * [delay])
 	try:
-		if fitOrder == 2:
-			fitModel = Model(polynomialFit2)
-			params = fitModel.make_params(b0 = 1, b1 = 1, b2 = 1)
-			result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
-		elif fitOrder == 3:
-			fitModel = Model(polynomialFit3)
-			params = fitModel.make_params(b0 = 1, b1 = 1, b2 = 1, b3 = 3)
-			result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
-		elif fitOrder == 4:
-			fitModel = Model(polynomialFit4)
-			params = fitModel.make_params(b0 = 1, b1 = 1, b2 = 1, b3=1, b4 =1)
-			result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
-		elif fitOrder == 1:
-			fitModel = Model(polynomialFit1)
-			params = fitModel.make_params(b0 = 1, b1 = 1)
-			result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
+		if _has_lmfit:
+			if fitOrder == 2:
+				fitModel = Model(polynomialFit2)
+				params = fitModel.make_params(b0 = 1, b1 = 1, b2 = 1)
+				result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
+			elif fitOrder == 3:
+				fitModel = Model(polynomialFit3)
+				params = fitModel.make_params(b0 = 1, b1 = 1, b2 = 1, b3 = 3)
+				result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
+			elif fitOrder == 4:
+				fitModel = Model(polynomialFit4)
+				params = fitModel.make_params(b0 = 1, b1 = 1, b2 = 1, b3=1, b4 =1)
+				result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
+			elif fitOrder == 1:
+				fitModel = Model(polynomialFit1)
+				params = fitModel.make_params(b0 = 1, b1 = 1)
+				result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
+			else:
+				raise ValueError('Out of range')
+			dispersion = []
+			dispersion_std = []
+			for name, par in result.params.items():
+				dispersion.append(par.value)
+				dispersion_std.append(par.stderr)
+			for idx in range(len(dispersion)):
+				dispersion[idx] =  dispersion[idx]*factorial(idx) #biztos?
+				dispersion_std[idx] =  dispersion_std[idx] * factorial(idx)
+			while len(dispersion)<5:
+				dispersion.append(0)
+				dispersion_std.append(0) 
+			bf = result.best_fit
+		#TODO: Put scipy curve_fit there..
 		else:
-			raise ValueError('Out of range')
-		dispersion = []
-		dispersion_std = []
-		for name, par in result.params.items():
-			dispersion.append(par.value)
-			dispersion_std.append(par.stderr)
-		for idx in range(len(dispersion)):
-			dispersion[idx] =  dispersion[idx]*factorial(idx) #biztos?
-			dispersion_std[idx] =  dispersion_std[idx] * factorial(idx)
-		while len(dispersion)<5:
-			dispersion.append(0)
-			dispersion_std.append(0) 
-		bf = result.best_fit
+			pass
 		return omegas_unpacked, delays_unpacked, dispersion, dispersion_std, bf
 	except Exception as e:
 		return e
