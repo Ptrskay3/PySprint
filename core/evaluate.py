@@ -7,11 +7,13 @@ from scipy.signal import argrelextrema
 import scipy
 import operator
 from math import factorial
-_has_lmfit = True
+
 try:
 	from lmfit import Model
+	_has_lmfit = True
 except ImportError:
 	_has_lmfit = False
+
 
 def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_point, maxx=[], minx=[], fitOrder=5, showGraph=False):
 	"""
@@ -94,57 +96,89 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 	y_s = np.append(posValues, negValues)
 	L = sorted(zip(x_s,y_s), key=operator.itemgetter(0))
 	fullXValues, fullYValues = zip(*L)
-
-	if fitOrder == 5:
-		fitModel = Model(polynomialFit5)
-		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1, b4 = 1, b5 = 1)
-		result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') #nelder
-	elif fitOrder == 4:
-		fitModel = Model(polynomialFit4)
-		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1, b4 = 1)
-		result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') 
-	elif fitOrder == 3:
-		fitModel = Model(polynomialFit3)
-		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1)
-		result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') 
-	elif fitOrder == 2:
-		fitModel = Model(polynomialFit2)
-		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1)
-		result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') 
-	elif fitOrder == 1:
-		fitModel = Model(polynomialFit1)
-		params = fitModel.make_params(b0 = 0, b1 = 1)
-		result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') 
+	if _has_lmfit:
+		if fitOrder == 5:
+			fitModel = Model(polynomialFit5)
+			params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1, b4 = 1, b5 = 1)
+			result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') #nelder
+		elif fitOrder == 4:
+			fitModel = Model(polynomialFit4)
+			params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1, b4 = 1)
+			result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') 
+		elif fitOrder == 3:
+			fitModel = Model(polynomialFit3)
+			params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1)
+			result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') 
+		elif fitOrder == 2:
+			fitModel = Model(polynomialFit2)
+			params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1)
+			result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') 
+		elif fitOrder == 1:
+			fitModel = Model(polynomialFit1)
+			params = fitModel.make_params(b0 = 0, b1 = 1)
+			result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') 
+		else:
+			raise ValueError('Order is out of range, please select from [1,5]')
 	else:
-		raise ValueError('Order is out of range, please select from [1,5]')
+		if fitOrder == 5:
+			popt, pcov = curve_fit(polynomialFit5, fullXValues, fullYValues, maxfev = 8000)
+			_function = polynomialFit5
+		elif fitOrder == 4:
+			popt, pcov = curve_fit(polynomialFit4, fullXValues, fullYValues, maxfev = 8000)
+			_function = polynomialFit4
+		elif fitOrder == 3:
+			popt, pcov = curve_fit(polynomialFit3, fullXValues, fullYValues, maxfev = 8000)
+			_function = polynomialFit3
+		elif fitOrder == 2:
+			popt, pcov = curve_fit(polynomialFit2, fullXValues, fullYValues, maxfev = 8000)
+			_function = polynomialFit2
+		elif fitOrder == 1:
+			popt, pcov = curve_fit(polynomialFit1, fullXValues, fullYValues, maxfev = 8000)
+			_function = polynomialFit1
+		else:
+			raise ValueError('Order is out of range, please select from [1,5]')
 	try:
-		dispersion = []
-		dispersion_std = []
-		for name, par in result.params.items():
-			dispersion.append(par.value)
-			dispersion_std.append(par.stderr)
-		dispersion = dispersion[1:]
-		dispersion_std = dispersion_std[1:]
-		for idx in range(len(dispersion)):
-			dispersion[idx] =  dispersion[idx] / factorial(idx+1) 
-			dispersion_std[idx] =  dispersion_std[idx] / factorial(idx+1)
-		while len(dispersion)<5:
-			dispersion.append(0)
-			dispersion_std.append(0) 
-		fit_report = result.fit_report()
+		if _has_lmfit:
+			dispersion = []
+			dispersion_std = []
+			for name, par in result.params.items():
+				dispersion.append(par.value)
+				dispersion_std.append(par.stderr)
+			dispersion = dispersion[1:]
+			dispersion_std = dispersion_std[1:]
+			for idx in range(len(dispersion)):
+				dispersion[idx] =  dispersion[idx] / factorial(idx+1) 
+				dispersion_std[idx] =  dispersion_std[idx] / factorial(idx+1)
+			while len(dispersion)<5:
+				dispersion.append(0)
+				dispersion_std.append(0) 
+			fit_report = result.fit_report()
+		else:
+			fullXValues = np.asarray(fullXValues)
+			dispersion=[]
+			dispersion_std=[]
+			for idx in range(len(popt)-1):
+				dispersion.append(popt[idx+1]/factorial(idx+1))
+			while len(dispersion)<5:
+				dispersion.append(0)
+			while len(dispersion_std)<len(dispersion):
+				dispersion_std.append(0)
+			fit_report = '\nTo display detailed results, you must have lmfit installed.'
 		if showGraph:
 			fig = plt.figure(figsize=(7,7))
 			fig.canvas.set_window_title('Min-max method fitted')
 			plt.plot(fullXValues, fullYValues, 'o', label = 'dataset')
-			plt.plot(fullXValues, result.best_fit, 'r*', label = 'fitted')
+			try:
+				plt.plot(fullXValues, result.best_fit, 'r*', label = 'fitted')
+			except:
+				plt.plot(fullXValues, _function(fullXValues, *popt), 'r*', label = 'fitted')
 			plt.legend()
 			plt.grid()
 			plt.show()
 		return dispersion, dispersion_std, fit_report
-	except:
-		return ['Optimal', 'params', 'not', 'found', '.'], ['','','','',''], []
-
-
+	except Exception as e:
+		raise ValueError('Unexpected results, aborting..')
+	
 
 
 def polynomialFit5(x, b0, b1, b2, b3, b4, b5):
@@ -206,6 +240,7 @@ def findNearest(array, value):
     array = np.asarray(array)
     idx = (np.abs(value - array)).argmin()
     return array[idx], idx
+
 
 
 def cosFitForPMCFF(x,c0, c1, b0, b1, b2, b3, b4, b5):
@@ -284,7 +319,7 @@ def spp_method(delays, omegas, fitOrder=4): #def SPP(delays,omegas, reference, f
 			dispersion.append(par.value)
 			dispersion_std.append(par.stderr)
 		for idx in range(len(dispersion)):
-			dispersion[idx] =  dispersion[idx]*factorial(idx) 
+			dispersion[idx] =  dispersion[idx]*factorial(idx) #biztos?
 			dispersion_std[idx] =  dispersion_std[idx] * factorial(idx)
 		while len(dispersion)<5:
 			dispersion.append(0)
@@ -529,5 +564,5 @@ bbb = cutWithGaussian(aa, bb, spike = 223, sigma = 10)
 bbbb = IFFT(bbb)
 # plt.plot(a, bbbb)
 plt.show()
-argsAndCompute(a, bbbb)
+args_comp(a, bbbb)
 """

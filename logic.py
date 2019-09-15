@@ -144,6 +144,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
             try:
                 return function(self)
+            
             finally:
                 QApplication.restoreOverrideCursor()
         return new_function

@@ -23,9 +23,9 @@ class Ui_SPP(object):
         self.yRef = []
         self.xtemporal = []
         self.ytemporal = []
-        self.xpoints = [[None]]*20
-        self.ypoints = [[None]]*20
-        self.delays = np.array([None]*20)
+        self.xpoints = [[None]]*30
+        self.ypoints = [[None]]*30
+        self.delays = np.array([None]*30)
         self.cid = None
         ##
         self.centralwidget = QtWidgets.QWidget(MainWindow)
