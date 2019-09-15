@@ -722,14 +722,14 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.CFF_ref.setText('2.5')
 
         #majd így bele kell vinni
-        if self.initQOD.text() =='0':
-            fit_func = cos_fit4
-        elif self.initQOD.text() == '0' and self.initFOD.text() == '0':
-            fit_func = cos_fit3
+        if self.initGDD.text() == '0' and self.initTOD.text() == '0' and self.initQOD.text() == '0' and self.initFOD.text() == '0':
+            fit_func = cos_fit1
         elif self.initTOD.text() == '0' and self.initQOD.text() == '0' and self.initFOD.text() == '0':
             fit_func = cos_fit2
-        elif self.initGDD.text() == '0' and self.initTOD.text() == '0' and self.initQOD.text() == '0' and self.initFOD.text() == '0':
-            fit_func = cos_fit1
+        elif self.initQOD.text() == '0' and self.initFOD.text() == '0':
+            fit_func = cos_fit3
+        elif self.initQOD.text() =='0':
+            fit_func = cos_fit4
         else:
             fit_func = cos_fit5
 
@@ -753,8 +753,12 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             new_fit.p0 = [float(self.CFF_c1.text()), float(self.CFF_c2.text()), float(self.CFF_b0.text()),
                           float(self.initGD.text())]
 
-        new_fit.set_initial_region(0.2, 2.4)
-        new_fit.run_loop(r_extend_by = 0.1, r_threshold = 0.85, outfunc = self.msg_output, max_tries = 10000, show_steps = True)
+        new_fit.set_initial_region(0.1, float(self.CFF_ref.text()))
+        # print(fit_func.__name__)
+        try:
+        	new_fit.run_loop(r_extend_by = 0.05, r_threshold = 0.85, outfunc = self.msg_output, max_tries = 10000, show_steps = True)
+        except Exception as e:
+        	self.msg_output(e)
         # print(new_fit.report())
 
 

@@ -53,13 +53,16 @@ class FitOptimizer(object):
 			try:
 				self.ref = np.asarray(self.ref)
 			except:
-				raise
+				pass
 		if not isinstance(self.sam, np.ndarray):
 			try:
 				self.sam = np.asarray(self.sam)
 			except:
-				raise
-		self._y_norm = (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
+				pass
+		if len(self.ref) == 0:
+			self._y_norm = self.y
+		else:
+			self._y_norm = (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 		self.func = func
 		self.p0 = [1, 1, 1, 1, 1, 1]
 		self.popt = p0
@@ -108,7 +111,7 @@ class FitOptimizer(object):
 			self.popt, self.pcov = curve_fit(self.func, self._x_curr, self._y_curr, maxfev = 200000, p0 = self.p0)
 			self.p0 = self.popt 
 		except RuntimeError:
-			self.p0[:3] = self.popt[:3] + np.random.normal(0, 100, self.popt.shape-3)
+			self.p0[:3] = self.popt[:3] + np.random.normal(0, 100, len(self.popt)-3)
 			self.popt, self.pcov = curve_fit(self.func, self._x_curr, self._y_curr, maxfev = 200000, p0 = self.p0)
 
 
@@ -169,7 +172,7 @@ class FitOptimizer(object):
 				outfunc('Currect tries:{}'.format(self.counter))
 			if self._make_fit() == True:
 				self.show_fit(50, self.obj)
-				outfunc('The overall fit goodness is:{}'.format(self._fit_goodness()))
+				# outfunc('The overall fit goodness is:{}'.format(self._fit_goodness()))
 				outfunc('The params were:{}'.format(self.popt))
 				# print('steps :', self.counter)
 				break
