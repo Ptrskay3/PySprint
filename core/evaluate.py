@@ -359,8 +359,8 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_poin
 
 	"""
 	# TODO: BOUNDS WILL BE SET ACCORDINGLY  ..
-	bounds=((-100, -1000, -1000, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf), 
-		    (100, 1000, 1000, np.inf, np.inf, np.inf, np.inf, np.inf))
+	# bounds=((-1000, -10000, -10000, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf), 
+		    # (1000, 10000, 10000, np.inf, np.inf, np.inf, np.inf, np.inf))
 	if len(initSpectrumY) > 0 and len(referenceArmY) > 0 and len(sampleArmY) > 0:
 		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
 		Ydata = np.asarray(Ydata)
@@ -374,7 +374,7 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_poin
 	Xdata = np.asarray(initSpectrumX)
 	#TODO: replace with lmfit
 	try:  
-		popt, pcov = curve_fit(cosFitForPMCFF, Xdata-ref_point, Ydata, p0, maxfev = 8000, bounds = bounds)
+		popt, pcov = curve_fit(cosFitForPMCFF, Xdata-ref_point, Ydata, p0, maxfev = 8000)
 		dispersion = np.zeros_like(popt)[:-3]
 		for num in range(len(popt)-3):
 			dispersion[num] = popt[num+3]/factorial(num)

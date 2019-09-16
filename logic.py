@@ -699,7 +699,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.msg_output(e)
 
 ###################################### UNDER_DEV ###############################
-    
+    @waiting_effects
     def cff_fit_optimizer(self):
         self.redraw_graph()
         if self.initGD.text() == '':
@@ -756,13 +756,46 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         new_fit.set_initial_region(float(self.cff_init.text()), float(self.cff_cent.text()))
         # print(fit_func.__name__)
         try:
-            new_fit.run_loop(r_extend_by = float(self.settings.value('cff_extend')), 
+            params = new_fit.run_loop(r_extend_by = float(self.settings.value('cff_extend')), 
         		             r_threshold = float(self.settings.value('cff_threshold')), 
         		             outfunc = self.msg_output, 
         		             max_tries = float(self.settings.value('cff_maxfev')))
+            try:
+                self.CFF_c1.setText(str(params[0]))
+            except:
+                pass
+            try:
+                self.CFF_c2.setText(str(params[1]))
+            except:
+                pass
+            try:
+                self.CFF_b0.setText(str(params[2]))
+            except:
+                pass           
+            try:
+                self.initGD.setText(str(params[3]))
+            except:
+                pass
+            try:
+                self.initGDD.setText(str(params[4]/2))
+            except:
+                self.initGDD.setText('0')
+            try:
+                self.initTOD.setText(str(params[5]/6))
+            except:
+                self.initTOD.setText('0')
+            try:
+                self.initFOD.setText(str(params[6]/24))
+            except:
+                self.initFOD.setText('0')
+            try:
+                self.initQOD.setText(str(params[7]/120))
+            except:
+                self.initQOD.setText('0')
+
         except Exception as e:
         	self.msg_output('{}\n Optimal parameters could not be estimated.'.format(str(e)))
-        # print(new_fit.report())
+
 
 
 

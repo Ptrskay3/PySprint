@@ -64,7 +64,6 @@ class FitOptimizer(object):
 		else:
 			self._y_norm = (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 		self.func = func
-		# self.p0 = [1, 1, 1, 1, 1, 1]
 		self.popt = p0
 		self._init_set = False
 		self.counter = 0
@@ -84,7 +83,6 @@ class FitOptimizer(object):
 			self.lower_bound = 0
 		if self.upper_bound > len(self.x):
 			self.upper_bound = len(self.x)
-
 		self._x_curr = self.x[self.lower_bound:self.upper_bound]
 		self._y_curr = self._y_norm[self.lower_bound:self.upper_bound]
 		
@@ -136,67 +134,40 @@ class FitOptimizer(object):
 	
 	def show_fit(self, time = 2, obj = None):
 		try:
-			# self.obj.plot(self.x, self._y_norm,'k',label = 'Original')
-			# self.obj.pause(time)
 			self.obj.axes.plot(self._x_curr, self._y_curr, 'k-', label = 'Affected data')
 			self.obj.axes.plot(self._x_curr, self.func(self._x_curr, *self.popt), 'r--', label = 'Fit')
-			# obj.grid()
-			# obj.legend()
 			self.obj.draw()
-			# self.obj.show()
-			# self.obj.pause(time)
-
-			# self.obj.axes.clear()
-			# obj.show()
 		except:
-			# print('a')
 			pass
-			# plt.figure()
-			# plt.plot(self._x_curr, self._y_curr)
-			# plt.show()
-			# print('passed..')
+
 
 	def run_loop(self, r_extend_by, r_threshold, outfunc, max_tries = 1000, show_steps = False):
 		if self._init_set == False:
 			raise ValueError('Set the initial conditions.')
 		self._make_fit()
-		# self._perturb_param(0)
 		self.show_fit(self.obj)
-		# good_step = 0
 		while self._fit_goodness() > r_threshold:
-			# good_step += 1
 			self._extend_region(r_extend_by)
 			self._make_fit()
-			# outfunc(str(self.counter))
-			# if show_steps:
-				# self.show_fit(self.obj)
 			self.counter +=1
-			# if self.counter % 1000 == 0:
-				# outfunc('Currect tries:{}'.format(self.counter))
 			if self._make_fit() == True:
 				self.show_fit(50, self.obj)
-				# outfunc('The overall fit goodness is:{}'.format(self._fit_goodness()))
-				outfunc('The params were:{}'.format(self.popt))
-				# print('steps :', self.counter)
+				outfunc('The params were:{}\n'.format(self.popt))
+				return self.popt
 				break
 			if self.counter == max_tries:
 				self.show_fit(50, self.obj)
 				outfunc('Max tries ({}) reached.. try another initial params.\n You can set the bounds at Edit --> Settings.'.format(max_tries))
+				return np.zeros_like(self.popt)
 				break
 				
 		while self._fit_goodness() < r_threshold:
 			self._make_fit()
-			# self._perturb_param(good_step+1)
-			# outfunc(str(self.counter))
-
 			self.counter +=1
-			# if self.counter % 1000 == 0:
-				# outfunc('Currect tries:{}'.format(self.counter))
-			# if counter % 50 == 0:
-				# self.show_fit()
 			if self.counter == max_tries:
 				self.show_fit(50, self.obj)
 				outfunc('Max tries ({}) reached.. try another initial params.\n You can set the bounds at Edit --> Settings.'.format(max_tries))
+				return np.zeros_like(self.popt)
 				self.popt = []
 				break
 	
