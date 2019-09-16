@@ -168,7 +168,7 @@ class FitOptimizer(object):
 				self.show_fit(50, self.obj)
 				outfunc('Max tries ({}) reached.. try another initial params.\n You can set the bounds at Edit --> Settings.'.format(max_tries))
 				return np.zeros_like(self.popt)
-				self.popt = []
+				# self.popt = []
 				break
 	
 	def report(self):
