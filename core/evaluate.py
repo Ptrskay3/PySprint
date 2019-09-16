@@ -241,17 +241,20 @@ def findNearest(array, value):
     return array[idx], idx
 
 
+def cos_fit1(x,c0, c1, b0, b1):
+	return c0 + c1*np.cos(b0 + b1*x)
 
-def cosFitForPMCFF(x,c0, c1, b0, b1, b2, b3, b4, b5):
-	"""
-	Auxiliary function for Phase Modulated Cosine Function Fit 
-	b1 = GD
-	b2 = GDD / 2
-	b3 = TOD / 6
-	b4 = FOD / 24
-	b5 = QOD / 120
-	"""
-	return c0 + c1*np.cos(b0 + b1*x + b2*x**2 + b3*x**3 +b4*x**4 + b5*x**5)
+def cos_fit2(x,c0, c1, b0, b1, b2):
+	return c0 + c1*np.cos(b0 + b1*x + b2*x**2)
+
+def cos_fit4(x,c0, c1, b0, b1, b2, b3, b4):
+	return c0 + c1*np.cos(b0 + b1*x + b2*x**2 + b3*x**3 + b4*x**4)
+
+def cos_fit5(x,c0, c1, b0, b1, b2, b3, b4, b5):
+	return c0 + c1*np.cos(b0 + b1*x + b2*x**2 + b3*x**3 + b4*x**4 + b5*x**5)
+
+def cos_fit3(x,c0, c1, b0, b1, b2, b3):
+	return c0 + c1*np.cos(b0 + b1*x + b2*x**2 + b3*x**3)
 
 
 
@@ -373,8 +376,22 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_poin
 
 	Xdata = np.asarray(initSpectrumX)
 	#TODO: replace with lmfit
-	try:  
-		popt, pcov = curve_fit(cosFitForPMCFF, Xdata-ref_point, Ydata, p0, maxfev = 8000)
+	try:
+		if p0[-1] == 0 and p0[-2] == 0 and p0[-3] == 0 and p0[-4] == 0:
+			_funct = cos_fit1
+			p0 = p0[:-4]
+		elif p0[-1] == 0 and p0[-2] == 0 and p0[-3] == 0:
+			_funct = cos_fit2
+			p0 = p0[:-3]
+		elif p0[-1] == 0 and p0[-2] == 0:
+			_funct = cos_fit3
+			p0 = p0[:-2]
+		elif p0[-1] == 0:
+			_funct = cos_fit4
+			p0 = p0[:-1]
+		else:
+			_funct = cos_fit5
+		popt, pcov = curve_fit(_funct, Xdata-ref_point, Ydata, p0, maxfev = 8000)
 		dispersion = np.zeros_like(popt)[:-3]
 		for num in range(len(popt)-3):
 			dispersion[num] = popt[num+3]/factorial(num)
@@ -385,7 +402,7 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_poin
 		# plt.legend()
 		# plt.grid()
 		# plt.show()
-		return dispersion, cosFitForPMCFF(Xdata-ref_point, *popt)
+		return dispersion, _funct(Xdata-ref_point, *popt)
 	except RuntimeError:
 		raise ValueError('Max tries reached.. \n Parameters could not be estimated.')
 
