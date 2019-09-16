@@ -106,8 +106,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.printCheck.setToolTip('Include lmfit report in the log.')
         self.resize(self.settings.value('main_size', QtCore.QSize(1800, 921)))
         self.move(self.settings.value('main_pos', QtCore.QPoint(50, 50)))
-        # self.CFF_fitnow.clicked.connect(self.cff_fit)
-        self.CFF_fitnow.clicked.connect(self.cff_fit_optimizer)
+        self.CFF_fitnow.clicked.connect(self.cff_fit)
+        self.cff_autofit.clicked.connect(self.cff_fit_optimizer)
         QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+G"), self, self.open_generator)
 
 
@@ -699,7 +699,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.msg_output(e)
 
 ###################################### UNDER_DEV ###############################
-
+    
     def cff_fit_optimizer(self):
         self.redraw_graph()
         if self.initGD.text() == '':
@@ -753,12 +753,15 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             new_fit.p0 = [float(self.CFF_c1.text()), float(self.CFF_c2.text()), float(self.CFF_b0.text()),
                           float(self.initGD.text())]
 
-        new_fit.set_initial_region(0.1, float(self.CFF_ref.text()))
+        new_fit.set_initial_region(float(self.cff_init.text()), float(self.cff_cent.text()))
         # print(fit_func.__name__)
         try:
-        	new_fit.run_loop(r_extend_by = 0.05, r_threshold = 0.85, outfunc = self.msg_output, max_tries = 10000, show_steps = True)
+            new_fit.run_loop(r_extend_by = float(self.settings.value('cff_extend')), 
+        		             r_threshold = float(self.settings.value('cff_threshold')), 
+        		             outfunc = self.msg_output, 
+        		             max_tries = float(self.settings.value('cff_maxfev')))
         except Exception as e:
-        	self.msg_output(e)
+        	self.msg_output('{}\n Optimal parameters could not be estimated.'.format(str(e)))
         # print(new_fit.report())
 
 
@@ -1272,6 +1275,9 @@ class SettingsWindow(QtWidgets.QMainWindow, Ui_SettingsWindow):
         self.def_TOD_std.setText(self.settings.value('TOD_std'))
         self.def_FOD_std.setText(self.settings.value('FOD_std'))
         self.def_QOD_std.setText(self.settings.value('QOD_std'))
+        self.cff_threshold.setText(self.settings.value('cff_threshold'))
+        self.cff_maxfev.setText(self.settings.value('cff_maxfev'))
+        self.cff_extend.setText(self.settings.value('cff_extend'))
 
         self.pushButton_2.clicked.connect(self.reset_event)
         self.pushButton_3.clicked.connect(self.save_event)
@@ -1290,6 +1296,9 @@ class SettingsWindow(QtWidgets.QMainWindow, Ui_SettingsWindow):
         self.settings.setValue('QOD_std', self.def_QOD_std.text())
         self.settings.setValue('size', self.size())
         self.settings.setValue('pos', self.pos())
+        self.settings.setValue('cff_threshold',self.cff_threshold.text())
+        self.settings.setValue('cff_maxfev',self.cff_maxfev.text())
+        self.settings.setValue('cff_extend',self.cff_extend.text())
         e.accept()
 
     def reset_event(self):
@@ -1303,6 +1312,9 @@ class SettingsWindow(QtWidgets.QMainWindow, Ui_SettingsWindow):
         self.def_TOD_std.setText('0')
         self.def_FOD_std.setText('0')
         self.def_QOD_std.setText('0')
+        self.cff_threshold.setText('0.9')
+        self.cff_maxfev.setText('10000')
+        self.cff_extend.setText('0.1')
         self.label_7.setVisible(True)
 
     def save_event(self):

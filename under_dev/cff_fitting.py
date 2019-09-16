@@ -111,7 +111,10 @@ class FitOptimizer(object):
 			self.popt, self.pcov = curve_fit(self.func, self._x_curr, self._y_curr, maxfev = 200000, p0 = self.p0)
 			self.p0 = self.popt 
 		except RuntimeError:
-			self.p0[:3] = self.popt[:3] + np.random.normal(0, 100, len(self.popt)-3)
+			if len(self.popt)> 4:
+				self.p0[:3] = self.popt[:3] + np.random.normal(0, 100, len(self.popt)-3)
+			else:
+				self.p0 = self.popt + np.random.normal(0,100, len(self.popt))
 			self.popt, self.pcov = curve_fit(self.func, self._x_curr, self._y_curr, maxfev = 200000, p0 = self.p0)
 
 
