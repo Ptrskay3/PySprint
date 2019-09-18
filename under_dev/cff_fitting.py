@@ -1,7 +1,6 @@
 """
 NOT PART OF THE MAIN PROGRAM YET.
 CURRENTLY POORLY WRITTEN, BUT IT WORKS.. I WILL UPDATE IT SOON.
-
 """
 
 import numpy as np 
@@ -34,7 +33,7 @@ def cos_fit3(x,c0, c1, b0, b1, b2, b3):
 
 class FitOptimizer(object):
 
-	def __init__(self, x, y, ref, sam, func = None, p0 = [], outfunc= None):
+	def __init__(self, x, y, ref, sam, func = None, p0 = None, outfunc= None):
 		self.x = x
 		self.y = y
 		self.ref = ref
@@ -64,11 +63,15 @@ class FitOptimizer(object):
 		else:
 			self._y_norm = (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 		self.func = func
-		self.popt = p0
+		if p0 is None:
+			self.p0 = []
+		else:
+			self.p0 = p0
+		self.popt = self.p0
 		self._init_set = False
 		self.counter = 0
-		self.obj = None
-		self.outfunc = None
+		# self.obj = None
+		# self.outfunc = None
 
 
 	def set_initial_region(self, percent, center):
@@ -186,16 +189,3 @@ class FitOptimizer(object):
 # f.run_loop(r_extend_by = 0.1, r_threshold = 0.85,outfunc = print, max_tries = 10000, show_steps = True)
 # parameters = f.report()
 # print(parameters)
-
-
-
-
-
-
-
-
-
-
-
-
-
