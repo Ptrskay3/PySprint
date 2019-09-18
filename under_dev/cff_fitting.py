@@ -88,6 +88,7 @@ class FitOptimizer(object):
 		
 
 	def _extend_region(self, extend_by = 0.2):
+		""" Extends region of fit"""
 		self.new_lower = np.floor(self.lower_bound - extend_by*len(self.x))
 		self.new_upper = np.floor(self.upper_bound + extend_by*len(self.x))
 		self.new_lower = self.new_lower.astype(int)
@@ -132,7 +133,7 @@ class FitOptimizer(object):
 		return 1 - (ss_res / ss_tot)
 
 	
-	def show_fit(self, time = 2, obj = None):
+	def show_fit(self, obj = None):
 		try:
 			self.obj.axes.plot(self._x_curr, self._y_curr, 'k-', label = 'Affected data')
 			self.obj.axes.plot(self._x_curr, self.func(self._x_curr, *self.popt), 'r--', label = 'Fit')
@@ -151,12 +152,12 @@ class FitOptimizer(object):
 			self._make_fit()
 			self.counter +=1
 			if self._make_fit() == True:
-				self.show_fit(50, self.obj)
+				self.show_fit(self.obj)
 				outfunc('The params were:{}\n'.format(self.popt))
 				return self.popt
 				break
 			if self.counter == max_tries:
-				self.show_fit(50, self.obj)
+				self.show_fit(self.obj)
 				outfunc('Max tries ({}) reached.. try another initial params.\n You can set the bounds at Edit --> Settings.'.format(max_tries))
 				return np.zeros_like(self.popt)
 				break
@@ -165,12 +166,13 @@ class FitOptimizer(object):
 			self._make_fit()
 			self.counter +=1
 			if self.counter == max_tries:
-				self.show_fit(50, self.obj)
+				self.show_fit(self.obj)
 				outfunc('Max tries ({}) reached.. try another initial params.\n You can set the bounds at Edit --> Settings.'.format(max_tries))
 				return np.zeros_like(self.popt)
 				# self.popt = []
 				break
 	
+
 	def report(self):
 		return self.popt, self.counter
 	
