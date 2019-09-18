@@ -48,6 +48,7 @@ conda install -c dsdale24 pyqt5
 ```
 Optional packages:
 * [lmfit](https://lmfit.github.io/lmfit-py/), numdifftools
+
 With command line:
 ```sh
 $ pip install lmfit
