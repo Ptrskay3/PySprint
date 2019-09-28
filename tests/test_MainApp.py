@@ -16,9 +16,9 @@ from core import loading
 class TestMainApp(unittest.TestCase):
 
 	def setUp(self):
-		self.x, self.y, self.v, self.w = np.loadtxt('method_test_w_arms.txt', 
-													delimiter = ',', unpack = True)
-
+		# self.x, self.y, self.v, self.w = np.loadtxt('method_test_w_arms.txt', 
+													# delimiter = ',', unpack = True)
+		pass
 	def tearDown(self):
 		pass
 
