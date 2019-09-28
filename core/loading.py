@@ -48,7 +48,10 @@ def read_data(file):
 	initSpectrumY = np.array([])
 	ref = np.array([])
 	sam = np.array([])
-	df = pd.read_csv(file)
+	try:
+		df = pd.read_csv(file)
+	except FileNotFoundError:
+		raise FileNotFoundError('File does not exist.')
 	if len(df.columns) == 2:
 		test = False
 	else:
@@ -74,10 +77,19 @@ def read_data(file):
 			sam = df.samY.values
 			ref = df.refY.values
 		else:
-			df = pd.read_csv(file, header = None)
-			df.drop(df.columns[2:], axis = 1, inplace=True)
+			length = len(df.columns) 
+			df[df.columns] = df[df.columns].apply(pd.to_numeric, errors='coerce', axis=1)
+			to_add = ['{}'.format(_) for _ in range(length-3)]
+			names = ['x','y','ref', 'sam']
+			names.extend(to_add)
+			df = pd.read_csv(file, header = None, names = names)
+			df.drop(df.columns[4:], axis = 1, inplace=True)
+			df = df.dropna(how = 'any', axis = 0)
 			initSpectrumX = df.x.values
 			initSpectrumY = df.y.values
+			ref = df.ref.values
+			sam = df.sam.values
+
 
 	df[df.columns] = df[df.columns].apply(pd.to_numeric, errors='coerce', axis=1)
 	df = df.dropna(how = 'any', axis = 0)
@@ -123,6 +135,7 @@ def read_data(file):
 			except:
 				pass
 
+
 	if len(initSpectrumX) == 0:
 		try:
 			initSpectrumX = df.iloc[:,0].values
@@ -158,7 +171,7 @@ def read_data(file):
 	return initSpectrumX, initSpectrumY, ref, sam
 
 
-# x,y,reference,sample = read_data('examples/KURVA.txt')
+# x,y,reference,sample = read_data('')
 
 # print(x[:3])
 # print(y[:3])

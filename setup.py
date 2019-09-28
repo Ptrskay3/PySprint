@@ -21,7 +21,8 @@ setuptools.setup(
         'numpy',
         'scipy', 
         'matplotlib',
-        'pandas', 
+        'pandas',
+        'matplotlib', 
         'lmfit'
       ],
 
