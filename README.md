@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Ptrskay3/Interferometry.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)
+
 # Interferometry [2019]
 
 
