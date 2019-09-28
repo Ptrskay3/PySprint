@@ -1,7 +1,6 @@
 # Disable sudo to speed up the build
 sudo: false
 
-os: windows
 
 # Set the build language to Python
 language: python
