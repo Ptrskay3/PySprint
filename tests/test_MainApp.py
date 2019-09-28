@@ -41,8 +41,6 @@ class TestMainApp(unittest.TestCase):
 			self.x, self.y, self.v, self.w = loading.read_data('doesnt_exist.txt')
 
 
-
-
 if __name__ == '__main__':
 	unittest.main()
 		
