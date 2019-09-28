@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import QApplication
 sys.path.append('..')
 # sys.modules['lmfit']=None
 # import lmfit
+from core import evaluate
 
 class TestMainApp(unittest.TestCase):
 

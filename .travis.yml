@@ -8,6 +8,9 @@ language: python
 # Set the python version to 2.7
 python: 3.6
 
+before_install:
+  - "export PYTHONPATH=$PYTHONPATH:$(pwd)"
+
 install:
   - pip install -r requirements.txt
 
