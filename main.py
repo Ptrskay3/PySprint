@@ -3,7 +3,7 @@ from logic import MainProgram
 try:
 	from PyQt5 import QtWidgets
 except ImportError:
-	print('PyQt5 is essential to run this program.')
+	print('PyQt5 is essential for the UI. Try using the API instead.')
 
 def main():
     app = QtWidgets.QApplication(sys.argv)

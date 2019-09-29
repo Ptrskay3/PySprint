@@ -1,6 +1,7 @@
-[![Build Status](https://travis-ci.org/Ptrskay3/Interferometry.svg?branch=master)](https://travis-ci.org/Ptrskay3/Interferometry)
 
 # Interferometry [2019]
+[![Build Status](https://travis-ci.org/Ptrskay3/Interferometry.svg?branch=master)](https://travis-ci.org/Ptrskay3/Interferometry)
+
 
 
 Interferometry is a UI for interferogram evaluation. Under construction.

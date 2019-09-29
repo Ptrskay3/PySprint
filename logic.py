@@ -25,11 +25,7 @@ from core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, 
 from core.edit_features import savgol, find_peak, convolution, interpolate_data, cut_data, find_closest#, cwt
 from core.loading import read_data
 from core.generator import generatorFreq, generatorWave
-
-
-"""UNDER DEV"""
-from under_dev.cff_fitting import FitOptimizer, cos_fit1, cos_fit2, cos_fit3, cos_fit5, cos_fit4
-
+from core.cff_fitting import FitOptimizer, cos_fit1, cos_fit2, cos_fit3, cos_fit5, cos_fit4
 
 
 class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
@@ -698,7 +694,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         except Exception as e:
             self.msg_output(e)
 
-###################################### UNDER_DEV ###############################
+
     @waiting_effects
     def cff_fit_optimizer(self):
         self.redraw_graph()
@@ -721,7 +717,6 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         if self.CFF_ref.text() == '':
             self.CFF_ref.setText('2.5')
 
-        #majd így bele kell vinni
         if self.initGDD.text() == '0' and self.initTOD.text() == '0' and self.initQOD.text() == '0' and self.initFOD.text() == '0':
             fit_func = cos_fit1
         elif self.initTOD.text() == '0' and self.initQOD.text() == '0' and self.initFOD.text() == '0':
@@ -820,7 +815,6 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     #     self.redraw_graph()
     #     self.tutorial1 = QMessageBox.about(self, "Tutorial", "I loaded in some example data for you. You can manipulate the data on the right panel and use the methods below. ")
 
-################################## UNDER DEV #########################################
 
 class HelpWindow(QtWidgets.QMainWindow, Help):
     """ Class for the help window."""
