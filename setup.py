@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 
 setup(
-    name="Interferometry-PtrSkay",
+    name="Interferometry",
     version="0.0.1",
     author="Péter Leéh",
     author_email="leeh123peter@gmail.com",
@@ -16,7 +16,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Ptrskay3/Interferometry",
-    packages=['Interferometry'],
+    packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
         "Development Status :: 2 - Pre-Alpha",
