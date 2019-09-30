@@ -21,7 +21,7 @@ def _disp(x ,GD=0, GDD=0, TOD=0, FOD=0, QOD=0):
 
 
 def generatorFreq(start, stop, center, delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1,
-				  delimiter=',',pulseWidth=0.02, includeArms=False):
+				  delimiter=',',pulseWidth=10, includeArms=False):
 	_ensure_input(start, stop, center, resolution)
 	omega0 = center 
 	window = (8*np.log(2))/(pulseWidth**2)
@@ -49,7 +49,7 @@ def generatorFreq(start, stop, center, delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, 
 #intenzitásarány
 
 def generatorWave(start, stop, center ,delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1, 
-				  delimiter=',',pulseWidth=0.02, includeArms=False):
+				  delimiter=',',pulseWidth=10, includeArms=False):
 	_ensure_input(start, stop, center, resolution)
 	omega0 = (2*np.pi*C_LIGHT)/center 
 	window = (8*np.log(2))/(pulseWidth**2) 
