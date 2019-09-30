@@ -119,8 +119,11 @@ class Dataset(object):
 	def is_normalized(self):
 		return self._is_normalized
 	
-	def savgol(self):
-		pass
+	def savgol_fil(self, window=101, order=3):
+		self.x, self.y_norm = savgol(self.x, self.y, self.ref, self.sam, window = window, order = order)
+		self.ref = []
+		self.sam = []
+		print('Savitzky-Golay filter done with window length {} and fit order {}'.format(window, order))
 
 	def cut(self):
 		pass

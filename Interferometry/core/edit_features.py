@@ -33,7 +33,7 @@ def savgol(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, window=101, 
 		except Exception as e:
 			print(e)
 	else:
-		pass
+		raise ValueError('window must be bigger than order (currently {}/{})'.format(window, order))
 
 # def cwt(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax=1, proMin=1, threshold=0.1):   
 # 	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:

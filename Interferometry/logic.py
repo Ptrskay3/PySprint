@@ -631,8 +631,10 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                                    self.settings.value('FOD_std'), self.settings.value('QOD_std')]
             self.msg_output('Using FFT method.')
             for item in range(len(disp)):
+                
                 self.logOutput.insertPlainText(' '+ labels[item] +' =  ' + str(float(disp[item])-float(calibrate_label[item])) +' +/- ' 
                                                    + str(float(disp_std[item]) + float(calibrate_std_label[item]) ) + ' 1/fs^'+str(item+1)+'\n')
+
 
         if  self.methodWidget.currentIndex() == 0:
             self.msg_output('Please use the interface for SPP method.')
