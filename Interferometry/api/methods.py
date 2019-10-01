@@ -11,7 +11,7 @@ sys.path.append('..')
 from core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, gaussian_window , ifft_method, spp_method, args_comp
 from core.edit_features import savgol, find_peak, convolution, cut_data, find_closest
 from core.generator import generatorFreq, generatorWave
-from core.cff_fitting import FitOptimizer, cos_fit1, cos_fit2, cos_fit3, cos_fit5, cos_fit4
+# from core.cff_fitting import FitOptimizer, cos_fit1, cos_fit2, cos_fit3, cos_fit5, cos_fit4
 
 
 class DatasetError(Exception):
@@ -123,7 +123,6 @@ class Dataset(object):
 		self.x, self.y_norm = savgol(self.x, self.y, self.ref, self.sam, window = window, order = order)
 		self.ref = []
 		self.sam = []
-		print('Savitzky-Golay filter done with window length {} and fit order {}'.format(window, order))
 
 	def cut(self):
 		pass

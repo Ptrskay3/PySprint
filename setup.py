@@ -6,9 +6,8 @@ except ImportError:
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-
 setup(
-    name="Interferometry",
+    name="interferometry",
     version="0.0.1",
     author="Péter Leéh",
     author_email="leeh123peter@gmail.com",
