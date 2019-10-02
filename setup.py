@@ -6,9 +6,15 @@ except ImportError:
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+
+MAJOR = 0
+MINOR = 0
+MICRO = 2
+VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
+
 setup(
     name="interferometry",
-    version="0.0.1",
+    version=VERSION,
     author="Péter Leéh",
     author_email="leeh123peter@gmail.com",
     description="UI for spectrally refined interferometry",
@@ -19,6 +25,10 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "Development Status :: 2 - Pre-Alpha",
+        "Intended Audience :: Education",
+        "Intended Audience :: Science/Research",
+        "Topic :: Scientific/Engineering :: Physics",
+        "Topic :: Scientific/Engineering :: Optics"
     ],
     install_requires=[
         'numpy',

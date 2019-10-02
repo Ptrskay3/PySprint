@@ -71,11 +71,11 @@ class Dataset(object):
 	def __init__(self, x, y, ref=None, sam=None):
 		self.x = x
 		self.y = y
-		if self.ref is None:
+		if ref is None:
 			self.ref = []
 		else:
-			self.ref = ref
-		if self.sam is None:
+			self.ref = ref 
+		if sam is None:
 			self.sam = []
 		else:
 			self.sam = sam
@@ -112,8 +112,14 @@ class Dataset(object):
 
 	
 	def __str__(self):
-		string = "{}, {}, {}, {}\n{}, {}, {}, {}".format(self.x[0], self.y[0], self.ref[0], self.sam[0], self.x[1], self.y[1], self.ref[1], self.sam[1])
+		try:
+			string = "{}, {}, {}, {}\n{}, {}, {}, {}".format(self.x[0], self.y[0], self.ref[0], self.sam[0], self.x[1], self.y[1], self.ref[1], self.sam[1])
+		except:
+			string = "{}, {}\n{}, {}".format(self.x[0], self.y[0], self.x[1], self.y[1])
 		return string
+
+	def __repr__(self):
+		 return 'Dataset(x = %s, y = %s, ref = %s, sam = %s)' % (self.x, self.y, self.ref, self.sam)
 
 	@property
 	def is_normalized(self):
@@ -123,6 +129,7 @@ class Dataset(object):
 		self.x, self.y_norm = savgol(self.x, self.y, self.ref, self.sam, window = window, order = order)
 		self.ref = []
 		self.sam = []
+		
 
 	def cut(self):
 		pass
@@ -138,6 +145,7 @@ class Dataset(object):
 		plt.plot(self.x, self.y_norm)
 		plt.grid()
 		plt.show()
+
 
 
 class MinMaxMethod(Dataset):
