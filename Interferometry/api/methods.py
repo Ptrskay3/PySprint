@@ -41,16 +41,16 @@ class Generator(object):
 
 	def generate_freq(self):
 		self.x, self.y, self.ref, self.sam = generatorFreq(self.start, self.stop, self.center, self.delay, self.GD,
-															    self.GDD, self.TOD, self.FOD, self.QOD,
-						   										self.resolution, self.delimiter, self.pulseWidth, self.includeArms)
+														   self.GDD, self.TOD, self.FOD, self.QOD,
+						   								   self.resolution, self.delimiter, self.pulseWidth, self.includeArms)
 		if len(self.ref) != 0:
 			self.y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 
 
 	def generate_wave(self):
 		self.x, self.y, self.ref, self.sam = generatorWave(self.start, self.stop, self.center, self.delay, self.GD,
-															    self.GDD, self.TOD, self.FOD, self.QOD,
-						   										self.resolution, self.delimiter, self.pulseWidth, self.includeArms)
+														   self.GDD, self.TOD, self.FOD, self.QOD,
+						   								   self.resolution, self.delimiter, self.pulseWidth, self.includeArms)
 		if len(self.ref) != 0:
 			self.y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 			
@@ -113,7 +113,8 @@ class Dataset(object):
 	
 	def __str__(self):
 		try:
-			string = "{}, {}, {}, {}\n{}, {}, {}, {}".format(self.x[0], self.y[0], self.ref[0], self.sam[0], self.x[1], self.y[1], self.ref[1], self.sam[1])
+			string = "{}, {}, {}, {}\n{}, {}, {}, {}".format(self.x[0], self.y[0], self.ref[0], self.sam[0],
+			                                                 self.x[1], self.y[1], self.ref[1], self.sam[1])
 		except:
 			string = "{}, {}\n{}, {}".format(self.x[0], self.y[0], self.x[1], self.y[1])
 		return string
@@ -145,7 +146,6 @@ class Dataset(object):
 		plt.plot(self.x, self.y_norm)
 		plt.grid()
 		plt.show()
-
 
 
 class MinMaxMethod(Dataset):
