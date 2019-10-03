@@ -41,16 +41,16 @@ class Generator(object):
 
 	def generate_freq(self):
 		self.x, self.y, self.ref, self.sam = generatorFreq(self.start, self.stop, self.center, self.delay, self.GD,
-														   self.GDD, self.TOD, self.FOD, self.QOD,
-						   								   self.resolution, self.delimiter, self.pulseWidth, self.includeArms)
+			self.GDD, self.TOD, self.FOD, self.QOD,
+			self.resolution, self.delimiter, self.pulseWidth, self.includeArms)
 		if len(self.ref) != 0:
 			self.y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 
 
 	def generate_wave(self):
 		self.x, self.y, self.ref, self.sam = generatorWave(self.start, self.stop, self.center, self.delay, self.GD,
-														   self.GDD, self.TOD, self.FOD, self.QOD,
-						   								   self.resolution, self.delimiter, self.pulseWidth, self.includeArms)
+			self.GDD, self.TOD, self.FOD, self.QOD,
+			self.resolution, self.delimiter, self.pulseWidth, self.includeArms)
 		if len(self.ref) != 0:
 			self.y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 			

@@ -1,11 +1,12 @@
 """
 The main logic behind the UI functions.
-
-CFF FIT CURRENTLY DISABLED, UI NEEDS NEW QLINEEDITS TO WORK PROPERLY.. FIXING IT SOON.
 """
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import (QMainWindow, QDialogButtonBox, QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QTreeWidget, QTreeWidgetItem, QAbstractItemView,
-QDialog, QPushButton, QVBoxLayout, QComboBox, QCheckBox, QLabel,QAction, qApp, QTextEdit, QSpacerItem, QSizePolicy,QHBoxLayout, QGroupBox, QTableWidgetItem)
+from PyQt5.QtWidgets import (QMainWindow, QDialogButtonBox, QApplication,
+     QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QTreeWidget,
+     QTreeWidgetItem, QAbstractItemView, QDialog, QPushButton, QVBoxLayout,
+     QComboBox, QCheckBox, QLabel,QAction, qApp, QTextEdit, QSpacerItem, 
+     QSizePolicy,QHBoxLayout, QGroupBox, QTableWidgetItem)
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, pyqtSlot, QSettings
 from PyQt5.QtGui import QIcon, QCursor
 
@@ -21,11 +22,14 @@ import pandas as pd
 from datetime import datetime
 import matplotlib
 
-from core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, gaussian_window , ifft_method, spp_method, args_comp
-from core.edit_features import savgol, find_peak, convolution, interpolate_data, cut_data, find_closest#, cwt
+from core.evaluate import min_max_method, cff_method, fft_method,
+     cut_gaussian, gaussian_window , ifft_method, spp_method, args_comp
+from core.edit_features import savgol, find_peak, convolution, 
+     interpolate_data, cut_data, find_closest#, cwt
 from core.loading import read_data
 from core.generator import generatorFreq, generatorWave
-from core.cff_fitting import FitOptimizer, cos_fit1, cos_fit2, cos_fit3, cos_fit5, cos_fit4
+from core.cff_fitting import FitOptimizer, cos_fit1, cos_fit2, cos_fit3,
+     cos_fit5, cos_fit4
 
 
 class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
