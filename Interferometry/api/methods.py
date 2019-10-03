@@ -139,7 +139,7 @@ class Dataset(object):
 		self.ref = []
 		self.sam = []
 
-	def convolution(self, std = 20):
+	def convolution(self, std=20):
 		self.x, self.y_norm = convolution(self.x, self.y, self.ref, self.sam, standev = std)
 		self.ref = []
 		self.sam = []
@@ -175,10 +175,16 @@ class CosFitMethod(Dataset):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 
+	def calculate(self):
+		pass
+
 
 class SPPMethod(Dataset):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
+
+	def calculate(self):
+		pass
 
 
 class FFTMethod(Dataset):
@@ -188,6 +194,9 @@ class FFTMethod(Dataset):
 		if self._is_normalized:
 			self.y_norm = self.y
 			self._is_normalized = False
+
+	def calculate(self):
+		pass
 		
 
 

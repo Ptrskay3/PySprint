@@ -226,10 +226,6 @@ def polynomialFit1(x, b0, b1):
 	"""
 	return b0+b1*x
 
-""" Tesing
-# a, b, c, d = np.loadtxt('examples/teszt.txt', unpack= True, delimiter=',')
-# ds, dss, res=  minMaxMethod(a,b,c,d, 2.5)
-"""
 
 
 def findNearest(array, value):
@@ -407,9 +403,6 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_poin
 		raise ValueError('Max tries reached.. \n Parameters could not be estimated.')
 
 
-
-
-
 def fft_method(initSpectrumY):
 	"""
 	Perfoms FFT on data
@@ -487,7 +480,6 @@ def cut_gaussian(initSpectrumX, initSpectrumY, spike, sigma, win_order):
 	return Ydata
 
 
-#unwrap
 
 def ifft_method(initSpectrumX, initSpectrumY, interpolate = True):
 	"""
