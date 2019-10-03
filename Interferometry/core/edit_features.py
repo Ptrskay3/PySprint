@@ -9,8 +9,6 @@ from scipy.interpolate import interp1d
 from .evaluate import findNearest
 
 
-
-
 def savgol(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, window=101, order=3):
 	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:
 		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))

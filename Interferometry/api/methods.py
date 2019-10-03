@@ -38,6 +38,7 @@ class Generator(object):
 		self.y = np.array([])
 		self.ref = np.array([])
 		self.sam = np.array([])
+		self.plotwidget = plt
 
 	def generate_freq(self):
 		self.x, self.y, self.ref, self.sam = generatorFreq(self.start, self.stop, self.center, self.delay, self.GD,
@@ -55,10 +56,10 @@ class Generator(object):
 			self.y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 			
 	def show(self):
-		plt.figure()
-		plt.plot(self.x, self.y, 'r')
-		plt.grid()
-		plt.show()
+		self.plotwidget.figure()
+		self.plotwidget.plot(self.x, self.y, 'r')
+		self.plotwidget.grid()
+		self.plotwidget.show()
 
 	def save(self, name, path=None):
 		if path == None:
@@ -109,6 +110,7 @@ class Dataset(object):
 		else:
 			self.y_norm = (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 			self._is_normalized = True
+		self.plotwidget = plt
 
 	
 	def __str__(self):
@@ -132,20 +134,25 @@ class Dataset(object):
 		self.sam = []
 		
 
-	def cut(self):
-		pass
+	def cut(self, start=-9999, stop=9999):
+		self.x, self.y_norm = cut_data(self.x, self.y, self.ref, self.sam, startValue = start, stopValue = stop)
+		self.ref = []
+		self.sam = []
 
-	def convolution(self):
-		pass
+	def convolution(self, std = 20):
+		self.x, self.y_norm = convolution(self.x, self.y, self.ref, self.sam, standev = std)
+		self.ref = []
+		self.sam = []
 
-	def detect_peak(self):
-		pass
-
+	def detect_peak(self, pmax=1, pmin=1, threshold=0.1):
+		xmax, ymax, xmin, ymin = find_peak(self.x, self.y, self.ref, self.sam, proMax = pmax, proMin = pmin, threshold=threshold)
+		return xmax, ymax, xmin, ymin
+		
 	def show(self):
-		plt.figure()
-		plt.plot(self.x, self.y_norm)
-		plt.grid()
-		plt.show()
+		self.plotwidget.figure()
+		self.plotwidget.plot(self.x, self.y_norm)
+		self.plotwidget.grid()
+		self.plotwidget.show()
 
 
 class MinMaxMethod(Dataset):
