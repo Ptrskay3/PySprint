@@ -2,7 +2,17 @@ sudo: false
 
 language: python
 
-python: 3.6
+
+python:
+    - 3.5
+    - 3.6
+    - 3.7
+
+
+env:
+    - version=minimum  
+    - version=latest
+
 
 before_install:
   - "export PYTHONPATH=$PYTHONPATH:$(pwd)"
