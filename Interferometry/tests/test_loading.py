@@ -1,19 +1,13 @@
 import sys
-import unittest
-import numpy as np
-try:
-	from PyQt5.QtTest import QTest
-except:
-	raise ImportError('PyQt5 package is missing.')
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication
 
 sys.path.append('..')
-# sys.modules['lmfit']=None
-# import lmfit
+
+import unittest
+import numpy as np
+
 from core import loading
 
-class TestMainApp(unittest.TestCase):
+class TestLoading(unittest.TestCase):
 
 	def setUp(self):
 		# self.x, self.y, self.v, self.w = np.loadtxt('method_test_w_arms.txt', 
