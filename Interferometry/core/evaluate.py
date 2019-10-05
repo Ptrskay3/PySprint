@@ -18,10 +18,9 @@ except ImportError:
 def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_point, maxx=[], minx=[], fitOrder=5, showGraph=False):
 	"""
 	Calculates the dispersion with minimum-maximum method 
-	(*CURRENTLY ACCEPTS UNITS ONLY IN PHz)
 
 	Parameters
-	__________
+	----------
 
 	initSpectrumX: array-like
 	x-axis data
@@ -42,10 +41,10 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 	degree of polynomial to fit data [1, 5]
 
 	showGraph: bool
-	True returns a matplotlib plot and pauses execution until closing the window
+	if True returns a matplotlib plot and pauses execution until closing the window
 
-	return
-	______
+	Returns
+	------
 
 	dispersion: array-like
 
@@ -257,35 +256,40 @@ def cos_fit3(x,c0, c1, b0, b1, b2, b3):
 
 
 
-def spp_method(delays, omegas, fitOrder=4): #def SPP(delays,omegas, reference, fitOrder= 4):
+def spp_method(delays, omegas, fitOrder=4): 
 	"""
 	Calculates the dispersion from SPP's positions and delays.
 	
-	Attributes:
+	Parameters
+	------
 
-	delays:
-	numpy.array-like, the time delays in fs
+	delays: array-like
+	the time delays in fs
 
-	omegas:
-	list, in form of [[SPP1, SPP2, SPP3, SPP4],[SPP1, SPP2, SPP3, SPP4], ..]
+	omegas: array-like
+	in form of [[SPP1, SPP2, SPP3, SPP4],[SPP1, SPP2, SPP3, SPP4], ..]
 	for lesser SPP cases replace elements with None:
 	[[SPP1, None, None, None],[SPP1, None, None, None], ..]
 
-	fitOrder:
+	fitOrder: int
 	order of polynomial to fit the given data
 
-	returns:
+	Returns
+	------
+	omegas_unpacked: array-like
+	x axis data
 
-	delays and SPP positions as numpy.array
+	delays_unpacked : array-like
+	y axis data
 
-	dispersion:
-	array with shape and values:[GD, GDD, TOD, FOD, QOD]
+	dispersion: array-like
+	[GD, GDD, TOD, FOD, QOD]
 
-	dispersion_std:
-	array with the standard deviation for dispersion [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
+	dispersion_std: array-like
+	[GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
 
-	bf:
-	array with best fitting curve 
+	bf: array-like
+	best fitting curve for plotting
 	"""
 
 	delays = delays[delays != np.array(None)]
@@ -338,26 +342,31 @@ def spp_method(delays, omegas, fitOrder=4): #def SPP(delays,omegas, reference, f
 def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_point=0 , p0=[1, 1, 1, 1, 1, 1, 1, 1]):
 	"""
 	Phase modulated cosine function fit method. 
-	(*CURRENTLY ACCEPTS UNITS ONLY IN PHz)
-
-	__inputs__
 	
-	initSpectrumX:
-	array with the x-axis data
 
-	initSpectrumY:
-	array with the y-axis data
+	Parameters
+	------
+	
+	initSpectrumX: array-like
+	x-axis data
 
-	referenceArmY, sampleArmY:
-	arrays containing the reference and sample arm spectra evaluated at initSpectrumX
+	initSpectrumY: array-like
+	y-axis data
 
-	p0:
-	array with the initial parameters for fitting
+	referenceArmY, sampleArmY: array-like
+	the reference and sample arm spectra evaluated at initSpectrumX
 
-	__returns__
+	p0: array-like
+	the initial parameters for fitting
 
-	dispersion:
-	array with shape and values:[GD, GDD, TOD, FOD, QOD]
+	Returns
+	------
+
+	dispersion: array-like
+	[GD, GDD, TOD, FOD, QOD]
+
+	bf: array-like
+	best fitting curve
 
 	"""
 	# TODO: BOUNDS WILL BE SET ACCORDINGLY  ..
@@ -410,21 +419,17 @@ def fft_method(initSpectrumY):
 	"""
 	Perfoms FFT on data
 
-	__inputs__
+	Parameters
+	------
 
-	initSpectrumX:
-	array with the x-axis data
-
-	initSpectrumY:
-	array with the y-axis data
+	initSpectrumY: array-like
+	y-axis data
 	
-	__returns__
-	
-	freq: 
-	array with the transformed x axis
+	Returns
+	------
 
-	yf:
-	array with the transformed y data
+	yf: array-like
+	the transformed y data
 
 	"""
 	if len(initSpectrumY) > 0:
@@ -436,19 +441,21 @@ def fft_method(initSpectrumY):
 
 def gaussian_window(t ,tau, standardDev, order):
 	"""
-	__inputs__
-	t:
-	input array
+	Parameters
+	------
+	t: array-like
+	input array to perform window on
 
-	tau :
-	float, center of gaussian window
+	tau: float
+	center of gaussian window
 
-	standardDev:
-	float, standard deviation of gaussian window
+	standardDev: float
+	standard deviation of gaussian window
 
-	__returns__
+	Returns
+	------
+	arr : array-like
 	6th order gaussian window with params above
-
 
 	"""
 	return np.exp(-(t-tau)**order/(2*standardDev**order))
@@ -457,24 +464,25 @@ def cut_gaussian(initSpectrumX, initSpectrumY, spike, sigma, win_order):
 	"""
 	Applies gaussian window with the given params.
 
-	__inputs__
+	Parameters
+	------
+	initSpectrumX: array-like
+	x-axis data
 
-	initSpectrumX:
-	array with the x-axis data
+	initSpectrumY: array-like
+	y-axis data
 
-	initSpectrumY:
-	array with the y-axis data
+	spike: float
+	center of gaussian window
 
-	spike:
-	float, center of gaussian window
+	sigma: float
+	standard deviation of gaussian window
 
-	sigma:
-	float, standard deviation of gaussian window
+	Returns
+	------
 
-	__returns__
-
-	Ydata:
-	array with windowed y values 
+	Ydata: array-like
+	the windowed y values 
 	
 	"""
 
@@ -488,15 +496,25 @@ def ifft_method(initSpectrumX, initSpectrumY, interpolate = True):
 	"""
 	Perfoms IFFT on data
 
-	__inputs__
+	Parameters
+	------
 
-	initSpectrumY:
-	array with the y-axis data
+	initSpectrumX: array-like
+	the x-axis data
+
+	initSpectrumY: array-like
+	the y-axis data
+
+	interpolate: bool
+	if True perform a linear interpolation on dataset before transforms
 	
-	__returns__
+	Returns
+	------
+	freq: array-like
+	the transformed x data
 
-	yf:
-	array with the transformed y data
+	yf: array-like
+	transformed y data
 
 	"""
 	from .edit_features import interpolate_data
@@ -511,12 +529,42 @@ def ifft_method(initSpectrumX, initSpectrumY, interpolate = True):
 	freq = scipy.fftpack.fftfreq(len(Xdata), d=(Xdata[3]-Xdata[2]))
 	return freq, yf 
 	
+
+
+
+def args_comp(initSpectrumX, initSpectrumY, fitOrder=5, showGraph=False):
+	"""
+	Calculates the phase of complex dataset then unwrap by changing deltas between 
+	values to 2*pi complement. At the end, fit a polynomial curve to determine
+	dispersion coeffs.
+
+	Parameters
+	------
+
+	initSpectrumX: array-like
+	the x-axis data
+
+	initSpectrumY: array-like
+	the y-axis data
+
+	fitOrder: int
+	degree of polynomial to fit data [1, 5]
+
+	showGrap: bool
+	if True returns a matplotlib plot and pauses execution until closing the window
 	
+	Returns
+	------
+	
+	dispersion: array-like
+	[GD, GDD, TOD, FOD, QOD]
 
-# under testing..
+	dispersion_std: array-like
+	[GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
 
+	fit_report: lmfit report object
 
-def args_comp(initSpectrumX, initSpectrumY, fitOrder = 5, showGraph=False):
+	"""
 	angles = np.angle(initSpectrumY)
 	###shifting to [0, 2pi]
 	# angles = (angles + 2 * np.pi) % (2 * np.pi)
@@ -572,12 +620,5 @@ def args_comp(initSpectrumX, initSpectrumY, fitOrder = 5, showGraph=False):
 		print(e)
 
 
-"""#TESZT
-a, b = np.loadtxt('examples/fft.txt', unpack = True, delimiter = ',')
-aa, bb = FFT(a,b)
-bbb = cutWithGaussian(aa, bb, spike = 223, sigma = 10)
-bbbb = IFFT(bbb)
-# plt.plot(a, bbbb)
-plt.show()
-args_comp(a, bbbb)
-"""
+
+

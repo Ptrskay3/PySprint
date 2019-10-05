@@ -11,7 +11,6 @@ sys.path.append('..')
 from core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, gaussian_window , ifft_method, spp_method, args_comp
 from core.edit_features import savgol, find_peak, convolution, cut_data, find_closest
 from core.generator import generatorFreq, generatorWave
-# from core.cff_fitting import FitOptimizer, cos_fit1, cos_fit2, cos_fit3, cos_fit5, cos_fit4
 
 
 class DatasetError(Exception):
@@ -56,7 +55,6 @@ class Generator(object):
 			self.y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 			
 	def show(self):
-		self.plotwidget.figure()
 		self.plotwidget.plot(self.x, self.y, 'r')
 		self.plotwidget.grid()
 		self.plotwidget.show()
@@ -149,10 +147,11 @@ class Dataset(object):
 		return xmax, ymax, xmin, ymin
 		
 	def show(self):
-		self.plotwidget.figure()
 		self.plotwidget.plot(self.x, self.y_norm)
 		self.plotwidget.grid()
 		self.plotwidget.show()
+
+
 
 
 class MinMaxMethod(Dataset):
