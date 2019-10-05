@@ -26,3 +26,4 @@ install:
 script:
   - cd Interferometry/tests
   - python test_loading.py
+  - python test_edit.py

@@ -65,7 +65,7 @@ def find_peak(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax=1,
 	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:
 		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
 	if len(initSpectrumX) == 0:
-		raise
+		raise ValueError
 	elif len(referenceArmY) == 0 or len(sampleArmY) == 0:
 		Ydata = initSpectrumY
 	Xdata = initSpectrumX
@@ -126,7 +126,7 @@ def cut_data(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, startValue
 	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:
 		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
 	elif len(initSpectrumY) == 0:
-		pass
+		raise ValueError
 	elif len(referenceArmY) == 0 or len(sampleArmY) == 0:
 		Ydata = initSpectrumY
 	Xdata = initSpectrumX
