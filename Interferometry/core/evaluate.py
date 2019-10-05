@@ -20,39 +20,42 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 	Calculates the dispersion with minimum-maximum method 
 	(*CURRENTLY ACCEPTS UNITS ONLY IN PHz)
 
-	__inputs__
+	Parameters
+	__________
 
-	initSpectrumX:
-	array with the x-axis data
+	initSpectrumX: array-like
+	x-axis data
 
-	initSpectrumY:
-	array with the y-axis data
+	initSpectrumY: array-like
+	y-axis data
 
-	referenceArmY, sampleArmY:
-	arrays containing the reference and sample arm spectra evaluated at initSpectrumX
+	referenceArmY, sampleArmY: array-like
+	reference and sample arm spectra evaluated at initSpectrumX
 
-	ref_point:
-	float, the reference point to calculate order
+	ref_point: float
+	the reference point to calculate order
 	
-	maxx and minx:
-	arrays containing the accepted minimal and maximal places (usually received from other methods)
+	maxx and minx: array-like
+	the accepted minimal and maximal places (usually received from other methods)
 
-	fitOrder:
-	int, degree of polynomial to fit data
+	fitOrder: int
+	degree of polynomial to fit data [1, 5]
 
-	showGraph:
-	bool, if True returns a matplotlib plot and pauses execution until closing the window
+	showGraph: bool
+	True returns a matplotlib plot and pauses execution until closing the window
 
-	__returns__
+	return
+	______
 
-	dispersion:
-	array with shape and values:[GD, GDD, TOD, FOD, QOD]
+	dispersion: array-like
 
-	dispersion_std:
-	array with the standard deviation for dispersion [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
+	[GD, GDD, TOD, FOD, QOD]
 
-	fit_report:
-	lmfit report object
+	dispersion_std: array-like
+	[GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
+
+	fit_report: lmfit report object
+	
 	"""
 
 	if (len(initSpectrumX) > 0) and (len(referenceArmY) > 0) and (len(sampleArmY) > 0) and (ref_point is not None):
