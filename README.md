@@ -7,7 +7,10 @@
 Interferometry is a UI for interferogram evaluation. Under construction.
 I will add an advanced description later on. 
 
-# Lastest upgrades:
+### Lastest upgrades:
+  - Added CI along with some(!) unittests
+  - Started API
+  - Numerous little fixes according to PEP8
   - Added autofit for CFF method, it will be improved later
   - Eval. methods are improved
   - Windows remember their last state, they open as they were closed
@@ -16,8 +19,8 @@ I will add an advanced description later on.
 
 ### Known issues
 * SPP Panel data storage should be rewritten
-* Evaluation methods still performing bad
-* The data loading AI sometimes produces unexpected results, currently being reviewed.
+* Evaluation methods improvement
+* The data loading AI sometimes produces unexpected results
 * There might be unnecessary imports
 * Some buttons has no effect yet.
 
@@ -25,6 +28,7 @@ I will add an advanced description later on.
 ### To-do list
 
 * ERROR HANDLING!
+* Unittests
 * Selectable units
 * Possible performance enhancement by improving algorithms
 * Possible new data manipulating features + new options for existing ones
@@ -37,7 +41,7 @@ Interferometry requires [Python 3](https://www.python.org/downloads/) to run.
 Please install the following packages:
 * [PyQt5](https://pypi.org/project/PyQt5/)
 * numpy, scipy, matplotlib, pandas
-With command line:
+
 ```sh
 $ pip install PyQt5
 $ pip install numpy
@@ -45,19 +49,19 @@ $ pip install scipy
 $ pip install pandas
 $ pip install matplotlib
 ```
-or conda run:
+or 
 ```sh
 conda install -c dsdale24 pyqt5
 ```
 Optional packages:
 * [lmfit](https://lmfit.github.io/lmfit-py/), numdifftools
 
-With command line:
+
 ```sh
 $ pip install lmfit
 $ pip install numdifftools
 ```
-or conda run:
+or 
 
 ```sh
 conda install -c conda-forge lmfit
