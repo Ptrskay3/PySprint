@@ -1,1 +1,1 @@
-from Interferometry.api.methods import *
+from methods import *

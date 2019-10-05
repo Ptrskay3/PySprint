@@ -155,16 +155,14 @@ class Dataset(object):
 
 
 class MinMaxMethod(Dataset):
-	def __init__(self, reference_point, *args, **kwargs):
+	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.xmin = []
 		self.xmax = []
-		self.reference_point = reference_point
 
-
-	def calculate(self, fit_order, show_graph = False):
+	def calculate(self, reference_point, fit_order, show_graph = False):
 		dispersion, dispersion_std, fit_report = min_max_method(
-			self.x, self.y, self.ref, self.sam, ref_point = self.reference_point,
+			self.x, self.y, self.ref, self.sam, ref_point = reference_point,
 			maxx = self.xmax, minx = self.xmin, fitOrder = fit_order, showGraph = show_graph
 			)
 		return dispersion, dispersion_std, fit_report
