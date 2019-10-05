@@ -517,7 +517,7 @@ def ifft_method(initSpectrumX, initSpectrumY, interpolate = True):
 	transformed y data
 
 	"""
-	from edit_features import interpolate_data
+	from .edit_features import interpolate_data
 	if len(initSpectrumY)>0 and len(initSpectrumX)>0:
 		Ydata = initSpectrumY
 		Xdata = initSpectrumX
@@ -569,7 +569,7 @@ def args_comp(initSpectrumX, initSpectrumY, fitOrder=5, showGraph=False):
 	###shifting to [0, 2pi]
 	# angles = (angles + 2 * np.pi) % (2 * np.pi)
 	Xdata = initSpectrumX
-	Ydata = np.unwrap(angles)
+	Ydata = np.unwrap(angles, axis = 0)
 	if fitOrder == 5:
 		fitModel = Model(polynomialFit5)
 		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1, b4 = 1, b5 = 1)
