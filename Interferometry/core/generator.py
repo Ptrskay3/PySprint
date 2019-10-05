@@ -34,7 +34,7 @@ def generatorFreq(start, stop, center, delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, 
 	relom = omega-omega0
 	i1 = np.exp(-(relom)**2/(window))
 	i2 = np.exp(-(relom)**2/(window))
-	i = i1 + i2 + 2*np.cos(_disp(relom, GD=GD, GDD=GDD, TOD=TOD, FOD=FOD, QOD=QOD)+(2*delay*omega/C_LIGHT))*np.sqrt(i1*i2) ## ####!!!!!!!!!!!!!!
+	i = i1 + i2 + 2*np.cos(_disp(relom, GD=GD, GDD=GDD, TOD=TOD, FOD=FOD, QOD=QOD)+(2*delay*omega/C_LIGHT))*np.sqrt(i1*i2) 
 	if includeArms:
 		return omega, i, i1, i2
 		# np.savetxt('examples/simulated_'+str(datetime.now().strftime("%Y_%m_%d_%H_%M_%S"))+'_frequency.txt', np.transpose([omega ,i, i1, i2]), 

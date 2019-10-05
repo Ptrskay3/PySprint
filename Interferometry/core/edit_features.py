@@ -6,7 +6,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import find_peaks, savgol_filter, gaussian, convolve #, find_peaks_cwt
 from scipy.interpolate import interp1d
-from .evaluate import findNearest
+
+
+def findNearest(array, value):
+	#Finds the nearest element to the given value in the array
+	#returns tuple: (element, element's index)
+	
+    array = np.asarray(array)
+    idx = (np.abs(value - array)).argmin()
+    return array[idx], idx
 
 
 def savgol(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, window=101, order=3):

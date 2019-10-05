@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import matplotlib.pyplot as plt
+from math import factorial
+import operator
+
 import numpy as np
+import matplotlib.pyplot as plt
+import scipy
 from scipy.optimize import curve_fit
 from scipy.signal import argrelextrema
-import scipy
-import operator
-from math import factorial
 
 try:
 	from lmfit import Model
@@ -47,7 +48,6 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 	------
 
 	dispersion: array-like
-
 	[GD, GDD, TOD, FOD, QOD]
 
 	dispersion_std: array-like
@@ -179,7 +179,7 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 			plt.show()
 		return dispersion, dispersion_std, fit_report
 	except Exception as e:
-		return e	
+		return [],[],e	
 
 
 def polynomialFit5(x, b0, b1, b2, b3, b4, b5):
@@ -517,7 +517,7 @@ def ifft_method(initSpectrumX, initSpectrumY, interpolate = True):
 	transformed y data
 
 	"""
-	from .edit_features import interpolate_data
+	from edit_features import interpolate_data
 	if len(initSpectrumY)>0 and len(initSpectrumX)>0:
 		Ydata = initSpectrumY
 		Xdata = initSpectrumX
@@ -555,7 +555,7 @@ def args_comp(initSpectrumX, initSpectrumY, fitOrder=5, showGraph=False):
 	
 	Returns
 	------
-	
+
 	dispersion: array-like
 	[GD, GDD, TOD, FOD, QOD]
 
@@ -617,8 +617,18 @@ def args_comp(initSpectrumX, initSpectrumY, fitOrder=5, showGraph=False):
 			plt.show()
 		return dispersion, dispersion_std, fit_report
 	except Exception as e:
-		print(e)
+		return [],[],e
 
 
 
-
+""" #Teszt
+a, b = np.loadtxt('ff.txt', unpack = True, delimiter = ',')
+aa, bb = ifft_method(a, b, interpolate = True)
+bbb = cut_gaussian(aa, bb, 740, 100, 6) 
+bbbb = fft_method(bbb)
+angles = np.angle(bbbb)
+angles = (angles + 2 * np.pi) % (2 * np.pi)
+c = np.unwrap(angles)
+plt.plot(aa, c, 'ro')
+plt.show()
+"""
