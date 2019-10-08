@@ -39,6 +39,9 @@ class Generator(object):
 		self.sam = np.array([])
 		self.plotwidget = plt
 
+	def __str__(self):
+		return 'Generator({}, {}, {}, delay = {},GD={}, GDD={}, TOD={}, FOD={}, QOD={}, resolution={}, delimiter={},pulseWidth={}, includeArms={}'.format(self.start, self.stop, self.center, self.delay, self.GD, self.GDD, self.TOD, self.FOD, self.QOD, self.resolution, self.delimiter, self.pulseWidth, self.includeArms)
+
 	def generate_freq(self):
 		self.x, self.y, self.ref, self.sam = generatorFreq(self.start, self.stop, self.center, self.delay, self.GD,
 			self.GDD, self.TOD, self.FOD, self.QOD,
@@ -174,24 +177,20 @@ class CosFitMethod(Dataset):
 		self.fit = None
 
 	def calculate(self, reference_point):
-		dispersion, self.toplot = cff_method(self.x, self.y, self.ref, self.sam, 
+		dispersion, self.fit = cff_method(self.x, self.y, self.ref, self.sam, 
 			ref_point = reference_point, p0 = self.params)
 		return dispersion
 
 	def plot_result(self):
 		if self.fit is not None:
-			self.plotwidget.plot(self.x, self.fit)
+			self.plotwidget.plot(self.x, self.fit, 'ko', label = 'fit')
+			self.plotwidget.legend()
 			self.show()
 		else:
 			self.show()
 
 	def current_params(self):
 		return self.params
-
-
-
-
-	
 
 
 class SPPMethod(Dataset):
