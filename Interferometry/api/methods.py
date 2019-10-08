@@ -208,8 +208,8 @@ class SPPMethod(Dataset):
 		self.de = None
 		self.bf = None
 		print('With SPP-Method x and y values have a different meaning compared to other methods.')
-		print('Make sure you put delays to y and frequencies to x:')
-		print('SPPMethod(frequencies, delays)')
+		print('\t\tMake sure you put delays to y and frequencies to x:')
+		print('\t\t\t\tSPPMethod(frequencies, delays)')
 
 	def __str__(self):
 		return '''SPPMethod({},{})'''.format(self.x, self.y)
