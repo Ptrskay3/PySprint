@@ -16,6 +16,46 @@ except ImportError:
 	_has_lmfit = False
 
 
+__all__ = ['min_max_method', 'findNearest', 'cos_fit1', 'cos_fit2', 'cos_fit3',
+		   'cos_fit4', 'cos_fit5', 'spp_method', 'cff_method', 'fft_method', 'cut_gaussian',
+		   'ifft_method', 'args_comp']
+
+def _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY):
+	"""
+	Instead of handling the inputs in every function, there is this private method.
+
+	Parameters
+	----------
+
+	initSpectrumX: array-like
+	x-axis data
+
+	initSpectrumY: array-like
+	y-axis data
+
+	referenceArmY, sampleArmY: array-like
+	reference and sample arm spectrum evaluated at initSpectrumX
+
+	Returns
+	------
+	initSpectrumX: array-like
+	unchanged x data
+
+	Ydata: array-like
+	the transformed y data
+
+	"""
+	if (len(initSpectrumX) > 0) and (len(referenceArmY) > 0) and (len(sampleArmY) > 0):
+		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
+	elif (len(referenceArmY) == 0) or (len(sampleArmY) == 0):
+		Ydata = initSpectrumY
+	elif len(initSpectrumX) == 0:
+		raise ValueError('Please load the spectrum!\n')
+	else:
+		raise TypeError('Input types are wrong.')
+	return initSpectrumX,  Ydata
+
+
 def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_point, maxx=[], minx=[], fitOrder=5, showGraph=False):
 	"""
 	Calculates the dispersion with minimum-maximum method 
@@ -56,17 +96,7 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 	fit_report: lmfit report object
 	
 	"""
-
-	if (len(initSpectrumX) > 0) and (len(referenceArmY) > 0) and (len(sampleArmY) > 0) and (ref_point is not None):
-		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
-	elif (len(referenceArmY) == 0) or (len(sampleArmY) == 0):
-		Ydata = initSpectrumY
-	elif len(initSpectrumX)== 0:
-		raise ValueError('Please load the spectrum!\n')
-	else:
-		raise ValueError('Something went wrong...')
-
-	Xdata = initSpectrumX
+	Xdata, Ydata  = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
 
 	_, SSPindex = findNearest(Xdata,ref_point)
 	if len(maxx) == 0 or len(minx) == 0:
@@ -96,8 +126,11 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 		negValues[freq] = np.pi*(freq+1)
 	x_s = np.append(relPosFreqs, relNegFreqs) 
 	y_s = np.append(posValues, negValues)
+
+	#making sure the data in right order
 	L = sorted(zip(x_s,y_s), key=operator.itemgetter(0))
 	fullXValues, fullYValues = zip(*L)
+	
 	if _has_lmfit:
 		if fitOrder == 5:
 			fitModel = Model(polynomialFit5)
@@ -231,13 +264,12 @@ def polynomialFit1(x, b0, b1):
 
 
 def findNearest(array, value):
-	#Finds the nearest element to the given value in the array
-	#returns tuple: (element, element's index)
-	
-    array = np.asarray(array)
-    idx = (np.abs(value - array)).argmin()
-    return array[idx], idx
-
+	"""
+	Finds the nearest element to the given value in the array
+	"""
+	array = np.asarray(array)
+	idx = (np.abs(value-array)).argmin()
+	return array[idx], idx
 
 def cos_fit1(x,c0, c1, b0, b1):
 	return c0 + c1*np.cos(b0 + b1*x)
@@ -372,17 +404,7 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_poin
 	# TODO: BOUNDS WILL BE SET ACCORDINGLY  ..
 	# bounds=((-1000, -10000, -10000, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf), 
 		    # (1000, 10000, 10000, np.inf, np.inf, np.inf, np.inf, np.inf))
-	if len(initSpectrumY) > 0 and len(referenceArmY) > 0 and len(sampleArmY) > 0:
-		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
-		Ydata = np.asarray(Ydata)
-	elif len(initSpectrumY) == 0:
-		raise ValueError('Please load the spectrum!\n')
-	elif len(referenceArmY) == 0 or len(sampleArmY) == 0:
-		Ydata = np.asarray(initSpectrumY)
-	else:
-		raise ValueError('No data..')
-
-	Xdata = np.asarray(initSpectrumX)
+	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
 	#TODO: replace with lmfit
 	try:
 		if p0[-1] == 0 and p0[-2] == 0 and p0[-3] == 0 and p0[-4] == 0:

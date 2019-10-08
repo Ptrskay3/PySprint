@@ -170,9 +170,28 @@ class MinMaxMethod(Dataset):
 class CosFitMethod(Dataset):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
+		self.params = [1, 1, 1, 1, 1, 1, 1, 1]
+		self.fit = None
 
-	def calculate(self):
-		pass
+	def calculate(self, reference_point):
+		dispersion, self.toplot = cff_method(self.x, self.y, self.ref, self.sam, 
+			ref_point = reference_point, p0 = self.params)
+		return dispersion
+
+	def plot_result(self):
+		if self.fit is not None:
+			self.plotwidget.plot(self.x, self.fit)
+			self.show()
+		else:
+			self.show()
+
+	def current_params(self):
+		return self.params
+
+
+
+
+	
 
 
 class SPPMethod(Dataset):
