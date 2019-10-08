@@ -26,7 +26,7 @@ class Help(QWidget):
         self.textArea.insertPlainText('created by Péter Leéh ')
         self.textArea.insertPlainText('(2019)\n\n')
         self.textArea.insertPlainText('For more detalis visit: ')
-        self.textArea.insertHtml("<a href='https://github.com/Ptrskay3/Interferometry'>GitHub</a>\n  ")
+        self.textArea.insertHtml("<a href='https://github.com/Ptrskay3/PySprint'>GitHub</a>\n  ")
         self.textArea.textCursor().insertHtml('\n\n or send an email to <b>leeh123peter@gmail.com</b>')
         self.textArea.setOpenExternalLinks(True)
         self.exbtn = QPushButton('Close', self.centralwidget)

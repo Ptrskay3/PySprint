@@ -17,7 +17,7 @@ setup(
     version=VERSION,
     author="Péter Leéh",
     author_email="leeh123peter@gmail.com",
-    description="UI for spectrally refined interferometry",
+    description="Spectrally refined interferometry for Python",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Ptrskay3/Interferometry",
@@ -36,6 +36,4 @@ setup(
         'pandas', 
         'lmfit'
       ],
-
-
 )
