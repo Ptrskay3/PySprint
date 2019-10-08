@@ -377,7 +377,7 @@ def spp_method(delays, omegas, fitOrder=4, from_raw = False):
 			pass
 		return omegas_unpacked, delays_unpacked, dispersion, dispersion_std, bf
 	except Exception as e:
-		return e
+		return [], [], [e], [], []
 
 
 def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_point=0 , p0=[1, 1, 1, 1, 1, 1, 1, 1]):

@@ -226,11 +226,14 @@ class SPPMethod(Dataset):
 			self.de = self.y
 		else:
 			self.om, self.de, dispersion, dispersion_std, self.bf = spp_method(self.y, self.x, fitOrder = fit_order, from_raw = False)
-		return dispersion, dispersion_std, bf
+		return dispersion, dispersion_std, self.bf
 
 	def plot_result(self):
 		self.plotwidget.plot(self.om, self.de, 'o')
-		self.plotwidget.plot(self.om, self.bf, 'r--')
+		try:
+			self.plotwidget.plot(self.om, self.bf, 'r--')
+		except:
+			pass
 		self.plotwidget.show()
 
 

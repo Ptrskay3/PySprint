@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
 
 MAJOR = 0
 MINOR = 0
-MICRO = 2
+MICRO = 3
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
 setup(
@@ -27,8 +27,7 @@ setup(
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Education",
         "Intended Audience :: Science/Research",
-        "Topic :: Scientific/Engineering :: Physics",
-        "Topic :: Scientific/Engineering :: Optics"
+        "Topic :: Scientific/Engineering :: Physics"        
     ],
     install_requires=[
         'numpy',
