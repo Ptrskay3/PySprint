@@ -3,6 +3,7 @@ This file is the main API to use Interferometry without the UI.
 """
 
 import sys
+import warnings
 import numpy as np
 import matplotlib.pyplot as plt 
 
@@ -14,6 +15,10 @@ from core.generator import generatorFreq, generatorWave
 
 
 class DatasetError(Exception):
+	pass
+
+
+class InterpolationWarning(UserWarning):
 	pass
 
 
@@ -136,6 +141,7 @@ class Dataset(object):
 		self.x, self.y_norm = savgol(self.x, self.y, self.ref, self.sam, window = window, order = order)
 		self.ref = []
 		self.sam = []
+		warnings.warn('Linear interpolation have been applied to data.', InterpolationWarning)
 		
 
 	def cut(self, start=-9999, stop=9999):

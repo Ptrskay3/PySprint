@@ -52,7 +52,7 @@ def _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY):
 	elif len(initSpectrumX) == 0:
 		raise ValueError('Please load the spectrum!\n')
 	else:
-		raise TypeError('Input types are wrong.')
+		raise TypeError('Input types are wrong.\n')
 	return initSpectrumX,  Ydata
 
 
@@ -303,7 +303,7 @@ def spp_method(delays, omegas, fitOrder=4, from_raw = False):
 	in form of [[SPP1, SPP2, SPP3, SPP4],[SPP1, SPP2, SPP3, SPP4], ..]
 	for lesser SPP cases replace elements with None:
 	[[SPP1, None, None, None],[SPP1, None, None, None], ..]
-	if from_raw is enabled, you must pass matching paris with delays
+	if from_raw is enabled, you must pass matching pairs with delays
 
 	fitOrder: int
 	order of polynomial to fit the given data
@@ -410,7 +410,7 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_poin
 	best fitting curve
 
 	"""
-	# TODO: BOUNDS WILL BE SET ACCORDINGLY  ..
+	# TODO: BOUNDS WILL BE SET  ..
 	# bounds=((-1000, -10000, -10000, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf), 
 		    # (1000, 10000, 10000, np.inf, np.inf, np.inf, np.inf, np.inf))
 	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
