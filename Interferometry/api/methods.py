@@ -207,28 +207,30 @@ class SPPMethod(Dataset):
 		self.om = None
 		self.de = None
 		self.bf = None
+		print('With SPP-Method x and y values have a different meaning compared to other methods.')
+		print('Make sure you put delays to y and frequencies to x:')
+		print('SPPMethod(frequencies, delays)')
 
 	def __str__(self):
-		return '''SPPMethod({},{},{},{})'''.format(self.x, self.y)
+		return '''SPPMethod({},{})'''.format(self.x, self.y)
 
 	@classmethod
-	def from_raw(cls, delays, omegas):
+	def from_raw(cls, omegas, delays):
 		cls.raw = True
-		return cls(delays, omegas)
+		return cls(omegas, delays)
 
 	def calculate(self, fit_order):
 		if self.raw:
-			_, _, dispersion, dispersion_std, self.bf = spp_method(self.x, self.y, fitOrder = fit_order, from_raw = True)
+			_, _, dispersion, dispersion_std, self.bf = spp_method(self.y, self.x, fitOrder = fit_order, from_raw = True)
 			self.om = self.x
 			self.de = self.y
 		else:
-			self.om, self.de, dispersion, dispersion_std, self.bf = spp_method(self.x, self.y, fitOrder = fit_order, from_raw = False)
+			self.om, self.de, dispersion, dispersion_std, self.bf = spp_method(self.y, self.x, fitOrder = fit_order, from_raw = False)
 		return dispersion, dispersion_std, bf
 
 	def plot_result(self):
 		self.plotwidget.plot(self.om, self.de, 'o')
 		self.plotwidget.plot(self.om, self.bf, 'r--')
-		# self.plotwidget.legend()
 		self.plotwidget.show()
 
 
@@ -241,7 +243,7 @@ class FFTMethod(Dataset):
 			self._is_normalized = False
 
 	def __str__(self):
-		return '''FFTMethod({},{},{},{})'''.format(self.x, self.y)
+		return '''FFTMethod({},{})'''.format(self.x, self.y)
 
 	def ifft(self, interpolate = True):
 		self.x, self.y = ifft_method(self.x, self.y, interpolate = interpolate)
