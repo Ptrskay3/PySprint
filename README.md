@@ -3,7 +3,8 @@
 [![Build Status](https://travis-ci.org/Ptrskay3/Interferometry.svg?branch=master)](https://travis-ci.org/Ptrskay3/Interferometry)
 
 
-Python Spectrally Refined Interferometry
+Spectrally Refined Interferometry for Python 
+
 PySprint is a UI and API for interferogram evaluation. Under construction.
 I will add an advanced description later on. 
 
