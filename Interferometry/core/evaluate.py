@@ -288,7 +288,7 @@ def cos_fit3(x,c0, c1, b0, b1, b2, b3):
 
 
 
-def spp_method(delays, omegas, fitOrder=4): 
+def spp_method(delays, omegas, fitOrder=4, from_raw = False): 
 	"""
 	Calculates the dispersion from SPP's positions and delays.
 	
@@ -297,14 +297,20 @@ def spp_method(delays, omegas, fitOrder=4):
 
 	delays: array-like
 	the time delays in fs
+	if from_raw is enabled you must pass matching pairs with omegas
 
 	omegas: array-like
 	in form of [[SPP1, SPP2, SPP3, SPP4],[SPP1, SPP2, SPP3, SPP4], ..]
 	for lesser SPP cases replace elements with None:
 	[[SPP1, None, None, None],[SPP1, None, None, None], ..]
+	if from_raw is enabled, you must pass matching paris with delays
 
 	fitOrder: int
 	order of polynomial to fit the given data
+
+	from_raw: bool
+	if True you can pass matching pairs to delays and omegas, and it will perform 
+	a normal curve fitting. It's useful at the API.
 
 	Returns
 	------
@@ -323,14 +329,17 @@ def spp_method(delays, omegas, fitOrder=4):
 	bf: array-like
 	best fitting curve for plotting
 	"""
-
-	delays = delays[delays != np.array(None)]
-	omegas_unpacked = []
-	delays_unpacked = []
-	for delay, element in zip(delays, omegas):
-		item = [x for x in element if x is not None]
-		omegas_unpacked.extend(item)
-		delays_unpacked.extend(len(item) * [delay])
+	if from_raw:
+		delays_unpacked = delays
+		omegas_unpacked = omegas
+	else:
+		delays = delays[delays != np.array(None)]
+		omegas_unpacked = []
+		delays_unpacked = []
+		for delay, element in zip(delays, omegas):
+			item = [x for x in element if x is not None]
+			omegas_unpacked.extend(item)
+			delays_unpacked.extend(len(item) * [delay])
 	try:
 		if _has_lmfit:
 			if fitOrder == 2:

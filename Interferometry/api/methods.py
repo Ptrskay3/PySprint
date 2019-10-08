@@ -40,7 +40,10 @@ class Generator(object):
 		self.plotwidget = plt
 
 	def __str__(self):
-		return 'Generator({}, {}, {}, delay = {},GD={}, GDD={}, TOD={}, FOD={}, QOD={}, resolution={}, delimiter={},pulseWidth={}, includeArms={}'.format(self.start, self.stop, self.center, self.delay, self.GD, self.GDD, self.TOD, self.FOD, self.QOD, self.resolution, self.delimiter, self.pulseWidth, self.includeArms)
+		return '''Generator({}, {}, {}, delay = {},GD={}, GDD={}, TOD={}, FOD={}, QOD={}, resolution={}, 
+				  delimiter={},pulseWidth={}, includeArms={}'''.format(self.start, self.stop, self.center,
+				  self.delay, self.GD, self.GDD, self.TOD, self.FOD, self.QOD, self.resolution, 
+				  self.delimiter, self.pulseWidth, self.includeArms)
 
 	def generate_freq(self):
 		self.x, self.y, self.ref, self.sam = generatorFreq(self.start, self.stop, self.center, self.delay, self.GD,
@@ -87,13 +90,13 @@ class Dataset(object):
 				self.x = np.array(self.x)
 				self.x.astype(float)
 			except:
-				raise DatasetError
+				raise DatasetError('Invalid type of data')
 		if not isinstance(self.y, np.ndarray):
 			try:
 				self.y = np.array(self.y)
 				self.y.astype(float)
 			except:
-				raise DatasetError
+				raise DatasetError('Invalid type of data')
 		if not isinstance(self.ref, np.ndarray):
 			try:
 				self.ref = np.array(self.ref)
@@ -155,12 +158,14 @@ class Dataset(object):
 		self.plotwidget.show()
 
 
-
 class MinMaxMethod(Dataset):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.xmin = []
 		self.xmax = []
+
+	def __str__(self):
+		return '''MinMaxMethod({},{},{},{})'''.format(self.x, self.y, self.ref, self.sam)
 
 	def calculate(self, reference_point, fit_order, show_graph = False):
 		dispersion, dispersion_std, fit_report = min_max_method(
@@ -176,6 +181,9 @@ class CosFitMethod(Dataset):
 		self.params = [1, 1, 1, 1, 1, 1, 1, 1]
 		self.fit = None
 
+	def __str__(self):
+		return '''CosFitMethod({},{},{},{})'''.format(self.x, self.y, self.ref, self.sam)
+
 	def calculate(self, reference_point):
 		dispersion, self.fit = cff_method(self.x, self.y, self.ref, self.sam, 
 			ref_point = reference_point, p0 = self.params)
@@ -189,16 +197,39 @@ class CosFitMethod(Dataset):
 		else:
 			self.show()
 
-	def current_params(self):
-		return self.params
-
 
 class SPPMethod(Dataset):
+
+	raw = False
+
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
+		self.om = None
+		self.de = None
+		self.bf = None
 
-	def calculate(self):
-		pass
+	def __str__(self):
+		return '''SPPMethod({},{},{},{})'''.format(self.x, self.y)
+
+	@classmethod
+	def from_raw(cls, delays, omegas):
+		cls.raw = True
+		return cls(delays, omegas)
+
+	def calculate(self, fit_order):
+		if self.raw:
+			_, _, dispersion, dispersion_std, self.bf = spp_method(self.x, self.y, fitOrder = fit_order, from_raw = True)
+			self.om = self.x
+			self.de = self.y
+		else:
+			self.om, self.de, dispersion, dispersion_std, self.bf = spp_method(self.x, self.y, fitOrder = fit_order, from_raw = False)
+		return dispersion, dispersion_std, bf
+
+	def plot_result(self):
+		self.plotwidget.plot(self.om, self.de, 'o')
+		self.plotwidget.plot(self.om, self.bf, 'r--')
+		# self.plotwidget.legend()
+		self.plotwidget.show()
 
 
 class FFTMethod(Dataset):
@@ -209,8 +240,19 @@ class FFTMethod(Dataset):
 			self.y_norm = self.y
 			self._is_normalized = False
 
-	def calculate(self):
-		pass
-		
+	def __str__(self):
+		return '''FFTMethod({},{},{},{})'''.format(self.x, self.y)
 
+	def ifft(self, interpolate = True):
+		self.x, self.y = ifft_method(self.x, self.y, interpolate = interpolate)
+	
+	def fft(self):
+		self.y = fft_method(self.y)
+
+	def cut(self, at, std, window_order = 6):
+		self.y = cut_gaussian(self.x, self.y, spike = at, sigma = std, win_order = window_order)
+		
+	def calculate(self, fit_order, showGraph):
+		dispersion, dispersion_std, fit_report = args_comp(self.x, self.y, fitOrder = fit_order, showGraph = show_graph)
+		return dispersion, dispersion_std, fit_report
 
