@@ -1,10 +1,10 @@
 
-# Interferometry [2019]
+# PySprint [2019]
 [![Build Status](https://travis-ci.org/Ptrskay3/Interferometry.svg?branch=master)](https://travis-ci.org/Ptrskay3/Interferometry)
 
 
-
-Interferometry is a UI for interferogram evaluation. Under construction.
+Python Spectrally Refined Interferometry
+PySprint is a UI and API for interferogram evaluation. Under construction.
 I will add an advanced description later on. 
 
 ### Lastest upgrades:
@@ -36,7 +36,7 @@ I will add an advanced description later on.
 
 ### Installation
 
-Interferometry requires [Python 3](https://www.python.org/downloads/) to run.
+PySprint requires [Python 3](https://www.python.org/downloads/) to run.
 
 Please install the following packages:
 * [PyQt5](https://pypi.org/project/PyQt5/)

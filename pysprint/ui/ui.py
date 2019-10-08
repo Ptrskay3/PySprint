@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_Interferometry(object):
     def setupUi(self, Interferometry):
-        Interferometry.setObjectName("Interferometry")
+        Interferometry.setObjectName("PySprint")
         Interferometry.resize(1800, 921)
         self.centralwidget = QtWidgets.QWidget(Interferometry)
         self.centralwidget.setObjectName("centralwidget")
@@ -538,7 +538,7 @@ class Ui_Interferometry(object):
 
     def retranslateUi(self, Interferometry):
         _translate = QtCore.QCoreApplication.translate
-        Interferometry.setWindowTitle(_translate("Interferometry", "Interferometry"))
+        Interferometry.setWindowTitle(_translate("Interferometry", "PySprint"))
         self.calculate.setText(_translate("Interferometry", "Calculate"))
         self.btn_load.setText(_translate("Interferometry", "Load data"))
         self.swapButton.setText(_translate("Interferometry", "Swap axes"))

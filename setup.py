@@ -13,7 +13,7 @@ MICRO = 3
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
 setup(
-    name="interferometry",
+    name="pysprint",
     version=VERSION,
     author="Péter Leéh",
     author_email="leeh123peter@gmail.com",
