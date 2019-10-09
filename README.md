@@ -1,6 +1,6 @@
 
 # PySprint [2019]
-[![Build Status](https://travis-ci.org/Ptrskay3/Interferometry.svg?branch=master)](https://travis-ci.org/Ptrskay3/Interferometry)
+[![Build Status](https://travis-ci.org/Ptrskay3/PySprint.svg?branch=master)](https://travis-ci.org/Ptrskay3/pysprint)
 
 
 Spectrally Refined Interferometry for Python 
