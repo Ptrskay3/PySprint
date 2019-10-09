@@ -233,19 +233,19 @@ def polynomialFit1(x, b0, b1):
 
 
 def cos_fit1(x,c0, c1, b0, b1):
-	return c0 + c1*np.cos(b0 + b1*x)
+	return c0 + c1*np.cos(polynomialFit1(x, b0, b1))
 
 def cos_fit2(x,c0, c1, b0, b1, b2):
-	return c0 + c1*np.cos(b0 + b1*x + b2*x**2)
+	return c0 + c1*np.cos(polynomialFit2(x,b0, b1, b2))
 
 def cos_fit4(x,c0, c1, b0, b1, b2, b3, b4):
-	return c0 + c1*np.cos(b0 + b1*x + b2*x**2 + b3*x**3 + b4*x**4)
+	return c0 + c1*np.cos(polynomialFit4(x,b0, b1, b2, b3, b4))
 
 def cos_fit5(x,c0, c1, b0, b1, b2, b3, b4, b5):
-	return c0 + c1*np.cos(b0 + b1*x + b2*x**2 + b3*x**3 + b4*x**4 + b5*x**5)
+	return c0 + c1*np.cos(polynomialFit5(x,b0, b1, b2, b3, b4, b5))
 
 def cos_fit3(x,c0, c1, b0, b1, b2, b3):
-	return c0 + c1*np.cos(b0 + b1*x + b2*x**2 + b3*x**3)
+	return c0 + c1*np.cos(polynomialFit3(x, b0, b1, b2, b3))
 
 
 
