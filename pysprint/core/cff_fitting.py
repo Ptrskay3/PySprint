@@ -1,31 +1,15 @@
 """
-NOT PART OF THE MAIN PROGRAM YET.
 CURRENTLY POORLY WRITTEN, BUT IT WORKS.. I WILL UPDATE IT SOON.
 """
-
+import sys
+sys.path.append('..')
 import numpy as np 
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt 
+from evaluate import cos_fit1, cos_fit2, cos_fit3, cos_fit5, cos_fit4
+from utils.accessories import findNearest as find_nearest
 
-def find_nearest(array, value):
-    array = np.asarray(array)
-    idx = (np.abs(value - array)).argmin()
-    return array[idx], idx
 
-def cos_fit1(x,c0, c1, b0, b1):
-	return c0 + c1*np.cos(b0 + b1*x)
-
-def cos_fit2(x,c0, c1, b0, b1, b2):
-	return c0 + c1*np.cos(b0 + b1*x + b2*x**2)
-
-def cos_fit4(x,c0, c1, b0, b1, b2, b3, b4):
-	return c0 + c1*np.cos(b0 + b1*x + b2*x**2 + b3*x**3 + b4*x**4)
-
-def cos_fit5(x,c0, c1, b0, b1, b2, b3, b4, b5):
-	return c0 + c1*np.cos(b0 + b1*x + b2*x**2 + b3*x**3 + b4*x**4 + b5*x**5)
-
-def cos_fit3(x,c0, c1, b0, b1, b2, b3):
-	return c0 + c1*np.cos(b0 + b1*x + b2*x**2 + b3*x**3)
 
 class FitOptimizer(object):
 	"""Class to help achieve better fitting results."""
