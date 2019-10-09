@@ -37,7 +37,7 @@ def _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY):
 	reference and sample arm spectrum evaluated at initSpectrumX
 
 	Returns
-	------
+	-------
 	initSpectrumX: array-like
 	unchanged x data
 
@@ -85,7 +85,7 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 	if True returns a matplotlib plot and pauses execution until closing the window
 
 	Returns
-	------
+	-------
 
 	dispersion: array-like
 	[GD, GDD, TOD, FOD, QOD]
@@ -293,7 +293,7 @@ def spp_method(delays, omegas, fitOrder=4, from_raw=False):
 	Calculates the dispersion from SPP's positions and delays.
 	
 	Parameters
-	------
+	----------
 
 	delays: array-like
 	the time delays in fs
@@ -313,7 +313,7 @@ def spp_method(delays, omegas, fitOrder=4, from_raw=False):
 	a normal curve fitting. It's useful at the API.
 
 	Returns
-	------
+	-------
 	omegas_unpacked: array-like
 	x axis data
 
@@ -410,7 +410,7 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_poin
 	
 
 	Parameters
-	------
+	----------
 	
 	initSpectrumX: array-like
 	x-axis data
@@ -425,7 +425,7 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_poin
 	the initial parameters for fitting
 
 	Returns
-	------
+	-------
 
 	dispersion: array-like
 	[GD, GDD, TOD, FOD, QOD]
@@ -475,13 +475,13 @@ def fft_method(initSpectrumY):
 	Perfoms FFT on data
 
 	Parameters
-	------
+	----------
 
 	initSpectrumY: array-like
 	y-axis data
 	
 	Returns
-	------
+	-------
 
 	yf: array-like
 	the transformed y data
@@ -497,7 +497,7 @@ def fft_method(initSpectrumY):
 def gaussian_window(t ,tau, standardDev, order):
 	"""
 	Parameters
-	------
+	----------
 	t: array-like
 	input array to perform window on
 
@@ -508,7 +508,7 @@ def gaussian_window(t ,tau, standardDev, order):
 	standard deviation of gaussian window
 
 	Returns
-	------
+	-------
 	arr : array-like
 	6th order gaussian window with params above
 
@@ -520,7 +520,7 @@ def cut_gaussian(initSpectrumX, initSpectrumY, spike, sigma, win_order):
 	Applies gaussian window with the given params.
 
 	Parameters
-	------
+	----------
 	initSpectrumX: array-like
 	x-axis data
 
@@ -534,7 +534,7 @@ def cut_gaussian(initSpectrumX, initSpectrumY, spike, sigma, win_order):
 	standard deviation of gaussian window
 
 	Returns
-	------
+	-------
 
 	Ydata: array-like
 	the windowed y values 
@@ -552,7 +552,7 @@ def ifft_method(initSpectrumX, initSpectrumY, interpolate = True):
 	Perfoms IFFT on data
 
 	Parameters
-	------
+	----------
 
 	initSpectrumX: array-like
 	the x-axis data
@@ -564,7 +564,7 @@ def ifft_method(initSpectrumX, initSpectrumY, interpolate = True):
 	if True perform a linear interpolation on dataset before transforms
 	
 	Returns
-	------
+	-------
 	freq: array-like
 	the transformed x data
 
@@ -594,7 +594,7 @@ def args_comp(initSpectrumX, initSpectrumY, fitOrder=5, showGraph=False):
 	dispersion coeffs.
 
 	Parameters
-	------
+	----------
 
 	initSpectrumX: array-like
 	the x-axis data
@@ -609,7 +609,7 @@ def args_comp(initSpectrumX, initSpectrumY, fitOrder=5, showGraph=False):
 	if True returns a matplotlib plot and pauses execution until closing the window
 	
 	Returns
-	------
+	-------
 
 	dispersion: array-like
 	[GD, GDD, TOD, FOD, QOD]
