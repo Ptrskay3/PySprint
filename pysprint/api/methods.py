@@ -102,7 +102,8 @@ class Generator(object):
 		try:
 			self.ax[1].plot(self.x, self._phase(self.x))
 		except:
-			raise ValueError('The spectrum is not generated yet.\nUse self.generate_freq() or self.generate_wave().')
+			raise ValueError('''The spectrum is not generated yet.
+				Use self.generate_freq() on frequency domain or self.generate_wave() on wavelength domain.''')
 		self.ax[0].set(xlabel="Frequency/Wavelength", ylabel="Intensity")
 		self.ax[1].set(xlabel="Frequency/Wavelength", ylabel="$\Phi \t[rad] $")
 		self.ax[0].grid()
@@ -110,7 +111,7 @@ class Generator(object):
 		self.plotwidget.show()
 
 g = Generator(2.2, 2.7, 2.45, delay = 0, normalize = True, GD = 100, GDD = 3000, FOD = -500000)
-g.generate_freq()
+# g.generate_freq()
 g.phase_graph()
 
 class Dataset(object):
