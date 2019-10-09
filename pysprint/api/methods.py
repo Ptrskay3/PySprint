@@ -47,6 +47,8 @@ class Generator(object):
 		self.ref = np.array([])
 		self.sam = np.array([])
 		self.plotwidget = plt
+		if len(self.ref) != 0:
+			self._y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 
 	def __str__(self):
 		return '''Generator({}, {}, {}, delay = {}, GD={}, GDD={}, TOD={}, FOD={}, QOD={}, resolution={}, 
@@ -65,8 +67,6 @@ class Generator(object):
 			self.resolution, self.delimiter, self.pulseWidth, self.normalize)
 		
 	def show(self):
-		if len(self.ref) != 0:
-			self._y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 		try:
 			self.plotwidget.plot(self.x, self._y, 'r')
 		except:
@@ -93,8 +93,6 @@ class Generator(object):
 		self.fig, self.ax = self.plotwidget.subplots(2,1, figsize = (8,7))
 		self.plotwidget.subplots_adjust(top = 0.95)
 		self.fig.canvas.set_window_title('Spectrum and phase')
-		if len(self.ref) != 0:
-			self._y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 		try:
 			self.ax[0].plot(self.x, self._y, 'r')
 		except:
@@ -110,9 +108,9 @@ class Generator(object):
 		self.ax[1].grid()
 		self.plotwidget.show()
 
-g = Generator(2.2, 2.7, 2.45, delay = 0, normalize = True, GD = 100, TOD = -30000, QOD = 500000)
-g.generate_freq()
-g.phase_graph()
+# g = Generator(2.2, 2.7, 2.45, delay = 0, normalize = True, GD = 100, TOD = -30000, QOD = 500000)
+# g.generate_freq()
+# g.phase_graph()
 
 class Dataset(object):
 	def __init__(self, x, y, ref=None, sam=None):
