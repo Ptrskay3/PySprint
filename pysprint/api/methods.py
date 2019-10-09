@@ -13,6 +13,7 @@ from core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, 
 from core.edit_features import savgol, find_peak, convolution, cut_data, find_closest
 from core.generator import generatorFreq, generatorWave
 
+C_LIGHT = 299.793 #nm/fs
 
 class DatasetError(Exception):
 	pass
@@ -76,6 +77,33 @@ class Generator(object):
 		else:
 			np.savetxt('{}/{}.txt'.format(path, name), np.transpose([self.x, self.y, self.ref, self.sam]))
 
+
+	def _phase(self, j):
+		lamend = (2*np.pi*C_LIGHT)/self.start
+		lamstart = (2*np.pi*C_LIGHT)/self.stop
+		lam = np.arange(lamstart, lamend+self.resolution, self.resolution)
+		omega = (2*np.pi*C_LIGHT)/lam 
+		j = omega-self.center
+		return j*self.GD+(self.GDD/2)*j**2+(self.TOD/6)*j**3+(self.FOD/24)*j**4+(self.QOD/120)*j**5
+
+	def phase_graph(self):
+		self.fig, self.ax = self.plotwidget.subplots(2,1, figsize = (8,7))
+		if len(self.ref) != 0:
+			self._y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
+		try:
+			self.ax[0].plot(self.x, self._y, 'r')
+		except:
+			self.ax[0].plot(self.x, self.y, 'r')
+		self.ax[1].plot(self.x, self._phase(self.x))
+		self.ax[0].set(xlabel="Frequency/Wavelength", ylabel="Intensity")
+		self.ax[1].set(xlabel="Frequency/Wavelength", ylabel="$\Phi \t[rad] $")
+		self.ax[0].grid()
+		self.ax[1].grid()
+		self.plotwidget.show()
+
+# g = Generator(2.2, 2.7, 2.45, delay = 1000, resolution = 0.05, includeArms = True, GD = 400, TOD = -100000)
+# g.generate_freq()
+# g.phase_graph()
 
 class Dataset(object):
 	def __init__(self, x, y, ref=None, sam=None):
