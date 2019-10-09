@@ -374,7 +374,31 @@ def spp_method(delays, omegas, fitOrder=4, from_raw=False):
 			bf = result.best_fit
 		#TODO: Put scipy curve_fit there..
 		else:
-			pass
+			elif fitOrder == 4:
+				popt, pcov = curve_fit(polynomialFit4, omegas_unpacked, delays_unpacked, maxfev = 8000)
+				_function = polynomialFit4
+			elif fitOrder == 3:
+				popt, pcov = curve_fit(polynomialFit3, omegas_unpacked, delays_unpacked, maxfev = 8000)
+				_function = polynomialFit3
+			elif fitOrder == 2:
+				popt, pcov = curve_fit(polynomialFit2, omegas_unpacked, delays_unpacked, maxfev = 8000)
+				_function = polynomialFit2
+			elif fitOrder == 1:
+				popt, pcov = curve_fit(polynomialFit1, omegas_unpacked, delays_unpacked, maxfev = 8000)
+				_function = polynomialFit1
+			else:
+				raise ValueError('Order is out of range, please select from [1,4]')
+			#FIXME: biztos?
+			omegas_unpacked = np.asarray(omegas_unpacked)
+			dispersion=[]
+			dispersion_std=[]
+			for idx in range(len(popt)):
+				dispersion.append(popt[idx]*factorial(idx))
+			while len(dispersion)<5:
+				dispersion.append(0)
+			while len(dispersion_std)<len(dispersion):
+				dispersion_std.append(0)
+			bf = _function(omegas_unpacked, *popt)
 		return omegas_unpacked, delays_unpacked, dispersion, dispersion_std, bf
 	except Exception as e:
 		return [], [], [e], [], []
