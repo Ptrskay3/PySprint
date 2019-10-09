@@ -25,7 +25,7 @@ class InterpolationWarning(UserWarning):
 
 class Generator(object):
 	def __init__(self, start, stop, center, delay=0, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1, delimiter=',',
-		         pulseWidth=10, includeArms=False):
+		         pulseWidth=10, normalize=False):
 		self.start = start
 		self.stop = stop
 		self.center = center
@@ -38,7 +38,7 @@ class Generator(object):
 		self.resolution = resolution
 		self.delimiter = delimiter
 		self.pulseWidth = pulseWidth
-		self.includeArms = includeArms
+		self.normalize = normalize
 		self.x = np.array([])
 		self.y = np.array([])
 		self.ref = np.array([])
@@ -47,19 +47,19 @@ class Generator(object):
 
 	def __str__(self):
 		return '''Generator({}, {}, {}, delay = {},GD={}, GDD={}, TOD={}, FOD={}, QOD={}, resolution={}, 
-				  delimiter={},pulseWidth={}, includeArms={}'''.format(self.start, self.stop, self.center,
+				  delimiter={},pulseWidth={}, normalize={}'''.format(self.start, self.stop, self.center,
 				  self.delay, self.GD, self.GDD, self.TOD, self.FOD, self.QOD, self.resolution, 
-				  self.delimiter, self.pulseWidth, self.includeArms)
+				  self.delimiter, self.pulseWidth, self.normalize)
 
 	def generate_freq(self):
 		self.x, self.y, self.ref, self.sam = generatorFreq(self.start, self.stop, self.center, self.delay, self.GD,
 			self.GDD, self.TOD, self.FOD, self.QOD,
-			self.resolution, self.delimiter, self.pulseWidth, self.includeArms)
+			self.resolution, self.delimiter, self.pulseWidth, self.normalize)
 
 	def generate_wave(self):
 		self.x, self.y, self.ref, self.sam = generatorWave(self.start, self.stop, self.center, self.delay, self.GD,
 			self.GDD, self.TOD, self.FOD, self.QOD,
-			self.resolution, self.delimiter, self.pulseWidth, self.includeArms)
+			self.resolution, self.delimiter, self.pulseWidth, self.normalize)
 		
 	def show(self):
 		if len(self.ref) != 0:
@@ -88,22 +88,27 @@ class Generator(object):
 
 	def phase_graph(self):
 		self.fig, self.ax = self.plotwidget.subplots(2,1, figsize = (8,7))
+		self.plotwidget.subplots_adjust(top = 0.95)
+		self.fig.canvas.set_window_title('Spectrum and phase')
 		if len(self.ref) != 0:
 			self._y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 		try:
 			self.ax[0].plot(self.x, self._y, 'r')
 		except:
 			self.ax[0].plot(self.x, self.y, 'r')
-		self.ax[1].plot(self.x, self._phase(self.x))
+		try:
+			self.ax[1].plot(self.x, self._phase(self.x))
+		except:
+			raise ValueError('The spectrum is not generated yet.\nUse self.generate_freq() or self.generate_wave().')
 		self.ax[0].set(xlabel="Frequency/Wavelength", ylabel="Intensity")
 		self.ax[1].set(xlabel="Frequency/Wavelength", ylabel="$\Phi \t[rad] $")
 		self.ax[0].grid()
 		self.ax[1].grid()
 		self.plotwidget.show()
 
-# g = Generator(2.2, 2.7, 2.45, delay = 1000, resolution = 0.05, includeArms = True, GD = 400, TOD = -100000)
-# g.generate_freq()
-# g.phase_graph()
+g = Generator(2.2, 2.7, 2.45, delay = 0, normalize = True, GD = 100, GDD = 3000, FOD = -500000)
+g.generate_freq()
+g.phase_graph()
 
 class Dataset(object):
 	def __init__(self, x, y, ref=None, sam=None):
