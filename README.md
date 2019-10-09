@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/Ptrskay3/PySprint/branch/master/graph/badge.svg)](https://codecov.io/gh/Ptrskay3/PySprint)
 [![Maintainability](https://api.codeclimate.com/v1/badges/4e876c4899af3c4435b0/maintainability)](https://codeclimate.com/github/Ptrskay3/PySprint/maintainability)
 
-### Spectrally Refined Interferometry for Python 
+Spectrally Refined Interferometry for Python 
 
 PySprint is a UI and API for interferogram evaluation. Under construction.
 I will add an advanced description later on. 
