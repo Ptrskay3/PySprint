@@ -42,3 +42,9 @@ def _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY):
 	else:
 		raise TypeError('Input types are wrong.\n')
 	return initSpectrumX,  Ydata
+
+
+def find_closest(xValue, xArray, yArray):
+	idx = (np.abs(xArray-xValue)).argmin()
+	value = xArray[idx]
+	return value, yArray[idx]

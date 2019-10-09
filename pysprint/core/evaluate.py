@@ -400,7 +400,7 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_poin
 	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
 	#TODO: replace with lmfit
 	try:
-		if p0[-1] == 0 and p0[-2] == 0 and p0[-3] == 0 and p0[-4] == 0:
+		if len(np.trim_zeros(p0, 'b')) + 4 == len(p0):
 			_funct = cos_fit1
 			p0 = p0[:-4]
 		elif p0[-1] == 0 and p0[-2] == 0 and p0[-3] == 0:

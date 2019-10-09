@@ -106,7 +106,3 @@ def cut_data(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, startValue
 	else:
 		pass
 
-# def find_closest(xValue, xArray, yArray):
-# 	idx = (np.abs(xArray-xValue)).argmin()
-# 	value = xArray[idx]
-# 	return value, yArray[idx]

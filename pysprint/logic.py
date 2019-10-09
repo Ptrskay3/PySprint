@@ -26,10 +26,11 @@ from core.evaluate import (min_max_method, cff_method, fft_method,
      cut_gaussian, gaussian_window , ifft_method, spp_method, args_comp,
      cos_fit1, cos_fit2, cos_fit3, cos_fit5, cos_fit4)
 from core.edit_features import (savgol, find_peak, convolution, 
-     interpolate_data, cut_data, find_closest)#, cwt)
+     interpolate_data, cut_data)#, cwt)
 from core.loading import read_data
 from core.generator import generatorFreq, generatorWave
 from core.cff_fitting import FitOptimizer
+from utils.accessories import find_closest
 
 
 class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
