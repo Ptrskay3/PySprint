@@ -288,7 +288,7 @@ def cos_fit3(x,c0, c1, b0, b1, b2, b3):
 
 
 
-def spp_method(delays, omegas, fitOrder=4, from_raw = False): 
+def spp_method(delays, omegas, fitOrder=4, from_raw=False): 
 	"""
 	Calculates the dispersion from SPP's positions and delays.
 	
