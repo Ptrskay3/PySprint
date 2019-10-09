@@ -19,6 +19,7 @@ except ImportError:
 __all__ = ['min_max_method', 'findNearest', 'cos_fit1', 'cos_fit2', 'cos_fit3',
 		   'cos_fit4', 'cos_fit5', 'spp_method', 'cff_method', 'fft_method', 'cut_gaussian',
 		   'ifft_method', 'args_comp']
+		   
 
 def _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY):
 	"""
