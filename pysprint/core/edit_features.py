@@ -16,18 +16,44 @@ def findNearest(array, value):
     idx = (np.abs(value - array)).argmin()
     return array[idx], idx
 
+def _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY):
+	"""
+	Instead of handling the inputs in every function, there is this private method.
+
+	Parameters
+	----------
+
+	initSpectrumX: array-like
+	x-axis data
+
+	initSpectrumY: array-like
+	y-axis data
+
+	referenceArmY, sampleArmY: array-like
+	reference and sample arm spectrum evaluated at initSpectrumX
+
+	Returns
+	-------
+	initSpectrumX: array-like
+	unchanged x data
+
+	Ydata: array-like
+	the transformed y data
+
+	"""
+	if (len(initSpectrumX) > 0) and (len(referenceArmY) > 0) and (len(sampleArmY) > 0):
+		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
+	elif (len(referenceArmY) == 0) or (len(sampleArmY) == 0):
+		Ydata = initSpectrumY
+	elif len(initSpectrumX) == 0:
+		raise ValueError('Please load the spectrum!\n')
+	else:
+		raise TypeError('Input types are wrong.\n')
+	return initSpectrumX,  Ydata
 
 def savgol(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, window=101, order=3):
-	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:
-		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
-		Xdata = initSpectrumX
-		xint, yint = interpolate_data(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
-	elif len(initSpectrumY) == 0:
-		pass
-	elif len(referenceArmY) == 0 or len(sampleArmY) == 0:
-		Ydata = initSpectrumY
-		Xdata = initSpectrumX
-		xint, yint = interpolate_data(initSpectrumX, initSpectrumY, [], [])
+	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
+	xint, yint = interpolate_data(Xdata, Ydata, [], [])
 	if window > order:
 		try:
 			if window % 2 == 1:
@@ -70,13 +96,7 @@ def savgol(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, window=101, 
 # 	return Xdata[max_idx], Ydata[max_idx], Xdata[min_idx], Ydata[min_idx]
 
 def find_peak(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax=1, proMin=1, threshold=0.1):   
-	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:
-		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
-	if len(initSpectrumX) == 0:
-		raise ValueError
-	elif len(referenceArmY) == 0 or len(sampleArmY) == 0:
-		Ydata = initSpectrumY
-	Xdata = initSpectrumX
+	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
 
 	maxIndexes, _ = find_peaks(Ydata, prominence = proMax) 
 	Ydata_rec = 1/Ydata
@@ -102,28 +122,14 @@ def find_peak(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax=1,
 
 
 def convolution(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, standev=200):
-	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:
-		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
-		Xdata = initSpectrumX
-		xint, yint = interpolate_data(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
-	elif len(initSpectrumY) == 0:
-		pass
-	elif len(referenceArmY) == 0 or len(sampleArmY) == 0:
-		Ydata = initSpectrumY
-		Xdata = initSpectrumX
-		xint, yint = interpolate_data(initSpectrumX, initSpectrumY, [], [])
+	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
+	xint, yint = interpolate_data(Xdata, Ydata, [], [])
 	window = gaussian(len(xint), std=standev)
 	smoothed = convolve(yint, window/window.sum(), mode='same')
 	return xint, smoothed
 
 def interpolate_data(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY):
-	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:
-		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
-	elif len(initSpectrumX) == 0:
-		raise
-	elif len(referenceArmY) == 0 or len(sampleArmY) == 0:
-		Ydata = initSpectrumY
-	Xdata = initSpectrumX
+	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
 	xint = np.linspace(Xdata[0], Xdata[-1], len(Xdata))
 	intp = interp1d(Xdata,Ydata, kind='linear')
 	yint = intp(xint)
@@ -131,13 +137,7 @@ def interpolate_data(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY):
 
 
 def cut_data(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, startValue=-9999, endValue=9999):
-	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:
-		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
-	elif len(initSpectrumY) == 0:
-		raise ValueError
-	elif len(referenceArmY) == 0 or len(sampleArmY) == 0:
-		Ydata = initSpectrumY
-	Xdata = initSpectrumX
+	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
 	if startValue < endValue:
 		lowItem, lowIndex = findNearest(Xdata, startValue)
 		highItem, highIndex = findNearest(Xdata, endValue)
