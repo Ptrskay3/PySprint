@@ -6,7 +6,6 @@ sys.path.append('..')
 import numpy as np 
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt 
-# from evaluate import cos_fit1, cos_fit2, cos_fit3, cos_fit5, cos_fit4
 from utils.accessories import findNearest as find_nearest
 
 class FitOptimizer(object):
