@@ -2,7 +2,8 @@
 # PySprint [2019]
 [![Build Status](https://travis-ci.org/Ptrskay3/PySprint.svg?branch=master)](https://travis-ci.org/Ptrskay3/pysprint)
 [![codecov](https://codecov.io/gh/Ptrskay3/PySprint/branch/master/graph/badge.svg)](https://codecov.io/gh/Ptrskay3/PySprint)
-
+[![Maintainability](https://api.codeclimate.com/v1/badges/4e876c4899af3c4435b0/maintainability)](https://codeclimate.com/github/Ptrskay3/PySprint/maintainability)
+Hopefully this will be better..
 
 Spectrally Refined Interferometry for Python 
 
@@ -10,6 +11,7 @@ PySprint is a UI and API for interferogram evaluation. Under construction.
 I will add an advanced description later on. 
 
 ### Lastest upgrades:
+  - Code Climate + Codecov
   - Data editing features unittests done
   - API skeleton is done
   - Added CI along with some unittests
