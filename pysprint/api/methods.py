@@ -79,9 +79,9 @@ class Generator(object):
 
 	def save(self, name, path=None):
 		if path == None:
-			np.savetxt('{}.txt'.format(name), np.transpose([self.x, self.y, self.ref, self.sam]))
+			np.savetxt('{}.txt'.format(name), np.transpose([self.x, self.y, self.ref, self.sam]), delimiter = self.delimiter)
 		else:
-			np.savetxt('{}/{}.txt'.format(path, name), np.transpose([self.x, self.y, self.ref, self.sam]))
+			np.savetxt('{}/{}.txt'.format(path, name), np.transpose([self.x, self.y, self.ref, self.sam]), delimiter = self.delimiter)
 
 
 	def _phase(self, j):
@@ -191,6 +191,8 @@ class Dataset(object):
 		self.x, self.y_norm = convolution(self.x, self.y, self.ref, self.sam, standev = std)
 		self.ref = []
 		self.sam = []
+		warnings.warn('Linear interpolation have been applied to data.', InterpolationWarning)
+
 
 	def detect_peak(self, pmax=1, pmin=1, threshold=0.1):
 		xmax, ymax, xmin, ymin = find_peak(self.x, self.y, self.ref, self.sam, proMax = pmax, proMin = pmin, threshold=threshold)
