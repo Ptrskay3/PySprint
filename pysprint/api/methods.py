@@ -110,9 +110,9 @@ class Generator(object):
 		self.ax[1].grid()
 		self.plotwidget.show()
 
-g = Generator(2.2, 2.7, 2.45, delay = 0, normalize = True, GD = 100, GDD = 3000, FOD = -500000)
+# g = Generator(2.2, 2.7, 2.45, delay = 0, normalize = True, GD = 100, TOD = 3000, FOD = -500000)
 # g.generate_freq()
-g.phase_graph()
+# g.phase_graph()
 
 class Dataset(object):
 	def __init__(self, x, y, ref=None, sam=None):

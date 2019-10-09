@@ -359,7 +359,7 @@ def spp_method(delays, omegas, fitOrder=4, from_raw=False):
 				params = fitModel.make_params(b0 = 1, b1 = 1)
 				result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
 			else:
-				raise ValueError('Out of range')
+				raise ValueError('Order is out of range, please select from [1,4]')
 			dispersion = []
 			dispersion_std = []
 			for name, par in result.params.items():
@@ -372,7 +372,6 @@ def spp_method(delays, omegas, fitOrder=4, from_raw=False):
 				dispersion.append(0)
 				dispersion_std.append(0) 
 			bf = result.best_fit
-		#TODO: Put scipy curve_fit there..
 		else:
 			if fitOrder == 4:
 				popt, pcov = curve_fit(polynomialFit4, omegas_unpacked, delays_unpacked, maxfev = 8000)
@@ -541,7 +540,7 @@ def cut_gaussian(initSpectrumX, initSpectrumY, spike, sigma, win_order):
 	
 	"""
 
-	Ydata = initSpectrumY * gaussian_window(initSpectrumX, tau = spike, standardDev=sigma, order = win_order) 
+	Ydata = initSpectrumY * gaussian_window(initSpectrumX, tau = spike, standardDev = sigma, order = win_order) 
 	# Ydata = initSpectrumY * scipy.signal.windows.gaussian(len(initSpectrumY), std=sigma)
 	return Ydata
 
