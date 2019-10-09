@@ -1,4 +1,4 @@
-
+import numpy as np
 
 def findNearest(array, value):
 	#Finds the nearest element to the given value in the array

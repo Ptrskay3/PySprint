@@ -17,7 +17,7 @@ except ImportError:
 
 sys.path.append('..')
 
-from utils.input import findNearest, _handle_input
+from utils.accessories import findNearest, _handle_input
 
 
 __all__ = ['min_max_method', 'cos_fit1', 'cos_fit2', 'cos_fit3',
