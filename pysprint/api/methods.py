@@ -1,5 +1,5 @@
 """
-This file is the main API to use Interferometry without the UI.
+This file is the main API to use Interferometry without the PyQt5 UI.
 """
 
 import sys
@@ -12,6 +12,9 @@ sys.path.append('..')
 from core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, gaussian_window , ifft_method, spp_method, args_comp
 from core.edit_features import savgol, find_peak, convolution, cut_data, find_closest
 from core.generator import generatorFreq, generatorWave
+
+
+__all__ = ['Generator', 'Dataset', 'MinMaxMethod', 'CosFitMethod', 'SPPMethod', 'FFTMethod']
 
 C_LIGHT = 299.793 #nm/fs
 
@@ -46,8 +49,8 @@ class Generator(object):
 		self.plotwidget = plt
 
 	def __str__(self):
-		return '''Generator({}, {}, {}, delay = {},GD={}, GDD={}, TOD={}, FOD={}, QOD={}, resolution={}, 
-				  delimiter={},pulseWidth={}, normalize={}'''.format(self.start, self.stop, self.center,
+		return '''Generator({}, {}, {}, delay = {}, GD={}, GDD={}, TOD={}, FOD={}, QOD={}, resolution={}, 
+				  delimiter={}, pulseWidth={}, normalize={})'''.format(self.start, self.stop, self.center,
 				  self.delay, self.GD, self.GDD, self.TOD, self.FOD, self.QOD, self.resolution, 
 				  self.delimiter, self.pulseWidth, self.normalize)
 
@@ -106,9 +109,9 @@ class Generator(object):
 		self.ax[1].grid()
 		self.plotwidget.show()
 
-g = Generator(2.2, 2.7, 2.45, delay = 0, normalize = True, GD = 100, GDD = 3000, FOD = -500000)
-g.generate_freq()
-g.phase_graph()
+# g = Generator(2.2, 2.7, 2.45, delay = 0, normalize = True, GD = 100, GDD = 3000, FOD = -500000)
+# g.generate_freq()
+# g.phase_graph()
 
 class Dataset(object):
 	def __init__(self, x, y, ref=None, sam=None):
