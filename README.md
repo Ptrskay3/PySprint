@@ -10,7 +10,7 @@ PySprint is a UI and API for interferogram evaluation. Under construction.
 I will add an advanced description later on. 
 
 ### Lastest upgrades:
-  - Code Climate + Codecov addition
+  - Code Climate + Codecov 
   - Data editing features unittests done
   - API skeleton is done
   - Added CI along with some unittests
