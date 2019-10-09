@@ -27,3 +27,6 @@ script:
   - cd pysprint/tests
   - python test_loading.py
   - python test_edit.py
+
+after_success:
+  - codecov
