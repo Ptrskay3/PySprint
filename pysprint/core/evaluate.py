@@ -374,7 +374,7 @@ def spp_method(delays, omegas, fitOrder=4, from_raw=False):
 			bf = result.best_fit
 		#TODO: Put scipy curve_fit there..
 		else:
-			elif fitOrder == 4:
+			if fitOrder == 4:
 				popt, pcov = curve_fit(polynomialFit4, omegas_unpacked, delays_unpacked, maxfev = 8000)
 				_function = polynomialFit4
 			elif fitOrder == 3:
