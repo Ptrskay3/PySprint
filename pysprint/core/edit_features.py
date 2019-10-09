@@ -3,53 +3,13 @@ Methods for manipulating the loaded data
 
 """
 import numpy as np 
+import sys
+sys.path.append('..')
 import matplotlib.pyplot as plt
 from scipy.signal import find_peaks, savgol_filter, gaussian, convolve #, find_peaks_cwt
 from scipy.interpolate import interp1d
+from utils.input import findNearest, _handle_input
 
-
-def findNearest(array, value):
-	#Finds the nearest element to the given value in the array
-	#returns tuple: (element, element's index)
-	
-    array = np.asarray(array)
-    idx = (np.abs(value - array)).argmin()
-    return array[idx], idx
-
-def _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY):
-	"""
-	Instead of handling the inputs in every function, there is this private method.
-
-	Parameters
-	----------
-
-	initSpectrumX: array-like
-	x-axis data
-
-	initSpectrumY: array-like
-	y-axis data
-
-	referenceArmY, sampleArmY: array-like
-	reference and sample arm spectrum evaluated at initSpectrumX
-
-	Returns
-	-------
-	initSpectrumX: array-like
-	unchanged x data
-
-	Ydata: array-like
-	the transformed y data
-
-	"""
-	if (len(initSpectrumX) > 0) and (len(referenceArmY) > 0) and (len(sampleArmY) > 0):
-		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
-	elif (len(referenceArmY) == 0) or (len(sampleArmY) == 0):
-		Ydata = initSpectrumY
-	elif len(initSpectrumX) == 0:
-		raise ValueError('Please load the spectrum!\n')
-	else:
-		raise TypeError('Input types are wrong.\n')
-	return initSpectrumX,  Ydata
 
 def savgol(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, window=101, order=3):
 	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
@@ -145,7 +105,6 @@ def cut_data(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, startValue
 		return Xdata[mask], Ydata[mask]
 	else:
 		pass
-
 
 
 def find_closest(xValue, xArray, yArray):

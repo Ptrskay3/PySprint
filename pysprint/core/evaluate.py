@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import sys
 from math import factorial
 import operator
 
@@ -15,46 +15,15 @@ try:
 except ImportError:
 	_has_lmfit = False
 
+sys.path.append('..')
 
-__all__ = ['min_max_method', 'findNearest', 'cos_fit1', 'cos_fit2', 'cos_fit3',
+from utils.input import findNearest, _handle_input
+
+
+__all__ = ['min_max_method', 'cos_fit1', 'cos_fit2', 'cos_fit3',
 		   'cos_fit4', 'cos_fit5', 'spp_method', 'cff_method', 'fft_method', 'cut_gaussian',
 		   'ifft_method', 'args_comp']
-		   
 
-def _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY):
-	"""
-	Instead of handling the inputs in every function, there is this private method.
-
-	Parameters
-	----------
-
-	initSpectrumX: array-like
-	x-axis data
-
-	initSpectrumY: array-like
-	y-axis data
-
-	referenceArmY, sampleArmY: array-like
-	reference and sample arm spectrum evaluated at initSpectrumX
-
-	Returns
-	-------
-	initSpectrumX: array-like
-	unchanged x data
-
-	Ydata: array-like
-	the transformed y data
-
-	"""
-	if (len(initSpectrumX) > 0) and (len(referenceArmY) > 0) and (len(sampleArmY) > 0):
-		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
-	elif (len(referenceArmY) == 0) or (len(sampleArmY) == 0):
-		Ydata = initSpectrumY
-	elif len(initSpectrumX) == 0:
-		raise ValueError('Please load the spectrum!\n')
-	else:
-		raise TypeError('Input types are wrong.\n')
-	return initSpectrumX,  Ydata
 
 
 def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_point, maxx=[], minx=[], fitOrder=5, showGraph=False):
@@ -262,15 +231,6 @@ def polynomialFit1(x, b0, b1):
 	"""
 	return b0+b1*x
 
-
-
-def findNearest(array, value):
-	"""
-	Finds the nearest element to the given value in the array
-	"""
-	array = np.asarray(array)
-	idx = (np.abs(value-array)).argmin()
-	return array[idx], idx
 
 def cos_fit1(x,c0, c1, b0, b1):
 	return c0 + c1*np.cos(b0 + b1*x)
