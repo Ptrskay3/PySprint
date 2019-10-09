@@ -6,6 +6,7 @@ except ImportError:
 	print('PyQt5 is essential for the UI. You can use the API instead.')
 
 def main():
+    print('Building up UI..')
     app = QtWidgets.QApplication(sys.argv)
     my_interface = MainProgram()
     my_interface.showMaximized()
@@ -18,5 +19,4 @@ def main():
     sys.exit(app.exec_())
 
 if __name__ == "__main__":
-    print('Building up UI..')
     main()
