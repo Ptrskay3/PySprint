@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 sys.path.append('..')
 
 from core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, gaussian_window , ifft_method, spp_method, args_comp
-from core.edit_features import savgol, find_peak, convolution, cut_data, find_closest
+from core.edit_features import savgol, find_peak, convolution, cut_data
 from core.generator import generatorFreq, generatorWave
 
 
@@ -47,8 +47,7 @@ class Generator(object):
 		self.ref = np.array([])
 		self.sam = np.array([])
 		self.plotwidget = plt
-		if len(self.ref) != 0:
-			self._y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
+		
 
 	def __str__(self):
 		return '''Generator({}, {}, {}, delay = {}, GD={}, GDD={}, TOD={}, FOD={}, QOD={}, resolution={}, 
@@ -60,11 +59,15 @@ class Generator(object):
 		self.x, self.y, self.ref, self.sam = generatorFreq(self.start, self.stop, self.center, self.delay, self.GD,
 			self.GDD, self.TOD, self.FOD, self.QOD,
 			self.resolution, self.delimiter, self.pulseWidth, self.normalize)
+		if len(self.ref) != 0:
+			self._y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 
 	def generate_wave(self):
 		self.x, self.y, self.ref, self.sam = generatorWave(self.start, self.stop, self.center, self.delay, self.GD,
 			self.GDD, self.TOD, self.FOD, self.QOD,
 			self.resolution, self.delimiter, self.pulseWidth, self.normalize)
+		if len(self.ref) != 0:
+			self._y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 		
 	def show(self):
 		try:
@@ -108,9 +111,9 @@ class Generator(object):
 		self.ax[1].grid()
 		self.plotwidget.show()
 
-# g = Generator(2.2, 2.7, 2.45, delay = 0, normalize = True, GD = 100, TOD = -30000, QOD = 500000)
-# g.generate_freq()
-# g.phase_graph()
+g = Generator(2.2, 2.7, 2.45, delay = 0, normalize = True, GD = 100, TOD = -30000, QOD = 500000)
+g.generate_freq()
+g.phase_graph()
 
 class Dataset(object):
 	def __init__(self, x, y, ref=None, sam=None):
