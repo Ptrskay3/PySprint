@@ -4,10 +4,11 @@ This file is the main API to use Interferometry without the PyQt5 UI.
 
 import sys
 import warnings
-import numpy as np
-import matplotlib.pyplot as plt 
 
 sys.path.append('..')
+
+import numpy as np
+import matplotlib.pyplot as plt 
 
 from core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, gaussian_window , ifft_method, spp_method, args_comp
 from core.edit_features import savgol, find_peak, convolution, cut_data
@@ -82,7 +83,6 @@ class Generator(object):
 			np.savetxt('{}.txt'.format(name), np.transpose([self.x, self.y, self.ref, self.sam]), delimiter = self.delimiter)
 		else:
 			np.savetxt('{}/{}.txt'.format(path, name), np.transpose([self.x, self.y, self.ref, self.sam]), delimiter = self.delimiter)
-
 
 	def _phase(self, j):
 		lamend = (2*np.pi*C_LIGHT)/self.start
