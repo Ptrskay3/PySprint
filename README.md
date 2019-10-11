@@ -1,16 +1,20 @@
 
-# PySprint [2019]
+# PySprint 
 [![Build Status](https://travis-ci.org/Ptrskay3/PySprint.svg?branch=master)](https://travis-ci.org/Ptrskay3/pysprint)
 [![codecov](https://codecov.io/gh/Ptrskay3/PySprint/branch/master/graph/badge.svg)](https://codecov.io/gh/Ptrskay3/PySprint)
 [![Maintainability](https://api.codeclimate.com/v1/badges/4e876c4899af3c4435b0/maintainability)](https://codeclimate.com/github/Ptrskay3/PySprint/maintainability)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+
 Spectrally Refined Interferometry for Python 
+
+CURRENT RELEASE: 0.0.8 (ALPHA)
 
 PySprint is a UI and API for interferogram evaluation. Under construction.
 I will add an advanced description later on. 
 
 ### Lastest upgrades:
+  - Uploaded to PyPI, now pip installable
   - Code Climate + Codecov 
   - Data editing features unittests done
   - API skeleton is done
@@ -42,41 +46,27 @@ I will add an advanced description later on.
 
 ### Installation
 
+```sh
+$ pip install pysprint
+```
+
 PySprint requires [Python 3](https://www.python.org/downloads/) to run.
 
-Please install the following packages:
-* [PyQt5](https://pypi.org/project/PyQt5/)
-* numpy, scipy, matplotlib, pandas
-
+Package requirements:
+* TO USE THE UI, PLEASE MANUALLY INSTALL : [PyQt5](https://pypi.org/project/PyQt5/)
 ```sh
 $ pip install PyQt5
-$ pip install numpy
-$ pip install scipy
-$ pip install pandas
-$ pip install matplotlib
 ```
 or 
 ```sh
 conda install -c dsdale24 pyqt5
 ```
-Optional packages:
-* [lmfit](https://lmfit.github.io/lmfit-py/), numdifftools
+* numpy, scipy, matplotlib, pandas, lmfit will be automatically collected.
 
 
+## To Run the GUI
 ```sh
-$ pip install lmfit
-$ pip install numdifftools
+from pysprint.main import main
+
+main()
 ```
-or 
-
-```sh
-conda install -c conda-forge lmfit
-or conda install -c conda-forge/label/gcc7 lmfit
-or conda install -c conda-forge/label/broken lmfit
-or conda install -c conda-forge/label/cf201901 lmfit 
-
-conda install -c omnia numdifftools
-```
-
-## To Run
-Run main.py

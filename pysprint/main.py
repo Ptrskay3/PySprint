@@ -1,12 +1,11 @@
-import sys
-from pysprint.logic import MainProgram
-try:
-	from PyQt5 import QtWidgets
-except ImportError:
-	print('PyQt5 is essential for the UI. You can use the API instead.')
-
 def main():
     print('Building up UI..')
+    import sys
+    from pysprint.logic import MainProgram
+    try:
+        from PyQt5 import QtWidgets
+    except ImportError:
+        print('PyQt5 is essential for the UI. You can use the API instead.')
     app = QtWidgets.QApplication(sys.argv)
     my_interface = MainProgram()
     my_interface.showMaximized()

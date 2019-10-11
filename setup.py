@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
 
 MAJOR = 0
 MINOR = 0
-MICRO = 6
+MICRO = 8
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
 setup(
@@ -20,7 +20,7 @@ setup(
     description="Spectrally refined interferometry for Python",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Ptrskay3/Interferometry",
+    url="https://github.com/Ptrskay3/PySprint",
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
