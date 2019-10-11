@@ -21,6 +21,7 @@ class TestEdit(unittest.TestCase):
 		with self.assertRaises(ValueError):
 			savgol(x, y, v, w, window = 1, order = 3)
 
+
 	
 	def test_peak(self):
 		x, y = np.loadtxt('test_peak.txt', delimiter = ',', unpack = True)
@@ -42,6 +43,8 @@ class TestEdit(unittest.TestCase):
 		i = abs(a[idx1] - a[idx1-1])
 		j = abs(a[idx2] - a[idx2-1])
 		np.testing.assert_almost_equal(i, j)
+		with self.assertRaises(TypeError):
+			interpolate_data({'a': '1', 'b':'2'}, x,y,v, window = 1, order = 3)
 
 	def test_cut(self):
 		x, y, v, w = np.loadtxt('test_arms.txt', delimiter = ',', unpack = True)
