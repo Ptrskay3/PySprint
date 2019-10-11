@@ -88,8 +88,10 @@ class Generator(object):
 	def save(self, name, path=None):
 		if path == None:
 			np.savetxt('{}.txt'.format(name), np.transpose([self.x, self.y, self.ref, self.sam]), delimiter = self.delimiter)
+			print('Successfully saved as {}'.format(name))
 		else:
 			np.savetxt('{}/{}.txt'.format(path, name), np.transpose([self.x, self.y, self.ref, self.sam]), delimiter = self.delimiter)
+			print('Successfully saved as {}'.format(name))
 
 	def _phase(self, j):
 		lamend = (2*np.pi*C_LIGHT)/self.start
