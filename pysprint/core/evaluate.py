@@ -26,7 +26,7 @@ __all__ = ['min_max_method', 'cos_fit1', 'cos_fit2', 'cos_fit3',
 
 
 
-def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_point, maxx=[], minx=[], fitOrder=5, showGraph=False):
+def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_point, maxx=None, minx=None, fitOrder=5, showGraph=False):
 	"""
 	Calculates the dispersion with minimum-maximum method 
 
@@ -67,7 +67,10 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 	
 	"""
 	Xdata, Ydata  = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
-
+	if maxx is None:
+		maxx = []
+	if minx is None:
+		minx = []
 	_, SSPindex = findNearest(Xdata,ref_point)
 	if len(maxx) == 0 or len(minx) == 0:
 		maxInd = argrelextrema(Ydata, np.greater)
