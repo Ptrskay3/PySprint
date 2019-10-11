@@ -185,7 +185,7 @@ class Ui_SPP(object):
         self.fitOrderLine.setPlaceholderText(_translate("MainWindow", "Fit order "))
         self.pushButton_6.setText(_translate("MainWindow", "Fit and report"))
 
-from ui.plotwidget import PlotWidget
+from pysprint.ui.plotwidget import PlotWidget
 
 if __name__ == "__main__":
     import sys

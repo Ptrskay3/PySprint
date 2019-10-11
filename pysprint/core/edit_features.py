@@ -8,7 +8,7 @@ sys.path.append('..')
 import matplotlib.pyplot as plt
 from scipy.signal import find_peaks, savgol_filter, gaussian, convolve #, find_peaks_cwt
 from scipy.interpolate import interp1d
-from utils.accessories import findNearest, _handle_input
+from pysprint.utils.accessories import findNearest, _handle_input
 
 
 def savgol(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, window=101, order=3):

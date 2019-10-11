@@ -612,7 +612,7 @@ class Ui_Interferometry(object):
         self.actionUnit_converter.setText(_translate("Interferometry", "Unit converter"))
         self.actionOpen_documentation.setText(_translate("Interferometry", "Open documentation"))
         self.actionSettings.setText(_translate("Interferometry", "Settings"))
-from ui.mplwidget import MplWidget
+from pysprint.ui.mplwidget import MplWidget
 
 
 if __name__ == "__main__":

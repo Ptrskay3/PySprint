@@ -10,10 +10,10 @@ sys.path.append('..')
 import numpy as np
 import matplotlib.pyplot as plt 
 
-from core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, gaussian_window , ifft_method, spp_method, args_comp
-from core.edit_features import savgol, find_peak, convolution, cut_data
-from core.generator import generatorFreq, generatorWave
-from utils.accessories import print_disp
+from pysprint.core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, gaussian_window , ifft_method, spp_method, args_comp
+from pysprint.core.edit_features import savgol, find_peak, convolution, cut_data
+from pysprint.core.generator import generatorFreq, generatorWave
+from pysprint.utils.accessories import print_disp
 
 
 __all__ = ['Generator', 'Dataset', 'MinMaxMethod', 'CosFitMethod', 'SPPMethod', 'FFTMethod']

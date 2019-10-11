@@ -1,6 +1,8 @@
 """
 The main logic behind the UI functions.
 """
+import os
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QMainWindow, QDialogButtonBox, QApplication,
      QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QTreeWidget,
@@ -10,29 +12,39 @@ from PyQt5.QtWidgets import (QMainWindow, QDialogButtonBox, QApplication,
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, pyqtSlot, QSettings
 from PyQt5.QtGui import QIcon, QCursor
 
-from ui.ui import Ui_Interferometry
-from ui.generatorUI import Ui_GeneratorWindow
-from ui.aboutUI import Help
-from ui.mplwidget import MplWidget
-from ui.SPPUI import Ui_SPP
-from ui.settings_dialog import Ui_SettingsWindow
+from pysprint.ui.ui import Ui_Interferometry
+from pysprint.ui.generatorUI import Ui_GeneratorWindow
+from pysprint.ui.aboutUI import Help
+from pysprint.ui.mplwidget import MplWidget
+from pysprint.ui.SPPUI import Ui_SPP
+from pysprint.ui.settings_dialog import Ui_SettingsWindow
 
 import numpy as np
 import pandas as pd
 from datetime import datetime
 import matplotlib
 
-from core.evaluate import (min_max_method, cff_method, fft_method,
+from pysprint.core.evaluate import (min_max_method, cff_method, fft_method,
      cut_gaussian, gaussian_window , ifft_method, spp_method, args_comp,
      cos_fit1, cos_fit2, cos_fit3, cos_fit5, cos_fit4)
-from core.edit_features import (savgol, find_peak, convolution, 
+from pysprint.core.edit_features import (savgol, find_peak, convolution, 
      interpolate_data, cut_data)#, cwt)
-from core.loading import read_data
-from core.generator import generatorFreq, generatorWave
-from core.cff_fitting import FitOptimizer
-from utils.accessories import find_closest
+from pysprint.core.loading import read_data
+from pysprint.core.generator import generatorFreq, generatorWave
+from pysprint.core.cff_fitting import FitOptimizer
+from pysprint.utils.accessories import find_closest
 
+import pysprint as ps 
 
+def getpath():
+    p = os.path.dirname(ps.__file__)
+    spath = p + '\_settings.ini'
+    ipath = p + '\icon.png'
+    return spath, ipath
+
+spath, ipath = getpath()
+
+    
 class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     """ The main window class, opened when main.py is run."""
     samX = np.array([])
@@ -49,8 +61,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     def __init__(self, parent=None):
         super(MainProgram, self).__init__(parent)
         self.setupUi(self)
-        self.setWindowIcon(QtGui.QIcon('icon.png'))
-        self.settings = QSettings("_settings.ini", QSettings.IniFormat)
+        self.setWindowIcon(QtGui.QIcon(ipath))
+        self.settings = QSettings(spath, QSettings.IniFormat)
         self.settings.setFallbacksEnabled(False)
         self.calculate.clicked.connect(self.get_it)
         self.btn_load.clicked.connect(lambda i: self.load_data(i, self.a))
@@ -828,7 +840,7 @@ class HelpWindow(QtWidgets.QMainWindow, Help):
     def __init__(self, parent=None):
         super(HelpWindow, self).__init__(parent)
         self.setupUi(self)
-        self.setWindowIcon(QtGui.QIcon('icon.png'))
+        self.setWindowIcon(QtGui.QIcon(ipath))
         self.exbtn.clicked.connect(self.close)
 
 
@@ -842,13 +854,13 @@ class GeneratorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
     def __init__(self, parent=None):
         super(GeneratorWindow, self).__init__(parent)
         self.setupUi(self)
-        self.setWindowIcon(QtGui.QIcon('icon.png'))
+        self.setWindowIcon(QtGui.QIcon(ipath))
         self.closeButton.clicked.connect(self.close)
         self.pushButton_4.clicked.connect(self.generate_data)
         self.pushButton_2.clicked.connect(self.save_as)
         self.armCheck.setChecked(True)
         self.delimiterLine.setText(',')
-        self.settings = QSettings("_settings.ini", QSettings.IniFormat)
+        self.settings = QSettings(spath, QSettings.IniFormat)
         self.settings.setFallbacksEnabled(False)
         self.resize(self.settings.value('gen_size', QtCore.QSize(984, 877)))
         self.move(self.settings.value('gen_pos', QtCore.QPoint(50, 50)))
@@ -961,7 +973,7 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
     def __init__(self, parent=None):
         super(SPPWindow, self).__init__(parent)
         self.setupUi(self)
-        self.setWindowIcon(QtGui.QIcon('icon.png'))
+        self.setWindowIcon(QtGui.QIcon(ipath))
         self.treeWidget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.loadButton.clicked.connect(self.load_up)
         self.treeWidget.itemSelectionChanged.connect(self.fill_SPP)
@@ -970,7 +982,7 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         self.pushButton_7.clicked.connect(self.delete_item)
         self.pushButton_2.clicked.connect(self.pressed)
         self.pushButton_3.clicked.connect(self.released)
-        self.settings = QSettings("_settings.ini", QSettings.IniFormat)
+        self.settings = QSettings(spath, QSettings.IniFormat)
         self.settings.setFallbacksEnabled(False)
         self.pushButton_4.clicked.connect(self.edit_SPP)
         self.pushButton_6.clicked.connect(self.do_SPP)
@@ -1292,9 +1304,9 @@ class SettingsWindow(QtWidgets.QMainWindow, Ui_SettingsWindow):
     def __init__(self, parent=None):
         super(SettingsWindow, self).__init__(parent)
         self.setupUi(self)
-        self.setWindowIcon(QtGui.QIcon('icon.png'))
+        self.setWindowIcon(QtGui.QIcon(ipath))
         self.pushButton.clicked.connect(self.close)
-        self.settings = QSettings("_settings.ini", QSettings.IniFormat)
+        self.settings = QSettings(spath, QSettings.IniFormat)
         self.settings.setFallbacksEnabled(False)
         self.resize(self.settings.value('size', QtCore.QSize(270, 225)))
         self.move(self.settings.value('pos', QtCore.QPoint(50, 50)))

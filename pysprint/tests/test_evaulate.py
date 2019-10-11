@@ -1,3 +1,6 @@
+'''
+FIXME:Obviously we need better tests than that..
+'''
 import sys
 
 sys.path.append('..')
@@ -5,7 +8,7 @@ sys.path.append('..')
 import unittest
 import numpy as np
 
-from core import evaluate
+from pysprint.core import evaluate
 
 
 class TestLoading(unittest.TestCase):

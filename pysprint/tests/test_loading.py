@@ -5,7 +5,7 @@ sys.path.append('..')
 import unittest
 import numpy as np
 
-from core import loading
+from pysprint.core import loading
 
 class TestLoading(unittest.TestCase):
 
