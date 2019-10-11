@@ -282,7 +282,7 @@ class SPPMethod(Dataset):
 			pass
 		self.plotwidget.show()
 
-
+#rossz.. x transform?
 class FFTMethod(Dataset):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)

@@ -96,7 +96,6 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 		negValues[freq] = np.pi*(freq+1)
 	x_s = np.append(relPosFreqs, relNegFreqs) 
 	y_s = np.append(posValues, negValues)
-
 	#making sure the data in right order
 	L = sorted(zip(x_s,y_s), key=operator.itemgetter(0))
 	fullXValues, fullYValues = zip(*L)
@@ -185,6 +184,10 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 		return [],[],e	
 
 
+
+
+
+
 def polynomialFit5(x, b0, b1, b2, b3, b4, b5):
 	"""
 	Taylor polynomial for fit
@@ -230,6 +233,13 @@ def polynomialFit1(x, b0, b1):
 	b1 = GD
 	"""
 	return b0+b1*x
+
+a = np.arange(100)
+b = np.arange(100)
+mins = [10,30,50,70,90]
+maxs = [20,40,60,80,100]
+# disp, disp_s, fit = min_max_method([], b, [], [], 0, maxx=maxs, minx=mins, fitOrder=1, showGraph=False)
+# print(disp, disp_s, fit)
 
 
 def cos_fit1(x,c0, c1, b0, b1):

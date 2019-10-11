@@ -27,8 +27,10 @@ script:
   - cd pysprint/tests
   - python test_loading.py
   - python test_edit.py
+  - python test_evaluate.py
   - coverage run test_loading.py
   - coverage run test_edit.py
+  -coverage run test_evaluate.py
 
 after_success:
   - codecov
