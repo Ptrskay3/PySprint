@@ -338,9 +338,15 @@ def spp_method(delays, omegas, fitOrder=4, from_raw=False):
 				dispersion_std.append(par.stderr)
 			for idx in range(len(dispersion)):
 				dispersion[idx] =  dispersion[idx]*factorial(idx) #biztos?
-				dispersion_std[idx] =  dispersion_std[idx] * factorial(idx)
+			for idx in range(len(dispersion_std)):
+				if dispersion_std[idx] != None:
+					dispersion_std[idx] =  dispersion_std[idx] * factorial(idx)
+				else:
+					dispersion_std[idx] = 0
 			while len(dispersion)<5:
 				dispersion.append(0)
+				dispersion_std.append(0)
+			while len(dispersion_std)<5:
 				dispersion_std.append(0) 
 			bf = result.best_fit
 		else:

@@ -1,4 +1,7 @@
+from functools import wraps
+
 import numpy as np
+
 
 def findNearest(array, value):
 	#Finds the nearest element to the given value in the array
@@ -48,3 +51,13 @@ def find_closest(xValue, xArray, yArray):
 	idx = (np.abs(xArray-xValue)).argmin()
 	value = xArray[idx]
 	return value, yArray[idx]
+
+def print_disp(f):
+    @wraps(f)
+    def wrapping(*args, **kwargs):
+        disp, disp_std, stri = f(*args, **kwargs)
+        labels = ['GD', 'GDD','TOD', 'FOD', 'QOD']
+        for i in range(len(labels)):
+        	print(labels[i] + ' = ' + str(disp[i]) +  ' +/- ' + str(disp_std[i]) + ' 1/fs^{}'.format(i+1))
+        return disp, disp_std, stri
+    return wrapping
