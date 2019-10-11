@@ -262,7 +262,7 @@ class CosFitMethod(Dataset):
 
 	def plot_result(self):
 		if self.fit is not None:
-			self.plotwidget.plot(self.x, self.fit, 'k--', label = 'fit')
+			self.plotwidget.plot(self.x, self.fit, 'k--', label = 'fit', zorder=99)
 			self.plotwidget.legend()
 			self.show()
 		else:
@@ -309,7 +309,7 @@ class SPPMethod(Dataset):
 	def plot_result(self):
 		self.plotwidget.plot(self.om, self.de, 'o')
 		try:
-			self.plotwidget.plot(self.om, self.bf, 'r--')
+			self.plotwidget.plot(self.om, self.bf, 'r--', zorder=1)
 		except:
 			pass
 		self.plotwidget.show()
