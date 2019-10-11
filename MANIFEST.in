@@ -1,1 +1,1 @@
-recursive-include pysprint/ *.png *.ini
+recursive-include pysprint *.png *.ini

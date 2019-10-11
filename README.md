@@ -8,7 +8,7 @@
 
 Spectrally Refined Interferometry for Python 
 
-CURRENT RELEASE: 0.0.8 (ALPHA)
+CURRENT RELEASE: 0.0.9 (ALPHA)
 
 PySprint is a UI and API for interferogram evaluation. Under construction.
 I will add an advanced description later on. 
