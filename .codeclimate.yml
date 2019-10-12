@@ -11,7 +11,7 @@ checks:
       threshold: 1000
   method-complexity:
     config:
-      threshold: 25
+      threshold: 65
   method-count:
     config:
       threshold: 20
@@ -24,6 +24,8 @@ checks:
   return-statements:
     config:
       threshold: 4
+  similar-code:
+    enabled: false
 exclude_patterns:
   - "config/"
   - "db/"
