@@ -25,6 +25,9 @@ checks:
     config:
       threshold: 4
   similar-code:
+    config:
+      threshold: 40
+  identical-code:
     enabled: false
 exclude_patterns:
   - "config/"
