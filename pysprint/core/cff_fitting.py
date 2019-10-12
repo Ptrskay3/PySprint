@@ -5,7 +5,6 @@ import sys
 sys.path.append('..')
 import numpy as np 
 from scipy.optimize import curve_fit
-import matplotlib.pyplot as plt 
 from pysprint.utils.accessories import findNearest as find_nearest
 
 class FitOptimizer(object):

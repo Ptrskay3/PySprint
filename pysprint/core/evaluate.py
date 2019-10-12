@@ -77,9 +77,7 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 		minInd = argrelextrema(Ydata, np.less)
 		maxx = Xdata[maxInd]
 		minx = Xdata[minInd]
-	else:
-		maxx = maxx
-		minx = minx
+
 
 	relNegMaxFreqs = np.array([a for a in (Xdata[SSPindex]-maxx) if a<0])
 	relNegMinFreqs= np.array([b for b in (Xdata[SSPindex]-minx) if b<0])

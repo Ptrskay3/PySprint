@@ -5,7 +5,6 @@ Methods for manipulating the loaded data
 import numpy as np 
 import sys
 sys.path.append('..')
-import matplotlib.pyplot as plt
 from scipy.signal import find_peaks, savgol_filter, gaussian, convolve #, find_peaks_cwt
 from scipy.interpolate import interp1d
 from pysprint.utils.accessories import findNearest, _handle_input

@@ -10,7 +10,7 @@ sys.path.append('..')
 import numpy as np
 import matplotlib.pyplot as plt 
 
-from pysprint.core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, gaussian_window , ifft_method, spp_method, args_comp
+from pysprint.core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, ifft_method, spp_method, args_comp
 from pysprint.core.edit_features import savgol, find_peak, convolution, cut_data
 from pysprint.core.generator import generatorFreq, generatorWave
 from pysprint.utils.accessories import print_disp
@@ -87,7 +87,7 @@ class Generator(object):
 		self.plotwidget.show()
 
 	def save(self, name, path=None):
-		if path == None:
+		if path is None:
 			np.savetxt('{}.txt'.format(name), np.transpose([self.x, self.y, self.ref, self.sam]), delimiter = self.delimiter)
 			print('Successfully saved as {}'.format(name))
 		else:
@@ -204,7 +204,7 @@ class Dataset(object):
 		
 
 	def cut(self, start=-9999, stop=9999):
-		self.x, self.y_norm = cut_data(self.x, self.y, self.ref, self.sam, startValue = start, stopValue = stop)
+		self.x, self.y_norm = cut_data(self.x, self.y, self.ref, self.sam, startValue = start, endValue = stop)
 		self.ref = []
 		self.sam = []
 
