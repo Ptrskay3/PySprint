@@ -68,6 +68,7 @@ class Generator(object):
 			self._y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 
 	def generate_wave(self):
+		self.is_wave = True
 		self.x, self.y, self.ref, self.sam = generatorWave(self.start, self.stop, self.center, self.delay, self.GD,
 			self.GDD, self.TOD, self.FOD, self.QOD,
 			self.resolution, self.delimiter, self.pulseWidth, self.normalize)
@@ -94,12 +95,19 @@ class Generator(object):
 			print('Successfully saved as {}'.format(name))
 
 	def _phase(self, j):
-		lamend = (2*np.pi*C_LIGHT)/self.start
-		lamstart = (2*np.pi*C_LIGHT)/self.stop
-		lam = np.arange(lamstart, lamend+self.resolution, self.resolution)
-		omega = (2*np.pi*C_LIGHT)/lam 
-		j = omega-self.center
-		return j*self.GD+(self.GDD/2)*j**2+(self.TOD/6)*j**3+(self.FOD/24)*j**4+(self.QOD/120)*j**5
+		if self.is_wave:
+			lam = np.arange(self.start, self.stop+self.resolution, self.resolution) 
+			omega = (2*np.pi*C_LIGHT)/lam 
+			omega0 = (2*np.pi*C_LIGHT)/self.center 
+			j = omega-omega0
+			return j*self.GD+(self.GDD/2)*j**2+(self.TOD/6)*j**3+(self.FOD/24)*j**4+(self.QOD/120)*j**5
+		else:
+			lamend = (2*np.pi*C_LIGHT)/self.start
+			lamstart = (2*np.pi*C_LIGHT)/self.stop
+			lam = np.arange(lamstart, lamend+self.resolution, self.resolution)
+			omega = (2*np.pi*C_LIGHT)/lam 
+			j = omega-self.center
+			return j*self.GD+(self.GDD/2)*j**2+(self.TOD/6)*j**3+(self.FOD/24)*j**4+(self.QOD/120)*j**5
 
 	def phase_graph(self):
 		self.fig, self.ax = self.plotwidget.subplots(2,1, figsize = (8,7))
@@ -125,8 +133,8 @@ class Generator(object):
 			return self.x, self.y
 		return self.x, self.y, self.ref, self.sam
 
-# g = Generator(2.2, 2.7, 2.45, delay = 0, normalize = True, GD = 100, TOD = -30000, QOD = 500000)
-# g.generate_freq()
+# g = Generator(400, 1000, 600, delay = 0, normalize = True, GD = 100, TOD = 300)
+# g.generate_wave()
 # g.phase_graph()
 
 class Dataset(object):
