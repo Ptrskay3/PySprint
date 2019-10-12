@@ -17,7 +17,9 @@ class TestEdit(unittest.TestCase):
 	def test_savgol(self):
 		x, y, v, w = np.loadtxt('test_arms.txt', delimiter = ',', unpack = True)
 		a, b = savgol(x, y, v, w, window = 10, order = 3)
+		c, d = savgol(x, y, v, w, window = 11, order = 3)
 		assert len(a) == len(b)
+		assert len(d) == len(d)
 		with self.assertRaises(ValueError):
 			savgol(x, y, v, w, window = 1, order = 3)
 
