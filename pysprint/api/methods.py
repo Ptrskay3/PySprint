@@ -64,18 +64,18 @@ class Generator(object):
 		self.x, self.y, self.ref, self.sam = generatorFreq(self.start, self.stop, self.center, self.delay, self.GD,
 			self.GDD, self.TOD, self.FOD, self.QOD,
 			self.resolution, self.delimiter, self.pulseWidth, self.normalize)
-		if len(self.ref) != 0:
-			self._y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
+		
 
 	def generate_wave(self):
 		self.is_wave = True
 		self.x, self.y, self.ref, self.sam = generatorWave(self.start, self.stop, self.center, self.delay, self.GD,
 			self.GDD, self.TOD, self.FOD, self.QOD,
 			self.resolution, self.delimiter, self.pulseWidth, self.normalize)
-		if len(self.ref) != 0:
-			self._y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
+
 		
 	def show(self):
+		if len(self.ref) != 0:
+			self._y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 		if np.iscomplexobj(self.y):
 			self.plotwidget.plot(self.x, np.abs(self.y))
 		else:   
@@ -100,14 +100,13 @@ class Generator(object):
 			omega = (2*np.pi*C_LIGHT)/lam 
 			omega0 = (2*np.pi*C_LIGHT)/self.center 
 			j = omega-omega0
-			return j*self.GD+(self.GDD/2)*j**2+(self.TOD/6)*j**3+(self.FOD/24)*j**4+(self.QOD/120)*j**5
 		else:
 			lamend = (2*np.pi*C_LIGHT)/self.start
 			lamstart = (2*np.pi*C_LIGHT)/self.stop
 			lam = np.arange(lamstart, lamend+self.resolution, self.resolution)
 			omega = (2*np.pi*C_LIGHT)/lam 
 			j = omega-self.center
-			return j*self.GD+(self.GDD/2)*j**2+(self.TOD/6)*j**3+(self.FOD/24)*j**4+(self.QOD/120)*j**5
+		return j*self.GD+(self.GDD/2)*j**2+(self.TOD/6)*j**3+(self.FOD/24)*j**4+(self.QOD/120)*j**5
 
 	def phase_graph(self):
 		self.fig, self.ax = self.plotwidget.subplots(2,1, figsize = (8,7))
