@@ -17,7 +17,7 @@ except ImportError:
 
 sys.path.append('..')
 
-from pysprint.utils.accessories import findNearest, _handle_input
+from pysprint.utils.accessories import findNearest, _handle_input, lmfit_disp, scipy_disp
 
 
 __all__ = ['min_max_method', 'cos_fit1', 'cos_fit2', 'cos_fit3',
@@ -143,11 +143,7 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 			raise ValueError('Order is out of range, please select from [1,5]')
 	try:
 		if _has_lmfit:
-			dispersion = []
-			dispersion_std = []
-			for name, par in result.params.items():
-				dispersion.append(par.value)
-				dispersion_std.append(par.stderr)
+			dispersion, dispersion_std = lmfit_disp(result.params.items())
 			dispersion = dispersion[1:]
 			dispersion_std = dispersion_std[1:]
 			for idx in range(len(dispersion)):
@@ -331,11 +327,7 @@ def spp_method(delays, omegas, fitOrder=4, from_raw=False):
 				result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
 			else:
 				raise ValueError('Order is out of range, please select from [1,4]')
-			dispersion = []
-			dispersion_std = []
-			for name, par in result.params.items():
-				dispersion.append(par.value)
-				dispersion_std.append(par.stderr)
+			dispersion, dispersion_std = lmfit_disp(result.params.items())
 			for idx in range(len(dispersion)):
 				dispersion[idx] =  dispersion[idx]*factorial(idx) #biztos?
 			for idx in range(len(dispersion_std)):
@@ -624,16 +616,10 @@ def args_comp(initSpectrumX, initSpectrumY, fitOrder=5, showGraph=False):
 	else:
 		raise ValueError('Order is out of range, please select from [1,5]')
 	try:
-		dispersion = []
-		dispersion_std = []
-		for name, par in result.params.items():
-			dispersion.append(par.value)
-			dispersion_std.append(par.stderr)
+		dispersion, dispersion_std = lmfit_disp(result.params.items())
 		dispersion = dispersion[1:]
 		dispersion_std = dispersion_std[1:]
-		for idx in range(len(dispersion)):
-			dispersion[idx] =  dispersion[idx] / factorial(idx+1) 
-			dispersion_std[idx] =  dispersion_std[idx] / factorial(idx+1)
+		dispersion, dispersion_std = scipy_disp(dispersion)
 		while len(dispersion)<5:
 			dispersion.append(0)
 			dispersion_std.append(0) 

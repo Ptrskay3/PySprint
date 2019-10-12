@@ -3,6 +3,19 @@ from functools import wraps
 import numpy as np
 
 
+def scipy_disp(r):
+	for idx in range(len(r)):
+		dispersion[idx] =  dispersion[idx] / factorial(idx+1) 
+		dispersion_std[idx] =  dispersion_std[idx] / factorial(idx+1)
+	return dispersion, dispersion_std
+
+def lmfit_disp(r):
+	dispersion, dispersion_std = [], []
+	for name, par in r:
+		dispersion.append(par.value)
+		dispersion_std.append(par.stderr)
+	return dispersion, dispersion_std
+
 def findNearest(array, value):
 	#Finds the nearest element to the given value in the array
 	#returns tuple: (element, element's index)
