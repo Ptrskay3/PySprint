@@ -25,6 +25,7 @@ __all__ = ['min_max_method', 'cos_fit1', 'cos_fit2', 'cos_fit3',
 		   'ifft_method', 'args_comp']
 
 
+
 def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_point, maxx=None, minx=None, fitOrder=5, showGraph=False):
 	"""
 	Calculates the dispersion with minimum-maximum method 
