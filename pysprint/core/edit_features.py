@@ -9,6 +9,7 @@ from scipy.signal import find_peaks, savgol_filter, gaussian, convolve #, find_p
 from scipy.interpolate import interp1d
 from pysprint.utils.accessories import findNearest, _handle_input
 
+
 def savgol(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, window=101, order=3):
 	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
 	xint, yint = interpolate_data(Xdata, Ydata, [], [])
