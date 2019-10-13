@@ -1,10 +1,10 @@
 
 # PySprint 
 [![Build Status](https://travis-ci.org/Ptrskay3/PySprint.svg?branch=master)](https://travis-ci.org/Ptrskay3/pysprint)
-[![codecov](https://codecov.io/gh/Ptrskay3/PySprint/branch/master/graph/badge.svg)](https://codecov.io/gh/Ptrskay3/PySprint)
 [![Maintainability](https://api.codeclimate.com/v1/badges/4e876c4899af3c4435b0/maintainability)](https://codeclimate.com/github/Ptrskay3/PySprint/maintainability)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Ptrskay3/PySprint.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Ptrskay3/PySprint/context:python)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![codecov](https://codecov.io/gh/Ptrskay3/PySprint/branch/master/graph/badge.svg)](https://codecov.io/gh/Ptrskay3/PySprint)
 
 
 ##### Spectrally Refined Interferometry for Python 
@@ -28,8 +28,7 @@ The GUI works only with 1920x1080 screen resolution. Lower resolution compatibil
   - Added SPP Panel
 
 ### Known issues
-* SPP Panel data storage should be rewritten
-* Evaluation methods improvement
+* FFTMethod's calculate works incorrectly, fix next release
 * The data loading AI sometimes produces unexpected results
 * There might be unnecessary imports
 * Some buttons has no effect yet.
