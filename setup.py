@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
 
 MAJOR = 0
 MINOR = 0
-MICRO = 11
+MICRO = 12
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
 
@@ -23,6 +23,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/Ptrskay3/PySprint",
     packages=find_packages(),
+    include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",
         "Development Status :: 3 - Alpha",
