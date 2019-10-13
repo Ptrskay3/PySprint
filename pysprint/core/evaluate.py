@@ -619,7 +619,7 @@ def args_comp(initSpectrumX, initSpectrumY, fitOrder=5, showGraph=False):
 		dispersion, dispersion_std = lmfit_disp(result.params.items())
 		dispersion = dispersion[1:]
 		dispersion_std = dispersion_std[1:]
-		dispersion, dispersion_std = scipy_disp(dispersion)
+		# dispersion, dispersion_std = scipy_disp(dispersion)
 		while len(dispersion)<5:
 			dispersion.append(0)
 			dispersion_std.append(0) 
