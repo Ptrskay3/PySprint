@@ -52,6 +52,7 @@ class Generator(object):
 		self.ref = np.array([])
 		self.sam = np.array([])
 		self.plotwidget = plt
+		self.is_wave = False
 		
 
 	def __str__(self):
@@ -100,6 +101,7 @@ class Generator(object):
 			omega = (2*np.pi*C_LIGHT)/lam 
 			omega0 = (2*np.pi*C_LIGHT)/self.center 
 			j = omega-omega0
+
 		else:
 			lamend = (2*np.pi*C_LIGHT)/self.start
 			lamstart = (2*np.pi*C_LIGHT)/self.stop
@@ -109,6 +111,8 @@ class Generator(object):
 		return j*self.GD+(self.GDD/2)*j**2+(self.TOD/6)*j**3+(self.FOD/24)*j**4+(self.QOD/120)*j**5
 
 	def phase_graph(self):
+		if len(self.ref) != 0:
+			self._y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 		self.fig, self.ax = self.plotwidget.subplots(2,1, figsize = (8,7))
 		self.plotwidget.subplots_adjust(top = 0.95)
 		self.fig.canvas.set_window_title('Spectrum and phase')
@@ -132,9 +136,9 @@ class Generator(object):
 			return self.x, self.y
 		return self.x, self.y, self.ref, self.sam
 
-# g = Generator(400, 1000, 600, delay = 0, normalize = True, GD = 100, TOD = 300)
-# g.generate_wave()
-# g.phase_graph()
+g = Generator(400, 1000, 600, delay = 0, normalize = True, GD = 100, TOD = 300)
+g.generate_wave()
+g.phase_graph()
 
 class Dataset(object):
 	def __init__(self, x, y, ref=None, sam=None):
