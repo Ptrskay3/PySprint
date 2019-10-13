@@ -136,9 +136,6 @@ class Generator(object):
 			return self.x, self.y
 		return self.x, self.y, self.ref, self.sam
 
-g = Generator(400, 1000, 600, delay = 0, normalize = True, GD = 100, TOD = 300)
-g.generate_wave()
-g.phase_graph()
 
 class Dataset(object):
 	def __init__(self, x, y, ref=None, sam=None):

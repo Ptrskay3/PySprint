@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
 
 MAJOR = 0
 MINOR = 0
-MICRO = 12
+MICRO = 13
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
 
