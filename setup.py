@@ -9,8 +9,9 @@ with open("README.md", "r") as fh:
 
 MAJOR = 0
 MINOR = 0
-MICRO = 10
+MICRO = 11
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
+
 
 setup(
     name="pysprint",

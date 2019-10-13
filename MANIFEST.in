@@ -1,2 +1,3 @@
-include pysprint icon.PNG *.ini
+recursive-include pysprint icon.png _settings.ini
+recursive-include doc *
 recursive-include pysprint/examples *.txt
