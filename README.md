@@ -6,18 +6,17 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
-Spectrally Refined Interferometry for Python 
+##### Spectrally Refined Interferometry for Python 
+CURRENT RELEASE: 0.0.11 (ALPHA)
 
 PySprint is a UI and API for interferogram evaluation. Under construction.
-I will add an advanced description later on. 
+The GUI works only with 1920x1080 screen resolution. Lower resolution compatibility is queued on the To-Do List.
 
-CURRENT RELEASE: 0.0.10 (ALPHA)
 
 ### Lastest upgrades:
-  - Uploaded to PyPI, now pip installable
-  - Code Climate + Codecov 
+  - Now pip installable, see below
+  - Added CI/CD, next is CircleCI
   - Data editing features unittests done
-  - API skeleton is done
   - Added CI along with some unittests
   - Started API
   - Numerous little fixes according to PEP8
@@ -36,7 +35,8 @@ CURRENT RELEASE: 0.0.10 (ALPHA)
 
 
 ### To-do list
-
+* Screen resolution compatibility
+* Clean up GUI from useless buttons
 * ERROR HANDLING!
 * Unittests
 * Selectable units
@@ -46,14 +46,14 @@ CURRENT RELEASE: 0.0.10 (ALPHA)
 
 ### Installation
 
+PySprint requires [Python 3](https://www.python.org/downloads/) to run.
+
 ```sh
 $ pip install pysprint
 ```
 
-PySprint requires [Python 3](https://www.python.org/downloads/) to run.
-
 Package requirements:
-* TO USE THE UI, PLEASE MANUALLY INSTALL : [PyQt5](https://pypi.org/project/PyQt5/)
+* To use the GUI, install [PyQt5](https://pypi.org/project/PyQt5/)
 ```sh
 $ pip install PyQt5
 ```
