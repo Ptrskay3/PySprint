@@ -458,7 +458,7 @@ def fft_method(initSpectrumY):
 	if len(initSpectrumY) == 0:
 		pass
 
-def gaussian_window(t ,tau, standardDev, order):
+def gaussian_window(t, tau, standardDev, order):
 	"""
 	Parameters
 	----------

@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from pysprint.core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, ifft_method, spp_method, args_comp
 from pysprint.core.edit_features import savgol, find_peak, convolution, cut_data
 from pysprint.core.generator import generatorFreq, generatorWave
-from pysprint.utils.accessories import print_disp
+from pysprint.utils import print_disp
 
 
 __all__ = ['Generator', 'Dataset', 'MinMaxMethod', 'CosFitMethod', 'SPPMethod', 'FFTMethod']
@@ -137,6 +137,32 @@ class Generator(object):
 		return self.x, self.y, self.ref, self.sam
 
 
+	def open_app(self):
+		print('Building up UI..')
+		import sys
+		from pysprint.logic import MainProgram
+		try:
+			from PyQt5 import QtWidgets
+		except ImportError:
+			print('PyQt5 is essential for the UI. You can use the API instead.')
+		app = QtWidgets.QApplication(sys.argv)
+		my_interface = MainProgram()
+		my_interface.showMaximized()
+		my_interface.a = self.x
+		my_interface.b = self.y
+		my_interface.samY = self.sam
+		my_interface.refY = self.ref
+		if my_interface.settings.value('show') == 'True':
+			my_interface.msgbox.exec_()
+			if my_interface.cb.isChecked():
+				my_interface.settings.setValue('show', False)
+		else:
+			pass
+		my_interface.redraw_graph()
+		sys.exit(app.exec_())
+
+
+
 class Dataset(object):
 	def __init__(self, x, y, ref=None, sam=None):
 		self.x = x
@@ -230,6 +256,30 @@ class Dataset(object):
 				self.plotwidget.plot(self.x, self.y, 'r')
 		self.plotwidget.grid()
 		self.plotwidget.show()
+
+	def open_app(self):
+		print('Building up UI..')
+		import sys
+		from pysprint.logic import MainProgram
+		try:
+			from PyQt5 import QtWidgets
+		except ImportError:
+			print('PyQt5 is essential for the UI. You can use the API instead.')
+		app = QtWidgets.QApplication(sys.argv)
+		my_interface = MainProgram()
+		my_interface.showMaximized()
+		my_interface.a = self.x
+		my_interface.b = self.y
+		my_interface.samY = self.sam
+		my_interface.refY = self.ref
+		if my_interface.settings.value('show') == 'True':
+			my_interface.msgbox.exec_()
+			if my_interface.cb.isChecked():
+				my_interface.settings.setValue('show', False)
+		else:
+			pass
+		my_interface.redraw_graph()
+		sys.exit(app.exec_())
 
 
 class MinMaxMethod(Dataset):
@@ -349,6 +399,3 @@ class FFTMethod(Dataset):
 	def calculate(self, fit_order, show_graph=False):
 		dispersion, dispersion_std, fit_report = args_comp(self.x, self.y, fitOrder = fit_order, showGraph = show_graph)
 		return dispersion, dispersion_std, fit_report
-
-
-
