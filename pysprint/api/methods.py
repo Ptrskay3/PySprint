@@ -252,30 +252,6 @@ class Dataset(BaseApp):
 		self.plotwidget.grid()
 		self.plotwidget.show()
 
-	def open_app(self):
-		print('Building up UI..')
-		import sys
-		from pysprint.logic import MainProgram
-		try:
-			from PyQt5 import QtWidgets
-		except ImportError:
-			print('PyQt5 is essential for the UI. You can use the API instead.')
-		app = QtWidgets.QApplication(sys.argv)
-		my_interface = MainProgram()
-		my_interface.showMaximized()
-		my_interface.a = self.x
-		my_interface.b = self.y
-		my_interface.samY = self.sam
-		my_interface.refY = self.ref
-		if my_interface.settings.value('show') == 'True':
-			my_interface.msgbox.exec_()
-			if my_interface.cb.isChecked():
-				my_interface.settings.setValue('show', False)
-		else:
-			pass
-		my_interface.redraw_graph()
-		sys.exit(app.exec_())
-
 
 class MinMaxMethod(Dataset):
 	def __init__(self, *args, **kwargs):
