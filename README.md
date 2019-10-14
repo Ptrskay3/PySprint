@@ -68,7 +68,7 @@ conda install -c dsdale24 pyqt5
 
 ## To Run the GUI
 ```python
-from pysprint.main import main
+import pysprint as ps
 
-main()
+ps.run()
 ```
