@@ -7,8 +7,9 @@
 [![codecov](https://codecov.io/gh/Ptrskay3/PySprint/branch/master/graph/badge.svg)](https://codecov.io/gh/Ptrskay3/PySprint)
 
 
+
 ##### Spectrally Refined Interferometry for Python 
-CURRENT RELEASE: 0.0.14 (ALPHA)
+CURRENT RELEASE: [![PyPI version](https://badge.fury.io/py/pysprint.svg)](https://badge.fury.io/py/pysprint)
 
 PySprint is a UI and API for interferogram evaluation. Under construction.
 The GUI works only with 1920x1080 screen resolution. Lower resolution compatibility is queued on the To-Do List.
