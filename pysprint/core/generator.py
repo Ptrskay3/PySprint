@@ -6,6 +6,7 @@ import numpy as np
 
 C_LIGHT = 299.793 #nm/fs
 
+
 def _ensure_input(start, stop, center, resolution):
 	if start >= stop:
 		raise ValueError('start value must be less than stop')
@@ -16,7 +17,8 @@ def _ensure_input(start, stop, center, resolution):
 	else:
 		pass
 
-def _disp(x ,GD=0, GDD=0, TOD=0, FOD=0, QOD=0):
+
+def _disp(x, GD=0, GDD=0, TOD=0, FOD=0, QOD=0):
 	return x*GD+(GDD/2)*x**2+(TOD/6)*x**3+(FOD/24)*x**4+(QOD/120)*x**5
 
 
@@ -48,7 +50,7 @@ def generatorFreq(start, stop, center, delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, 
 
 #intenzitásarány
 
-def generatorWave(start, stop, center ,delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1, 
+def generatorWave(start, stop, center, delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1, 
 				  delimiter=',',pulseWidth=10, includeArms=False):
 	_ensure_input(start, stop, center, resolution)
 	omega0 = (2*np.pi*C_LIGHT)/center 

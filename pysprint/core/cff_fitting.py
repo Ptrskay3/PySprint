@@ -2,10 +2,14 @@
 CURRENTLY POORLY WRITTEN, BUT IT WORKS.. I WILL UPDATE IT SOON.
 """
 import sys
-sys.path.append('..')
 import numpy as np 
 from scipy.optimize import curve_fit
-from pysprint.utils.accessories import findNearest as find_nearest
+from pysprint.utils import findNearest as find_nearest
+# from pysprint.logic import MainProgram
+
+
+sys.path.append('..')
+
 
 class FitOptimizer(object):
 	"""Class to help achieve better fitting results."""

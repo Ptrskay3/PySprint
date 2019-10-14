@@ -1,3 +1,4 @@
+import sys
 try:
     from setuptools import setup, find_packages
 except ImportError:
@@ -6,10 +7,12 @@ except ImportError:
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+if sys.version_info[:2] < (3, 5):
+    raise RuntimeError("Python version >= 3.5 required.")
 
 MAJOR = 0
 MINOR = 0
-MICRO = 13
+MICRO = 14
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
 

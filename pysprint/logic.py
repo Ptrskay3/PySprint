@@ -32,7 +32,7 @@ from pysprint.core.edit_features import (savgol, find_peak, convolution,
 from pysprint.core.loading import read_data
 from pysprint.core.generator import generatorFreq, generatorWave
 from pysprint.core.cff_fitting import FitOptimizer
-from pysprint.utils.accessories import find_closest
+from pysprint.utils import find_closest
 
 import pysprint as ps 
 

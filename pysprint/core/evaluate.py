@@ -17,7 +17,7 @@ except ImportError:
 
 sys.path.append('..')
 
-from pysprint.utils.accessories import findNearest, _handle_input, lmfit_disp, scipy_disp
+from pysprint.utils import findNearest, _handle_input, lmfit_disp, scipy_disp
 
 
 __all__ = ['min_max_method', 'cos_fit1', 'cos_fit2', 'cos_fit3',
@@ -67,16 +67,13 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 	"""
 	Xdata, Ydata  = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
 	if maxx is None:
-		maxx = []
-	if minx is None:
-		minx = []
-	_, SSPindex = findNearest(Xdata,ref_point)
-	if len(maxx) == 0 or len(minx) == 0:
 		maxInd = argrelextrema(Ydata, np.greater)
-		minInd = argrelextrema(Ydata, np.less)
 		maxx = Xdata[maxInd]
+	if minx is None:
+		minInd = argrelextrema(Ydata, np.less)
 		minx = Xdata[minInd]
 
+	_, SSPindex = findNearest(Xdata,ref_point)
 
 	relNegMaxFreqs = np.array([a for a in (Xdata[SSPindex]-maxx) if a<0])
 	relNegMinFreqs= np.array([b for b in (Xdata[SSPindex]-minx) if b<0])
@@ -230,10 +227,10 @@ def polynomialFit1(x, b0, b1):
 	"""
 	return b0+b1*x
 
-a = np.arange(100)
-b = np.arange(100)
-mins = [10,30,50,70,90]
-maxs = [20,40,60,80,100]
+# a = np.arange(100)
+# b = np.arange(100)
+# mins = [10,30,50,70,90]
+# maxs = [20,40,60,80,100]
 # disp, disp_s, fit = min_max_method([], b, [], [], 0, maxx=maxs, minx=mins, fitOrder=1, showGraph=False)
 # print(disp, disp_s, fit)
 
@@ -244,15 +241,14 @@ def cos_fit1(x,c0, c1, b0, b1):
 def cos_fit2(x,c0, c1, b0, b1, b2):
 	return c0 + c1*np.cos(polynomialFit2(x,b0, b1, b2))
 
+def cos_fit3(x,c0, c1, b0, b1, b2, b3):
+	return c0 + c1*np.cos(polynomialFit3(x, b0, b1, b2, b3))
+
 def cos_fit4(x,c0, c1, b0, b1, b2, b3, b4):
 	return c0 + c1*np.cos(polynomialFit4(x,b0, b1, b2, b3, b4))
 
 def cos_fit5(x,c0, c1, b0, b1, b2, b3, b4, b5):
 	return c0 + c1*np.cos(polynomialFit5(x,b0, b1, b2, b3, b4, b5))
-
-def cos_fit3(x,c0, c1, b0, b1, b2, b3):
-	return c0 + c1*np.cos(polynomialFit3(x, b0, b1, b2, b3))
-
 
 
 def spp_method(delays, omegas, fitOrder=4, from_raw=False): 
