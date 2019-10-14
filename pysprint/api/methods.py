@@ -31,7 +31,37 @@ class InterpolationWarning(UserWarning):
 	pass
 
 
-class Generator(object):
+class BaseApp(object):
+	def __init__(self):
+		pass
+
+	def open_app(self):
+		import sys
+		from pysprint.logic import MainProgram
+		try:
+			from PyQt5 import QtWidgets
+		except ImportError:
+			print('PyQt5 is essential for the UI. You can use the API instead.')
+		print('Building up UI..')
+		app = QtWidgets.QApplication(sys.argv)
+		my_interface = MainProgram()
+		my_interface.showMaximized()
+		my_interface.a = self.x
+		my_interface.b = self.y
+		my_interface.samY = self.sam
+		my_interface.refY = self.ref
+		if my_interface.settings.value('show') == 'True':
+			my_interface.msgbox.exec_()
+			if my_interface.cb.isChecked():
+				my_interface.settings.setValue('show', False)
+		else:
+			pass
+		my_interface.redraw_graph()
+		sys.exit(app.exec_())
+		
+
+
+class Generator(BaseApp):
 	def __init__(self, start, stop, center, delay=0, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1, delimiter=',',
 		         pulseWidth=10, normalize=False):
 		self.start = start
@@ -137,44 +167,9 @@ class Generator(object):
 		return self.x, self.y, self.ref, self.sam
 
 
-	def open_app(self):
-		print('Building up UI..')
-		import sys
-		from pysprint.logic import MainProgram
-		try:
-			from PyQt5 import QtWidgets
-		except ImportError:
-			print('PyQt5 is essential for the UI. You can use the API instead.')
-		app = QtWidgets.QApplication(sys.argv)
-		my_interface = MainProgram()
-		my_interface.showMaximized()
-		my_interface.a = self.x
-		my_interface.b = self.y
-		my_interface.samY = self.sam
-		my_interface.refY = self.ref
-		if my_interface.settings.value('show') == 'True':
-			my_interface.msgbox.exec_()
-			if my_interface.cb.isChecked():
-				my_interface.settings.setValue('show', False)
-		else:
-			pass
-		my_interface.redraw_graph()
-		sys.exit(app.exec_())
-
-
-
-class Dataset(object):
+class Dataset(BaseApp):
 	def __init__(self, x, y, ref=None, sam=None):
-		self.x = x
-		self.y = y
-		if ref is None:
-			self.ref = []
-		else:
-			self.ref = ref 
-		if sam is None:
-			self.sam = []
-		else:
-			self.sam = sam
+		
 		self._is_normalized = False
 		if not isinstance(self.x, np.ndarray):
 			try:
