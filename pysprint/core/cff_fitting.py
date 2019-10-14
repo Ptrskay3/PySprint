@@ -2,11 +2,10 @@
 CURRENTLY POORLY WRITTEN, BUT IT WORKS.. I WILL UPDATE IT SOON.
 """
 import sys
-import numpy as np 
+import numpy as np
 from scipy.optimize import curve_fit
 from pysprint.utils import findNearest as find_nearest
 # from pysprint.logic import MainProgram
-
 
 sys.path.append('..')
 
@@ -65,7 +64,7 @@ class FitOptimizer(object):
 			self._upper_bound = len(self.x)
 		self._x_curr = self.x[self._lower_bound:self._upper_bound]
 		self._y_curr = self._y_norm[self._lower_bound:self._upper_bound]
-		
+
 	def _extend_region(self, extend_by=0.2):
 		""" Extends region of fit"""
 		self._new_lower = np.floor(self._lower_bound - extend_by*len(self.x))
@@ -86,61 +85,62 @@ class FitOptimizer(object):
 		try:
 			if len(self._x_curr) == len(self.x):
 				return True
-			self.popt, self.pcov = curve_fit(self.func, self._x_curr, self._y_curr, maxfev = 200000, p0 = self.p0)
-			self.p0 = self.popt 
+			self.popt, self.pcov = curve_fit(
+				self.func, self._x_curr, self._y_curr, maxfev=200000, p0=self.p0
+				)
+			self.p0 = self.popt
 		except RuntimeError:
 			if len(self.popt) > 4:
 				self.p0[:3] = self.popt[:3] + np.random.normal(0, 100, len(self.popt)-3)
 			else:
-				self.p0 = self.popt + np.random.normal(0,100, len(self.popt))
-			self.popt, self.pcov = curve_fit(self.func, self._x_curr, self._y_curr, maxfev = 200000, p0 = self.p0)
+				self.p0 = self.popt + np.random.normal(0, 100, len(self.popt))
+			self.popt, self.pcov = curve_fit(
+				self.func, self._x_curr, self._y_curr, maxfev=200000, p0=self.p0
+				)
 
 	def _fit_goodness(self):
 		residuals = self._y_curr - self.func(self._x_curr, *self.popt)
 		ss_res = np.sum(residuals**2)
 		ss_tot = np.sum((self._y_curr - np.mean(self._y_curr))**2)
 		return 1 - (ss_res / ss_tot)
-	
-	def show_fit(self, obj = None):
+
+	def show_fit(self, obj=None):
 		try:
-			self.obj.axes.plot(self._x_curr, self._y_curr, 'k-', label = 'Affected data')
-			self.obj.axes.plot(self._x_curr, self.func(self._x_curr, *self.popt), 'r--', label = 'Fit')
+			self.obj.axes.plot(
+				self._x_curr, self._y_curr, 'k-', label='Affected data'
+				)
+			self.obj.axes.plot(
+				self._x_curr, self.func(self._x_curr, *self.popt), 'r--', label='Fit'
+				)
 			self.obj.draw()
 		except:
 			pass
 
-	def run_loop(self, r_extend_by, r_threshold, outfunc, max_tries = 10000, show_steps = False):
-		if self._init_set == False:
+	def run_loop(
+		self, r_extend_by, r_threshold, outfunc, max_tries=10000, show_steps=False
+		):
+		if self._init_set is False:
 			raise ValueError('Set the initial conditions.')
 		self._make_fit()
 		while self._fit_goodness() > r_threshold:
 			self._extend_region(r_extend_by)
 			self._make_fit()
-			self.counter +=1
-			if self._make_fit() == True:
+			self.counter += 1
+			if self._make_fit() is True:
 				self.show_fit(self.obj)
 				outfunc('The params were:{}\n'.format(self.popt))
 				return self.popt
 			if self.counter == max_tries:
 				self.show_fit(self.obj)
-				outfunc('Max tries ({}) reached.. try another initial params.\n You can set the bounds at Edit --> Settings.'.format(max_tries))
+				outfunc('''Max tries ({}) reached.. try another initial params
+					    .\n You can set the bounds at Edit --> Settings.'''.format(max_tries))
 				return np.zeros_like(self.popt)
 
 		while self._fit_goodness() < r_threshold:
 			self._make_fit()
-			self.counter +=1
+			self.counter += 1
 			if self.counter == max_tries:
 				self.show_fit(self.obj)
-				outfunc('Max tries ({}) reached.. try another initial params.\n You can set the bounds at Edit --> Settings.'.format(max_tries))
+				outfunc('''Max tries ({}) reached.. try another initial params
+					.\nYou can set the bounds at Edit --> Settings.'''.format(max_tries))
 				return np.zeros_like(self.popt)
-
-
-# a, b, c, d = np.loadtxt('E:/int_new/Interferometry/examples/teszt.txt', delimiter = ',', unpack = True ) # f.set_initial_region(0.15, 2.5) #f.run_loop(r_extend_by = 0.05, r_threshold = 0.79, max_tries = 20000, show_steps = True)
-# a, b, c, d = np.loadtxt('FOD.txt', delimiter = ',', unpack = True )
-
-# f = FitOptimizer(a,b,c,d, func = cos_fit)
-# f.obj = plt
-# f.set_initial_region(0.2, 2.4)
-# f.run_loop(r_extend_by = 0.1, r_threshold = 0.85,outfunc = print, max_tries = 10000, show_steps = True)
-# parameters = f.report()
-# print(parameters)
