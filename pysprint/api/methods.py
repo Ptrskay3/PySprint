@@ -36,7 +36,6 @@ class BaseApp(object):
 		pass
 
 	def open_app(self):
-		import sys
 		from pysprint.logic import MainProgram
 		try:
 			from PyQt5 import QtWidgets
@@ -169,7 +168,16 @@ class Generator(BaseApp):
 
 class Dataset(BaseApp):
 	def __init__(self, x, y, ref=None, sam=None):
-		
+		self.x = x
+		self.y = y
+		if ref is None:
+			self.ref = []
+		else:
+			self.ref = ref 
+		if sam is None:
+			self.sam = []
+		else:
+			self.sam = sam
 		self._is_normalized = False
 		if not isinstance(self.x, np.ndarray):
 			try:

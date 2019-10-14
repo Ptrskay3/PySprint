@@ -9,7 +9,8 @@
 
 
 ##### Spectrally Refined Interferometry for Python 
-CURRENT RELEASE: [![PyPI version](https://badge.fury.io/py/pysprint.svg)](https://badge.fury.io/py/pysprint)
+CURRENT RELEASE: 
+[![PyPI version](https://badge.fury.io/py/pysprint.svg)](https://badge.fury.io/py/pysprint)
 
 PySprint is a UI and API for interferogram evaluation. Under construction.
 The GUI works only with 1920x1080 screen resolution. Lower resolution compatibility is queued on the To-Do List.
