@@ -44,19 +44,19 @@ class BaseApp(object):
 			print('PyQt5 is essential for the UI. You can use the API instead.')
 		print('Building up UI..')
 		app = QtWidgets.QApplication(sys.argv)
-		my_interface = MainProgram()
-		my_interface.showMaximized()
-		my_interface.a = self.x
-		my_interface.b = self.y
-		my_interface.samY = self.sam
-		my_interface.refY = self.ref
-		if my_interface.settings.value('show') == 'True':
-			my_interface.msgbox.exec_()
-			if my_interface.cb.isChecked():
-				my_interface.settings.setValue('show', False)
+		main_app = MainProgram()
+		main_app.showMaximized()
+		main_app.a = self.x
+		main_app.b = self.y
+		main_app.samY = self.sam
+		main_app.refY = self.ref
+		if main_app.settings.value('show') == 'True':
+			main_app.msgbox.exec_()
+			if main_app.cb.isChecked():
+				main_app.settings.setValue('show', False)
 		else:
 			pass
-		my_interface.redraw_graph()
+		main_app.redraw_graph()
 		sys.exit(app.exec_())
 		
 
