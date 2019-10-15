@@ -29,10 +29,10 @@ script:
   - python test_edit.py
   - python test_evaluate.py
   - python test_generator.py
-  - coverage run test_loading.py
-  - coverage run test_edit.py
-  # - coverage run test_evaluate.py
-  - coverage run test_generator.py
+  - coverage run -a test_loading.py
+  - coverage run -a test_edit.py
+  # - coverage run -a test_evaluate.py
+  - coverage run -a test_generator.py
 
 after_success:
   - codecov
