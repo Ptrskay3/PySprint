@@ -5,8 +5,6 @@ This file is the main API to use Interferometry without the PyQt5 UI.
 import sys
 import warnings
 
-sys.path.append('..')
-
 import numpy as np
 import matplotlib.pyplot as plt 
 
@@ -19,8 +17,6 @@ from pysprint.utils import print_disp
 __all__ = ['Generator', 'Dataset', 'MinMaxMethod', 'CosFitMethod', 'SPPMethod', 'FFTMethod']
 
 C_LIGHT = 299.793 #nm/fs
-
-
 
 
 class DatasetError(Exception):
@@ -59,10 +55,12 @@ class BaseApp(object):
 		sys.exit(app.exec_())
 		
 
-
 class Generator(BaseApp):
-	def __init__(self, start, stop, center, delay=0, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1, delimiter=',',
-		         pulseWidth=10, normalize=False):
+	def __init__(
+		self, start, stop, center, delay=0,
+		GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1,
+	 	delimiter=',', pulseWidth=10,normalize=False):
+
 		self.start = start
 		self.stop = stop
 		self.center = center
@@ -83,7 +81,6 @@ class Generator(BaseApp):
 		self.plotwidget = plt
 		self.is_wave = False
 		
-
 	def __str__(self):
 		return '''Generator({}, {}, {}, delay = {}, GD={}, GDD={}, TOD={}, FOD={}, QOD={}, resolution={}, 
 				  delimiter={}, pulseWidth={}, normalize={})'''.format(self.start, self.stop, self.center,
@@ -378,3 +375,4 @@ class FFTMethod(Dataset):
 	def calculate(self, fit_order, show_graph=False):
 		dispersion, dispersion_std, fit_report = args_comp(self.x, self.y, fitOrder = fit_order, showGraph = show_graph)
 		return dispersion, dispersion_std, fit_report
+		

@@ -129,12 +129,10 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.settings.setValue('main_pos', self.pos())
         e.accept()
 
-
     def open_help(self):
         """ Opens up help window."""
         self.window1 = HelpWindow(self)
         self.window1.show()
-        print(self.settings.value('GD'))
 
     def open_generator(self):
         """ Opens up generator window"""
@@ -164,13 +162,14 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
             try:
                 return function(self)
-            
+            except KeyboardInterrupt:
+                self.msg_output('Keyboard Interrupt')
             finally:
                 QApplication.restoreOverrideCursor()
         return new_function
 
     def gauss_cut_func(self):
-        """ On FFT tab perfoms a cut with 6 order gaussian """
+        """ On FFT tab perfoms a cut with custom order gaussian """
         if self.gaussianCut.text() == '':
             self.gaussianCut.setText('100')
         if self.gaussianCut2.text() == '':
@@ -216,12 +215,12 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.b = self.temp
             self.redraw_graph()
             if len(self.a)<400:
-                        for row_number in range(len(self.a)):
-                            self.tableWidget.insertRow(row_number)
-                            for item in range(len(self.a)):
-                                self.tableWidget.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.a[item])))
-                            for item in range(len(self.b)):
-                                self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
+                for row_number in range(len(self.a)):
+                    self.tableWidget.insertRow(row_number)
+                    for item in range(len(self.a)):
+                        self.tableWidget.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.a[item])))
+                    for item in range(len(self.b)):
+                        self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
             else:
                 for row_number in range(400):
                     self.tableWidget.insertRow(row_number)
@@ -343,9 +342,6 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.tableWidget.setColumnCount(2)
         self.tableWidget.setHorizontalHeaderLabels(["Angular frequency", "Intensity"])
 
-    def testt(self):
-        print(self.editTab.currentIndex())
-        print(self.editTab.currentWidget())
 
     def apply_on_plot(self):
         """ On the data manipulation tab applies the current function but only shows the plot and doesn't commit the changes."""
@@ -811,30 +807,6 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         	self.msg_output('{}\n Optimal parameters could not be estimated.'.format(str(e)))
 
 
-
-
-    # def runTutorial(self):
-    #     self.a, self.b, self.refY, self.samY = readData('examples/fft.txt')
-    #     if len(self.a)<400:
-    #         for row_number in range(len(self.a)):
-    #             self.tableWidget.insertRow(row_number)
-    #             for item in range(len(self.a)):
-    #                 self.tableWidget.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.a[item])))
-    #             for item in range(len(self.b)):
-    #                 self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
-    #     else:
-    #         for row_number in range(400):
-    #             self.tableWidget.insertRow(row_number)
-    #             for item in range(400):
-    #                 self.tableWidget.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.a[item])))
-    #             for item in range(400):
-    #                 self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
-    #     self.tableWidget.resizeRowsToContents()
-    #     self.tableWidget.resizeColumnsToContents()
-    #     self.redraw_graph()
-    #     self.tutorial1 = QMessageBox.about(self, "Tutorial", "I loaded in some example data for you. You can manipulate the data on the right panel and use the methods below. ")
-
-
 class HelpWindow(QtWidgets.QMainWindow, Help):
     """ Class for the help window."""
     def __init__(self, parent=None):
@@ -967,7 +939,7 @@ class GeneratorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
         except:
             pass
 
-    
+#FIXME: The data storage should be rewritten with dictionaries and classes.
 class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
     """ Class for the SPP Interface"""
     def __init__(self, parent=None):
@@ -976,8 +948,10 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         self.setWindowIcon(QtGui.QIcon(ipath))
         self.treeWidget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.loadButton.clicked.connect(self.load_up)
+        self.pushButton.setVisible(False)
         self.treeWidget.itemSelectionChanged.connect(self.fill_SPP)
-        self.pushButton.clicked.connect(self.record_delay)
+        # self.pushButton.clicked.connect(self.record_delay)
+        self.delayLine.textChanged.connect(self.record_delay)
         self.treeWidget.itemSelectionChanged.connect(self.preview_data)
         self.pushButton_7.clicked.connect(self.delete_item)
         self.pushButton_2.clicked.connect(self.pressed)
@@ -1072,7 +1046,7 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
             y = self.yData[curr]
         else:
             y = (self.yData[curr]-self.yRef[curr]-self.ySam[curr])/(2*np.sqrt(self.yRef[curr]*self.ySam[curr]))
-        ix, iy= find_closest(ix, x, y)
+        ix, iy = find_closest(ix, x, y)
 
         self.xtemporal.append(ix)
         self.ytemporal.append(iy)
@@ -1186,6 +1160,8 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         self.xtemporal = []
         self.preview_data()
 
+
+    #FIXME: This is horrible. Do we even need to complicate things this much ?
     def preview_data(self):
         """ Function to update plot."""
         curr = self.treeWidget.currentIndex().row()
@@ -1244,7 +1220,7 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getOpenFileName(None,"Load interferogram", "","All Files (*);;Text Files (*.txt)", options=options)
         try:
-            actualCount = self.treeWidget.topLevelItemCount()
+            # actualCount = self.treeWidget.topLevelItemCount()
             if fileName:
                 xx, yy, vv, ww = read_data(fileName)
                 self.xData.append(xx)
@@ -1277,9 +1253,9 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         self.yRef = []
         self.xtemporal = []
         self.ytemporal = []
-        self.xpoints = [[None]]*20
-        self.ypoints = [[None]]*20
-        self.delays = np.array([None]*20)
+        self.xpoints = [[None]]*30
+        self.ypoints = [[None]]*30
+        self.delays = np.array([None]*30)
         self.cid = None
         self.treeWidget.clear() 
 

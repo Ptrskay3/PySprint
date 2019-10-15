@@ -1,16 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QAbstractItemView, QTreeWidget
 import numpy as np
 
-# xcoords = []
-# ycoords = []
-
 class Ui_SPP(object):
-## ez is átmegy majd
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -66,6 +60,7 @@ class Ui_SPP(object):
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.delayLine = QtWidgets.QLineEdit(self.centralwidget)
+        self.delayLine.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.delayLine.setMinimumSize(QtCore.QSize(0, 30))
         self.delayLine.setObjectName("delayLine")
         self.horizontalLayout.addWidget(self.delayLine)
