@@ -14,6 +14,8 @@ def _ensure_input(start, stop, center, resolution):
 		raise ValueError('center must be between start and stop')	
 	if resolution > (stop-start):
 		raise ValueError('resolution is too big')
+	if pulseWidth <= 0:
+		raise ValueError('Pulse width is strictly positive.')
 	else:
 		pass
 
