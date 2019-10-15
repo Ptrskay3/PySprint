@@ -31,7 +31,7 @@ script:
   - python test_generator.py
   - coverage run test_loading.py
   - coverage run test_edit.py
-  - coverage run test_evaluate.py
+  # - coverage run test_evaluate.py
   - coverage run test_generator.py
 
 after_success:
