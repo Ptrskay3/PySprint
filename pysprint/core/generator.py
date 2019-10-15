@@ -7,7 +7,7 @@ import numpy as np
 C_LIGHT = 299.793 #nm/fs
 
 
-def _ensure_input(start, stop, center, resolution):
+def _ensure_input(start, stop, center, resolution, pulseWidth):
 	if start >= stop:
 		raise ValueError('start value must be less than stop')
 	if center < start or center > stop:
@@ -26,7 +26,7 @@ def _disp(x, GD=0, GDD=0, TOD=0, FOD=0, QOD=0):
 
 def generatorFreq(start, stop, center, delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1,
 				  delimiter=',',pulseWidth=10, includeArms=False):
-	_ensure_input(start, stop, center, resolution)
+	_ensure_input(start, stop, center, resolution, pulseWidth)
 	omega0 = center 
 	window = (8*np.log(2))/(pulseWidth**2)
 	lamend = (2*np.pi*C_LIGHT)/start
@@ -54,7 +54,7 @@ def generatorFreq(start, stop, center, delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, 
 
 def generatorWave(start, stop, center, delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1, 
 				  delimiter=',',pulseWidth=10, includeArms=False):
-	_ensure_input(start, stop, center, resolution)
+	_ensure_input(start, stop, center, resolution, pulseWidth)
 	omega0 = (2*np.pi*C_LIGHT)/center 
 	window = (8*np.log(2))/(pulseWidth**2) 
 	# stepAmount = (stop-start+resolution)/resolution
