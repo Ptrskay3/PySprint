@@ -56,8 +56,7 @@ class BaseApp(object):
 		
 
 class Generator(BaseApp):
-	def __init__(
-		self, start, stop, center, delay=0,
+	def __init__(self, start, stop, center, delay=0,
 		GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1,
 	 	delimiter=',', pulseWidth=10,normalize=False):
 
@@ -87,6 +86,11 @@ class Generator(BaseApp):
 				  self.delay, self.GD, self.GDD, self.TOD, self.FOD, self.QOD, self.resolution, 
 				  self.delimiter, self.pulseWidth, self.normalize)
 
+	def _check_norm(self):
+		if len(self.ref) != 0:
+			self._y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
+
+
 	def generate_freq(self):
 		self.x, self.y, self.ref, self.sam = generatorFreq(self.start, self.stop, self.center, self.delay, self.GD,
 			self.GDD, self.TOD, self.FOD, self.QOD,
@@ -101,8 +105,7 @@ class Generator(BaseApp):
 
 		
 	def show(self):
-		if len(self.ref) != 0:
-			self._y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
+		self._check_norm()
 		if np.iscomplexobj(self.y):
 			self.plotwidget.plot(self.x, np.abs(self.y))
 		else:   
@@ -137,8 +140,7 @@ class Generator(BaseApp):
 		return j*self.GD+(self.GDD/2)*j**2+(self.TOD/6)*j**3+(self.FOD/24)*j**4+(self.QOD/120)*j**5
 
 	def phase_graph(self):
-		if len(self.ref) != 0:
-			self._y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
+		self._check_norm()
 		self.fig, self.ax = self.plotwidget.subplots(2,1, figsize = (8,7))
 		self.plotwidget.subplots_adjust(top = 0.95)
 		self.fig.canvas.set_window_title('Spectrum and phase')
