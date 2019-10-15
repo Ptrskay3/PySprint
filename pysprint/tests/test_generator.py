@@ -22,7 +22,7 @@ class TestGenerator(unittest.TestCase):
 		with self.assertRaises(ValueError):
 			generatorFreq(start = 1, stop = -1, center = 3, delay = 0)
 		with self.assertRaises(ValueError):
-			generatorFreq(start = 1, stop = 3, center = 2, pulseWidth = -20)
+			generatorFreq(start = 1, stop = 3, center = 2, delay = 0, pulseWidth = -20)
 
 	def test_freq(self):
 		a,b,c,d = generatorFreq(1,2,1.5, delay = 0, includeArms = True)
