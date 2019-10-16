@@ -33,8 +33,8 @@ class TestLoading(unittest.TestCase):
 			# disp, disp_s, fit = evaluate.min_max_method(a, [], [], [], ref_point = 0, maxx=maxs, minx=mins, fitOrder=1, showGraph=False)
 		with self.assertRaises(ValueError):
 			disp, disp_s, fit = evaluate.min_max_method(a, b, [], [], 0, maxx=maxs, minx=mins, fitOrder=6, showGraph=False)
-		with self.assertRaises(np.core._exceptions.UFuncTypeError):
-			disp, disp_s, fit = evaluate.min_max_method(a, b, [], [], ref_point = 0, maxx='a', minx=mins, fitOrder=1, showGraph=False)
+		# with self.assertRaises(np.core._exceptions.UFuncTypeError):
+			# disp, disp_s, fit = evaluate.min_max_method(a, b, [], [], ref_point = 0, maxx='a', minx=mins, fitOrder=1, showGraph=False)
 		# with self.assertRaises(ValueError):
 			# disp, disp_s, fit = evaluate.min_max_method(a, b, b, b, ref_point=-50000, maxx=maxs, minx=mins, fitOrder=1, showGraph=False)
 
