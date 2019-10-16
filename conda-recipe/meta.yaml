@@ -1,0 +1,32 @@
+package:
+  name: pysprint
+  version: "0.0.16"
+
+source:
+  fn: pysprint-0.0.16.tar.gz
+  url: https://pypi.io/packages/source/p/pysprint/pysprint-0.0.16.tar.gz
+  md5: d942553f2f4093baaa8df7ceadb4b6d2
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - numpy
+    - scipy
+    - matplotlib
+
+  run:
+    - python
+    - numpy
+    - scipy
+    - matplotlib
+
+test:
+  imports:
+    - pysprint
+
+
+about:
+  home: https://github.com/Ptrskay3/PySprint
+  license: MIT
+  summary: 'Spectrally refined interferometry for Python'
