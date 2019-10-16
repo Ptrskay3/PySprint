@@ -73,15 +73,15 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 		minInd = argrelextrema(Ydata, np.less)
 		minx = Xdata[minInd]
 
-	_, SSPindex = findNearest(Xdata,ref_point)
+	_, ref_index = findNearest(Xdata,ref_point)
 
-	relNegMaxFreqs = np.array([a for a in (Xdata[SSPindex]-maxx) if a<0])
-	relNegMinFreqs= np.array([b for b in (Xdata[SSPindex]-minx) if b<0])
+	relNegMaxFreqs = np.array([a for a in (Xdata[ref_index]-maxx) if a<0])
+	relNegMinFreqs= np.array([b for b in (Xdata[ref_index]-minx) if b<0])
 	relNegFreqs = relNegMaxFreqs
 	relNegFreqs = sorted(np.append(relNegFreqs, relNegMinFreqs))
 	relNegFreqs = relNegFreqs[::-1]
-	relPosMaxFreqs = np.array([c for c in (Xdata[SSPindex]-maxx) if c>0])
-	relPosMinFreqs= np.array([d for d in (Xdata[SSPindex]-minx) if d>0])
+	relPosMaxFreqs = np.array([c for c in (Xdata[ref_index]-maxx) if c>0])
+	relPosMinFreqs= np.array([d for d in (Xdata[ref_index]-minx) if d>0])
 	relPosFreqs = relPosMinFreqs
 	relPosFreqs = sorted(np.append(relPosFreqs,relPosMaxFreqs))
 

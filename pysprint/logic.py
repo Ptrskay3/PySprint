@@ -1,5 +1,6 @@
 """
 The main logic behind the UI functions.
+#FIXME: This file is horrible. We might need to restructure this into smaller units.
 """
 import os
 
@@ -12,18 +13,18 @@ from PyQt5.QtWidgets import (QMainWindow, QDialogButtonBox, QApplication,
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, pyqtSlot, QSettings
 from PyQt5.QtGui import QIcon, QCursor
 
+import numpy as np
+import pandas as pd
+from datetime import datetime
+import matplotlib
+
+import pysprint as ps 
 from pysprint.ui.ui import Ui_Interferometry
 from pysprint.ui.generatorUI import Ui_GeneratorWindow
 from pysprint.ui.aboutUI import Help
 from pysprint.ui.mplwidget import MplWidget
 from pysprint.ui.SPPUI import Ui_SPP
 from pysprint.ui.settings_dialog import Ui_SettingsWindow
-
-import numpy as np
-import pandas as pd
-from datetime import datetime
-import matplotlib
-
 from pysprint.core.evaluate import (min_max_method, cff_method, fft_method,
      cut_gaussian, gaussian_window , ifft_method, spp_method, args_comp,
      cos_fit1, cos_fit2, cos_fit3, cos_fit5, cos_fit4)
@@ -34,7 +35,6 @@ from pysprint.core.generator import generatorFreq, generatorWave
 from pysprint.core.cff_fitting import FitOptimizer
 from pysprint.utils import find_closest
 
-import pysprint as ps 
 
 def getpath():
     p = os.path.dirname(ps.__file__)
