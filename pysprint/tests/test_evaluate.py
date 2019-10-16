@@ -5,6 +5,7 @@ import sys
 import unittest
 import numpy as np
 import scipy
+# import matplotlib.pyplot as plt
 
 from pysprint.core import evaluate
 from pysprint.core.edit_features import find_peak
@@ -62,6 +63,7 @@ class TestLoading(unittest.TestCase):
 		d5, d_s5, fit5 = evaluate.min_max_method(a,b,c,d, ref_point = 2.5, fitOrder = 5, maxx = maxs, minx = mins, showGraph = False)
 		# np.testing.assert_array_equal(d3[3:], [0,0])
 		# np.testing.assert_array_equal(d_s3[3:], [0,0])
+		# plt.close('all')
 		assert len(d5) == len(d_s5) == 5
 
 

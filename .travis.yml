@@ -11,6 +11,7 @@ python:
 env:
     - version=minimum  
     - version=latest
+    - version=nolmfit
 
 
 before_install:
@@ -20,6 +21,7 @@ before_install:
 install:
   - if [[ $version == minimum ]]; then pip install matplotlib==3.0.3 numpy==1.16.2 scipy==1.3.0 pandas==0.24.2 lmfit==0.9.13 PyQt5==5.13.0 codecov pysprint;fi
   - if [[ $version == latest ]]; then pip install -r requirements.txt codecov pysprint; fi
+  - if [[ $version == nolmfit ]]; then pip install -r requirements.txt codecov pysprint; pip uninstall lmfit; fi
   - pip list
 
 
