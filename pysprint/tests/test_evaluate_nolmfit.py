@@ -6,16 +6,15 @@ import unittest
 import numpy as np
 import scipy
 # import matplotlib.pyplot as plt
-
+sys.modules['lmfit'] = None
 from pysprint.core import evaluate
 from pysprint.core.edit_features import find_peak
 
-_has_lmfit = False
 
 class TestEvaluateNoLmfit(unittest.TestCase):
 
 	def setUp(self):
-		pass
+		_has_lmfit = False
 
 	def tearDown(self):
 		pass
@@ -70,6 +69,7 @@ class TestEvaluateNoLmfit(unittest.TestCase):
 
 			
 	def test_cff(self):
+		_has_lmfit = False
 		a = np.arange(100)
 		b = np.arange(100)
 		with self.assertRaises(TypeError):
@@ -84,6 +84,7 @@ class TestEvaluateNoLmfit(unittest.TestCase):
 	    np.testing.assert_allclose(y, x)
 
 	def test_windowing(self):
+		_has_lmfit = False
 		a,b = np.loadtxt('test_window.txt', unpack = True, delimiter = ',')
 		y_data = evaluate.cut_gaussian(a,b, 2.5, 0.2, 6)
 		assert len(b) == len(y_data)
