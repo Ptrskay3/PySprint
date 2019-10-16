@@ -1,24 +1,24 @@
 '''
-FIXME:Obviously we need better tests than that..
+FIXME: Obviously we need better tests than that..
 '''
 import sys
-
-sys.path.append('..')
-
 import unittest
 import numpy as np
+import scipy
 
 from pysprint.core import evaluate
+from pysprint.core.edit_features import find_peak
 
 
 class TestLoading(unittest.TestCase):
 
 	def setUp(self):
 		pass
+
 	def tearDown(self):
 		pass
 
-	def test_min_max(self):
+	def test_min_max_bases(self):
 		a = np.arange(100)
 		b = np.arange(100)
 		mins = [10,30,50,70,90]
@@ -27,11 +27,44 @@ class TestLoading(unittest.TestCase):
 		np.testing.assert_almost_equal(disp[0], -0.3127272727301358)
 		with self.assertRaises(ValueError):
 			disp, disp_s, fit = evaluate.min_max_method([], b, [], [], 0, maxx=maxs, minx=mins, fitOrder=1, showGraph=False)
+		with self.assertRaises(ValueError):
 			disp, disp_s, fit = evaluate.min_max_method([], [], [], [], 0, maxx=maxs, minx=mins, fitOrder=1, showGraph=False)
-			disp, disp_s, fit = evaluate.min_max_method(a, [], [], [], 0, maxx=maxs, minx=mins, fitOrder=1, showGraph=False)
+		with self.assertRaises(ValueError):
+			disp, disp_s, fit = evaluate.min_max_method(a, [], [], [], ref_point = 0, maxx=maxs, minx=mins, fitOrder=1, showGraph=False)
+		with self.assertRaises(ValueError):
 			disp, disp_s, fit = evaluate.min_max_method(a, b, [], [], 0, maxx=maxs, minx=mins, fitOrder=6, showGraph=False)
-			disp, disp_s, fit = evaluate.min_max_method(a, b, [], [], 0, maxx='a', minx=mins, fitOrder=1, showGraph=False)
-			disp, disp_s, fit = evaluate.min_max_method(a, b, b, b, -50000, maxx=maxs, minx=mins, fitOrder=1, showGraph=False)
+		with self.assertRaises(np.core._exceptions.UFuncTypeError):
+			disp, disp_s, fit = evaluate.min_max_method(a, b, [], [], ref_point = 0, maxx='a', minx=mins, fitOrder=1, showGraph=False)
+		# with self.assertRaises(ValueError):
+			# disp, disp_s, fit = evaluate.min_max_method(a, b, b, b, ref_point=-50000, maxx=maxs, minx=mins, fitOrder=1, showGraph=False)
+
+	def test_min_max_advanced(self):
+		with self.assertRaises(ValueError):
+			evaluate.min_max_method(np.arange(100), np.arange(100), [], [], ref_point = 10, fitOrder = 1, showGraph=False)
+		a,b,c,d = np.loadtxt('test_arms.txt', delimiter = ',', unpack = True)
+		maxs, _, mins, _ = find_peak(a,b,c,d, proMax=1, proMin=1, threshold=0.4)
+		d1, d_s1, fit1 = evaluate.min_max_method(a,b,c,d, ref_point = 2.5, fitOrder = 1, maxx = maxs, minx = mins, showGraph = False)
+		np.testing.assert_array_equal(d1[1:], [0,0,0,0])
+		np.testing.assert_array_equal(d_s1[1:], [0,0,0,0])
+		assert len(d1) == len(d_s1) == 5
+		d2, d_s2, fit2 = evaluate.min_max_method(a,b,c,d, ref_point = 2.5, fitOrder = 2, maxx = maxs, minx = mins, showGraph = False)
+		np.testing.assert_array_equal(d2[2:], [0,0,0])
+		np.testing.assert_array_equal(d_s2[2:], [0,0,0])
+		assert len(d2) == len(d_s2) == 5
+		d3, d_s3, fit3 = evaluate.min_max_method(a,b,c,d, ref_point = 2.5, fitOrder = 3, maxx = maxs, minx = mins, showGraph = False)
+		np.testing.assert_array_equal(d3[3:], [0,0])
+		np.testing.assert_array_equal(d_s3[3:], [0,0])
+		assert len(d3) == len(d_s3) == 5
+		d4, d_s4, fit4 = evaluate.min_max_method(a,b,c,d, ref_point = 2.5, fitOrder = 4, maxx = maxs, minx = mins, showGraph = False)
+		np.testing.assert_array_equal(d4[4:], [0])
+		np.testing.assert_array_equal(d_s4[4:], [0])
+		assert len(d4) == len(d_s4) == 5
+		d5, d_s5, fit5 = evaluate.min_max_method(a,b,c,d, ref_point = 2.5, fitOrder = 5, maxx = maxs, minx = mins, showGraph = False)
+		# np.testing.assert_array_equal(d3[3:], [0,0])
+		# np.testing.assert_array_equal(d_s3[3:], [0,0])
+		assert len(d5) == len(d_s5) == 5
+
+
 			
 	def test_cff(self):
 		a = np.arange(100)
@@ -39,8 +72,21 @@ class TestLoading(unittest.TestCase):
 		with self.assertRaises(TypeError):
 			evaluate.cff_method(a, b, [], [], ref_point=0 , p0=[1, 1, 1, 1, 1,1, 1, 1, 1])
 
-	def test_fft(self):
-		pass
+	def test_ffts(self):
+		#adapted from scipy's unittests
+	    scipy.random.seed(1534)
+	    x = scipy.randn(10) + 1j * scipy.randn(10)
+	    fr, yf = evaluate.ifft_method(x, x, interpolate = False)
+	    y = evaluate.fft_method(yf)
+	    np.testing.assert_allclose(y, x)
+
+	def test_windowing(self):
+		a,b = np.loadtxt('test_window.txt', unpack = True, delimiter = ',')
+		y_data = evaluate.cut_gaussian(a,b, 2.5, 0.2, 6)
+		assert len(b) == len(y_data)
+		np.testing.assert_almost_equal(y_data[0], 0)
+		np.testing.assert_almost_equal(y_data[-1], 0)
+		np.testing.assert_almost_equal(np.median(y_data), np.median(b), decimal = 2)
 
 	def test_spp(self):
 		pass

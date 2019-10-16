@@ -62,6 +62,8 @@ def _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY):
 		Ydata = initSpectrumY
 	elif len(initSpectrumX) == 0:
 		raise ValueError('Please load the spectrum!\n')
+	elif len(initSpectrumY) == 0:
+		raise ValueError('Please load the spectrum!\n')
 	else:
 		raise TypeError('Input types are wrong.\n')
 	return initSpectrumX,  Ydata
