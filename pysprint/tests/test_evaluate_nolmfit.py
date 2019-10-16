@@ -10,8 +10,9 @@ import scipy
 from pysprint.core import evaluate
 from pysprint.core.edit_features import find_peak
 
+_has_lmfit = False
 
-class TestEvaluate(unittest.TestCase):
+class TestEvaluateNoLmfit(unittest.TestCase):
 
 	def setUp(self):
 		pass
