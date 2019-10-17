@@ -373,7 +373,7 @@ class FFTMethod(Dataset):
 		self.y = cut_gaussian(self.x, self.y, spike = at, sigma = std, win_order = window_order)
 		
 	@print_disp
-	def calculate(self, fit_order, show_graph=False):
-		dispersion, dispersion_std, fit_report = args_comp(self.x, self.y, fitOrder = fit_order, showGraph = show_graph)
+	def calculate(self, reference_point, fit_order, show_graph=False):
+		dispersion, dispersion_std, fit_report = args_comp(self.x, self.y, reference_point = reference_point, fitOrder = fit_order, showGraph = show_graph)
 		return dispersion, dispersion_std, fit_report
 		

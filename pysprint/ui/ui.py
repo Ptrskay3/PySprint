@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'uia.ui'
+# Form implementation generated from reading ui file 'ui.ui'
 #
-# Created by: PyQt5 UI code generator 5.13.0
+# Created by: PyQt5 UI code generator 5.13.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -23,7 +23,7 @@ class Ui_Interferometry(object):
         spacerItem = QtWidgets.QSpacerItem(20, 24, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         self.verticalLayout_8.addItem(spacerItem)
         self.logOutput = QtWidgets.QTextEdit(self.centralwidget)
-        self.logOutput.setMinimumSize(QtCore.QSize(380, 0))
+        self.logOutput.setMinimumSize(QtCore.QSize(320, 0))
         self.logOutput.setBaseSize(QtCore.QSize(369, 214))
         self.logOutput.setReadOnly(True)
         self.logOutput.setObjectName("logOutput")
@@ -210,7 +210,8 @@ class Ui_Interferometry(object):
         self.verticalLayout_2 = QtWidgets.QVBoxLayout()
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.MplWidget = MplWidget(self.centralwidget)
-        self.MplWidget.setMinimumSize(QtCore.QSize(900, 500))
+        self.MplWidget.setMinimumSize(QtCore.QSize(400, 400))
+        self.MplWidget.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum))
         self.MplWidget.setObjectName("MplWidget")
         self.verticalLayout_2.addWidget(self.MplWidget)
         self.gridLayout_7.addLayout(self.verticalLayout_2, 1, 1, 1, 1)
@@ -470,6 +471,12 @@ class Ui_Interferometry(object):
         self.horizontalLayout_21.addWidget(self.fft_fitOrder)
         spacerItem52 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_21.addItem(spacerItem52)
+        self.fft_ref = QtWidgets.QLineEdit(self.verticalLayoutWidget_9)
+        self.fft_ref.setMinimumSize(QtCore.QSize(0, 30))
+        self.fft_ref.setObjectName("fft_ref")
+        self.horizontalLayout_21.addWidget(self.fft_ref)
+        spacerItem53 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_21.addItem(spacerItem53)
         self.fft_cb = QtWidgets.QCheckBox(self.verticalLayoutWidget_9)
         self.fft_cb.setObjectName("fft_cb")
         self.horizontalLayout_21.addWidget(self.fft_cb)
@@ -529,11 +536,10 @@ class Ui_Interferometry(object):
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuPreferences.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
-        self.label_2.setStyleSheet("font: 9pt")
 
         self.retranslateUi(Interferometry)
-        self.editTab.setCurrentIndex(1)
-        self.methodWidget.setCurrentIndex(1)
+        self.editTab.setCurrentIndex(0)
+        self.methodWidget.setCurrentIndex(3)
         QtCore.QMetaObject.connectSlotsByName(Interferometry)
 
     def retranslateUi(self, Interferometry):
@@ -568,7 +574,7 @@ class Ui_Interferometry(object):
         self.cff_cent.setPlaceholderText(_translate("Interferometry", "Center"))
         self.cff_autofit.setText(_translate("Interferometry", "Auto fit"))
         self.iSampleArm.setText(_translate("Interferometry", "Sample Arm"))
-        self.label_2.setText(_translate("Interferometry", "y = c<sub>1</sub> + c<sub>2</sub>·cos(b<sub>0</sub> + GD· Δω + GDD/2 · Δω<sup>2</sup> + TOD/6 · Δω<sup>3</sup> + FOD/24· Δω<sup>4</sup> + QOD/120· Δω<sup>5</sup>) "))
+        self.label_2.setText(_translate("Interferometry", "y = c1 + c2·cos(b0 + GD· Δω + GDD/2 · Δω^2 + TOD/6 · Δω^3 + FOD/24· Δω^4 + QOD/120· Δω^5 ) "))
         self.CFF_ref.setPlaceholderText(_translate("Interferometry", "Reference point"))
         self.CFF_fitnow.setText(_translate("Interferometry", "Manual fit"))
         self.CFF_c1.setPlaceholderText(_translate("Interferometry", "c1"))
@@ -595,6 +601,7 @@ class Ui_Interferometry(object):
         self.window_order.setPlaceholderText(_translate("Interferometry", "Gaussian window order"))
         self.doIFFT.setText(_translate("Interferometry", "3.  FFT"))
         self.fft_fitOrder.setPlaceholderText(_translate("Interferometry", "Fit Order"))
+        self.fft_ref.setPlaceholderText(_translate("Interferometry", "Reference point"))
         self.fft_cb.setText(_translate("Interferometry", "Show Graph"))
         self.methodWidget.setTabText(self.methodWidget.indexOf(self.fftTab), _translate("Interferometry", "FFT"))
         self.menuFile.setTitle(_translate("Interferometry", "File"))

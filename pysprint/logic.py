@@ -636,7 +636,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 self.msg_output(e)
 
         if self.methodWidget.currentIndex() == 3:
-            disp, disp_std, bf = args_comp(self.a, self.b, showGraph = self.fft_cb.isChecked(), fitOrder = int(self.fft_fitOrder.text()))
+            disp, disp_std, bf = args_comp(self.a, self.b, reference_point = float(self.fft_ref.text()), showGraph = self.fft_cb.isChecked(), fitOrder = int(self.fft_fitOrder.text()))
             labels = ['GD', 'GDD', 'TOD', 'FOD', 'QOD']
             calibrate_label = [self.settings.value('GD'), self.settings.value('GDD'), self.settings.value('TOD'), 
                                self.settings.value('FOD'),self.settings.value('QOD')]

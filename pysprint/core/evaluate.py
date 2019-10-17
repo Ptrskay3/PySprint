@@ -542,7 +542,7 @@ def ifft_method(initSpectrumX, initSpectrumY, interpolate = True):
 
 
 
-def args_comp(initSpectrumX, initSpectrumY, fitOrder=5, showGraph=False):
+def args_comp(initSpectrumX, initSpectrumY, reference_point = 2.5, fitOrder=5, showGraph=False):
 	"""
 	Calculates the phase of complex dataset then unwrap by changing deltas between 
 	values to 2*pi complement. At the end, fit a polynomial curve to determine
@@ -575,7 +575,7 @@ def args_comp(initSpectrumX, initSpectrumY, fitOrder=5, showGraph=False):
 	fit_report: lmfit report object
 
 	"""
-	Xdata = initSpectrumX
+	Xdata = initSpectrumX-reference_point
 	angles = np.angle(initSpectrumY)
 	###shifting to [0, 2pi] if necessary
 	# angles = (angles + 2 * np.pi) % (2 * np.pi)
