@@ -603,11 +603,13 @@ def args_comp(initSpectrumX, initSpectrumY, fitOrder=5, showGraph=False):
 	else:
 		raise ValueError('Order is out of range, please select from [1,5]')
 	try:
-		#FIXME: This is definitely not right
+		dispersion, dispersion_std = [], []
 		dispersion, dispersion_std = lmfit_disp(result.params.items())
 		dispersion = dispersion[1:]
 		dispersion_std = dispersion_std[1:]
-		dispersion, dispersion_std = scipy_disp(dispersion)
+		for idx in range(len(dispersion)):
+			dispersion[idx] = dispersion[idx] * factorial(idx+1)
+			dispersion_std[idx] = dispersion_std[idx] * factorial(idx+1)
 		while len(dispersion)<5:
 			dispersion.append(0)
 			dispersion_std.append(0) 

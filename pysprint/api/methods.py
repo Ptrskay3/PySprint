@@ -262,8 +262,8 @@ class Dataset(BaseApp):
 class MinMaxMethod(Dataset):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		self.xmin = []
-		self.xmax = []
+		self.xmin = None
+		self.xmax = None
 
 	def __str__(self):
 		return '''MinMaxMethod({},{},{},{})'''.format(self.x, self.y, self.ref, self.sam)
