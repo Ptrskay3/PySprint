@@ -58,8 +58,7 @@ class BaseApp(object):
 class Generator(BaseApp):
 	def __init__(self, start, stop, center, delay=0,
 		GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1,
-	 	delimiter=',', pulseWidth=10,normalize=False):
-
+	 	delimiter=',', pulseWidth=10, normalize=False):
 		self.start = start
 		self.stop = stop
 		self.center = center

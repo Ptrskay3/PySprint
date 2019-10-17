@@ -3,10 +3,12 @@ FIXME: Obviously we need better tests than that..
 '''
 import sys
 import unittest
+
+sys.modules['lmfit'] = None
+
 import numpy as np
 import scipy
-# import matplotlib.pyplot as plt
-sys.modules['lmfit'] = None
+
 from pysprint.core import evaluate
 from pysprint.core.edit_features import find_peak
 

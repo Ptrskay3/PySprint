@@ -77,13 +77,11 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 
 	relNegMaxFreqs = np.array([a for a in (Xdata[ref_index]-maxx) if a<0])
 	relNegMinFreqs= np.array([b for b in (Xdata[ref_index]-minx) if b<0])
-	relNegFreqs = relNegMaxFreqs
-	relNegFreqs = sorted(np.append(relNegFreqs, relNegMinFreqs))
+	relNegFreqs = sorted(np.append(relNegMaxFreqs, relNegMinFreqs))
 	relNegFreqs = relNegFreqs[::-1]
 	relPosMaxFreqs = np.array([c for c in (Xdata[ref_index]-maxx) if c>0])
 	relPosMinFreqs= np.array([d for d in (Xdata[ref_index]-minx) if d>0])
-	relPosFreqs = relPosMinFreqs
-	relPosFreqs = sorted(np.append(relPosFreqs,relPosMaxFreqs))
+	relPosFreqs = sorted(np.append(relPosMinFreqs,relPosMaxFreqs))
 
 	negValues = np.zeros_like(relNegFreqs)
 	posValues = np.zeros_like(relPosFreqs)
@@ -94,6 +92,7 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 	x_s = np.append(relPosFreqs, relNegFreqs) 
 	y_s = np.append(posValues, negValues)
 	#making sure the data in right order
+	#FIXME: Do we even need this?
 	L = sorted(zip(x_s,y_s), key=operator.itemgetter(0))
 	fullXValues, fullYValues = zip(*L)
 	
@@ -144,8 +143,8 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 			dispersion = dispersion[1:]
 			dispersion_std = dispersion_std[1:]
 			for idx in range(len(dispersion)):
-				dispersion[idx] =  dispersion[idx] / factorial(idx+1) 
-				dispersion_std[idx] =  dispersion_std[idx] / factorial(idx+1)
+				dispersion[idx] =  dispersion[idx] * factorial(idx+1) 
+				dispersion_std[idx] =  dispersion_std[idx] * factorial(idx+1)
 			while len(dispersion)<5:
 				dispersion.append(0)
 				dispersion_std.append(0) 
@@ -155,7 +154,7 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 			dispersion=[]
 			dispersion_std=[]
 			for idx in range(len(popt)-1):
-				dispersion.append(popt[idx+1]/factorial(idx+1))
+				dispersion.append(popt[idx+1]*factorial(idx+1))
 			while len(dispersion)<5:
 				dispersion.append(0)
 			while len(dispersion_std)<len(dispersion):
@@ -167,14 +166,14 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 			plt.plot(fullXValues, fullYValues, 'o', label = 'dataset')
 			try:
 				plt.plot(fullXValues, result.best_fit, 'r*', label = 'fitted')
-			except:
+			except Exception:
 				plt.plot(fullXValues, _function(fullXValues, *popt), 'r*', label = 'fitted')
 			plt.legend()
 			plt.grid()
 			plt.show()
 		return dispersion, dispersion_std, fit_report
 	except Exception as e:
-		return [],[],e	
+		return [0,0,0,0,0],[0,0,0,0,0],e	
 
 
 
@@ -584,10 +583,10 @@ def args_comp(initSpectrumX, initSpectrumY, fitOrder=5, showGraph=False):
 	fit_report: lmfit report object
 
 	"""
-	angles = np.angle(initSpectrumY)
-	###shifting to [0, 2pi]
-	# angles = (angles + 2 * np.pi) % (2 * np.pi)
 	Xdata = initSpectrumX
+	angles = np.angle(initSpectrumY)
+	###shifting to [0, 2pi] if necessary
+	# angles = (angles + 2 * np.pi) % (2 * np.pi)
 	Ydata = np.unwrap(angles, axis = 0)
 	if fitOrder == 5:
 		fitModel = Model(polynomialFit5)
