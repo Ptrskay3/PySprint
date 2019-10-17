@@ -17,6 +17,7 @@ except ImportError:
 
 sys.path.append('..')
 
+from pysprint.core.edit_features import interpolate_data
 from pysprint.utils import findNearest, _handle_input, lmfit_disp, scipy_disp
 
 
@@ -45,7 +46,7 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 	the reference point to calculate order
 	
 	maxx and minx: array-like
-	the accepted minimal and maximal places (usually received from other methods)
+	the accepted minimal and maximal x values (if you want to manually pass)
 
 	fitOrder: int
 	degree of polynomial to fit data [1, 5]
@@ -225,14 +226,6 @@ def polynomialFit1(x, b0, b1):
 	b1 = GD
 	"""
 	return b0+b1*x
-
-# a = np.arange(100)
-# b = np.arange(100)
-# mins = [10,30,50,70,90]
-# maxs = [20,40,60,80,100]
-# disp, disp_s, fit = min_max_method([], b, [], [], 0, maxx=maxs, minx=mins, fitOrder=1, showGraph=False)
-# print(disp, disp_s, fit)
-
 
 def cos_fit1(x,c0, c1, b0, b1):
 	return c0 + c1*np.cos(polynomialFit1(x, b0, b1))
@@ -535,7 +528,6 @@ def ifft_method(initSpectrumX, initSpectrumY, interpolate = True):
 	transformed y data
 
 	"""
-	from .edit_features import interpolate_data
 	if len(initSpectrumY)>0 and len(initSpectrumX)>0:
 		Ydata = initSpectrumY
 		Xdata = initSpectrumX
@@ -611,10 +603,11 @@ def args_comp(initSpectrumX, initSpectrumY, fitOrder=5, showGraph=False):
 	else:
 		raise ValueError('Order is out of range, please select from [1,5]')
 	try:
+		#FIXME: This is definitely not right
 		dispersion, dispersion_std = lmfit_disp(result.params.items())
 		dispersion = dispersion[1:]
 		dispersion_std = dispersion_std[1:]
-		# dispersion, dispersion_std = scipy_disp(dispersion)
+		dispersion, dispersion_std = scipy_disp(dispersion)
 		while len(dispersion)<5:
 			dispersion.append(0)
 			dispersion_std.append(0) 
@@ -629,7 +622,7 @@ def args_comp(initSpectrumX, initSpectrumY, fitOrder=5, showGraph=False):
 			plt.show()
 		return dispersion, dispersion_std, fit_report
 	except Exception as e:
-		return [],[],e
+		return [0,0,0,0,0],[0,0,0,0,0],e
 
 
 

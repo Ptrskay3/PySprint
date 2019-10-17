@@ -9,8 +9,8 @@ __all__ = ['scipy_disp', 'lmfit_disp', 'findNearest', 'find_closest',
 
 def scipy_disp(r):
 	for idx in range(len(r)):
-		dispersion[idx] = dispersion[idx] / factorial(idx+1)
-		dispersion_std[idx] = dispersion_std[idx] / factorial(idx+1)
+		dispersion[idx] = dispersion[idx] * factorial(idx+1)
+		dispersion_std[idx] = dispersion_std[idx] * factorial(idx+1)
 	return dispersion, dispersion_std
 
 

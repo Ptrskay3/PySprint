@@ -1,4 +1,4 @@
-# Contributing to Interferometry
+# Contributing to PySprint
 
 ## Reporting issues
 
@@ -9,7 +9,7 @@ please also include a brief, self-contained code/screenshot example that demonst
 
 ## Contributing code 
 
-Thanks for your interest in contributing code to Interferometry!
+Thanks for your interest in contributing code to PySprint!
 
 This repository is strongly connected to my thesis, and to avoid any kind of copyright issues contributing is temporaly rejected.
 Later on - when it's released - contributing will be available.
