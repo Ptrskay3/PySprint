@@ -546,6 +546,33 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         except:
             self.msg_output('Failed')
 
+
+
+    def fill_table(self):
+        self.tableWidget.setRowCount(0)
+        self.tableWidget.clear()
+        try:
+            if len(self.a)<100:
+                for row_number in range(len(self.a)):
+                    self.tableWidget.insertRow(row_number)
+                    for item in range(len(self.a)):
+                        self.tableWidget.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.a[item])))
+                    for item in range(len(self.b)):
+                        self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
+            else:
+                for row_number in range(100):
+                    self.tableWidget.insertRow(row_number)
+                    for item in range(100):
+                        self.tableWidget.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.a[item])))
+                    for item in range(100):
+                        self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
+                self.redraw_graph()
+        except Exception as e:
+            self.msg_output(e)
+        self.tableWidget.resizeColumnsToContents()
+        self.tableWidget.resizeRowsToContents()
+
+
     @pyqtSlot(float) 
     def load_data(self, a, b): 
         """ Loads in the data with AI. If that fails, loads in manually with np.loadtxt."""
@@ -553,33 +580,14 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         fileName, _ = QFileDialog.getOpenFileName(None,"Load interferogram", "","All Files (*);;Text Files (*.txt)", options=options)
         try:
             if fileName:
-                self.tableWidget.setRowCount(0)
                 try:
                     self.a, self.b, self.refY, self.samY = read_data(fileName)
                 except:
                     self.msg_output('Auto-detect failed, attempting to load again..')  
                     self.a, self.b = np.loadtxt(fileName, usecols=(0,1), unpack = True, delimiter =',')  
-                    self.msg_output('Done')
-                if len(self.a)<100:
-                    for row_number in range(len(self.a)):
-                        self.tableWidget.insertRow(row_number)
-                        for item in range(len(self.a)):
-                            self.tableWidget.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.a[item])))
-                        for item in range(len(self.b)):
-                            self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
-                else:
-                    for row_number in range(100):
-                        self.tableWidget.insertRow(row_number)
-                        for item in range(100):
-                            self.tableWidget.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.a[item])))
-                        for item in range(100):
-                            self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
-        
-            self.redraw_graph()
-        except Exception as e:
-            self.msg_output(e)
-        self.tableWidget.resizeColumnsToContents()
-        self.tableWidget.resizeRowsToContents()
+        self.fill_table()
+                    
+                
    
     @waiting_effects
     def get_it(self):
@@ -1366,6 +1374,7 @@ class ImportPage(QtWidgets.QMainWindow, Ui_ImportPage):
         self.shortcut = QShortcut(QKeySequence("Ctrl+E"), self)
         self.shortcut.activated.connect(self.commit)
         sys.stdout = Stream(newText=self.onUpdateText)
+        self.imp_import.clicked.connect(self.import_)
 
     def onUpdateText(self, text):
         cursor = self.imp_put.textCursor()
@@ -1436,6 +1445,16 @@ class ImportPage(QtWidgets.QMainWindow, Ui_ImportPage):
 	    	except Exception as e:
 	    		print('''This shell is intended to work with loaded data. It seems you did not load anything. The following error message was raised:\n''', e)
 
+    def import_(self):
+        if len(self.x) > 0:
+            new_main = MainProgram()
+            new_main.a = self.x
+            new_main.b = self.y
+            if len(self.ref) > 0:
+                new_main.refY = self.ref
+                new_main.samY = self.sam
+            new_main.showMaximized()
+            new_main.redraw_graph()
 
 class Stream(QtCore.QObject):
     newText = QtCore.pyqtSignal(str)

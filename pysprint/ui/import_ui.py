@@ -136,7 +136,7 @@ class Ui_ImportPage(object):
         self.imp_command.setPlaceholderText(_translate("ImportPage", "Write your command here. Pressing CTRL+E will trigger a commit. Type help or help() for details."))
         self.label_2.setText(_translate("ImportPage", "Output"))
         self.imp_close.setText(_translate("ImportPage", "Close"))
-        self.imp_import.setText(_translate("ImportPage", "Import(not implemented)"))
+        self.imp_import.setText(_translate("ImportPage", "Import"))
 
 
 if __name__ == "__main__":

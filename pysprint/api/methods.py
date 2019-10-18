@@ -52,6 +52,7 @@ class BaseApp(object):
 		else:
 			pass
 		main_app.redraw_graph()
+		main_app.fill_table()
 		sys.exit(app.exec_())
 		
 
