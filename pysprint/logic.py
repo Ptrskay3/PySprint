@@ -3,15 +3,16 @@ The main logic behind the UI functions.
 #FIXME: This file is horrible. We might need to restructure this into smaller units.
 """
 import os
+import sys
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QMainWindow, QDialogButtonBox, QApplication,
      QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QTreeWidget,
      QTreeWidgetItem, QAbstractItemView, QDialog, QPushButton, QVBoxLayout,
      QComboBox, QCheckBox, QLabel,QAction, qApp, QTextEdit, QSpacerItem, 
-     QSizePolicy,QHBoxLayout, QGroupBox, QTableWidgetItem)
+     QSizePolicy,QHBoxLayout, QGroupBox, QTableWidgetItem, QShortcut)
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, pyqtSlot, QSettings
-from PyQt5.QtGui import QIcon, QCursor
+from PyQt5.QtGui import QIcon, QCursor, QKeySequence
 
 import numpy as np
 import pandas as pd
@@ -20,6 +21,7 @@ import matplotlib
 
 import pysprint as ps 
 from pysprint.ui.ui import Ui_Interferometry
+from pysprint.ui.import_ui import Ui_ImportPage
 from pysprint.ui.generatorUI import Ui_GeneratorWindow
 from pysprint.ui.aboutUI import Help
 from pysprint.ui.mplwidget import MplWidget
@@ -33,6 +35,7 @@ from pysprint.core.edit_features import (savgol, find_peak, convolution,
 from pysprint.core.loading import read_data
 from pysprint.core.generator import generatorFreq, generatorWave
 from pysprint.core.cff_fitting import FitOptimizer
+from pysprint.core.command import ImportModel
 from pysprint.utils import find_closest
 
 
@@ -83,6 +86,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.actionSave_log_file.triggered.connect(self.save_output)
         self.actionExit.triggered.connect(self.close)
         self.actionGenerator.triggered.connect(self.open_generator)
+        self.actionUnit_converter.triggered.connect(self.open_import)
         self.actionSettings.triggered.connect(self.open_settings)
         self.pushButton.clicked.connect(self.open_sppanel)
         self.cb = QCheckBox('Do not show this message again.', self.centralwidget)
@@ -147,6 +151,10 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     def open_settings(self):
         self.window4 = SettingsWindow(self)
         self.window4.show()
+
+    def open_import(self):
+    	self.window5 = ImportPage(self)
+    	self.window5.show()
 
     def msg_output(self, text):
         """ Prints to the log dialog"""
@@ -1342,3 +1350,98 @@ class SettingsWindow(QtWidgets.QMainWindow, Ui_SettingsWindow):
         self.label_7.setVisible(True)
 
 
+class ImportPage(QtWidgets.QMainWindow, Ui_ImportPage):
+    x = np.array([])
+    y = np.array([])
+    ref = np.array([])
+    sam = np.array([])
+
+    def __init__(self, parent=None):
+        super(ImportPage, self).__init__(parent)
+        self.setupUi(self)
+        self.fileName = None
+        self.imp_load.clicked.connect(self.load)
+        self.imp_close.clicked.connect(self.close)
+        self.imp_commit.clicked.connect(self.commit)
+        self.shortcut = QShortcut(QKeySequence("Ctrl+E"), self)
+        self.shortcut.activated.connect(self.commit)
+        sys.stdout = Stream(newText=self.onUpdateText)
+
+    def onUpdateText(self, text):
+        cursor = self.imp_put.textCursor()
+        cursor.movePosition(QtGui.QTextCursor.End)
+        cursor.insertText(text)
+        self.imp_put.setTextCursor(cursor)
+        self.imp_put.ensureCursorVisible()
+
+    def __del__(self):
+        sys.stdout = sys.__stdout__
+
+
+    def update_table(self):
+        self.imp_table.clear()
+        if len(self.x)<21:
+            pass
+        try: # will be defined in the config file.
+	        for row_number in range(20):
+	            self.imp_table.insertRow(row_number)
+	            for item in range(10):
+	                self.imp_table.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.x[item])))
+	            for item in range(10):
+	                self.imp_table.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.y[item])))
+	            for item in range(10):
+	                self.imp_table.setItem(item, 2, QtWidgets.QTableWidgetItem(str(self.ref[item])))
+	            for item in range(10):
+	                self.imp_table.setItem(item, 3, QtWidgets.QTableWidgetItem(str(self.sam[item])))
+	            for item in range(11,20):
+	                self.imp_table.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.x[-item])))
+	            for item in range(11,20):
+	                self.imp_table.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.y[-item])))
+	            for item in range(11,20):
+	                self.imp_table.setItem(item, 2, QtWidgets.QTableWidgetItem(str(self.ref[-item])))
+	            for item in range(11,20):
+	                self.imp_table.setItem(item, 3, QtWidgets.QTableWidgetItem(str(self.sam[-item])))
+	        self.imp_table.setItem(10, 0, QtWidgets.QTableWidgetItem('...'))
+	        self.imp_table.setItem(10, 1, QtWidgets.QTableWidgetItem('...'))
+	        self.imp_table.setItem(10, 2, QtWidgets.QTableWidgetItem('...'))
+	        self.imp_table.setItem(10, 3, QtWidgets.QTableWidgetItem(str('...')))
+	        self.imp_table.resizeColumnsToContents()
+	        self.imp_table.resizeRowsToContents()
+        except Exception as e:
+             print('''This shell is intended to work with loaded data. It seems you did not load anything. The following error message was raised:\n''', e)
+
+    def load(self):
+        options = QFileDialog.Options()
+        self.fileName, _ = QFileDialog.getOpenFileName(None,"Load interferogram", "","All Files (*);;Text Files (*.txt)", options=options)
+        if self.fileName:
+            self.imp_table.setRowCount(0)
+            self.imp_path.setText(str(self.fileName))
+            try:
+                self.x, self.y, self.ref, self.sam = read_data(self.fileName)
+            except Exception:
+                self.x, self.y = np.loadtxt(self.fileName, usecols=(0,1), unpack = True, delimiter =',')  
+        self.update_table()
+
+
+    def commit(self):
+    	if self.imp_command.toPlainText().lower() == 'help' or self.imp_command.toPlainText().lower() == 'help()':
+    		print('''This is an interactive Python shell. It's intended to work with the loaded data, however it works on it's own. CTRL + E will trigger a commit. To refer to the 1st, 2nd .. column type $1, $2, ... Let's say you want to subtract 1.5 from the 2nd column. To achieve it:\n>>> $2 = $2 - 1.5\nAnother built in method is chdomain. This converts from nm to PHz, and vice versa. Converting the 1st column from nm to fs is just that line:\n>>> chdomain($1)\nYou can do advanced calculations also. Numpy is always imported as np. For example:\n>>> toadd = np.random.normal(0, 1, len($1))\n>>> $1 = $1 + toadd\nNote: both ^ and ** power operators can be used.''')
+    	else:
+	    	self.imp_put.clear()
+	    	i = ImportModel(self.x, self.y, self.ref, self.sam)
+	    	try:
+	    		i.exec_command(self.imp_command.toPlainText())
+	    		self.x, self.y, self.ref, self.sam = i.unpack()
+	    		self.update_table()
+	    	except Exception as e:
+	    		print('''This shell is intended to work with loaded data. It seems you did not load anything. The following error message was raised:\n''', e)
+
+
+class Stream(QtCore.QObject):
+    newText = QtCore.pyqtSignal(str)
+
+    def write(self, text):
+        self.newText.emit(str(text))
+
+    def flush(self):
+    	pass

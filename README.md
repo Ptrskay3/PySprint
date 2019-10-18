@@ -18,6 +18,7 @@ The GUI works only with 1920x1080 screen resolution. Lower resolution compatibil
 
 
 ### Lastest upgrades:
+  - Added Tools -> Import data window (functionality will be improved)
   - Now pip installable, see below
   - Added CI/CD, next is CircleCI
   - Data editing features unittests done

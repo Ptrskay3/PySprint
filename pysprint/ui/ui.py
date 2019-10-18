@@ -616,7 +616,7 @@ class Ui_Interferometry(object):
         self.action.setText(_translate("Interferometry", "Undo"))
         self.actionRedo.setText(_translate("Interferometry", "Redo"))
         self.actionGenerator.setText(_translate("Interferometry", "Generator"))
-        self.actionUnit_converter.setText(_translate("Interferometry", "Unit converter"))
+        self.actionUnit_converter.setText(_translate("Interferometry", "Import data"))
         self.actionOpen_documentation.setText(_translate("Interferometry", "Open documentation"))
         self.actionSettings.setText(_translate("Interferometry", "Settings"))
 from pysprint.ui.mplwidget import MplWidget

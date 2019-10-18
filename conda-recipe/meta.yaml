@@ -1,11 +1,11 @@
 package:
   name: pysprint
-  version: "0.0.17"
+  version: "0.0.18"
 
 source:
-  fn: pysprint-0.0.17.tar.gz
-  url: https://pypi.io/packages/source/p/pysprint/pysprint-0.0.17.tar.gz
-  md5: d942553f2f4093baaa8df7ceadb4b6d2
+  fn: pysprint-0.0.18.tar.gz
+  url: https://pypi.io/packages/source/p/pysprint/pysprint-0.0.18.tar.gz
+  md5: b63f80c9e1a28d576a66ae701df9ced9
 
 requirements:
   build:
