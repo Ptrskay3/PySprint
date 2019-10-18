@@ -21,10 +21,14 @@ class ImportModel(object):
 		self.create_dict()
 
 	def create_dict(self):
+		# custom rules .. we might add more later.
+		if len(self.col3) > 0 and len(self.col4) > 0:
+			self.d['$y'] = '($2-$3-$4)/(2*np.sqrt($3*$4))'
 		for i in range(self._ncols):
 			self.d['chdomain($'+str(i+1)+')'] = '$' + str(i+1) + ' = np.pi*2*299.793/$' + str(i+1) 
 			self.d['$'+str(i+1)] = 'self.col'  + str(i+1)
 		self.d['^'] = '**'
+
 
 	def exec_command(self, com):
 		for command, executable in self.d.items():

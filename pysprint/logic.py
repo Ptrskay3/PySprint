@@ -163,6 +163,14 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.logOutput.insertPlainText('\n {}\n\n'.format(str(text)))
         self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
 
+    #will be added..
+    def drop_arms(self):
+        if len(self.refY) != 0:
+            self.refY = np.array([])
+        if len(self.samY) != 0:
+            self.samY = np.array([])
+        self.redraw_graph()
+        self.fill_table()
 
     def waiting_effects(function):
         """ Decorator to show loading cursor"""
@@ -1391,6 +1399,7 @@ class ImportPage(QtWidgets.QMainWindow, Ui_ImportPage):
 
     def update_table(self):
         self.imp_table.clear()
+        self.imp_table.setRowCount(0)
         if len(self.x)<21:
             pass
         try: # will be defined in the config file.
@@ -1439,7 +1448,7 @@ class ImportPage(QtWidgets.QMainWindow, Ui_ImportPage):
 
     def commit(self):
     	if self.imp_command.toPlainText().lower() == 'help' or self.imp_command.toPlainText().lower() == 'help()':
-    		print('''This is an interactive Python shell. It's intended to work with the loaded data, however it works on it's own. CTRL + E will trigger a commit. To refer to the 1st, 2nd .. column type $1, $2, ... Let's say you want to subtract 1.5 from the 2nd column. To achieve it:\n>>> $2 = $2 - 1.5\nAnother built in method is chdomain. This converts from nm to PHz, and vice versa. Converting the 1st column from nm to fs is just that line:\n>>> chdomain($1)\nYou can do advanced calculations also. Numpy is always imported as np. For example:\n>>> toadd = np.random.normal(0, 1, len($1))\n>>> $1 = $1 + toadd\nNote: both ^ and ** power operators can be used.''')
+    		print('''This is an interactive Python shell. It's intended to work with the loaded data, however it works on it's own. CTRL + E will trigger a commit. To refer to the 1st, 2nd .. column type $1, $2, ... Let's say you want to subtract 1.5 from the 2nd column. To achieve it:\n>>> $2 = $2 - 1.5\nAnother built in method is chdomain. This converts from nm to PHz, and vice versa. Converting the 1st column from nm to fs is just that line:\n>>> chdomain($1)\nYou can do advanced calculations also. Numpy is always imported as np. For example:\n>>> toadd = np.random.normal(0, 1, len($1))\n>>> $1 = $1 + toadd\nNote: both ^ and ** power operators can be used.\n$y is only defined if we have both arms' spectra. It's a shortcut for having the normalized data.''')
     	else:
 	    	self.imp_put.clear()
 	    	i = ImportModel(self.x, self.y, self.ref, self.sam)
@@ -1451,15 +1460,19 @@ class ImportPage(QtWidgets.QMainWindow, Ui_ImportPage):
 	    		print('''This shell is intended to work with loaded data. It seems you did not load anything. The following error message was raised:\n''', e)
 
     def import_(self):
-        if len(self.x) > 0:
-            new_main = MainProgram()
-            new_main.a = self.x
-            new_main.b = self.y
-            if len(self.ref) > 0:
-                new_main.refY = self.ref
-                new_main.samY = self.sam
-            new_main.showMaximized()
-            new_main.redraw_graph()
+        try:
+            if len(self.x) > 0:
+                new_main = MainProgram()
+                new_main.a = self.x
+                new_main.b = self.y
+                if len(self.ref) > 0:
+                    new_main.refY = self.ref
+                    new_main.samY = self.sam
+                new_main.showMaximized()
+                new_main.redraw_graph()
+                new_main.fill_table()
+        except Exception as e:
+            self.imp_put.setText(str(e))
 
 class Stream(QtCore.QObject):
     newText = QtCore.pyqtSignal(str)

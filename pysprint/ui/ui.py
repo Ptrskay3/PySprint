@@ -546,7 +546,7 @@ class Ui_Interferometry(object):
         _translate = QtCore.QCoreApplication.translate
         Interferometry.setWindowTitle(_translate("Interferometry", "PySprint"))
         self.calculate.setText(_translate("Interferometry", "Calculate"))
-        self.btn_load.setText(_translate("Interferometry", "Load data"))
+        self.btn_load.setText(_translate("Interferometry", "Quick load"))
         self.swapButton.setText(_translate("Interferometry", "Swap axes"))
         self.savgolWindow.setPlaceholderText(_translate("Interferometry", "Window size"))
         self.savgolOrder.setPlaceholderText(_translate("Interferometry", "Order"))

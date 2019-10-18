@@ -128,12 +128,12 @@ class Ui_ImportPage(object):
         self.imp_header.setItemText(1, _translate("ImportPage", "1st row"))
         self.label.setText(_translate("ImportPage", "Header mode(not implemented)"))
         self.imp_commit.setText(_translate("ImportPage", "Commit"))
-        self.imp_command.setHtml(_translate("ImportPage", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
-"<p align=\"center\" style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
-        self.imp_command.setPlaceholderText(_translate("ImportPage", "Write your command here. Pressing CTRL+E will trigger a commit. Type help or help() for details."))
+#         self.imp_command.setHtml(_translate("ImportPage", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+# "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+# "p, li { white-space: pre-wrap; }\n"
+# "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
+# "<p align=\"center\" style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
+#         self.imp_command.setPlaceholderText(_translate("ImportPage", "Write your command here. Pressing CTRL+E will trigger a commit. Type help or help() for details."))
         self.label_2.setText(_translate("ImportPage", "Output"))
         self.imp_close.setText(_translate("ImportPage", "Close"))
         self.imp_import.setText(_translate("ImportPage", "Import"))
