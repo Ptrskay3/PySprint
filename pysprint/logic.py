@@ -585,7 +585,9 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 except:
                     self.msg_output('Auto-detect failed, attempting to load again..')  
                     self.a, self.b = np.loadtxt(fileName, usecols=(0,1), unpack = True, delimiter =',')  
-        self.fill_table()
+            self.fill_table()
+        except Exception as e:
+            self.msg_output(e)
                     
                 
    
@@ -1392,30 +1394,33 @@ class ImportPage(QtWidgets.QMainWindow, Ui_ImportPage):
         if len(self.x)<21:
             pass
         try: # will be defined in the config file.
-	        for row_number in range(20):
-	            self.imp_table.insertRow(row_number)
-	            for item in range(10):
-	                self.imp_table.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.x[item])))
-	            for item in range(10):
-	                self.imp_table.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.y[item])))
-	            for item in range(10):
-	                self.imp_table.setItem(item, 2, QtWidgets.QTableWidgetItem(str(self.ref[item])))
-	            for item in range(10):
-	                self.imp_table.setItem(item, 3, QtWidgets.QTableWidgetItem(str(self.sam[item])))
-	            for item in range(11,20):
-	                self.imp_table.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.x[-item])))
-	            for item in range(11,20):
-	                self.imp_table.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.y[-item])))
-	            for item in range(11,20):
-	                self.imp_table.setItem(item, 2, QtWidgets.QTableWidgetItem(str(self.ref[-item])))
-	            for item in range(11,20):
-	                self.imp_table.setItem(item, 3, QtWidgets.QTableWidgetItem(str(self.sam[-item])))
-	        self.imp_table.setItem(10, 0, QtWidgets.QTableWidgetItem('...'))
-	        self.imp_table.setItem(10, 1, QtWidgets.QTableWidgetItem('...'))
-	        self.imp_table.setItem(10, 2, QtWidgets.QTableWidgetItem('...'))
-	        self.imp_table.setItem(10, 3, QtWidgets.QTableWidgetItem(str('...')))
-	        self.imp_table.resizeColumnsToContents()
-	        self.imp_table.resizeRowsToContents()
+            for row_number in range(20):
+                self.imp_table.insertRow(row_number)
+                for item in range(10):
+                    self.imp_table.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.x[item])))
+                for item in range(10):
+                    self.imp_table.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.y[item])))
+                if len(self.ref) != 0:
+                    for item in range(10):
+                        self.imp_table.setItem(item, 2, QtWidgets.QTableWidgetItem(str(self.ref[item])))
+                    for item in range(10):
+                        self.imp_table.setItem(item, 3, QtWidgets.QTableWidgetItem(str(self.sam[item])))
+                for item in range(11,20):
+                    self.imp_table.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.x[-item])))
+                for item in range(11,20):
+                    self.imp_table.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.y[-item])))
+                if len(self.ref) != 0:
+                    for item in range(11,20):
+                        self.imp_table.setItem(item, 2, QtWidgets.QTableWidgetItem(str(self.ref[-item])))
+                    for item in range(11,20):
+                        self.imp_table.setItem(item, 3, QtWidgets.QTableWidgetItem(str(self.sam[-item])))
+            self.imp_table.setItem(10, 0, QtWidgets.QTableWidgetItem('...'))
+            self.imp_table.setItem(10, 1, QtWidgets.QTableWidgetItem('...'))
+            if len(self.ref) != 0:
+                self.imp_table.setItem(10, 2, QtWidgets.QTableWidgetItem('...'))
+                self.imp_table.setItem(10, 3, QtWidgets.QTableWidgetItem(str('...')))
+            self.imp_table.resizeColumnsToContents()
+            self.imp_table.resizeRowsToContents()
         except Exception as e:
              print('''This shell is intended to work with loaded data. It seems you did not load anything. The following error message was raised:\n''', e)
 
