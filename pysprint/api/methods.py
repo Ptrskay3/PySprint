@@ -370,7 +370,7 @@ class FFTMethod(Dataset):
 		return '''FFTMethod({},{})'''.format(self.x, self.y)
 
 	def ifft(self, interpolate=False):
-		if self.ifftContainer is not None:
+		if self.iffttemp is not None:
 			warnings.warn('Doing another IFFT would mess up the calculations. This call is ignored.')
 			return
 		if self.ffttemp is None:
@@ -387,7 +387,7 @@ class FFTMethod(Dataset):
 
 	
 	def fft(self, interpolate = False):
-		if self.ifftContainer is not None:
+		if self.ffttemp is not None:
 			warnings.warn('Doing another FFT would mess up the calculations. This call is ignored.')
 			return
 		if self.iffttemp is None:

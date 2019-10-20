@@ -9,6 +9,7 @@ import scipy
 
 from pysprint.core import evaluate
 from pysprint.core.dataedits import find_peak
+from pysprint import Generator, FFTMethod
 
 
 class TestEvaluate(unittest.TestCase):
@@ -74,13 +75,29 @@ class TestEvaluate(unittest.TestCase):
 		with self.assertRaises(TypeError):
 			evaluate.cff_method(a, b, [], [], ref_point=0 , p0=[1, 1, 1, 1, 1, 1, 1, 1, 1])
 
-	def test_ffts(self):
+	def test_ffts_primitive(self):
 		#adapted from scipy's unittests
 	    scipy.random.seed(1534)
 	    x = scipy.randn(10) + 1j * scipy.randn(10)
 	    fr, yf = evaluate.ifft_method(x, x, interpolate = False)
 	    _, y = evaluate.fft_method(yf, yf)
 	    np.testing.assert_allclose(y, x)
+
+
+	def test_ffts_advanced(self):
+		g = Generator(2.2, 2.8, 2.5, delay = 150000, GDD = -500, TOD = 3000, FOD = -20000, pulseWidth = 25)
+		g.generate_freq()
+		a,b = g.unpack()
+		f = FFTMethod(a,b)
+		f.ifft(interpolate = False)
+		f.cut(126,30)
+		f.fft()
+		dis, _, _ = f.calculate(fit_order = 4, reference_point = 2.5)
+		np.testing.assert_almost_equal(np.abs(dis[1]), 500.123, decimal = 2)
+		np.testing.assert_almost_equal(np.abs(dis[2]), 3002.06, decimal = 2)
+		np.testing.assert_almost_equal(np.abs(dis[3]), 19992.92, decimal = 2)
+		np.testing.assert_almost_equal(dis[4], 0, decimal = 2)
+
 
 	def test_windowing(self):
 		a,b = np.loadtxt('test_window.txt', unpack = True, delimiter = ',')
