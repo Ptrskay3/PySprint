@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 
 from pysprint.core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, ifft_method, spp_method, args_comp
-from pysprint.core.edit_features import savgol, find_peak, convolution, cut_data
+from pysprint.core.dataedits import savgol, find_peak, convolution, cut_data
 from pysprint.core.generator import generatorFreq, generatorWave
 from pysprint.utils import print_disp
 
@@ -371,8 +371,8 @@ class FFTMethod(Dataset):
 
 	def ifft(self, interpolate=False):
 		if self.ifftContainer is not None:
-            warnings.warn('Doing another IFFT would mess up the calculations. This call is ignored.')
-            return
+			warnings.warn('Doing another IFFT would mess up the calculations. This call is ignored.')
+			return
 		if self.ffttemp is None:
 			if self.iffttemp is None:
 				self.iffttemp = self.x
@@ -388,8 +388,8 @@ class FFTMethod(Dataset):
 	
 	def fft(self, interpolate = False):
 		if self.ifftContainer is not None:
-            warnings.warn('Doing another FFT would mess up the calculations. This call is ignored.')
-            return
+			warnings.warn('Doing another FFT would mess up the calculations. This call is ignored.')
+			return
 		if self.iffttemp is None:
 			if self.ffttemp is None:
 				self.ffttemp = self.x
