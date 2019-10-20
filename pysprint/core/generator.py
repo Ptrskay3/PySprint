@@ -20,14 +20,14 @@ def _ensure_input(start, stop, center, resolution, pulseWidth):
 		pass
 
 
-def _disp(x, GD=0, GDD=0, TOD=0, FOD=0, QOD=0):
-	return x*GD+(GDD/2)*x**2+(TOD/6)*x**3+(FOD/24)*x**4+(QOD/120)*x**5
+def _disp(x, delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0):
+	return x*GD+x*delay+(GDD/2)*x**2+delay+(TOD/6)*x**3+(FOD/24)*x**4+(QOD/120)*x**5
 
 
 def generatorFreq(start, stop, center, delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1,
 				  delimiter=',',pulseWidth=10, includeArms=False, chirp=0):
 	_ensure_input(start, stop, center, resolution, pulseWidth)
-	omega0 = center 
+	omega0 = center
 	window = (np.sqrt(1+chirp**2)*8*np.log(2))/(pulseWidth**2)
 	lamend = (2*np.pi*C_LIGHT)/start
 	lamstart = (2*np.pi*C_LIGHT)/stop
@@ -38,7 +38,7 @@ def generatorFreq(start, stop, center, delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, 
 	relom = omega-omega0
 	i1 = np.exp(-(relom)**2/(window))
 	i2 = np.exp(-(relom)**2/(window))
-	i = i1 + i2 + 2*np.cos(_disp(relom, GD=GD, GDD=GDD, TOD=TOD, FOD=FOD, QOD=QOD)+(2*delay*omega/C_LIGHT))*np.sqrt(i1*i2) 
+	i = i1 + i2 + 2*np.sqrt(i1*i2)*np.cos(_disp(relom, delay, GD=GD, GDD=GDD, TOD=TOD, FOD=FOD, QOD=QOD)+(2*delay*omega/C_LIGHT))
 	if includeArms:
 		return omega, i, i1, i2
 		# np.savetxt('examples/simulated_'+str(datetime.now().strftime("%Y_%m_%d_%H_%M_%S"))+'_frequency.txt', np.transpose([omega ,i, i1, i2]), 
@@ -62,7 +62,7 @@ def generatorWave(start, stop, center, delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, 
 	relom = omega-omega0 
 	i1 = np.exp(-(relom)**2/(window))
 	i2 = np.exp(-(relom)**2/(window))
-	i = i1 + i2 + 2*np.cos(_disp(relom, GD=GD, GDD= GDD, TOD=TOD, FOD=FOD, QOD=QOD)+(2*omega*delay/C_LIGHT))*np.sqrt(i1*i2)
+	i = i1 + i2 + 2*np.cos(_disp(relom, delay, GD=GD, GDD= GDD, TOD=TOD, FOD=FOD, QOD=QOD)+(2*omega*delay/C_LIGHT))*np.sqrt(i1*i2)
 	if includeArms:
 		return lam, i, i1, i2
 		# np.savetxt('examples/simulated_'+str(datetime.now().strftime("%Y_%m_%d_%H_%M_%S"))+'_wavelength.txt', np.transpose([lam ,i, i1, i2]), 

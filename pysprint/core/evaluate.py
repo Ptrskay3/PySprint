@@ -243,7 +243,7 @@ def cos_fit5(x,c0, c1, b0, b1, b2, b3, b4, b5):
 	return c0 + c1*np.cos(polynomialFit5(x,b0, b1, b2, b3, b4, b5))
 
 
-def spp_method(delays, omegas, fitOrder=4, from_raw=False): 
+def spp_method(delays, omegas, reference_point = 0, fitOrder=4, from_raw=False): 
 	"""
 	Calculates the dispersion from SPP's positions and delays.
 	
@@ -295,6 +295,9 @@ def spp_method(delays, omegas, fitOrder=4, from_raw=False):
 			item = [x for x in element if x is not None]
 			omegas_unpacked.extend(item)
 			delays_unpacked.extend(len(item) * [delay])
+	L = sorted(zip(omegas_unpacked, delays_unpacked), key=operator.itemgetter(0))
+	omegas_unpacked, delays_unpacked = zip(*L)
+	omegas_unpacked = [val-reference_point for val in omegas_unpacked]
 	try:
 		if _has_lmfit:
 			if fitOrder == 2:

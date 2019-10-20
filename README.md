@@ -17,7 +17,17 @@ PySprint is a UI and API for interferogram evaluation. Under construction.
 The GUI works only with 1920x1080 or bigger screen resolution. Lower resolution compatibility is queued on the To-Do List.
 
 
-### Lastest upgrades:
+### 0.0.24 release notes and bugfixes
+  - SPP Method's collected data now correctly broadcasted to evaluating function
+  - SPP Method now has a reference point arg (also on API)
+  - SPP Method's and Generator's GUI is a little bit prettier
+  - Generator now correctly handles the delay
+  - Added linear chirp parameter to Generator
+  - API: CosFitMethod now has guess_GD, guess_GDD, etc methods for initial parameters
+  - API: CosFitMethod also has a set_max_order method to restrict max order dispersion
+  - Added advanced unittests for Fourier Method
+
+### Lastest upgrades: (See release notes)
   - Added Tools -> Import data window (functionality will be improved)
   - Now pip installable, see below
   - Added CI/CD, next is CircleCI
@@ -32,7 +42,7 @@ The GUI works only with 1920x1080 or bigger screen resolution. Lower resolution 
   - Added SPP Panel
 
 ### Known issues
-* There is a huge amount of bugs out there, I'm working on a fix.
+* There mightbe bigger bugs out there, I'm working on a fix.
 * There might be unnecessary imports
 * Some buttons has no effect yet.
 

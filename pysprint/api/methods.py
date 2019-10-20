@@ -358,9 +358,9 @@ class SPPMethod(Dataset):
 		return cls(omegas, delays)
 
 	@print_disp
-	def calculate(self, fit_order):
+	def calculate(self, reference_point, fit_order):
 		if self.raw:
-			_, _, dispersion, dispersion_std, self.bf = spp_method(self.y, self.x, fitOrder = fit_order, from_raw = True)
+			_, _, dispersion, dispersion_std, self.bf = spp_method(self.y, self.x, reference_point = reference_point, fitOrder = fit_order, from_raw = True)
 			self.om = self.x
 			self.de = self.y
 		else:

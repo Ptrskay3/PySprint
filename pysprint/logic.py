@@ -618,7 +618,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     self.msg_output(str('Using Min-max method.. \n ' + fit_report))
                 for item in range(len(disp)):
                     self.logOutput.insertPlainText(' '+ labels[item] +' =  ' + str(float(disp[item])-float(calibrate_label[item])) +' +/- ' 
-                                                   + str(float(disp_std[item]) + float(calibrate_std_label[item]) ) + ' 1/fs^'+str(item+1)+'\n')
+                                                   + str(float(disp_std[item]) + float(calibrate_std_label[item]) ) + ' fs^'+str(item+1)+'\n')
 
                 self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
             except Exception as e:
@@ -653,7 +653,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 try:
                     for item in range(len(cFF)):
                         self.logOutput.insertPlainText(' '+ labels[item] +' =  ' + str(float(cFF[item])-float(calibrate_label[item])) 
-                                                       +'  1/fs^'+str(item+1)+'\n')
+                                                       +'  fs^'+str(item+1)+'\n')
                     self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
                 except Exception as e:
                     self.msg_output('You might need to provide initial guess for parameters.')
@@ -671,7 +671,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.msg_output('Using FFT method.')
             for item in range(len(disp)):
                 self.logOutput.insertPlainText(' '+ labels[item] +' =  ' + str(float(disp[item])-float(calibrate_label[item])) +' +/- ' 
-                                                   + str(float(disp_std[item]) + float(calibrate_std_label[item]) ) + ' 1/fs^'+str(item+1)+'\n')
+                                                   + str(float(disp_std[item]) + float(calibrate_std_label[item]) ) + ' fs^'+str(item+1)+'\n')
 
 
         if self.methodWidget.currentIndex() == 0:
@@ -974,7 +974,6 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         self.setWindowIcon(QtGui.QIcon(ipath))
         self.treeWidget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.loadButton.clicked.connect(self.load_up)
-        self.pushButton.setVisible(False)
         self.treeWidget.itemSelectionChanged.connect(self.fill_SPP)
         # self.pushButton.clicked.connect(self.record_delay)
         self.delayLine.textChanged.connect(self.record_delay)
@@ -1002,8 +1001,10 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         self.widget.canvas.axes.clear()
         if self.fitOrderLine.text() == '':
             self.fitOrderLine.setText('4')
+        if self.spp_ref.text() == '':
+            self.spp_ref.setText('0')
         try:
-            xs, ys, disp, disp_std, bestFit = spp_method(delays = self.delays, omegas = self.xpoints, fitOrder = int(self.fitOrderLine.text()))
+            xs, ys, disp, disp_std, bestFit = spp_method(delays = self.delays, omegas = self.xpoints, reference_point = float(self.spp_ref.text()), fitOrder = int(self.fitOrderLine.text()))
             self.widget.canvas.axes.clear()
             self.widget.canvas.axes.plot(xs, ys,'o', label = 'data')
             self.widget.canvas.axes.plot(xs, bestFit, 'r--', label = 'fit')
@@ -1054,11 +1055,11 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
             else:
                 corr_QOD_std = disp_std[4]
 
-            self.GDSPP.setText(str(corr_GD) + ' +/- ' + str(corr_GD_std)+ ' 1/fs')
-            self.GDDSPP.setText(str(corr_GDD) + ' +/- ' + str(corr_GDD_std)+ ' 1/fs^2')
-            self.TODSPP.setText(str(corr_TOD) + ' +/- ' + str(corr_TOD_std)+ ' 1/fs^3')
-            self.FODSPP.setText(str(corr_FOD) + ' +/- ' + str(corr_FOD_std)+ ' 1/fs^4')
-            self.QODSPP.setText(str(corr_QOD) + ' +/- ' + str(corr_QOD_std)+ ' 1/fs^5')
+            self.GDSPP.setText(str(corr_GD) + ' +/- ' + str(corr_GD_std)+ ' fs')
+            self.GDDSPP.setText(str(corr_GDD) + ' +/- ' + str(corr_GDD_std)+ ' fs^2')
+            self.TODSPP.setText(str(corr_TOD) + ' +/- ' + str(corr_TOD_std)+ ' fs^3')
+            self.FODSPP.setText(str(corr_FOD) + ' +/- ' + str(corr_FOD_std)+ ' fs^4')
+            self.QODSPP.setText(str(corr_QOD) + ' +/- ' + str(corr_QOD_std)+ ' fs^5')
         except Exception as e:
             self.msg_output('Some values might be missing. Fit order must be lower or equal than the number of data points.\n' + str(e))
 

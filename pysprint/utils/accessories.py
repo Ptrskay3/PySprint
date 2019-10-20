@@ -81,6 +81,6 @@ def print_disp(f):
         disp, disp_std, stri = f(*args, **kwargs)
         labels = ['GD', 'GDD','TOD', 'FOD', 'QOD']
         for i in range(len(labels)):
-        	print(labels[i] + ' = ' + str(disp[i]) +  ' +/- ' + str(disp_std[i]) + ' 1/fs^{}'.format(i+1))
+        	print(labels[i] + ' = ' + str(disp[i]) +  ' +/- ' + str(disp_std[i]) + ' fs^{}'.format(i+1))
         return disp, disp_std, stri
     return wrapping
