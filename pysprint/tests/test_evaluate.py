@@ -85,17 +85,17 @@ class TestEvaluate(unittest.TestCase):
 
 
 	def test_ffts_advanced(self):
-		g = Generator(2.2, 2.8, 2.5, delay = 150000, GDD = -500, TOD = 3000, FOD = -20000, pulseWidth = 25)
+		g = Generator(2.2, 2.8, 2.5, delay = 1500, GDD = -500, TOD = 3000, FOD = -20000, pulseWidth = 25)
 		g.generate_freq()
 		a,b = g.unpack()
 		f = FFTMethod(a,b)
 		f.ifft(interpolate = False)
-		f.cut(126,30)
+		f.cut(192,30)
 		f.fft()
 		dis, _, _ = f.calculate(fit_order = 4, reference_point = 2.5)
-		np.testing.assert_almost_equal(np.abs(dis[1]), 500.123, decimal = 2)
-		np.testing.assert_almost_equal(np.abs(dis[2]), 3002.06, decimal = 2)
-		np.testing.assert_almost_equal(np.abs(dis[3]), 19992.92, decimal = 2)
+		np.testing.assert_almost_equal(np.abs(dis[1]), 485.8, decimal = 2)
+		np.testing.assert_almost_equal(np.abs(dis[2]), 2937.14, decimal = 2)
+		np.testing.assert_almost_equal(np.abs(dis[3]), 23753.98, decimal = 2)
 		np.testing.assert_almost_equal(dis[4], 0, decimal = 2)
 
 
