@@ -8,7 +8,7 @@ import scipy
 # import matplotlib.pyplot as plt
 
 from pysprint.core import evaluate
-from pysprint.core.edit_features import find_peak
+from pysprint.core.dataedits import find_peak
 
 
 class TestEvaluate(unittest.TestCase):

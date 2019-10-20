@@ -10,7 +10,7 @@ import numpy as np
 import scipy
 
 from pysprint.core import evaluate
-from pysprint.core.edit_features import find_peak
+from pysprint.core.dataedits import find_peak
 
 
 class TestEvaluateNoLmfit(unittest.TestCase):
