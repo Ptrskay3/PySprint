@@ -25,10 +25,10 @@ def _disp(x, GD=0, GDD=0, TOD=0, FOD=0, QOD=0):
 
 
 def generatorFreq(start, stop, center, delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1,
-				  delimiter=',',pulseWidth=10, includeArms=False):
+				  delimiter=',',pulseWidth=10, includeArms=False, chirp=0):
 	_ensure_input(start, stop, center, resolution, pulseWidth)
 	omega0 = center 
-	window = (8*np.log(2))/(pulseWidth**2)
+	window = (np.sqrt(1+chirp**2)*8*np.log(2))/(pulseWidth**2)
 	lamend = (2*np.pi*C_LIGHT)/start
 	lamstart = (2*np.pi*C_LIGHT)/stop
 	# stepAmount = (lamend-lamstart+resolution)/resolution
@@ -48,15 +48,13 @@ def generatorFreq(start, stop, center, delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, 
 			# header = 'freq, int', delimiter = delimiter, comments ='')
 		return omega, i, np.array([]), np.array([])
 
-
-
-#intenzitásarány
+#TODO: intenzitásarány
 
 def generatorWave(start, stop, center, delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1, 
-				  delimiter=',',pulseWidth=10, includeArms=False):
+				  delimiter=',',pulseWidth=10, includeArms=False, chirp=0):
 	_ensure_input(start, stop, center, resolution, pulseWidth)
 	omega0 = (2*np.pi*C_LIGHT)/center 
-	window = (8*np.log(2))/(pulseWidth**2) 
+	window = (np.sqrt(1+chirp**2)*8*np.log(2))/(pulseWidth**2)
 	# stepAmount = (stop-start+resolution)/resolution
 	# lam = np.linspace(start, stop+resolution, stepAmount)
 	lam = np.arange(start, stop+resolution, resolution) 

@@ -27,6 +27,10 @@ class InterpolationWarning(UserWarning):
 	pass
 
 
+class FourierWarning(UserWarning):
+	pass
+
+
 class BaseApp(object):
 	def __init__(self):
 		pass
@@ -59,7 +63,7 @@ class BaseApp(object):
 class Generator(BaseApp):
 	def __init__(self, start, stop, center, delay=0,
 		GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1,
-	 	delimiter=',', pulseWidth=10, normalize=False):
+	 	delimiter=',', pulseWidth=10, normalize=False, chirp=0):
 		self.start = start
 		self.stop = stop
 		self.center = center
@@ -72,6 +76,7 @@ class Generator(BaseApp):
 		self.resolution = resolution
 		self.delimiter = delimiter
 		self.pulseWidth = pulseWidth
+		self.chirp = chirp
 		self.normalize = normalize
 		self.x = np.array([])
 		self.y = np.array([])
@@ -94,14 +99,14 @@ class Generator(BaseApp):
 	def generate_freq(self):
 		self.x, self.y, self.ref, self.sam = generatorFreq(self.start, self.stop, self.center, self.delay, self.GD,
 			self.GDD, self.TOD, self.FOD, self.QOD,
-			self.resolution, self.delimiter, self.pulseWidth, self.normalize)
+			self.resolution, self.delimiter, self.pulseWidth, self.normalize, self.chirp)
 		
 
 	def generate_wave(self):
 		self.is_wave = True
 		self.x, self.y, self.ref, self.sam = generatorWave(self.start, self.stop, self.center, self.delay, self.GD,
 			self.GDD, self.TOD, self.FOD, self.QOD,
-			self.resolution, self.delimiter, self.pulseWidth, self.normalize)
+			self.resolution, self.delimiter, self.pulseWidth, self.normalize, self.chirp)
 
 		
 	def show(self):
@@ -358,17 +363,45 @@ class FFTMethod(Dataset):
 		if self._is_normalized:
 			self.y_norm = self.y
 			self._is_normalized = False
+		self.iffttemp = None
+		self.ffttemp = None
 
 	def __str__(self):
 		return '''FFTMethod({},{})'''.format(self.x, self.y)
 
-	def ifft(self, interpolate = True):
-		self.temp = self.x
-		self.x, self.y = ifft_method(self.x, self.y, interpolate = interpolate)
+	def ifft(self, interpolate=False):
+		if self.ifftContainer is not None:
+            warnings.warn('Doing another IFFT would mess up the calculations. This call is ignored.')
+            return
+		if self.ffttemp is None:
+			if self.iffttemp is None:
+				self.iffttemp = self.x
+				self.x, self.y = ifft_method(self.x, self.y, interpolate=interpolate)
+			else:
+				warnings.warn('Doing another IFFT would mess up the calculations. This call is ignored.')
+		else:
+			self.x = self.ffttemp
+			_, self.y = ifft_method(self.x, self.y, interpolate=interpolate)
+			self.ffttemp = None
+
+
 	
-	def fft(self):
-		self.y = fft_method(self.y)
-		self.x = self.temp
+	def fft(self, interpolate = False):
+		if self.ifftContainer is not None:
+            warnings.warn('Doing another FFT would mess up the calculations. This call is ignored.')
+            return
+		if self.iffttemp is None:
+			if self.ffttemp is None:
+				self.ffttemp = self.x
+				self.x, self.y = fft_method(self.x, self.y, interpolate=interpolate)
+			else:
+				warnings.warn('Doing another FFT would mess up the calculations. This call is ignored.')
+		else:
+			self.x = self.iffttemp
+			_, self.y = fft_method(self.x, self.y, interpolate=interpolate)
+			self.iffttemp = None
+
+
 
 	def cut(self, at, std, window_order = 6):
 		self.y = cut_gaussian(self.x, self.y, spike = at, sigma = std, win_order = window_order)
@@ -377,4 +410,4 @@ class FFTMethod(Dataset):
 	def calculate(self, reference_point, fit_order, show_graph=False):
 		dispersion, dispersion_std, fit_report = args_comp(self.x, self.y, reference_point = reference_point, fitOrder = fit_order, showGraph = show_graph)
 		return dispersion, dispersion_std, fit_report
-		
+

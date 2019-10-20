@@ -133,7 +133,7 @@ class Ui_ImportPage(object):
 # "p, li { white-space: pre-wrap; }\n"
 # "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
 # "<p align=\"center\" style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
-#         self.imp_command.setPlaceholderText(_translate("ImportPage", "Write your command here. Pressing CTRL+E will trigger a commit. Type help or help() for details."))
+        self.imp_command.setPlaceholderText(_translate("ImportPage", "Write your command here. Pressing CTRL+E will run the code. Type help or help() for details."))
         self.label_2.setText(_translate("ImportPage", "Output"))
         self.imp_close.setText(_translate("ImportPage", "Close"))
         self.imp_import.setText(_translate("ImportPage", "Import"))

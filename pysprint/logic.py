@@ -15,7 +15,6 @@ from PyQt5.QtCore import Qt, pyqtSignal, QObject, pyqtSlot, QSettings
 from PyQt5.QtGui import QIcon, QCursor, QKeySequence
 
 import numpy as np
-import pandas as pd
 from datetime import datetime
 import matplotlib
 
@@ -30,12 +29,12 @@ from pysprint.ui.settings_dialog import Ui_SettingsWindow
 from pysprint.core.evaluate import (min_max_method, cff_method, fft_method,
      cut_gaussian, gaussian_window , ifft_method, spp_method, args_comp,
      cos_fit1, cos_fit2, cos_fit3, cos_fit5, cos_fit4)
-from pysprint.core.edit_features import (savgol, find_peak, convolution, 
+from pysprint.core.dataedits import (savgol, find_peak, convolution, 
      interpolate_data, cut_data)#, cwt)
 from pysprint.core.loading import read_data
 from pysprint.core.generator import generatorFreq, generatorWave
 from pysprint.core.cff_fitting import FitOptimizer
-from pysprint.core.command import ImportModel
+from pysprint.core.dataimport import ImportModel
 from pysprint.utils import find_closest
 
 
@@ -57,7 +56,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     a = np.array([])
     b = np.array([])
     temp = np.array([])
-    fftContainer = np.array([])
+    fftContainer = None
+    ifftContainer = None
     minx = np.array([])
     maxx = np.array([])
 
@@ -100,7 +100,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.tableWidget.setHorizontalHeaderLabels(["Angular frequency", "Intensity"])
         self.tableWidget.setSizeAdjustPolicy(
         QtWidgets.QAbstractScrollArea.AdjustToContents)
-        self.interpolate_cb.setChecked(True)
+        self.interpolate_cb.setChecked(False)
         self.savgolTab.setStyleSheet(" background-color: rgb(240,240,240);")
         self.peakTab.setStyleSheet(" background-color: rgb(240,240,240);")
         self.convolTab.setStyleSheet(" background-color: rgb(240,240,240);")
@@ -201,23 +201,37 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     def fft_handler(self):
         """ On FFT tab perfoms FFT on currently loaded data"""
         if len(self.a)>0 and len(self.b)>0:
-            self.b = fft_method(self.b)
-            self.a = self.fftContainer
+            if self.fftContainer is not None:
+                self.msg_output('Doing another FFT would mess up the calculations. This call is ignored.')
+                return
+            if self.ifftContainer is None:
+                if self.fftContainer is None:
+                    self.fftContainer = self.a
+                    self.a, self.b = fft_method(self.a ,self.b, interpolate = self.interpolate_cb.isChecked())
+                else:
+                    self.msg_output('Doing another FFT would mess up the calculations. This call is ignored.')
+            else:
+                self.a = self.ifftContainer
+                _, self.b = fft_method(self.a, self.b, interpolate = self.interpolate_cb.isChecked())
+                self.ifftContainer = None
             self.redraw_graph()
-            self.fftContainer = np.array([])
-            self.msg_output('FFT done.')
         else:
             self.msg_output('No data is loaded.')
 
     def ifft_handler(self):
         """ On FFt tab perfoms IFFT on currently loaded data""" 
         if len(self.a)>0 and len(self.b)>0:
-            self.fftContainer = self.a
-            self.a, self.b = ifft_method(self.a ,self.b, interpolate = self.interpolate_cb.isChecked())
-            # self.a = self.fftContainer
-            # self.fftContainer = np.array([])
+            if self.ifftContainer is not None:
+                self.msg_output('Doing another IFFT would mess up the calculations. This call is ignored.')
+                return
+            if self.fftContainer is None:
+                self.ifftContainer = self.a
+                self.a, self.b = ifft_method(self.a ,self.b, interpolate = self.interpolate_cb.isChecked())
+            else:
+                self.a = self.fftContainer
+                _, self.b = ifft_method(self.a, self.b, interpolate = self.interpolate_cb.isChecked())
+                self.fftContainer = None
             self.redraw_graph()
-            self.msg_output('IFFT done. ')
         else:
             self.msg_output('No data is loaded.')
             
@@ -230,22 +244,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.a = self.b
             self.b = self.temp
             self.redraw_graph()
-            if len(self.a)<400:
-                for row_number in range(len(self.a)):
-                    self.tableWidget.insertRow(row_number)
-                    for item in range(len(self.a)):
-                        self.tableWidget.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.a[item])))
-                    for item in range(len(self.b)):
-                        self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
-            else:
-                for row_number in range(400):
-                    self.tableWidget.insertRow(row_number)
-                    for item in range(400):
-                        self.tableWidget.setItem(item, 0, QtWidgets.QTableWidgetItem(str(self.a[item])))
-                    for item in range(400):
-                        self.tableWidget.setItem(item, 1, QtWidgets.QTableWidgetItem(str(self.b[item])))
-            self.tableWidget.resizeRowsToContents()
-            self.tableWidget.resizeColumnsToContents()
+            self.fill_table()
 
     def commit_to_data(self):
         """ On the data manipulation tab applies the current function with the given parameters to the loaded dataset."""
@@ -346,7 +345,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.b = []
         self.refY = []
         self.samY = []
-        self.fftContainer = []
+        self.fftContainer = None
+        self.ifftContainer = None
         self.minx = []
         self.maxx = []
         self.temp = []
@@ -918,28 +918,30 @@ class GeneratorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
             self.FODLine.setText('0')
         if self.QODLine.text()=='':
             self.QODLine.setText('0')
-        if self.delimiterLine.text == '':
+        if self.delimiterLine.text() == '':
             self.delimiterLine.setText(',')
+        if self.gen_chirp.text() == '':
+            self.gen_chirp.setText('0')
 
-        if self.comboBox.currentText() == 'frequency':
+        if self.comboBox.currentText() == 'Frequency':
             try:
                 self.pushButton_4.setStyleSheet('background-color: None')
                 self.xAxisData, self.yAxisData, self.refData, self.samData =  generatorFreq(start = float(self.startLine.text()),
                     stop = float(self.stopLine.text()), center = float(self.centerLine.text()), delay = float(self.delayLine.text()), 
                     GD = float(self.GDLine.text()), GDD = float(self.GDDLine.text()), TOD = float(self.TODLine.text()), FOD = float(self.FODLine.text()), 
                     QOD = float(self.QODLine.text()), resolution = float(self.resolutionLine.text()), delimiter = self.delimiterLine.text(), pulseWidth = float(self.pulseLine.text()), 
-                    includeArms = self.armCheck.isChecked())
+                    includeArms = self.armCheck.isChecked(), chirp = float(self.gen_chirp.text()))
             except:
                 self.pushButton_4.setStyleSheet(" background-color: rgb(240,0,0); color: rgb(255,255,255);")
 
-        if self.comboBox.currentText() == 'wavelength':
+        if self.comboBox.currentText() == 'Wavelength':
             try:
                 self.pushButton_4.setStyleSheet('background-color: None')
                 self.xAxisData, self.yAxisData, self.refData, self.samData =  generatorWave(start = float(self.startLine.text()),
                     stop = float(self.stopLine.text()), center = float(self.centerLine.text()), delay = float(self.delayLine.text()), 
                     GD = float(self.GDLine.text()), GDD = float(self.GDDLine.text()), TOD = float(self.TODLine.text()), FOD = float(self.FODLine.text()), 
                     QOD = float(self.QODLine.text()), resolution = float(self.resolutionLine.text()), delimiter = self.delimiterLine.text(), pulseWidth = float(self.pulseLine.text()), 
-                    includeArms = self.armCheck.isChecked())
+                    includeArms = self.armCheck.isChecked(), chirp = float(self.gen_chirp.text()))
             except:
                 self.pushButton_4.setStyleSheet(" background-color: rgb(240,0,0); color: rgb(255,255,255);")
         
@@ -951,7 +953,6 @@ class GeneratorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
             self.delimiterLine.setText(',')
         options = QFileDialog.Options()
         name = QFileDialog.getSaveFileName(self, 'Save File','','Text(*.txt)', options=options)
-        # print(len(self.xAxisData))
         try:
             with open(name[0], 'w') as f:
                 if self.armCheck.isChecked():

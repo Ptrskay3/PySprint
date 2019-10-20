@@ -17,7 +17,7 @@ except ImportError:
 
 sys.path.append('..')
 
-from pysprint.core.edit_features import interpolate_data
+from pysprint.core.dataedits import interpolate_data
 from pysprint.utils import findNearest, _handle_input, lmfit_disp, scipy_disp
 
 
@@ -426,29 +426,40 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_poin
 		raise ValueError('Max tries reached.. \n Parameters could not be estimated.')
 
 
-def fft_method(initSpectrumY):
-	"""
-	Perfoms FFT on data
+def fft_method(initSpectrumX ,initSpectrumY, interpolate=False):
+	"""Perfoms FFT on data
 
 	Parameters
 	----------
 
+	initSpectrumX: array-like
+	the x-axis data
+
 	initSpectrumY: array-like
-	y-axis data
+	the y-axis data
+
+	interpolate: bool
+	if True perform a linear interpolation on dataset before transforming
 	
 	Returns
 	-------
+	freq: array-like
+	the transformed x data
 
 	yf: array-like
-	the transformed y data
-
+	transformed y data
 	"""
-	if len(initSpectrumY) > 0:
+	if len(initSpectrumY) > 0 and len(initSpectrumX) > 0:
 		Ydata = initSpectrumY
-		yf = scipy.fftpack.fft(Ydata)
-		return yf
-	if len(initSpectrumY) == 0:
-		pass
+		Xdata = initSpectrumX
+	else:
+		raise FileNotFoundError
+	if interpolate:
+		Xdata, Ydata = interpolate_data(initSpectrumX, initSpectrumY, [],[])
+	yf = scipy.fftpack.fft(Ydata)
+	freq = scipy.fftpack.fftfreq(len(Xdata), d=(Xdata[3]-Xdata[2]))
+	return freq, yf 
+
 
 def gaussian_window(t, tau, standardDev, order):
 	"""
@@ -503,7 +514,7 @@ def cut_gaussian(initSpectrumX, initSpectrumY, spike, sigma, win_order):
 
 
 
-def ifft_method(initSpectrumX, initSpectrumY, interpolate = True):
+def ifft_method(initSpectrumX, initSpectrumY, interpolate=False):
 	"""
 	Perfoms IFFT on data
 
@@ -517,7 +528,7 @@ def ifft_method(initSpectrumX, initSpectrumY, interpolate = True):
 	the y-axis data
 
 	interpolate: bool
-	if True perform a linear interpolation on dataset before transforms
+	if True perform a linear interpolation on dataset before transforming
 	
 	Returns
 	-------
@@ -528,11 +539,11 @@ def ifft_method(initSpectrumX, initSpectrumY, interpolate = True):
 	transformed y data
 
 	"""
-	if len(initSpectrumY)>0 and len(initSpectrumX)>0:
+	if len(initSpectrumY) > 0 and len(initSpectrumX) > 0:
 		Ydata = initSpectrumY
 		Xdata = initSpectrumX
 	else:
-		raise
+		raise FileNotFoundError
 	if interpolate:
 		Xdata, Ydata = interpolate_data(initSpectrumX, initSpectrumY, [],[])
 	yf = scipy.fftpack.ifft(Ydata)
@@ -542,7 +553,7 @@ def ifft_method(initSpectrumX, initSpectrumY, interpolate = True):
 
 
 
-def args_comp(initSpectrumX, initSpectrumY, reference_point = 2.5, fitOrder=5, showGraph=False):
+def args_comp(initSpectrumX, initSpectrumY, reference_point = 0, fitOrder=5, showGraph=False):
 	"""
 	Calculates the phase of complex dataset then unwrap by changing deltas between 
 	values to 2*pi complement. At the end, fit a polynomial curve to determine
@@ -572,7 +583,7 @@ def args_comp(initSpectrumX, initSpectrumY, reference_point = 2.5, fitOrder=5, s
 	dispersion_std: array-like
 	[GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
 
-	fit_report: lmfit report object
+	fit_report: lmfit report
 
 	"""
 	Xdata = initSpectrumX-reference_point
@@ -626,16 +637,3 @@ def args_comp(initSpectrumX, initSpectrumY, reference_point = 2.5, fitOrder=5, s
 	except Exception as e:
 		return [0,0,0,0,0],[0,0,0,0,0],e
 
-
-
-""" #Teszt
-a, b = np.loadtxt('ff.txt', unpack = True, delimiter = ',')
-aa, bb = ifft_method(a, b, interpolate = True)
-bbb = cut_gaussian(aa, bb, 740, 100, 6) 
-bbbb = fft_method(bbb)
-angles = np.angle(bbbb)
-angles = (angles + 2 * np.pi) % (2 * np.pi)
-c = np.unwrap(angles)
-plt.plot(aa, c, 'ro')
-plt.show()
-"""

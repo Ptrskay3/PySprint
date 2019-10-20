@@ -79,7 +79,7 @@ class TestEvaluate(unittest.TestCase):
 	    scipy.random.seed(1534)
 	    x = scipy.randn(10) + 1j * scipy.randn(10)
 	    fr, yf = evaluate.ifft_method(x, x, interpolate = False)
-	    y = evaluate.fft_method(yf)
+	    _, y = evaluate.fft_method(yf, yf)
 	    np.testing.assert_allclose(y, x)
 
 	def test_windowing(self):
