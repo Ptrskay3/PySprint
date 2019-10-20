@@ -335,7 +335,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 try:
                     self.a, self.b  = cut_data(self.a, self.b ,[], [], startValue = float(self.sliceStart.text()),
                      endValue = float(self.sliceStop.text()))
-                except:
+                except Exception:
                     self.msg_output('Invalid values encountered..')
             self.redraw_graph()
 
@@ -433,7 +433,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     self.MplWidget.canvas.axes.set_ylabel("Intensity")
                     # self.MplWidget.canvas.axes.set_xlabel("Angular frequency")
                     self.MplWidget.canvas.draw()
-                except:
+                except Exception:
                     self.msg_output('Polynomial order must be less than window.')
 
         if self.editTab.currentIndex() == 2:
@@ -492,7 +492,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     self.MplWidget.canvas.axes.set_ylabel("Intensity")
                     # self.MplWidget.canvas.axes.set_xlabel("Angular frequency")
                     self.MplWidget.canvas.draw()
-                except:
+                except Exception:
                     self.msg_output('Invalid values encountered..')
 
     def redraw_graph(self):
@@ -539,7 +539,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         try:
             if referenceName:
                 self.refX, self.refY= np.loadtxt(referenceName, usecols=(0,1), unpack = True, delimiter =',')
-        except:
+        except Exception:
             self.msg_output('Failed')
     
     @pyqtSlot(float)   
@@ -551,7 +551,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             if sampleName:
                 self.samX, self.samY= np.loadtxt(sampleName, usecols=(0,1), unpack = True, delimiter = ',')
           
-        except:
+        except Exception:
             self.msg_output('Failed')
 
 
@@ -685,7 +685,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             with open(name[0], 'w') as f:
                 text = self.logOutput.toPlainText()
                 f.write(text)
-        except:
+        except Exception:
             pass
 
     def save_curr_data(self):
@@ -700,7 +700,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     np.savetxt(name[0], np.transpose([self.a, self.b]), delimiter = ',')
                 else:
                     self.msg_output('Something went wrong.')
-        except:
+        except Exception:
             pass
 
     @waiting_effects
@@ -797,35 +797,35 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         		             max_tries = float(self.settings.value('cff_maxfev')))
             try:
                 self.CFF_c1.setText(str(params[0]))
-            except:
+            except Exception:
                 pass
             try:
                 self.CFF_c2.setText(str(params[1]))
-            except:
+            except Exception:
                 pass
             try:
                 self.CFF_b0.setText(str(params[2]))
-            except:
+            except Exception:
                 pass           
             try:
                 self.initGD.setText(str(params[3]))
-            except:
+            except Exception:
                 pass
             try:
                 self.initGDD.setText(str(params[4]/2))
-            except:
+            except Exception:
                 self.initGDD.setText('0')
             try:
                 self.initTOD.setText(str(params[5]/6))
-            except:
+            except Exception:
                 self.initTOD.setText('0')
             try:
                 self.initFOD.setText(str(params[6]/24))
-            except:
+            except Exception:
                 self.initFOD.setText('0')
             try:
                 self.initQOD.setText(str(params[7]/120))
-            except:
+            except Exception:
                 self.initQOD.setText('0')
 
         except Exception as e:
@@ -931,7 +931,7 @@ class GeneratorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
                     GD = float(self.GDLine.text()), GDD = float(self.GDDLine.text()), TOD = float(self.TODLine.text()), FOD = float(self.FODLine.text()), 
                     QOD = float(self.QODLine.text()), resolution = float(self.resolutionLine.text()), delimiter = self.delimiterLine.text(), pulseWidth = float(self.pulseLine.text()), 
                     includeArms = self.armCheck.isChecked(), chirp = float(self.gen_chirp.text()))
-            except:
+            except Exception:
                 self.pushButton_4.setStyleSheet(" background-color: rgb(240,0,0); color: rgb(255,255,255);")
 
         if self.comboBox.currentText() == 'Wavelength':
@@ -942,7 +942,7 @@ class GeneratorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
                     GD = float(self.GDLine.text()), GDD = float(self.GDDLine.text()), TOD = float(self.TODLine.text()), FOD = float(self.FODLine.text()), 
                     QOD = float(self.QODLine.text()), resolution = float(self.resolutionLine.text()), delimiter = self.delimiterLine.text(), pulseWidth = float(self.pulseLine.text()), 
                     includeArms = self.armCheck.isChecked(), chirp = float(self.gen_chirp.text()))
-            except:
+            except Exception:
                 self.pushButton_4.setStyleSheet(" background-color: rgb(240,0,0); color: rgb(255,255,255);")
         
         self.preview_data()
@@ -962,7 +962,7 @@ class GeneratorWindow(QtWidgets.QMainWindow, Ui_GeneratorWindow):
                     # pd.to_csv(name[0], columns = [self.xAxisData ,self.yAxisData, self.refData, self.samData])
                 else:
                    np.savetxt(name[0], np.column_stack((self.xAxisData, self.yAxisData)), delimiter = str(self.delimiterLine.text()))
-        except:
+        except Exception:
             pass
 
 #FIXME: The data storage should be rewritten with dictionaries and classes.
@@ -1112,19 +1112,19 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         self.pushButton_2.setText('Clickable SPP')
         try:
             self.SPP1.setText(str(self.xpoints[curr][0]))
-        except:
+        except Exception:
             pass
         try:
             self.SPP2.setText(str(self.xpoints[curr][1]))
-        except:
+        except Exception:
             pass
         try:
             self.SPP3.setText(str(self.xpoints[curr][2]))
-        except:
+        except Exception:
             pass
         try:
             self.SPP4.setText(str(self.xpoints[curr][3]))
-        except:
+        except Exception:
             pass
         self.preview_data()
 
@@ -1133,19 +1133,19 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         curr = self.treeWidget.currentIndex().row()
         try:
             self.SPP1.setText(str(self.xpoints[curr][0]))
-        except:
+        except Exception:
             self.SPP1.setText(str(None))
         try:
             self.SPP2.setText(str(self.xpoints[curr][1]))
-        except:
+        except Exception:
             self.SPP2.setText(str(None))
         try:
             self.SPP3.setText(str(self.xpoints[curr][2]))
-        except:
+        except Exception:
             self.SPP3.setText(str(None))
         try:
             self.SPP4.setText(str(self.xpoints[curr][3]))
-        except:
+        except Exception:
             self.SPP4.setText(str(None))
 
     def edit_SPP(self):
@@ -1155,25 +1155,25 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
             xval1, yval1 = find_closest(float(self.SPP1.text()), self.xData[curr], self.yData[curr])
             self.xtemporal.append(xval1)
             self.ytemporal.append(yval1)
-        except:
+        except Exception:
             pass
         try:
             xval2, yval2 = find_closest(float(self.SPP2.text()), self.xData[curr], self.yData[curr])
             self.xtemporal.append(xval2)
             self.ytemporal.append(yval2)
-        except:
+        except Exception:
             pass
         try:
             xval3, yval3 = find_closest(float(self.SPP3.text()), self.xData[curr], self.yData[curr])
             self.xtemporal.append(xval3)
             self.ytemporal.append(yval3)
-        except:
+        except Exception:
             pass
         try:
             xval4, yval4 = find_closest(float(self.SPP4.text()), self.xData[curr], self.yData[curr])
             self.xtemporal.append(xval4)
             self.ytemporal.append(yval4)
-        except:
+        except Exception:
             pass
 
         while len(self.xtemporal)< 4:
@@ -1208,7 +1208,7 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
                             else:
                                 colors = ['blue','orange','green','purple']
                                 self.widget.canvas.axes.scatter(self.xpoints[curr], self.ypoints[curr], color = colors, s = 80, zorder = 99)
-                        except:
+                        except Exception:
                             pass
                         self.widget.canvas.axes.grid()
                         self.widget.canvas.draw()
@@ -1230,15 +1230,15 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
                         else:
                             colors = ['blue','orange','green','purple']
                             self.widget.canvas.axes.scatter(self.xpoints[curr], self.ypoints[curr], color = colors, s = 80, zorder = 99)
-                    except:
+                    except Exception:
                         pass
                     self.widget.canvas.axes.grid()
                     self.widget.canvas.draw()
                 try:
                     self.delayLine.setText(str(self.delays[curr]))
-                except:
+                except Exception:
                     print('not assigned')
-            except:
+            except Exception:
                 pass
 
     def load_up(self):
@@ -1268,7 +1268,7 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
             self.xpoints[curr] = 0
             self.ypoints[curr] = 0
             self.treeWidget.currentItem().setHidden(True)
-        except:
+        except Exception:
             pass
 
     def clean_up(self):
@@ -1293,12 +1293,12 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         elif curr == 0:
             try:
                 self.delays[0]= float(self.delayLine.text())
-            except:
+            except Exception:
                 pass
         else:
             try:
                 self.delays[curr] = float(self.delayLine.text())
-            except:
+            except Exception:
                 pass
 
 
