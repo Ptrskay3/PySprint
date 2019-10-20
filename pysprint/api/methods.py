@@ -292,6 +292,32 @@ class CosFitMethod(Dataset):
 	def __str__(self):
 		return '''CosFitMethod({},{},{},{})'''.format(self.x, self.y, self.ref, self.sam)
 
+	def guess_GD(self, value):
+		self.params[3] = value
+
+	def guess_GDD(self, value):
+		self.params[4] = value/2
+
+	def guess_TOD(self, value):
+		self.params[5] = value/6
+
+	def guess_FOD(self, value):
+		self.params[6] = value/24
+
+	def guess_QOD(self, value):
+		self.params[7] = value/120
+
+	def set_max_order(self, order):
+		if order > 5 or order < 1:
+			print('order should be an in integer from [1,5], currently {} is given'.format(order))
+		try:
+			int(order)
+		except ValueError:
+			print('order should be an in integer from [1,5], currently {} is given'.format(order))
+		order = 6 - order
+		for i in range(1, order):
+			self.params[-i] = 0
+
 	@print_disp
 	def calculate(self, reference_point):
 		dispersion, self.fit = cff_method(self.x, self.y, self.ref, self.sam, 
@@ -299,7 +325,7 @@ class CosFitMethod(Dataset):
 		dispersion = list(dispersion)
 		while len(dispersion)<5:
 			dispersion.append(0)
-		return dispersion, [0,0,0,0,0], ''
+		return dispersion, [0,0,0,0,0], 'Fit report for CFF not supported yet.'
 
 	def plot_result(self):
 		if self.fit is not None:
@@ -410,4 +436,3 @@ class FFTMethod(Dataset):
 	def calculate(self, reference_point, fit_order, show_graph=False):
 		dispersion, dispersion_std, fit_report = args_comp(self.x, self.y, reference_point = reference_point, fitOrder = fit_order, showGraph = show_graph)
 		return dispersion, dispersion_std, fit_report
-
