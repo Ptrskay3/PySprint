@@ -33,7 +33,7 @@ script:
   # - python test_evaluate.py
   # - python test_generator.py
   # - python test_evaluate_nolmfit.py
-  - coverage run -m unittest --source=.
+  - coverage run -m unittest
   # - coverage run -a test_edit.py
   # - coverage run -a test_evaluate.py
   # - coverage run -a test_generator.py
