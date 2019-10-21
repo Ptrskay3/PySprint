@@ -298,7 +298,7 @@ class Ui_GeneratorWindow(object):
 
     def retranslateUi(self, GeneratorWindow):
         _translate = QtCore.QCoreApplication.translate
-        GeneratorWindow.setWindowTitle(_translate("GeneratorWindow", "MainWindow"))
+        GeneratorWindow.setWindowTitle(_translate("GeneratorWindow", "Generator"))
         self.groupBox.setTitle(_translate("GeneratorWindow", "Generator"))
         self.label.setText(_translate("GeneratorWindow", "Start"))
         self.label_2.setText(_translate("GeneratorWindow", "Stop "))

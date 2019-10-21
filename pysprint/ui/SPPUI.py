@@ -198,7 +198,7 @@ class Ui_SPP(object):
 
     def retranslateUi(self, SPP):
         _translate = QtCore.QCoreApplication.translate
-        SPP.setWindowTitle(_translate("SPP", "MainWindow"))
+        SPP.setWindowTitle(_translate("SPP", "SPP Panel"))
         self.GDSPP.setPlaceholderText(_translate("SPP", "GD "))
         self.GDDSPP.setPlaceholderText(_translate("SPP", "GDD"))
         self.TODSPP.setPlaceholderText(_translate("SPP", "TOD"))
