@@ -14,11 +14,12 @@ CURRENT RELEASE:
 [![PyPI version](https://badge.fury.io/py/pysprint.svg)](https://badge.fury.io/py/pysprint)
 
 **Under construction.**
+
 PySprint is a UI and API for interferogram evaluation. 
 The GUI works only with 1920x1080 or bigger screen resolution. Lower resolution compatibility is queued on the To-Do List.
 
 
-### 0.0.24 release notes and bugfixes
+### 0.0.25 release notes and bugfixes
   - SPP Method's collected data now correctly broadcasted to evaluating function
   - SPP Method now has a reference point arg (also on API)
   - SPP Method's and Generator's GUI is a little bit prettier

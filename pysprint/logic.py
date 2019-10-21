@@ -141,12 +141,12 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     def open_generator(self):
         """ Opens up generator window"""
         self.window2 = GeneratorWindow(self)
-        self.window2.show()
+        self.window2.showMaximized()
 
     def open_sppanel(self):
         """ Opens up SPP Interface"""
         self.window3 = SPPWindow(self)
-        self.window3.show()
+        self.window3.showMaximized()
 
     def open_settings(self):
         self.window4 = SettingsWindow(self)
@@ -1284,6 +1284,18 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
         self.ypoints = [[None]]*30
         self.delays = np.array([None]*30)
         self.cid = None
+        self.GDSPP.setText('')
+        self.delayLine.setText('')
+        self.spp_ref.setText('')
+        self.GDDSPP.setText('')
+        self.TODSPP.setText('')
+        self.FODSPP.setText('')
+        self.QODSPP.setText('')
+        self.SPP1.setText('')
+        self.SPP2.setText('')
+        self.SPP3.setText('')
+        self.SPP4.setText('')
+        self.fitOrderLine.setText('')
         self.treeWidget.clear() 
 
     def record_delay(self):
