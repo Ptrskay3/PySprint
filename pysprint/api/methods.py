@@ -296,16 +296,16 @@ class CosFitMethod(Dataset):
 		self.params[3] = value
 
 	def guess_GDD(self, value):
-		self.params[4] = value/2
+		self.params[4] = value
 
 	def guess_TOD(self, value):
-		self.params[5] = value/6
+		self.params[5] = value
 
 	def guess_FOD(self, value):
-		self.params[6] = value/24
+		self.params[6] = value
 
 	def guess_QOD(self, value):
-		self.params[7] = value/120
+		self.params[7] = value
 
 	def set_max_order(self, order):
 		if order > 5 or order < 1:

@@ -475,15 +475,21 @@ def gaussian_window(t, tau, standardDev, order):
 	center of gaussian window
 
 	standardDev: float
-	standard deviation of gaussian window
+	FWHM of given gaussian
+
+	order: float
+	order of gaussian window. Must be even.
 
 	Returns
 	-------
 	arr : array-like
-	6th order gaussian window with params above
+	nth order gaussian window with params above
 
 	"""
-	return np.exp(-(t-tau)**order/(2*standardDev**order))
+	if order % 2 == 1:
+		order += 1
+	std = standardDev/(2*(np.log(2)**(1/order)))
+	return np.exp(-((t-tau)**order)/(std**order))
 
 def cut_gaussian(initSpectrumX, initSpectrumY, spike, sigma, win_order):
 	"""

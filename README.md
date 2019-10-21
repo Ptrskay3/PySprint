@@ -13,7 +13,8 @@ CURRENT RELEASE:
 
 [![PyPI version](https://badge.fury.io/py/pysprint.svg)](https://badge.fury.io/py/pysprint)
 
-PySprint is a UI and API for interferogram evaluation. Under construction.
+**Under construction.**
+PySprint is a UI and API for interferogram evaluation. 
 The GUI works only with 1920x1080 or bigger screen resolution. Lower resolution compatibility is queued on the To-Do List.
 
 
@@ -23,6 +24,7 @@ The GUI works only with 1920x1080 or bigger screen resolution. Lower resolution 
   - SPP Method's and Generator's GUI is a little bit prettier
   - Generator now correctly handles the delay
   - Added linear chirp parameter to Generator
+  - Fixed FWHM and order, now std of gaussian is correctly calculated 
   - API: CosFitMethod now has guess_GD, guess_GDD, etc methods for initial parameters
   - API: CosFitMethod also has a set_max_order method to restrict max order dispersion
   - Added advanced unittests for Fourier Method
