@@ -90,12 +90,13 @@ class TestEvaluate(unittest.TestCase):
 		a,b = g.unpack()
 		f = FFTMethod(a,b)
 		f.ifft(interpolate = False)
-		f.cut(192,30)
+		f.cut(190,50)
+		# f.show()
 		f.fft()
 		dis, _, _ = f.calculate(fit_order = 4, reference_point = 2.5)
-		np.testing.assert_almost_equal(np.abs(dis[1]), 485.8, decimal = 2)
-		np.testing.assert_almost_equal(np.abs(dis[2]), 2937.14, decimal = 2)
-		np.testing.assert_almost_equal(np.abs(dis[3]), 23753.98, decimal = 2)
+		np.testing.assert_almost_equal(np.abs(dis[1]), 502.16, decimal = 2)
+		np.testing.assert_almost_equal(np.abs(dis[2]), 2586.16, decimal = 2)
+		np.testing.assert_almost_equal(np.abs(dis[3]), 23778.70, decimal = 2)
 		np.testing.assert_almost_equal(dis[4], 0, decimal = 2)
 
 
