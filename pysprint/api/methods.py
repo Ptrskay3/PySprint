@@ -116,7 +116,7 @@ class Generator(BaseApp):
 		else:   
 			try:
 				self.plotwidget.plot(self.x, self._y, 'r')
-			except:
+			except Exception:
 				self.plotwidget.plot(self.x, self.y, 'r')
 		self.plotwidget.grid()
 		self.plotwidget.show()
@@ -151,11 +151,11 @@ class Generator(BaseApp):
 		self.fig.canvas.set_window_title('Spectrum and phase')
 		try:
 			self.ax[0].plot(self.x, self._y, 'r')
-		except:
+		except Exception:
 			self.ax[0].plot(self.x, self.y, 'r')
 		try:
 			self.ax[1].plot(self.x, self._phase(self.x))
-		except:
+		except Exception:
 			raise ValueError('''The spectrum is not generated yet.
 			Use self.generate_freq() on frequency domain or self.generate_wave() on wavelength domain.''')
 		self.ax[0].set(xlabel="Frequency/Wavelength", ylabel="Intensity")
@@ -187,25 +187,25 @@ class Dataset(BaseApp):
 			try:
 				self.x = np.array(self.x)
 				self.x.astype(float)
-			except:
+			 except Exception:
 				raise DatasetError('Invalid type of data')
 		if not isinstance(self.y, np.ndarray):
 			try:
 				self.y = np.array(self.y)
 				self.y.astype(float)
-			except:
+			except Exception:
 				raise DatasetError('Invalid type of data')
 		if not isinstance(self.ref, np.ndarray):
 			try:
 				self.ref = np.array(self.ref)
 				self.ref.astype(float)
-			except:
+			except Exception:
 				pass
 		if not isinstance(self.sam, np.ndarray):
 			try:
 				self.sam = np.array(self.sam)
 				self.sam.astype(float)
-			except:
+			except Exception:
 				pass
 		if len(self.ref) == 0:
 			self.y_norm = self.y
@@ -219,7 +219,7 @@ class Dataset(BaseApp):
 		try:
 			string = "{}, {}, {}, {}\n{}, {}, {}, {}".format(self.x[0], self.y[0], self.ref[0], self.sam[0],
 			                                                 self.x[1], self.y[1], self.ref[1], self.sam[1])
-		except:
+		except Exception:
 			string = "{}, {}\n{}, {}".format(self.x[0], self.y[0], self.x[1], self.y[1])
 		return string
 
@@ -259,7 +259,7 @@ class Dataset(BaseApp):
 		else:   
 			try:
 				self.plotwidget.plot(self.x, self.y_norm, 'r')
-			except:
+			 except Exception:
 				self.plotwidget.plot(self.x, self.y, 'r')
 		self.plotwidget.grid()
 		self.plotwidget.show()
@@ -377,7 +377,7 @@ class SPPMethod(Dataset):
 		self.plotwidget.plot(self.om, self.de, 'o')
 		try:
 			self.plotwidget.plot(self.om, self.bf, 'r--', zorder=1)
-		except:
+		except Exception:
 			pass
 		self.plotwidget.show()
 

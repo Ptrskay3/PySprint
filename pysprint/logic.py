@@ -419,7 +419,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                         self.msg_output('Data shapes are different. Operation canceled.')
 
 
-                except:
+                except Exception:
                     self.msg_output('Polynomial order must be less than window..')
             elif len(self.a) == 0:
                 pass
@@ -590,7 +590,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             if fileName:
                 try:
                     self.a, self.b, self.refY, self.samY = read_data(fileName)
-                except:
+                except Exception:
                     self.msg_output('Auto-detect failed, attempting to load again..')  
                     self.a, self.b = np.loadtxt(fileName, usecols=(0,1), unpack = True, delimiter =',')  
             self.fill_table()

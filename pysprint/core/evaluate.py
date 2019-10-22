@@ -623,7 +623,6 @@ def args_comp(initSpectrumX, initSpectrumY, reference_point = 0, fitOrder=5, sho
 	else:
 		raise ValueError('Order is out of range, please select from [1,5]')
 	try:
-		dispersion, dispersion_std = [], []
 		dispersion, dispersion_std = lmfit_disp(result.params.items())
 		dispersion = dispersion[1:]
 		dispersion_std = dispersion_std[1:]

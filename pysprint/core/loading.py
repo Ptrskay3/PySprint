@@ -2,7 +2,6 @@
 This file helps to load in data with auto detection features. Bugs might be encountered, currently working on fix.
 
 '''
-
 import numpy as np
 import pandas as pd
 from difflib import SequenceMatcher
@@ -36,7 +35,7 @@ def get_matches(word, possibilities, n=3, cutoff=0.7):
 def has_header(file, nrows=20):
 	try:
 		df = pd.read_csv(file, header=None, nrows=nrows)
-	except:
+	except Exception:
 		pass
 	df_header = pd.read_csv(file, nrows=nrows)
 	return tuple(df.dtypes) != tuple(df_header.dtypes)
@@ -103,7 +102,7 @@ def read_data(file):
 				if df.iloc[0,item[0][0]] == 'crowded':
 					df = df.drop(df.columns[item[0][0]], axis=1)
 					# print('df')
-			except:
+			except Exception:
 				pass
 		elif item[1] in yAxis:
 			try:
@@ -113,7 +112,7 @@ def read_data(file):
 					df = df.drop(df.columns[item[0][0]], axis=1)
 					# print('f')
 				# print(initSpectrumY[:3])
-			except:
+			except Exception:
 				pass
 		elif item[1] in refAxis:
 			try:
@@ -122,7 +121,7 @@ def read_data(file):
 				if df.iloc[0,item[0][0]] == 'crowded':
 					df = df.drop(df.columns[item[0][0]], axis=1)
 					# print('ddf')
-			except:
+			except Exception:
 				pass
 
 		elif item[1] in samAxis:
@@ -132,7 +131,7 @@ def read_data(file):
 				if df.iloc[0,item[0][0]] == 'crowded':
 					df = df.drop(df.columns[item[0][0]], axis=1)
 					# print('dfdd')
-			except:
+			except Exception:
 				pass
 
 
@@ -140,13 +139,13 @@ def read_data(file):
 		try:
 			initSpectrumX = df.iloc[:,0].values
 			df = df.drop(df.columns[0], axis=1)
-		except:
+		except Exception:
 			pass
 	if len(initSpectrumY) == 0:
 		try:
 			initSpectrumY = df.iloc[:,0].values
 			df = df.drop(df.columns[0], axis=1)
-		except:
+		except Exception:
 			pass
 	if len(ref) == 0:
 		if test:
@@ -154,7 +153,7 @@ def read_data(file):
 				ref = df.iloc[:,0].values
 				df = df.drop(df.columns[0], axis=1)
 				
-			except:
+			except Exception:
 				pass
 		else:
 			pass
@@ -163,17 +162,9 @@ def read_data(file):
 			try:
 				sam = df.iloc[:,0].values
 				df = df.drop(df.columns[0], axis=1)
-			except:
+			except Exception:
 				pass
 		else:
 			pass
 
 	return initSpectrumX, initSpectrumY, ref, sam
-
-
-# x,y,reference,sample = read_data('')
-
-# print(x[:3])
-# print(y[:3])
-# print(reference[:3])
-# print(sample[:3])
