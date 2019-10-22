@@ -28,16 +28,8 @@ install:
 script:
   - cd pysprint/tests
   - python -m unittest
-  # - python test_loading.py
-  # - python test_edit.py
-  # - python test_evaluate.py
-  # - python test_generator.py
-  # - python test_evaluate_nolmfit.py
   - coverage run -m unittest
-  # - coverage run -a test_edit.py
-  # - coverage run -a test_evaluate.py
-  # - coverage run -a test_generator.py
-  # - coverage run -a test_evaluate_nolmfit.py
+
 
 after_success:
   - codecov

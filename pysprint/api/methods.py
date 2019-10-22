@@ -142,7 +142,7 @@ class Generator(BaseApp):
 			lam = np.arange(lamstart, lamend+self.resolution, self.resolution)
 			omega = (2*np.pi*C_LIGHT)/lam 
 			j = omega-self.center
-		return j*self.GD+(self.GDD/2)*j**2+(self.TOD/6)*j**3+(self.FOD/24)*j**4+(self.QOD/120)*j**5
+		return j+self.delay*j+j*self.GD+(self.GDD/2)*j**2+(self.TOD/6)*j**3+(self.FOD/24)*j**4+(self.QOD/120)*j**5
 
 	def phase_graph(self):
 		self._check_norm()
