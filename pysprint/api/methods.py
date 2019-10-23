@@ -187,7 +187,7 @@ class Dataset(BaseApp):
 			try:
 				self.x = np.array(self.x)
 				self.x.astype(float)
-			 except Exception:
+			except Exception:
 				raise DatasetError('Invalid type of data')
 		if not isinstance(self.y, np.ndarray):
 			try:
@@ -259,7 +259,7 @@ class Dataset(BaseApp):
 		else:   
 			try:
 				self.plotwidget.plot(self.x, self.y_norm, 'r')
-			 except Exception:
+			except Exception:
 				self.plotwidget.plot(self.x, self.y, 'r')
 		self.plotwidget.grid()
 		self.plotwidget.show()
