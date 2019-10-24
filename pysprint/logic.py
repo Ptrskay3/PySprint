@@ -645,7 +645,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             try:
                 cFF, _ = cff_method(self.a, self.b ,self.refY, self.samY, float(self.CFF_ref.text()),
                     p0=[float(self.CFF_c1.text()),float(self.CFF_c2.text()),float(self.CFF_b0.text()), float(self.initGD.text()),
-                        float(self.initGDD.text()), float(self.initTOD.text()), float(self.initFOD.text()), float(self.initQOD.text())]) 
+                        float(self.initGDD.text())/2, float(self.initTOD.text())/6, float(self.initFOD.text())/24, float(self.initQOD.text())/120]) 
                 labels = ['GD', 'GDD', 'TOD', 'FOD', 'QOD']
                 calibrate_label = [self.settings.value('GD'), self.settings.value('GDD'), self.settings.value('TOD'), 
                                    self.settings.value('FOD'),self.settings.value('QOD')]
@@ -726,7 +726,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         try:
             disp, curr_fit = cff_method(self.a, self.b ,self.refY, self.samY, float(self.CFF_ref.text()),
                               p0=[float(self.CFF_c1.text()), float(self.CFF_c2.text()), float(self.CFF_b0.text()), float(self.initGD.text()),
-                              float(self.initGDD.text()), float(self.initTOD.text()), float(self.initFOD.text()), float(self.initQOD.text())])
+                              float(self.initGDD.text())/2, float(self.initTOD.text())/6, float(self.initFOD.text())/24, float(self.initQOD.text())/120])
             self.MplWidget.canvas.axes.clear()
             self.redraw_graph()
             self.MplWidget.canvas.axes.plot(self.a, curr_fit, 'r--')
@@ -735,6 +735,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.msg_output(e)
 
 
+#fix: is it ok?
     @waiting_effects
     def cff_fit_optimizer(self):
         self.redraw_graph()

@@ -79,8 +79,8 @@ def print_disp(f):
     @wraps(f)
     def wrapping(*args, **kwargs):
         disp, disp_std, stri = f(*args, **kwargs)
-        labels = ['GD', 'GDD','TOD', 'FOD', 'QOD']
-        for i in range(len(labels)):
-        	print(labels[i] + ' = ' + str(disp[i]) +  ' +/- ' + str(disp_std[i]) + ' fs^{}'.format(i+1))
+        labels = ('GD', 'GDD','TOD', 'FOD', 'QOD')  
+        for i, (label, disp_item, disp_std_item) in enumerate(zip(labels, disp, disp_std)):
+             print(f'{label} = {disp_item} ± {disp_std_item} fs^{i+1}')
         return disp, disp_std, stri
     return wrapping

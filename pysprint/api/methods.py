@@ -288,24 +288,28 @@ class CosFitMethod(Dataset):
 		super().__init__(*args, **kwargs)
 		self.params = [1, 1, 1, 1, 1, 1, 1, 1]
 		self.fit = None
+		self.mt = 8000
 
 	def __str__(self):
 		return '''CosFitMethod({},{},{},{})'''.format(self.x, self.y, self.ref, self.sam)
+
+	def set_max_tries(self, value):
+		self.mt = value
 
 	def guess_GD(self, value):
 		self.params[3] = value
 
 	def guess_GDD(self, value):
-		self.params[4] = value
+		self.params[4] = value/2
 
 	def guess_TOD(self, value):
-		self.params[5] = value
+		self.params[5] = value/6
 
 	def guess_FOD(self, value):
-		self.params[6] = value
+		self.params[6] = value/24
 
 	def guess_QOD(self, value):
-		self.params[7] = value
+		self.params[7] = value/120
 
 	def set_max_order(self, order):
 		if order > 5 or order < 1:
@@ -321,13 +325,20 @@ class CosFitMethod(Dataset):
 	@print_disp
 	def calculate(self, reference_point):
 		dispersion, self.fit = cff_method(self.x, self.y, self.ref, self.sam, 
-			ref_point = reference_point, p0 = self.params)
+			ref_point = reference_point, p0 = self.params, maxtries = self.mt)
 		dispersion = list(dispersion)
 		while len(dispersion)<5:
 			dispersion.append(0)
 		return dispersion, [0,0,0,0,0], 'Fit report for CFF not supported yet.'
 
 	def plot_result(self):
+		try:
+			residuals = self.y_norm - self.fit
+			ss_res = np.sum(residuals**2)
+			ss_tot = np.sum((self.y_norm - np.mean(self.y_norm))**2)
+			print('r^2 = ' + str(1 - (ss_res / ss_tot)))
+		except Exception:
+			pass
 		if self.fit is not None:
 			self.plotwidget.plot(self.x, self.fit, 'k--', label = 'fit', zorder=99)
 			self.plotwidget.legend()

@@ -243,7 +243,7 @@ def cos_fit5(x,c0, c1, b0, b1, b2, b3, b4, b5):
 	return c0 + c1*np.cos(polynomialFit5(x,b0, b1, b2, b3, b4, b5))
 
 
-def spp_method(delays, omegas, reference_point = 0, fitOrder=4, from_raw=False): 
+def spp_method(delays, omegas, reference_point=0, fitOrder=4, from_raw=False): 
 	"""
 	Calculates the dispersion from SPP's positions and delays.
 	
@@ -363,7 +363,7 @@ def spp_method(delays, omegas, reference_point = 0, fitOrder=4, from_raw=False):
 		return [], [], [e], [], []
 
 
-def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_point=0 , p0=[1, 1, 1, 1, 1, 1, 1, 1]):
+def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_point=0 , p0=[1, 1, 1, 1, 1, 1, 1, 1], maxtries=8000):
 	"""
 	Phase modulated cosine function fit method. 
 	
@@ -413,20 +413,13 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_poin
 			p0 = p0[:-1]
 		else:
 			_funct = cos_fit5
-		popt, pcov = curve_fit(_funct, Xdata-ref_point, Ydata, p0, maxfev = 8000)
+		popt, pcov = curve_fit(_funct, Xdata, Ydata, p0, maxfev=maxtries)
 		dispersion = np.zeros_like(popt)[:-3]
 		for num in range(len(popt)-3):
-			dispersion[num] = popt[num+3]/factorial(num)
-		# fig1 = plt.figure()
-		# fig1.canvas.set_window_title('Cosine function fit method')
-		# plt.plot(Xdata, Ydata,'r-',label = 'dataset')
-		# plt.plot(Xdata, cosFitForPMCFF(Xdata, *popt),'k*', label = 'fitted')
-		# plt.legend()
-		# plt.grid()
-		# plt.show()
-		return dispersion, _funct(Xdata-ref_point, *popt)
+			dispersion[num] = popt[num+3]*factorial(num+1)
+		return dispersion, _funct(Xdata, *popt)
 	except RuntimeError:
-		raise ValueError('Max tries reached.. \n Parameters could not be estimated.')
+		raise ValueError('Max tries ({}) reached.. \n Parameters could not be estimated.'.format(maxtries))
 
 
 def fft_method(initSpectrumX ,initSpectrumY, interpolate=False):

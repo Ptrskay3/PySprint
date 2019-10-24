@@ -18,6 +18,12 @@ CURRENT RELEASE:
 PySprint is a UI and API for interferogram evaluation. 
 The GUI works only with 1920x1080 or bigger screen resolution. Lower resolution compatibility is queued on the To-Do List.
 
+### 0.0.26 release notes and bugfixes
+  - Cosine fit method now works correctly, prints coefficient of determination on plot_result call
+  - Also Cosine fit method now has a max try count for curve fitting
+  - Updated docs
+  - Small rework of print_disp decorator function
+
 
 ### 0.0.25 release notes and bugfixes
   - SPP Method's collected data now correctly broadcasted to evaluating function
@@ -30,24 +36,12 @@ The GUI works only with 1920x1080 or bigger screen resolution. Lower resolution 
   - API: CosFitMethod also has a set_max_order method to restrict max order dispersion
   - Added advanced unittests for Fourier Method
 
-### Lastest upgrades: (See release notes)
-  - Added Tools -> Import data window (functionality will be improved)
-  - Now pip installable, see below
-  - Added CI/CD, next is CircleCI
-  - Data editing features unittests done
-  - Added CI along with some unittests
-  - Started API
-  - Numerous little fixes according to PEP8
-  - Added autofit for CFF method, it will be improved later
-  - Eval. methods are improved
-  - Windows remember their last state, they open as they were closed
-  - Added Settings panel for calibration
-  - Added SPP Panel
 
 ### Known issues
-* There mightbe bigger bugs out there, I'm working on a fix.
+* There can be bigger bugs out there, I'm working on a fix.
 * There might be unnecessary imports
 * Some buttons has no effect yet.
+* In the menus some functions are unusually placed.
 
 
 ### To-do list
