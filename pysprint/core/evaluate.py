@@ -413,11 +413,11 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_poin
 			p0 = p0[:-1]
 		else:
 			_funct = cos_fit5
-		popt, pcov = curve_fit(_funct, Xdata, Ydata, p0, maxfev=maxtries)
+		popt, pcov = curve_fit(_funct, Xdata-ref_point, Ydata, p0, maxfev=maxtries)
 		dispersion = np.zeros_like(popt)[:-3]
 		for num in range(len(popt)-3):
 			dispersion[num] = popt[num+3]*factorial(num+1)
-		return dispersion, _funct(Xdata, *popt)
+		return dispersion, _funct(Xdata-ref_point, *popt)
 	except RuntimeError:
 		raise ValueError('Max tries ({}) reached.. \n Parameters could not be estimated.'.format(maxtries))
 
