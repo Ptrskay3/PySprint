@@ -545,7 +545,7 @@ def ifft_method(initSpectrumX, initSpectrumY, interpolate=True):
 	N = len(Xdata)
 	if interpolate:
 	    Xdata, Ydata = fourier_interpolate(Xdata, Ydata)
-	xf = np.fft.fftfreq(N, d=(Xdata[1]-Xdata[0])/(2*np.pi)) * N * Xdata[-1]/(N-1)
+	xf = np.fft.fftfreq(N, d=(Xdata[1]-Xdata[0])/(2*np.pi)) #* N * Xdata[-1]/(N-1)
 	yf = np.fft.ifft(Ydata)
 	return xf, yf
  

@@ -18,28 +18,11 @@ CURRENT RELEASE:
 PySprint is a UI and API for interferogram evaluation. 
 The GUI works only with 1920x1080 or bigger screen resolution. Lower resolution compatibility is queued on the To-Do List.
 
-### 0.0.28 release notes and bugfixes
+### 0.0.29 release notes and bugfixes
   - FFTMethod should work now properly, will be improved
     (temporaly it's disabled in the GUI)
   - Unittests disabled for FFT, will be improved too
-
-### 0.0.27 release notes and bugfixes
-  - Cosine fit method now works correctly, prints coefficient of determination on plot_result call
-  - Also Cosine fit method now has a max try count for curve fitting
-  - Updated docs
-  - Small rework of print_disp decorator function
-
-
-### 0.0.26 release notes and bugfixes
-  - SPP Method's collected data now correctly broadcasted to evaluating function
-  - SPP Method now has a reference point arg (also on API)
-  - SPP Method's and Generator's GUI is a little bit prettier
-  - Generator now correctly handles the delay
-  - Added linear chirp parameter to Generator
-  - Fixed FWHM and order, now std of gaussian is correctly calculated 
-  - API: CosFitMethod now has guess_GD, guess_GDD, etc methods for initial parameters
-  - API: CosFitMethod also has a set_max_order method to restrict max order dispersion
-  - Added advanced unittests for Fourier Method
+  - Generator now works properly
 
 
 ### Known issues

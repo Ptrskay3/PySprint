@@ -1,4 +1,4 @@
-__version__ = '0.0.28'
+__version__ = '0.0.29'
 __author__ = 'Leéh Péter'
 
 from .api import *
