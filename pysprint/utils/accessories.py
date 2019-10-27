@@ -1,10 +1,11 @@
 from functools import wraps
 
 import numpy as np
+from scipy.interpolate import interp1d
 
 
 __all__ = ['scipy_disp', 'lmfit_disp', 'findNearest', 'find_closest',
-           '_handle_input', 'print_disp']
+           '_handle_input', 'print_disp', 'fourier_interpolate']
 
 
 def scipy_disp(r):
@@ -84,3 +85,12 @@ def print_disp(f):
              print(f'{label} = {disp_item} ± {disp_std_item} fs^{i+1}')
         return disp, disp_std, stri
     return wrapping
+
+
+def fourier_interpolate(x, y):
+    ''' Simple linear interpolation for FFTs'''
+    xs = np.linspace(x[0], x[-1], len(x))
+    intp = interp1d(x, y, kind='linear', fill_value = 'extrapolate')
+    ys = intp(xs)
+    return xs, ys
+

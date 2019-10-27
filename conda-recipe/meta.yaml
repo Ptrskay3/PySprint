@@ -1,10 +1,10 @@
 package:
   name: pysprint
-  version: "0.0.26"
+  version: "0.0.28"
 
 source:
-  fn: pysprint-0.0.26.tar.gz
-  url: https://pypi.io/packages/source/p/pysprint/pysprint-0.0.26.tar.gz
+  fn: pysprint-0.0.28.tar.gz
+  url: https://pypi.io/packages/source/p/pysprint/pysprint-0.0.28.tar.gz
   md5: b63f80c9e1a28d576a66ae701df9ced9
 
 requirements:

@@ -400,44 +400,17 @@ class FFTMethod(Dataset):
 		if self._is_normalized:
 			self.y_norm = self.y
 			self._is_normalized = False
-		self.iffttemp = None
-		self.ffttemp = None
+		self.original_x = self.x
 
 	def __str__(self):
 		return '''FFTMethod({},{})'''.format(self.x, self.y)
 
-	def ifft(self, interpolate=False):
-		if self.iffttemp is not None:
-			warnings.warn('Doing another IFFT would mess up the calculations. This call is ignored.')
-			return
-		if self.ffttemp is None:
-			if self.iffttemp is None:
-				self.iffttemp = self.x
-				self.x, self.y = ifft_method(self.x, self.y, interpolate=interpolate)
-			else:
-				warnings.warn('Doing another IFFT would mess up the calculations. This call is ignored.')
-		else:
-			self.x = self.ffttemp
-			_, self.y = ifft_method(self.x, self.y, interpolate=interpolate)
-			self.ffttemp = None
-
+	def ifft(self, interpolate=True):
+		self.x, self.y = ifft_method(self.x, self.y, interpolate=interpolate)
 
 	
-	def fft(self, interpolate = False):
-		if self.ffttemp is not None:
-			warnings.warn('Doing another FFT would mess up the calculations. This call is ignored.')
-			return
-		if self.iffttemp is None:
-			if self.ffttemp is None:
-				self.ffttemp = self.x
-				self.x, self.y = fft_method(self.x, self.y, interpolate=interpolate)
-			else:
-				warnings.warn('Doing another FFT would mess up the calculations. This call is ignored.')
-		else:
-			self.x = self.iffttemp
-			_, self.y = fft_method(self.x, self.y, interpolate=interpolate)
-			self.iffttemp = None
-
+	def fft(self):
+		self.x, self.y = fft_method(self.original_x, self.y)
 
 
 	def cut(self, at, std, window_order = 6):

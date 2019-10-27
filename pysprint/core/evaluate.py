@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import sys
 from math import factorial
 import operator
 
@@ -15,10 +14,9 @@ try:
 except ImportError:
 	_has_lmfit = False
 
-sys.path.append('..')
 
 from pysprint.core.dataedits import interpolate_data
-from pysprint.utils import findNearest, _handle_input, lmfit_disp, scipy_disp
+from pysprint.utils import findNearest, _handle_input, lmfit_disp, scipy_disp, fourier_interpolate
 
 
 __all__ = ['min_max_method', 'cos_fit1', 'cos_fit2', 'cos_fit3',
@@ -422,7 +420,7 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_poin
 		raise ValueError('Max tries ({}) reached.. \n Parameters could not be estimated.'.format(maxtries))
 
 
-def fft_method(initSpectrumX ,initSpectrumY, interpolate=False):
+def fft_method(initSpectrumX ,initSpectrumY):
 	"""Perfoms FFT on data
 
 	Parameters
@@ -450,11 +448,9 @@ def fft_method(initSpectrumX ,initSpectrumY, interpolate=False):
 		Xdata = initSpectrumX
 	else:
 		raise FileNotFoundError
-	if interpolate:
-		Xdata, Ydata = interpolate_data(initSpectrumX, initSpectrumY, [],[])
 	yf = scipy.fftpack.fft(Ydata)
-	freq = scipy.fftpack.fftfreq(len(Xdata), d=(Xdata[3]-Xdata[2]))
-	return freq, yf 
+	xf = np.linspace(Xdata[0], Xdata[-1], len(Xdata))
+	return xf, yf 
 
 
 def gaussian_window(t, tau, standardDev, order):
@@ -516,7 +512,7 @@ def cut_gaussian(initSpectrumX, initSpectrumY, spike, sigma, win_order):
 
 
 
-def ifft_method(initSpectrumX, initSpectrumY, interpolate=False):
+def ifft_method(initSpectrumX, initSpectrumY, interpolate=True):
 	"""
 	Perfoms IFFT on data
 
@@ -545,12 +541,14 @@ def ifft_method(initSpectrumX, initSpectrumY, interpolate=False):
 		Ydata = initSpectrumY
 		Xdata = initSpectrumX
 	else:
-		raise FileNotFoundError
+		raise ValueError
+	N = len(Xdata)
 	if interpolate:
-		Xdata, Ydata = interpolate_data(initSpectrumX, initSpectrumY, [],[])
-	yf = scipy.fftpack.ifft(Ydata)
-	freq = scipy.fftpack.fftfreq(len(Xdata), d=(Xdata[3]-Xdata[2]))
-	return freq, yf 
+	    Xdata, Ydata = fourier_interpolate(Xdata, Ydata)
+	xf = np.fft.fftfreq(N, d=(Xdata[1]-Xdata[0])/(2*np.pi)) * N * Xdata[-1]/(N-1)
+	yf = np.fft.ifft(Ydata)
+	return xf, yf
+ 
 	
 
 

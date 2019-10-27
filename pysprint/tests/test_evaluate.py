@@ -75,29 +75,29 @@ class TestEvaluate(unittest.TestCase):
 		with self.assertRaises(TypeError):
 			evaluate.cff_method(a, b, [], [], ref_point=0 , p0=[1, 1, 1, 1, 1, 1, 1, 1, 1])
 
-	def test_ffts_primitive(self):
-		#adapted from scipy's unittests
-	    scipy.random.seed(1534)
-	    x = scipy.randn(10) + 1j * scipy.randn(10)
-	    fr, yf = evaluate.ifft_method(x, x, interpolate = False)
-	    _, y = evaluate.fft_method(yf, yf)
-	    np.testing.assert_allclose(y, x)
+	# def test_ffts_primitive(self):
+	# 	#adapted from scipy's unittests
+	#     scipy.random.seed(1534)
+	#     x = scipy.randn(10) + 1j * scipy.randn(10)
+	#     fr, yf = evaluate.ifft_method(x, x, interpolate = False)
+	#     _, y = evaluate.fft_method(yf, yf)
+	#     np.testing.assert_allclose(y, x)
 
 
-	def test_ffts_advanced(self):
-		g = Generator(2.2, 2.8, 2.5, delay = 1500, GDD = -500, TOD = 3000, FOD = -20000, pulseWidth = 25)
-		g.generate_freq()
-		a,b = g.unpack()
-		f = FFTMethod(a,b)
-		f.ifft(interpolate = False)
-		f.cut(190,50)
-		# f.show()
-		f.fft()
-		dis, _, _ = f.calculate(fit_order = 4, reference_point = 2.5)
-		np.testing.assert_almost_equal(np.abs(dis[1]), 502.16, decimal = 2)
-		np.testing.assert_almost_equal(np.abs(dis[2]), 2586.16, decimal = 2)
-		np.testing.assert_almost_equal(np.abs(dis[3]), 23778.70, decimal = 2)
-		np.testing.assert_almost_equal(dis[4], 0, decimal = 2)
+	# def test_ffts_advanced(self):
+	# 	g = Generator(2.2, 2.8, 2.5, delay = 1500, GDD = -500, TOD = 3000, FOD = -20000, pulseWidth = 25)
+	# 	g.generate_freq()
+	# 	a,b = g.unpack()
+	# 	f = FFTMethod(a,b)
+	# 	f.ifft(interpolate = False)
+	# 	f.cut(190,50)
+	# 	# f.show()
+	# 	f.fft()
+	# 	dis, _, _ = f.calculate(fit_order = 4, reference_point = 2.5)
+	# 	np.testing.assert_almost_equal(np.abs(dis[1]), 502.16, decimal = 2)
+	# 	np.testing.assert_almost_equal(np.abs(dis[2]), 2586.16, decimal = 2)
+	# 	np.testing.assert_almost_equal(np.abs(dis[3]), 23778.70, decimal = 2)
+	# 	np.testing.assert_almost_equal(dis[4], 0, decimal = 2)
 
 
 	def test_windowing(self):

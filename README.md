@@ -18,6 +18,11 @@ CURRENT RELEASE:
 PySprint is a UI and API for interferogram evaluation. 
 The GUI works only with 1920x1080 or bigger screen resolution. Lower resolution compatibility is queued on the To-Do List.
 
+### 0.0.28 release notes and bugfixes
+  - FFTMethod should work now properly, will be improved
+    (temporaly it's disabled in the GUI)
+  - Unittests disabled for FFT, will be improved too
+
 ### 0.0.27 release notes and bugfixes
   - Cosine fit method now works correctly, prints coefficient of determination on plot_result call
   - Also Cosine fit method now has a max try count for curve fitting
