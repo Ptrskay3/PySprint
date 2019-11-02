@@ -2,10 +2,8 @@
 Sample generator
 """
 import numpy as np 	
-# from datetime import datetime
 
 C_LIGHT = 299.793 #nm/fs
-
 
 def _ensure_input(start, stop, center, resolution, pulseWidth):
 	if start >= stop:
@@ -19,56 +17,50 @@ def _ensure_input(start, stop, center, resolution, pulseWidth):
 	else:
 		pass
 
-
 def _disp(x, GD=0, GDD=0, TOD=0, FOD=0, QOD=0):
 	return x*GD+(GDD/2)*x**2+(TOD/6)*x**3+(FOD/24)*x**4+(QOD/120)*x**5
 
 
-def generatorFreq(start, stop, center, delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1,
-				  delimiter=',',pulseWidth=10, includeArms=False, chirp=0):
+def generatorFreq(
+	start, stop, center, delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0,
+	resolution=0.1,	delimiter=',', pulseWidth=10, includeArms=False,
+	chirp=0):
 	_ensure_input(start, stop, center, resolution, pulseWidth)
 	omega0 = center
 	window = (np.sqrt(1+chirp**2)*8*np.log(2))/(pulseWidth**2)
 	lamend = (2*np.pi*C_LIGHT)/start
 	lamstart = (2*np.pi*C_LIGHT)/stop
-	# stepAmount = (lamend-lamstart+resolution)/resolution
-	# lam = np.linspace(lamstart, lamend+resolution,stepAmount)
 	lam = np.arange(lamstart, lamend+resolution, resolution) 
 	omega = (2*np.pi*C_LIGHT)/lam 
 	relom = omega-omega0
 	i1 = np.exp(-(relom)**2/(window))
 	i2 = np.exp(-(relom)**2/(window))
-	i = i1 + i2 + 2*np.sqrt(i1*i2)*np.cos(_disp(relom, GD=GD, GDD=GDD, TOD=TOD, FOD=FOD, QOD=QOD)+(delay*omega))
+	i = i1 + i2 + 2* np.sqrt(i1 * i2) * np.cos(
+		_disp(relom, GD=GD, GDD= GDD, TOD=TOD, FOD=FOD, QOD=QOD)+(omega*delay)
+		)
 	if includeArms:
 		return omega, i, i1, i2
-		# np.savetxt('examples/simulated_'+str(datetime.now().strftime("%Y_%m_%d_%H_%M_%S"))+'_frequency.txt', np.transpose([omega ,i, i1, i2]), 
-			# header = 'freq, int, ref, sam', delimiter = delimiter, comments ='')
 	else:
-		# np.savetxt('examples/simulated_'+str(datetime.now().strftime("%Y_%m_%d_%H_%M_%S"))+'_frequency.txt', np.transpose([omega ,i,]), 
-			# header = 'freq, int', delimiter = delimiter, comments ='')
 		return omega, i, np.array([]), np.array([])
 
-#TODO: intenzitásarány
-
-def generatorWave(start, stop, center, delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1, 
-				  delimiter=',',pulseWidth=10, includeArms=False, chirp=0):
+def generatorWave(
+	start, stop, center, delay, GD=0, GDD=0, TOD=0, FOD=0, QOD=0,
+	resolution=0.1, delimiter=',', pulseWidth=10, includeArms=False,
+	chirp=0):
 	_ensure_input(start, stop, center, resolution, pulseWidth)
 	omega0 = (2*np.pi*C_LIGHT)/center 
 	window = (np.sqrt(1+chirp**2)*8*np.log(2))/(pulseWidth**2)
-	# stepAmount = (stop-start+resolution)/resolution
-	# lam = np.linspace(start, stop+resolution, stepAmount)
 	lam = np.arange(start, stop+resolution, resolution) 
 	omega = (2*np.pi*C_LIGHT)/lam
 	relom = omega-omega0 
 	i1 = np.exp(-(relom)**2/(window))
 	i2 = np.exp(-(relom)**2/(window))
-	i = i1 + i2 + 2*np.cos(_disp(relom, GD=GD, GDD= GDD, TOD=TOD, FOD=FOD, QOD=QOD)+(omega*delay))*np.sqrt(i1*i2)
+	i = i1 + i2 + 2 * np.sqrt(i1 * i2) * np.cos(
+		_disp(relom, GD=GD, GDD= GDD, TOD=TOD, FOD=FOD, QOD=QOD)+(omega*delay)
+		)
 	if includeArms:
 		return lam, i, i1, i2
-		# np.savetxt('examples/simulated_'+str(datetime.now().strftime("%Y_%m_%d_%H_%M_%S"))+'_wavelength.txt', np.transpose([lam ,i, i1, i2]), 
-			# header = 'wavelength, int, ref, sam', delimiter = delimiter, comments ='')
 	else:
 		return lam, i, np.array([]), np.array([])
-		# np.savetxt('examples/simulated_'+str(datetime.now().strftime("%Y_%m_%d_%H_%M_%S"))+'_wavelength.txt', np.transpose([lam ,i]), 
-			# header = 'wavelength, int', delimiter = delimiter, comments ='')
+
 

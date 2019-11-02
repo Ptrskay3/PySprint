@@ -1,17 +1,19 @@
 """
 Methods for manipulating the loaded data
-
 """
-import numpy as np 
-import sys
-sys.path.append('..')
-from scipy.signal import find_peaks, savgol_filter, gaussian, convolve #, find_peaks_cwt
+import numpy as np
+from scipy.signal import find_peaks, savgol_filter, gaussian, convolve
 from scipy.interpolate import interp1d
 from pysprint.utils import findNearest, _handle_input
 
 
-def savgol(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, window=101, order=3):
-	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
+def savgol(
+	initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, window=101,
+	order=3):
+
+	Xdata, Ydata = _handle_input(
+		initSpectrumX, initSpectrumY, referenceArmY, sampleArmY
+		)
 	xint, yint = interpolate_data(Xdata, Ydata, [], [])
 	if window > order:
 		try:
@@ -54,16 +56,16 @@ def savgol(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, window=101, 
 
 # 	return Xdata[max_idx], Ydata[max_idx], Xdata[min_idx], Ydata[min_idx]
 
-def find_peak(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax=1, proMin=1, threshold=0.1):   
-	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
+def find_peak(
+	initSpectrumX, initSpectrumY, referenceArmY, sampleArmY,
+	proMax=1, proMin=1, threshold=0.1):   
 
+	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
 	maxIndexes, _ = find_peaks(Ydata, prominence = proMax) 
 	Ydata_rec = 1/Ydata
 	minIndexes, _ = find_peaks(Ydata_rec, prominence = proMin)
-
 	min_idx = []
 	max_idx = []
-
 	for idx in maxIndexes:
 		if np.abs(Ydata[idx]) > threshold:
 			max_idx.append(idx)
@@ -71,32 +73,41 @@ def find_peak(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax=1,
 		if np.abs(Ydata[idx]) > threshold:
 			min_idx.append(idx)
 
-	# min_idx = np.asarray(min_idx)
-	# max_idx = np.asarray(max_idx)
-
 	if len(Xdata[max_idx]) != len(Ydata[max_idx]) or len(Xdata[min_idx]) != len(Ydata[min_idx]):
 		raise ValueError('Something went wrong, try to cut the edges of data.')
 
 	return Xdata[max_idx], Ydata[max_idx], Xdata[min_idx], Ydata[min_idx]
 
 
-def convolution(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, standev=200):
-	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
+def convolution(
+	initSpectrumX, initSpectrumY, referenceArmY, sampleArmY,
+	standev=200):
+
+	Xdata, Ydata = _handle_input(
+		initSpectrumX, initSpectrumY, referenceArmY, sampleArmY
+		)
 	xint, yint = interpolate_data(Xdata, Ydata, [], [])
 	window = gaussian(len(xint), std=standev)
 	smoothed = convolve(yint, window/window.sum(), mode='same')
 	return xint, smoothed
 
 def interpolate_data(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY):
-	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
+	Xdata, Ydata = _handle_input(
+		initSpectrumX, initSpectrumY, referenceArmY, sampleArmY
+		)
 	xint = np.linspace(Xdata[0], Xdata[-1], len(Xdata))
 	intp = interp1d(Xdata,Ydata, kind='linear')
 	yint = intp(xint)
 	return xint, yint
 
 
-def cut_data(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, startValue=-9999, endValue=9999):
-	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
+def cut_data(
+	initSpectrumX, initSpectrumY, referenceArmY, sampleArmY,
+	startValue=-9999, endValue=9999):
+
+	Xdata, Ydata = _handle_input(
+		initSpectrumX, initSpectrumY, referenceArmY, sampleArmY
+		)
 	if startValue < endValue:
 		lowItem, lowIndex = findNearest(Xdata, startValue)
 		highItem, highIndex = findNearest(Xdata, endValue)

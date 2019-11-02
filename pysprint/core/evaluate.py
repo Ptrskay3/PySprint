@@ -16,15 +16,21 @@ except ImportError:
 
 
 from pysprint.core.dataedits import interpolate_data
-from pysprint.utils import findNearest, _handle_input, lmfit_disp, scipy_disp, fourier_interpolate
+from pysprint.utils import (
+	findNearest, _handle_input, lmfit_disp, scipy_disp, fourier_interpolate
+	)
 
 
-__all__ = ['min_max_method', 'cos_fit1', 'cos_fit2', 'cos_fit3',
-		   'cos_fit4', 'cos_fit5', 'spp_method', 'cff_method', 'fft_method', 'cut_gaussian',
-		   'ifft_method', 'args_comp']
+__all__ = [
+	'min_max_method', 'cos_fit1', 'cos_fit2', 'cos_fit3',
+	'cos_fit4', 'cos_fit5', 'spp_method', 'cff_method', 'fft_method',
+	'cut_gaussian', 'ifft_method', 'args_comp'
+	]
 
 
-def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_point, maxx=None, minx=None, fitOrder=5, showGraph=False):
+def min_max_method(
+	initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_point,
+	maxx=None, minx=None, fitOrder=5, showGraph=False):
 	"""
 	Calculates the dispersion with minimum-maximum method 
 
@@ -64,7 +70,9 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 	fit_report: lmfit report object
 	
 	"""
-	Xdata, Ydata  = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
+	Xdata, Ydata  = _handle_input(
+		initSpectrumX, initSpectrumY, referenceArmY, sampleArmY
+		)
 	if maxx is None:
 		maxInd = argrelextrema(Ydata, np.greater)
 		maxx = Xdata[maxInd]
@@ -90,7 +98,10 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 		negValues[freq] = np.pi*(freq+1)
 	x_s = np.append(relPosFreqs, relNegFreqs) 
 	y_s = np.append(posValues, negValues)
-	#making sure the data in right order
+	# making sure the data in right order
+	# could be:
+	# idx = np.argsort(x)
+	# fullXValues, fullYValues = x_s[idx], y_s[idx]
 	#FIXME: Do we even need this?
 	L = sorted(zip(x_s,y_s), key=operator.itemgetter(0))
 	fullXValues, fullYValues = zip(*L)
@@ -99,7 +110,7 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 		if fitOrder == 5:
 			fitModel = Model(polynomialFit5)
 			params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1, b4 = 1, b5 = 1)
-			result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') #nelder
+			result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq')
 		elif fitOrder == 4:
 			fitModel = Model(polynomialFit4)
 			params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1, b4 = 1)
@@ -107,15 +118,15 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 		elif fitOrder == 3:
 			fitModel = Model(polynomialFit3)
 			params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1)
-			result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') 
+			result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq')
 		elif fitOrder == 2:
 			fitModel = Model(polynomialFit2)
 			params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1)
-			result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') 
+			result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq')
 		elif fitOrder == 1:
 			fitModel = Model(polynomialFit1)
 			params = fitModel.make_params(b0 = 0, b1 = 1)
-			result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq') 
+			result = fitModel.fit(fullYValues, x=fullXValues, params = params, method ='leastsq')
 		else:
 			raise ValueError('Order is out of range, please select from [1,5]')
 	else:
@@ -173,10 +184,6 @@ def min_max_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_
 		return dispersion, dispersion_std, fit_report
 	except Exception as e:
 		return [0,0,0,0,0],[0,0,0,0,0],e	
-
-
-
-
 
 
 def polynomialFit5(x, b0, b1, b2, b3, b4, b5):
@@ -241,7 +248,7 @@ def cos_fit5(x,c0, c1, b0, b1, b2, b3, b4, b5):
 	return c0 + c1*np.cos(polynomialFit5(x,b0, b1, b2, b3, b4, b5))
 
 
-def spp_method(delays, omegas, reference_point=0, fitOrder=4, from_raw=False): 
+def spp_method(delays, omegas, reference_point=0, fitOrder=4, from_raw=False):
 	"""
 	Calculates the dispersion from SPP's positions and delays.
 	
@@ -293,6 +300,7 @@ def spp_method(delays, omegas, reference_point=0, fitOrder=4, from_raw=False):
 			item = [x for x in element if x is not None]
 			omegas_unpacked.extend(item)
 			delays_unpacked.extend(len(item) * [delay])
+	# FIXME: should be numpy arrays..
 	L = sorted(zip(omegas_unpacked, delays_unpacked), key=operator.itemgetter(0))
 	omegas_unpacked, delays_unpacked = zip(*L)
 	omegas_unpacked = [val-reference_point for val in omegas_unpacked]
@@ -301,24 +309,24 @@ def spp_method(delays, omegas, reference_point=0, fitOrder=4, from_raw=False):
 			if fitOrder == 2:
 				fitModel = Model(polynomialFit2)
 				params = fitModel.make_params(b0 = 1, b1 = 1, b2 = 1)
-				result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
+				result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq')
 			elif fitOrder == 3:
 				fitModel = Model(polynomialFit3)
 				params = fitModel.make_params(b0 = 1, b1 = 1, b2 = 1, b3 = 3)
-				result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
+				result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq')
 			elif fitOrder == 4:
 				fitModel = Model(polynomialFit4)
 				params = fitModel.make_params(b0 = 1, b1 = 1, b2 = 1, b3=1, b4 =1)
-				result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
+				result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq')
 			elif fitOrder == 1:
 				fitModel = Model(polynomialFit1)
 				params = fitModel.make_params(b0 = 1, b1 = 1)
-				result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq') #nelder
+				result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params = params, method ='leastsq')
 			else:
 				raise ValueError('Order is out of range, please select from [1,4]')
 			dispersion, dispersion_std = lmfit_disp(result.params.items())
 			for idx in range(len(dispersion)):
-				dispersion[idx] =  dispersion[idx]*factorial(idx) #biztos?
+				dispersion[idx] =  dispersion[idx]*factorial(idx)
 			for idx in range(len(dispersion_std)):
 				if dispersion_std[idx] != None:
 					dispersion_std[idx] =  dispersion_std[idx] * factorial(idx)
@@ -328,7 +336,7 @@ def spp_method(delays, omegas, reference_point=0, fitOrder=4, from_raw=False):
 				dispersion.append(0)
 				dispersion_std.append(0)
 			while len(dispersion_std)<5:
-				dispersion_std.append(0) 
+				dispersion_std.append(0)
 			bf = result.best_fit
 		else:
 			if fitOrder == 4:
@@ -345,7 +353,6 @@ def spp_method(delays, omegas, reference_point=0, fitOrder=4, from_raw=False):
 				_function = polynomialFit1
 			else:
 				raise ValueError('Order is out of range, please select from [1,4]')
-			#FIXME: biztos?
 			omegas_unpacked = np.asarray(omegas_unpacked)
 			dispersion=[]
 			dispersion_std=[]
@@ -361,7 +368,9 @@ def spp_method(delays, omegas, reference_point=0, fitOrder=4, from_raw=False):
 		return [], [], [e], [], []
 
 
-def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_point=0 , p0=[1, 1, 1, 1, 1, 1, 1, 1], maxtries=8000):
+def cff_method(
+	initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_point=0,
+	p0=[1, 1, 1, 1, 1, 1, 1, 1], maxtries=8000):
 	"""
 	Phase modulated cosine function fit method. 
 	
@@ -394,7 +403,9 @@ def cff_method(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, ref_poin
 	# TODO: BOUNDS WILL BE SET  ..
 	# bounds=((-1000, -10000, -10000, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf), 
 		    # (1000, 10000, 10000, np.inf, np.inf, np.inf, np.inf, np.inf))
-	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
+	Xdata, Ydata = _handle_input(
+		initSpectrumX, initSpectrumY, referenceArmY, sampleArmY
+		)
 	#TODO: replace with lmfit
 	try:
 		if len(np.trim_zeros(p0, 'b')) + 4 == len(p0):
@@ -431,13 +442,10 @@ def fft_method(initSpectrumX ,initSpectrumY):
 
 	initSpectrumY: array-like
 	the y-axis data
-
-	interpolate: bool
-	if True perform a linear interpolation on dataset before transforming
 	
 	Returns
 	-------
-	freq: array-like
+	xf: array-like
 	the transformed x data
 
 	yf: array-like
@@ -467,7 +475,7 @@ def gaussian_window(t, tau, standardDev, order):
 	FWHM of given gaussian
 
 	order: float
-	order of gaussian window. Must be even.
+	order of gaussian window. If not even it's incremented by 1.
 
 	Returns
 	-------
@@ -496,18 +504,15 @@ def cut_gaussian(initSpectrumX, initSpectrumY, spike, sigma, win_order):
 	center of gaussian window
 
 	sigma: float
-	standard deviation of gaussian window
+	Full width at half max
 
 	Returns
 	-------
 
 	Ydata: array-like
 	the windowed y values 
-	
 	"""
-
 	Ydata = initSpectrumY * gaussian_window(initSpectrumX, tau = spike, standardDev = sigma, order = win_order) 
-	# Ydata = initSpectrumY * scipy.signal.windows.gaussian(len(initSpectrumY), std=sigma)
 	return Ydata
 
 
@@ -530,7 +535,7 @@ def ifft_method(initSpectrumX, initSpectrumY, interpolate=True):
 	
 	Returns
 	-------
-	freq: array-like
+	xf: array-like
 	the transformed x data
 
 	yf: array-like
@@ -548,12 +553,11 @@ def ifft_method(initSpectrumX, initSpectrumY, interpolate=True):
 	xf = np.fft.fftfreq(N, d=(Xdata[1]-Xdata[0])/(2*np.pi)) #* N * Xdata[-1]/(N-1)
 	yf = np.fft.ifft(Ydata)
 	return xf, yf
- 
-	
 
 
-
-def args_comp(initSpectrumX, initSpectrumY, reference_point = 0, fitOrder=5, showGraph=False):
+def args_comp(
+	initSpectrumX, initSpectrumY, reference_point=0, fitOrder=5,
+	showGraph=False):
 	"""
 	Calculates the phase of complex dataset then unwrap by changing deltas between 
 	values to 2*pi complement. At the end, fit a polynomial curve to determine
@@ -571,7 +575,7 @@ def args_comp(initSpectrumX, initSpectrumY, reference_point = 0, fitOrder=5, sho
 	fitOrder: int
 	degree of polynomial to fit data [1, 5]
 
-	showGrap: bool
+	showGraph: bool
 	if True returns a matplotlib plot and pauses execution until closing the window
 	
 	Returns
@@ -584,33 +588,32 @@ def args_comp(initSpectrumX, initSpectrumY, reference_point = 0, fitOrder=5, sho
 	[GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
 
 	fit_report: lmfit report
-
 	"""
 	Xdata = initSpectrumX-reference_point
 	angles = np.angle(initSpectrumY)
-	###shifting to [0, 2pi] if necessary
+	### shifting to [0, 2pi] if necessary
 	# angles = (angles + 2 * np.pi) % (2 * np.pi)
 	Ydata = np.unwrap(angles, axis = 0)
 	if fitOrder == 5:
 		fitModel = Model(polynomialFit5)
 		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1, b4 = 1, b5 = 1)
-		result = fitModel.fit(Ydata, x=Xdata, params = params, method ='leastsq') 
+		result = fitModel.fit(Ydata, x=Xdata, params = params, method ='leastsq')
 	elif fitOrder == 4:
 		fitModel = Model(polynomialFit4)
 		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1, b4 = 1)
-		result = fitModel.fit(Ydata, x=Xdata, params = params, method ='leastsq') 
+		result = fitModel.fit(Ydata, x=Xdata, params = params, method ='leastsq')
 	elif fitOrder == 3:
 		fitModel = Model(polynomialFit3)
 		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1, b3 = 1)
-		result = fitModel.fit(Ydata, x=Xdata, params = params, method ='leastsq') 
+		result = fitModel.fit(Ydata, x=Xdata, params = params, method ='leastsq')
 	elif fitOrder == 2:
 		fitModel = Model(polynomialFit2)
 		params = fitModel.make_params(b0 = 0, b1 = 1, b2 = 1)
-		result = fitModel.fit(Ydata, x=Xdata, params = params, method ='leastsq') 
+		result = fitModel.fit(Ydata, x=Xdata, params = params, method ='leastsq')
 	elif fitOrder == 1:
 		fitModel = Model(polynomialFit1)
 		params = fitModel.make_params(b0 = 0, b1 = 1)
-		result = fitModel.fit(Ydata, x=Xdata, params = params, method ='leastsq') 
+		result = fitModel.fit(Ydata, x=Xdata, params = params, method ='leastsq')
 	else:
 		raise ValueError('Order is out of range, please select from [1,5]')
 	try:
@@ -634,5 +637,4 @@ def args_comp(initSpectrumX, initSpectrumY, reference_point = 0, fitOrder=5, sho
 			plt.show()
 		return dispersion, dispersion_std, fit_report
 	except Exception as e:
-		return [0,0,0,0,0],[0,0,0,0,0],e
-
+		return [0,0,0,0,0], [0,0,0,0,0], e

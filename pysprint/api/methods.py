@@ -35,7 +35,7 @@ class BaseApp(object):
 	def __init__(self):
 		pass
 
-	def open_app(self):
+	def run(self):
 		from pysprint.logic import MainProgram
 		try:
 			from PyQt5 import QtWidgets
@@ -95,12 +95,10 @@ class Generator(BaseApp):
 		if len(self.ref) != 0:
 			self._y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 
-
 	def generate_freq(self):
 		self.x, self.y, self.ref, self.sam = generatorFreq(self.start, self.stop, self.center, self.delay, self.GD,
 			self.GDD, self.TOD, self.FOD, self.QOD,
 			self.resolution, self.delimiter, self.pulseWidth, self.normalize, self.chirp)
-		
 
 	def generate_wave(self):
 		self.is_wave = True
@@ -108,7 +106,6 @@ class Generator(BaseApp):
 			self.GDD, self.TOD, self.FOD, self.QOD,
 			self.resolution, self.delimiter, self.pulseWidth, self.normalize, self.chirp)
 
-		
 	def show(self):
 		self._check_norm()
 		if np.iscomplexobj(self.y):
@@ -135,7 +132,6 @@ class Generator(BaseApp):
 			omega = (2*np.pi*C_LIGHT)/lam 
 			omega0 = (2*np.pi*C_LIGHT)/self.center 
 			j = omega-omega0
-
 		else:
 			lamend = (2*np.pi*C_LIGHT)/self.start
 			lamstart = (2*np.pi*C_LIGHT)/self.stop
@@ -249,7 +245,7 @@ class Dataset(BaseApp):
 		warnings.warn('Linear interpolation have been applied to data.', InterpolationWarning)
 
 
-	def detect_peak(self, pmax=1, pmin=1, threshold=0.1):
+	def detect_peak(self, pmax=0.1, pmin=0.1, threshold=0.1):
 		xmax, ymax, xmin, ymin = find_peak(self.x, self.y, self.ref, self.sam, proMax = pmax, proMin = pmin, threshold=threshold)
 		return xmax, ymax, xmin, ymin
 		
@@ -371,11 +367,15 @@ class SPPMethod(Dataset):
 	@print_disp
 	def calculate(self, reference_point, fit_order):
 		if self.raw:
-			_, _, dispersion, dispersion_std, self.bf = spp_method(self.y, self.x, reference_point = reference_point, fitOrder = fit_order, from_raw = True)
+			_, _, dispersion, dispersion_std, self.bf = spp_method(
+				self.y, self.x, reference_point = reference_point, fitOrder = fit_order, from_raw = True
+				)
 			self.om = self.x
 			self.de = self.y
 		else:
-			self.om, self.de, dispersion, dispersion_std, self.bf = spp_method(self.y, self.x, fitOrder = fit_order, from_raw = False)
+			self.om, self.de, dispersion, dispersion_std, self.bf = spp_method(
+				self.y, self.x, fitOrder = fit_order, from_raw = False
+				)
 		dispersion = list(dispersion)
 		dispersion_std = list(dispersion_std)
 		while len(dispersion)<5:
@@ -408,15 +408,15 @@ class FFTMethod(Dataset):
 	def ifft(self, interpolate=True):
 		self.x, self.y = ifft_method(self.x, self.y, interpolate=interpolate)
 
-	
 	def fft(self):
 		self.x, self.y = fft_method(self.original_x, self.y)
-
 
 	def cut(self, at, std, window_order = 6):
 		self.y = cut_gaussian(self.x, self.y, spike = at, sigma = std, win_order = window_order)
 		
 	@print_disp
 	def calculate(self, reference_point, fit_order, show_graph=False):
-		dispersion, dispersion_std, fit_report = args_comp(self.x, self.y, reference_point = reference_point, fitOrder = fit_order, showGraph = show_graph)
+		dispersion, dispersion_std, fit_report = args_comp(
+			self.x, self.y, reference_point=reference_point, fitOrder=fit_order, showGraph=show_graph
+			)
 		return dispersion, dispersion_std, fit_report

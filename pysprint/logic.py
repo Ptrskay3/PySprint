@@ -56,8 +56,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     a = np.array([])
     b = np.array([])
     temp = np.array([])
-    fftContainer = None
-    ifftContainer = None
+    original_x = None
     minx = np.array([])
     maxx = np.array([])
 
@@ -200,42 +199,21 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
 
     def fft_handler(self):
         """ On FFT tab perfoms FFT on currently loaded data"""
-        self.msg_output('Temporal disable on FFT, will be fixed.')
-        # if len(self.a)>0 and len(self.b)>0:
-        #     if self.fftContainer is not None:
-        #         self.msg_output('Doing another FFT would mess up the calculations. This call is ignored.')
-        #         return
-        #     if self.ifftContainer is None:
-        #         if self.fftContainer is None:
-        #             self.fftContainer = self.a
-        #             self.a, self.b = fft_method(self.a ,self.b)
-        #         else:
-        #             self.msg_output('Doing another FFT would mess up the calculations. This call is ignored.')
-        #     else:
-        #         self.a = self.ifftContainer
-        #         _, self.b = fft_method(self.a, self.b)
-        #         self.ifftContainer = None
-        #     self.redraw_graph()
-        # else:
-        #     self.msg_output('No data is loaded.')
+        if len(self.a)>0 and len(self.b)>0:
+            if self.original_x is not None:
+                self.a, self.b = fft_method(self.original_x, self.b)
+                self.redraw_graph()
+        else:
+            self.msg_output('No data is loaded or original x values can not be recovered.\nPlease reload data.')
 
     def ifft_handler(self):
-        """ On FFt tab perfoms IFFT on currently loaded data""" 
-        self.msg_output('Temporal disable on IFFT, will be fixed.')
-        # if len(self.a)>0 and len(self.b)>0:
-        #     if self.ifftContainer is not None:
-        #         self.msg_output('Doing another IFFT would mess up the calculations. This call is ignored.')
-        #         return
-        #     if self.fftContainer is None:
-        #         self.ifftContainer = self.a
-        #         self.a, self.b = ifft_method(self.a ,self.b, interpolate = self.interpolate_cb.isChecked())
-        #     else:
-        #         self.a = self.fftContainer
-        #         _, self.b = ifft_method(self.a, self.b, interpolate = self.interpolate_cb.isChecked())
-        #         self.fftContainer = None
-        #     self.redraw_graph()
-        # else:
-        #     self.msg_output('No data is loaded.')
+        """ On FFT tab perfoms IFFT on currently loaded data""" 
+        if len(self.a)>0 and len(self.b)>0:
+            self.original_x = self.a
+            self.a, self.b = ifft_method(self.a, self.b, interpolate=self.interpolate_cb.isChecked())
+            self.redraw_graph()
+        else:
+            self.msg_output('No data is loaded.')
             
     @waiting_effects
     def swap_axes(self):
@@ -347,8 +325,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.b = []
         self.refY = []
         self.samY = []
-        self.fftContainer = None
-        self.ifftContainer = None
+        self.original_x = None
         self.minx = []
         self.maxx = []
         self.temp = []

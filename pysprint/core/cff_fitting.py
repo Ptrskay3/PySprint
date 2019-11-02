@@ -1,13 +1,10 @@
 """
+
 CURRENTLY POORLY WRITTEN, BUT IT WORKS.. I WILL UPDATE IT SOON.
 """
-import sys
 import numpy as np
 from scipy.optimize import curve_fit
 from pysprint.utils import findNearest as find_nearest
-# from pysprint.logic import MainProgram
-
-sys.path.append('..')
 
 
 class FitOptimizer(object):
@@ -81,7 +78,6 @@ class FitOptimizer(object):
 		self._y_curr = self._y_norm[self._new_lower:self._new_upper]
 
 	def _make_fit(self):
-		""" Makes fit  """
 		try:
 			if len(self._x_curr) == len(self.x):
 				return True
@@ -117,8 +113,9 @@ class FitOptimizer(object):
 			pass
 
 	def run_loop(
-		self, r_extend_by, r_threshold, outfunc, max_tries=10000, show_steps=False
-		):
+		self, r_extend_by, r_threshold, outfunc, max_tries=10000,
+		show_steps=False):
+	
 		if self._init_set is False:
 			raise ValueError('Set the initial conditions.')
 		self._make_fit()
