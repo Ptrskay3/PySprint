@@ -127,7 +127,7 @@ class TestEvaluate(unittest.TestCase):
 		f.cut(1500, 1490, window_order = 8)
 		f.fft()
 		d, _, _ = f.calculate(fit_order = 4, reference_point = 2.4)
-		np.testing.assert_array_almost_equal(d, [-1500.00, -1999.95, 0.21, 99995.00, 0], decimal=2)
+		np.testing.assert_array_almost_equal(d, [-1500.00, -1999.95, 0.21, 99995.00, 0], decimal=1)
 
 	def test_ffts_advanced5(self):
 		g = Generator(2,2.8,2.4, delay = 1500, QOD = 900000, pulseWidth = 25, resolution = 0.01)
@@ -138,7 +138,7 @@ class TestEvaluate(unittest.TestCase):
 		f.cut(1600, 2950, window_order = 12)
 		f.fft()
 		d, _, _ = f.calculate(fit_order = 5, reference_point = 2.4)
-		np.testing.assert_array_almost_equal(d, [-1499.96, 0.14, -7.88, -15.99, -898920.79], decimal=2)
+		np.testing.assert_array_almost_equal(d, [-1499.96, 0.14, -7.88, -15.99, -898920.79], decimal=1)
 
 	def test_windowing(self):
 		a,b = np.loadtxt('test_window.txt', unpack = True, delimiter = ',')
