@@ -18,10 +18,8 @@ CURRENT RELEASE:
 PySprint is a UI and API for interferogram evaluation. 
 The GUI works only with 1920x1080 or bigger screen resolution. Lower resolution compatibility is queued on the To-Do List.
 
-### 0.0.29 release notes and bugfixes
+### 0.0.30 release notes and bugfixes
   - FFTMethod should work now properly, will be improved
-    (temporaly it's disabled in the GUI)
-  - Unittests disabled for FFT, will be improved too
   - Generator now works properly
 
 

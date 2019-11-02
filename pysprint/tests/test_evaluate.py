@@ -75,30 +75,70 @@ class TestEvaluate(unittest.TestCase):
 		with self.assertRaises(TypeError):
 			evaluate.cff_method(a, b, [], [], ref_point=0 , p0=[1, 1, 1, 1, 1, 1, 1, 1, 1])
 
-	# def test_ffts_primitive(self):
-	# 	#adapted from scipy's unittests
-	#     scipy.random.seed(1534)
-	#     x = scipy.randn(10) + 1j * scipy.randn(10)
-	#     fr, yf = evaluate.ifft_method(x, x, interpolate = False)
-	#     _, y = evaluate.fft_method(yf, yf)
-	#     np.testing.assert_allclose(y, x)
+	def test_ffts_primitive(self):
+		#adapted from scipy's unittests
+	    scipy.random.seed(1534)
+	    x = scipy.randn(10) + 1j * scipy.randn(10)
+	    fr, yf = evaluate.ifft_method(x, x, interpolate = False)
+	    _, y = evaluate.fft_method(yf, yf)
+	    np.testing.assert_allclose(y, x)
 
 
-	# def test_ffts_advanced(self):
-	# 	g = Generator(2.2, 2.8, 2.5, delay = 1500, GDD = -500, TOD = 3000, FOD = -20000, pulseWidth = 25)
-	# 	g.generate_freq()
-	# 	a,b = g.unpack()
-	# 	f = FFTMethod(a,b)
-	# 	f.ifft(interpolate = False)
-	# 	f.cut(190,50)
-	# 	# f.show()
-	# 	f.fft()
-	# 	dis, _, _ = f.calculate(fit_order = 4, reference_point = 2.5)
-	# 	np.testing.assert_almost_equal(np.abs(dis[1]), 502.16, decimal = 2)
-	# 	np.testing.assert_almost_equal(np.abs(dis[2]), 2586.16, decimal = 2)
-	# 	np.testing.assert_almost_equal(np.abs(dis[3]), 23778.70, decimal = 2)
-	# 	np.testing.assert_almost_equal(dis[4], 0, decimal = 2)
+	def test_ffts_advanced2(self):
+		g = Generator(2,2.8,2.4, delay=1500, GDD=2000, pulseWidth=25, resolution=0.01)
+		g.generate_freq()
+		a,b = g.unpack()
+		f = FFTMethod(a, b)
+		f.ifft()
+		f.cut(1500, 2920)
+		f.fft()
+		d, _, _ = f.calculate(fit_order = 2, reference_point = 2.4)
+		np.testing.assert_array_almost_equal(d, [-1500.01, -1999.79, 0, 0, 0], decimal=2)
 
+	def test_ffts_advanced1(self):
+		g = Generator(2,2.8,2.4, delay = 1500, GD = 200, pulseWidth = 25, resolution = 0.01)
+		g.generate_freq()
+		a,b = g.unpack()
+		f = FFTMethod(a, b)
+		f.ifft()
+		f.cut(1700, 3300)
+		f.fft()
+		d, _, _ = f.calculate(fit_order = 1, reference_point = 2.4)
+		np.testing.assert_array_almost_equal(d, [-1699.99, 0, 0, 0, 0], decimal=2)
+
+	def test_ffts_advanced3(self):
+		g = Generator(2,2.8,2.4, delay = 1500, TOD = 40000, pulseWidth = 25, resolution = 0.01)
+		g.generate_freq()
+		a,b = g.unpack()
+		f = FFTMethod(a, b)
+		f.ifft()
+		f.cut(2500, 4830, window_order = 12)
+		f.fft()
+		d, _, _ = f.calculate(fit_order = 3, reference_point = 2.4)
+		np.testing.assert_array_almost_equal(d, [-1500.03, -0.03, -39996.60, 0, 0], decimal=2)
+
+
+	def test_ffts_advanced4(self):
+		g = Generator(2,2.8,2.4, delay = 1500, GDD = 2000, FOD = -100000, pulseWidth = 25, resolution = 0.01)
+		g.generate_freq()
+		a,b = g.unpack()
+		f = FFTMethod(a, b)
+		f.ifft()
+		f.cut(1500, 1490, window_order = 8)
+		f.fft()
+		d, _, _ = f.calculate(fit_order = 4, reference_point = 2.4)
+		np.testing.assert_array_almost_equal(d, [-1500.00, -1999.95, 0.21, 99995.00, 0], decimal=2)
+
+	def test_ffts_advanced5(self):
+		g = Generator(2,2.8,2.4, delay = 1500, QOD = 900000, pulseWidth = 25, resolution = 0.01)
+		g.generate_freq()
+		a,b = g.unpack()
+		f = FFTMethod(a, b)
+		f.ifft()
+		f.cut(1600, 2950, window_order = 12)
+		f.fft()
+		d, _, _ = f.calculate(fit_order = 5, reference_point = 2.4)
+		np.testing.assert_array_almost_equal(d, [-1499.96, 0.14, -7.88, -15.99, -898920.79], decimal=2)
 
 	def test_windowing(self):
 		a,b = np.loadtxt('test_window.txt', unpack = True, delimiter = ',')
