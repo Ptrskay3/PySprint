@@ -4,6 +4,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 
 
+
 __all__ = ['scipy_disp', 'lmfit_disp', 'findNearest', 'find_closest',
            '_handle_input', 'print_disp', 'fourier_interpolate']
 
@@ -93,4 +94,3 @@ def fourier_interpolate(x, y):
     intp = interp1d(x, y, kind='linear', fill_value = 'extrapolate')
     ys = intp(xs)
     return xs, ys
-
