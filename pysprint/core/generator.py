@@ -35,9 +35,9 @@ def generatorFreq(
 	relom = omega-omega0
 	i1 = np.exp(-(relom)**2/(window))
 	i2 = np.exp(-(relom)**2/(window))
-	i = i1 + i2 + 2* np.sqrt(i1 * i2) * np.cos(
+	i = i1 + i2 + 2 * np.cos(
 		_disp(relom, GD=GD, GDD= GDD, TOD=TOD, FOD=FOD, QOD=QOD)+(omega*delay)
-		)
+		) * np.sqrt(i1 * i2)
 	if includeArms:
 		return omega, i, i1, i2
 	else:
