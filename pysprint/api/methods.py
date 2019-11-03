@@ -233,7 +233,7 @@ class Dataset(BaseApp):
 		warnings.warn('Linear interpolation have been applied to data.', InterpolationWarning)
 		
 
-	def cut(self, start=-9999, stop=9999):
+	def slice(self, start=-9999, stop=9999):
 		self.x, self.y_norm = cut_data(self.x, self.y, self.ref, self.sam, startValue = start, endValue = stop)
 		self.ref = []
 		self.sam = []
