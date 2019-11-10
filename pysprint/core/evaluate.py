@@ -135,7 +135,7 @@ def min_max_method(
             popt, pcov = curve_fit(polynomialFit5, fullXValues, fullYValues, maxfev=8000)
             _function = polynomialFit5
         elif fitOrder == 4:
-            popt, pcov = curve_fit(polynomialFit4, fullXValues, fullYValues, maxfe=8000)
+            popt, pcov = curve_fit(polynomialFit4, fullXValues, fullYValues, maxfev=8000)
             _function = polynomialFit4
         elif fitOrder == 3:
             popt, pcov = curve_fit(polynomialFit3, fullXValues, fullYValues, maxfev=8000)
