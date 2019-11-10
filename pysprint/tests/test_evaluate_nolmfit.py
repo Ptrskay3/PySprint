@@ -43,8 +43,10 @@ class TestEvaluateNoLmfit(unittest.TestCase):
 			# disp, disp_s, fit = evaluate.min_max_method(a, b, b, b, ref_point=-50000, maxx=maxs, minx=mins, fitOrder=1, showGraph=False)
 
 	def test_min_max_advanced(self):
-		with self.assertRaises(ValueError):
-			evaluate.min_max_method(np.arange(100), np.arange(100), [], [], ref_point = 10, fitOrder = 1, showGraph=False)
+		mp = np.zeros(5)
+		j,k = evaluate.min_max_method(np.arange(100), np.arange(100), [], [], ref_point = 10, fitOrder = 1, showGraph=False)
+		np.testing.assert_array_equal(emp, j)
+		np.testing.assert_array_equal(emp, k)
 		a,b,c,d = np.loadtxt('test_arms.txt', delimiter = ',', unpack = True)
 		maxs, _, mins, _ = find_peak(a,b,c,d, proMax=1, proMin=1, threshold=0.4)
 		d1, d_s1, fit1 = evaluate.min_max_method(a,b,c,d, ref_point = 2.5, fitOrder = 1, maxx = maxs, minx = mins, showGraph = False)
