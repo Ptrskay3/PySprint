@@ -1,4 +1,4 @@
-sudo: true
+sudo: false
 
 language: python
 
@@ -16,7 +16,11 @@ env:
 
 before_install:
   - "export PYTHONPATH=$PYTHONPATH:$(pwd)"
-  - sudo apt-get install -qq libegl1-mesa
+  
+addons:
+  apt:
+    packages:
+    - libxkbcommon-x11-0
 
 
 install:
