@@ -80,14 +80,16 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.doFFT.clicked.connect(self.ifft_handler)
         self.doCut.clicked.connect(self.gauss_cut_func)
         self.doIFFT.clicked.connect(self.fft_handler)
+        self.pushButton_2.clicked.connect(self.show_window)
         self.actionAbout.triggered.connect(self.open_help)
         self.actionSave_current_data.triggered.connect(self.save_curr_data)
         self.actionSave_log_file.triggered.connect(self.save_output)
         self.actionExit.triggered.connect(self.close)
         self.actionGenerator.triggered.connect(self.open_generator)
-        self.actionUnit_converter.triggered.connect(self.open_import)
+        self.actionLoad_data_manually.triggered.connect(self.open_import)
         self.actionSettings.triggered.connect(self.open_settings)
         self.pushButton.clicked.connect(self.open_sppanel)
+        self.actionNew.triggered.connect(self.newaction)
         self.cb = QCheckBox('Do not show this message again.', self.centralwidget)
         self.msgbox = QMessageBox(self)
         self.msgbox.setText('Welcome to PySprint!\nDo not forget to set the calibration at Edit --> Settings. For more details, see documentation.')
@@ -99,7 +101,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.tableWidget.setHorizontalHeaderLabels(["Angular frequency", "Intensity"])
         self.tableWidget.setSizeAdjustPolicy(
         QtWidgets.QAbstractScrollArea.AdjustToContents)
-        self.interpolate_cb.setChecked(False)
+        self.interpolate_cb.setChecked(True)
         self.savgolTab.setStyleSheet(" background-color: rgb(240,240,240);")
         self.peakTab.setStyleSheet(" background-color: rgb(240,240,240);")
         self.convolTab.setStyleSheet(" background-color: rgb(240,240,240);")
@@ -124,6 +126,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.move(self.settings.value('main_pos', QtCore.QPoint(50, 50)))
         self.CFF_fitnow.clicked.connect(self.cff_fit)
         self.cff_autofit.clicked.connect(self.cff_fit_optimizer)
+        self.drop_arms.clicked.connect(self.drop_arms_func)
         QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+G"), self, self.open_generator)
 
 
@@ -131,6 +134,11 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.settings.setValue('main_size', self.size())
         self.settings.setValue('main_pos', self.pos())
         e.accept()
+
+
+    def newaction(self):
+        self.new_window = MainProgram(self)
+        self.new_window.showMaximized()
 
     def open_help(self):
         """ Opens up help window."""
@@ -162,12 +170,12 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.logOutput.insertPlainText('\n {}\n\n'.format(str(text)))
         self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
 
-    #will be added..
-    def drop_arms(self):
+    def drop_arms_func(self):
         if len(self.refY) != 0:
             self.refY = np.array([])
         if len(self.samY) != 0:
             self.samY = np.array([])
+        self.arms_separate.setChecked(False)
         self.redraw_graph()
         self.fill_table()
 
@@ -182,6 +190,23 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             finally:
                 QApplication.restoreOverrideCursor()
         return new_function
+
+    def show_window(self):
+        if self.gaussianCut.text() == '':
+            self.gaussianCut.setText('1000')
+        if self.gaussianCut2.text() == '':
+            self.gaussianCut2.setText('900')
+        if self.window_order.text() == '':
+            self.window_order.setText('6')
+        try:
+        	gaussian = gaussian_window(self.a, float(self.gaussianCut.text()), float(self.gaussianCut2.text()),
+        		int(self.window_order.text()))
+	        self.MplWidget.canvas.axes.clear()
+	        self.redraw_graph()
+	        self.MplWidget.canvas.axes.plot(self.a, gaussian, 'r--')
+	        self.MplWidget.canvas.draw()
+        except Exception as e:
+        	self.msg_output(str(e))
 
     def gauss_cut_func(self):
         """ On FFT tab perfoms a cut with custom order gaussian """
@@ -265,6 +290,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                         order = int(self.savgolOrder.text()))
                     self.refY = []
                     self.samY = []
+                    if self.arms_separate.isChecked():
+                    	self.arms_separate.setChecked(False)
                     self.msg_output('Reference and sample arm is now merged and the spectrum is normalized.')
                 else:
                     self.msg_output('Data shapes are different. Operation canceled.')
@@ -284,6 +311,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     self.a, self.b = convolution(self.a, self.b, self.refY, self.samY, standev = float(self.convolutionStd.text()))
                     self.refY = []
                     self.samY = []
+                    if self.arms_separate.isChecked():
+                        self.arms_separate.setChecked(False)
                     self.msg_output('Reference and sample arm is now merged and the spectrum is normalized.')
                 else:
                     self.msg_output('Data shapes are different. Operation canceled.')
@@ -306,6 +335,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                      endValue = float(self.sliceStop.text()))
                     self.refY = []
                     self.samY = []
+                    if self.arms_separate.isChecked():
+                        self.arms_separate.setChecked(False)
                     self.msg_output('Reference and sample arm is now merged and the spectrum is normalized.')
                 else:
                     self.msg_output('Data shapes are different. Operation canceled')
@@ -329,6 +360,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.minx = []
         self.maxx = []
         self.temp = []
+        self.arms_separate.setChecked(False)
+        self.data_length.setText('0')
         self.MplWidget.canvas.axes.clear()
         self.MplWidget.canvas.draw()
         self.msg_output('Data cleared.')
@@ -563,15 +596,20 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     @pyqtSlot(float) 
     def load_data(self, a, b): 
         """ Loads in the data with AI. If that fails, loads in manually with np.loadtxt."""
+        self.data_length.setText('0')
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getOpenFileName(None,"Load interferogram", "","All Files (*);;Text Files (*.txt)", options=options)
         try:
             if fileName:
                 try:
                     self.a, self.b, self.refY, self.samY = read_data(fileName)
+                    if len(self.refY) != 0:
+                        self.arms_separate.setChecked(True)
+                    self.data_length.setText(str(len(self.a)))
                 except Exception:
                     self.msg_output('Auto-detect failed, attempting to load again..')  
-                    self.a, self.b = np.loadtxt(fileName, usecols=(0,1), unpack = True, delimiter =',')  
+                    self.a, self.b = np.loadtxt(fileName, usecols=(0,1), unpack = True, delimiter =',')
+                    self.data_length.setText(str(len(self.a))) 
             self.fill_table()
         except Exception as e:
             self.msg_output(e)

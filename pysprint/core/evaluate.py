@@ -49,13 +49,13 @@ def min_max_method(
     ref_point: float
     the reference point to calculate order
 
-    maxx and minx: array-like
+    maxx and minx: array-like, optional
     the accepted minimal and maximal x values (if you want to manually pass)
 
-    fitOrder: int
+    fitOrder: int, optional
     degree of polynomial to fit data [1, 5]
 
-    showGraph: bool
+    showGraph: bool, optional
     if True returns a matplotlib plot and pauses execution until closing the window
 
     Returns
@@ -89,6 +89,8 @@ def min_max_method(
     relPosMinFreqs = np.array([d for d in (Xdata[ref_index] - minx) if d > 0])
     relPosFreqs = sorted(np.append(relPosMinFreqs, relPosMaxFreqs))
 
+    if len(relNegFreqs) == 0 and len(relPosFreqs) == 0:
+    	return [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], 'No extremal points found.'
     negValues = np.zeros_like(relNegFreqs)
     posValues = np.zeros_like(relPosFreqs)
     for freq in range(len(relPosFreqs)):
@@ -163,7 +165,7 @@ def min_max_method(
             dispersion = []
             dispersion_std = []
             for idx in range(len(popt) - 1):
-                dispersion.append(popt[idx + 1]*factorial(idx + 1))
+                dispersion.append(popt[idx + 1] * factorial(idx + 1))
             while len(dispersion) < 5:
                 dispersion.append(0)
             while len(dispersion_std) < len(dispersion):
