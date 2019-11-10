@@ -16,6 +16,7 @@ env:
 
 before_install:
   - "export PYTHONPATH=$PYTHONPATH:$(pwd)"
+  - sudo apt-get install -qq libegl1-mesa
 
 
 install:
