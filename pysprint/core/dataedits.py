@@ -81,13 +81,15 @@ def find_peak(
 
 def convolution(
 	initSpectrumX, initSpectrumY, referenceArmY, sampleArmY,
-	standev=200):
-
+	win_len ,standev=200):
 	Xdata, Ydata = _handle_input(
 		initSpectrumX, initSpectrumY, referenceArmY, sampleArmY
 		)
+	if win_len < 0 or win_len > len(Xdata):
+		raise ValueError('Window length must be 0 < window_length < len(x)')
+
 	xint, yint = interpolate_data(Xdata, Ydata, [], [])
-	window = gaussian(len(xint), std=standev)
+	window = gaussian(win_len, std=standev)
 	smoothed = convolve(yint, window/window.sum(), mode='same')
 	return xint, smoothed
 

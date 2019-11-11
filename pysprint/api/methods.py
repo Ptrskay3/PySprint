@@ -238,8 +238,8 @@ class Dataset(BaseApp):
 		self.ref = []
 		self.sam = []
 
-	def convolution(self, std=20):
-		self.x, self.y_norm = convolution(self.x, self.y, self.ref, self.sam, standev = std)
+	def convolution(self, window_length, std=20):
+		self.x, self.y_norm = convolution(self.x, self.y, self.ref, self.sam, window_length, standev = std)
 		self.ref = []
 		self.sam = []
 		warnings.warn('Linear interpolation have been applied to data.', InterpolationWarning)

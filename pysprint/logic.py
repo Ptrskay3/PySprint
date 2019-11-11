@@ -130,6 +130,12 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+G"), self, self.open_generator)
 
 
+    def track_stats(self):
+        if len(self.refY) != 0:
+            self.arms_separate.setChecked(True)
+        self.data_length.setText(str(len(self.a)))
+
+
     def closeEvent(self, e):
         self.settings.setValue('main_size', self.size())
         self.settings.setValue('main_pos', self.pos())
@@ -306,9 +312,11 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         if self.editTab.currentIndex() == 2:
             if self.convolutionStd.text() == '':
                 self.convolutionStd.setText('5')
+            if self.convolutionWindow.text() == '':
+                self.convolutionWindow.setText(str(len(self.a)//10))
             if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
                 if len(self.a) == len(self.refY) and len(self.a) == len(self.samY):
-                    self.a, self.b = convolution(self.a, self.b, self.refY, self.samY, standev = float(self.convolutionStd.text()))
+                    self.a, self.b = convolution(self.a, self.b, self.refY, self.samY, int(self.convolutionWindow.text()), standev = float(self.convolutionStd.text()))
                     self.refY = []
                     self.samY = []
                     if self.arms_separate.isChecked():
@@ -319,7 +327,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             elif len(self.a) == 0:
                 pass
             elif len(self.refY) == 0 or len(self.samY) == 0:
-                self.a, self.b = convolution(self.a, self.b ,[], [], standev = float(self.convolutionStd.text()))
+                self.a, self.b = convolution(self.a, self.b ,[], [], int(self.convolutionWindow.text()), standev = float(self.convolutionStd.text()))
 
             self.redraw_graph()
         
@@ -451,10 +459,12 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         if self.editTab.currentIndex() == 2:
             if self.convolutionStd.text() == '':
                 self.convolutionStd.setText('5')
+            if self.convolutionWindow.text() == '':
+                self.convolutionWindow.setText(str(len(self.a)//10))
             if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
                 self.MplWidget.canvas.axes.clear()
                 if len(self.a) == len(self.refY) and len(self.a) == len(self.samY):
-                    u, v = convolution(self.a, self.b, self.refY, self.samY, standev = float(self.convolutionStd.text()))
+                    u, v = convolution(self.a, self.b, self.refY, self.samY, int(self.convolutionWindow.text()), standev = float(self.convolutionStd.text()))
                     self.MplWidget.canvas.axes.plot(u, v)
                     self.MplWidget.canvas.axes.grid()
                     self.MplWidget.canvas.axes.set_ylabel("Intensity")
@@ -467,7 +477,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 pass
             elif len(self.refY) == 0 or len(self.samY) == 0:
                 self.MplWidget.canvas.axes.clear()
-                u, v = convolution(self.a, self.b ,[], [], standev = float(self.convolutionStd.text()))
+                u, v = convolution(self.a, self.b ,[], [], int(self.convolutionWindow.text()), standev = float(self.convolutionStd.text()))
                 self.MplWidget.canvas.axes.plot(u, v)
                 self.MplWidget.canvas.axes.grid()
                 self.MplWidget.canvas.axes.set_ylabel("Intensity")
@@ -1503,6 +1513,7 @@ class ImportPage(QtWidgets.QMainWindow, Ui_ImportPage):
                 new_main.showMaximized()
                 new_main.redraw_graph()
                 new_main.fill_table()
+                new_main.track_stats()
         except Exception as e:
             self.imp_put.setText(str(e))
 

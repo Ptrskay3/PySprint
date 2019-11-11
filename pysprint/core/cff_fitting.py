@@ -1,5 +1,4 @@
 """
-
 CURRENTLY POORLY WRITTEN, BUT IT WORKS.. I WILL UPDATE IT SOON.
 """
 import numpy as np
@@ -17,22 +16,22 @@ class FitOptimizer(object):
 		if not isinstance(self.x, np.ndarray):
 			try:
 				self.x = np.asarray(self.x)
-			except:
-				raise
+			except Exception:
+				raise ValueError
 		if not isinstance(self.y, np.ndarray):
 			try:
 				self.y = np.asarray(self.y)
-			except:
-				raise
+			except Exception:
+				raise ValueError
 		if not isinstance(self.ref, np.ndarray):
 			try:
 				self.ref = np.asarray(self.ref)
-			except:
+			except Exception:
 				pass
 		if not isinstance(self.sam, np.ndarray):
 			try:
 				self.sam = np.asarray(self.sam)
-			except:
+			except Exception:
 				pass
 		if len(self.ref) == 0:
 			self._y_norm = self.y
