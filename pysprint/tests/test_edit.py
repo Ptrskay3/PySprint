@@ -60,10 +60,10 @@ class TestEdit(unittest.TestCase):
 
 	def test_convolution(self):
 		x, y, v, w = np.loadtxt('test_arms.txt', delimiter = ',', unpack = True)
-		a, b = convolution(x, y, v, w, standev = 200)
+		a, b = convolution(x, y, v, w, len(x), standev = 200)
 		assert len(a) == len(b)
 		with self.assertRaises(ValueError):
-			convolution(x, [], v, w, standev = -541)
+			convolution(x, [], v, w, 10, standev = -541)
 
 if __name__ == '__main__':
 	unittest.main()
