@@ -5,14 +5,14 @@ The main logic behind the UI functions.
 import os
 import sys
 
-from PyQt5 import QtCore, QtGui, QtWidgets # lgtm [py/unused-import]
-from PyQt5.QtWidgets import (QMainWindow, QDialogButtonBox, QApplication, # lgtm [py/unused-import]
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import (QMainWindow, QDialogButtonBox, QApplication,
      QWidget, QInputDialog, QLineEdit, QFileDialog, QMessageBox, QTreeWidget,
      QTreeWidgetItem, QAbstractItemView, QDialog, QPushButton, QVBoxLayout,
      QComboBox, QCheckBox, QLabel,QAction, qApp, QTextEdit, QSpacerItem, 
      QSizePolicy,QHBoxLayout, QGroupBox, QTableWidgetItem, QShortcut)
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, pyqtSlot, QSettings
-from PyQt5.QtGui import QIcon, QCursor, QKeySequence # lgtm [py/unused-import]
+from PyQt5.QtGui import QIcon, QCursor, QKeySequence
 
 import numpy as np
 from datetime import datetime

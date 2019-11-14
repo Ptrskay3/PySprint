@@ -2,8 +2,8 @@
 """
 Help window
 """
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QWidget, QMessageBox, QPushButton
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtWidgets import QWidget, QPushButton
 
 
 class Help(QWidget):
