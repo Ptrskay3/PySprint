@@ -121,7 +121,7 @@ class TestEvaluate(unittest.TestCase):
 
 
 	def test_ffts_advanced4(self):
-		g = Generator(2,2.8,2.4, delay = 1500, GDD = 2000, FOD = -100000, pulseWidth = 25, resolution = 0.01)
+		g = Generator(2,2.8,2.4, delay=1500, GDD=2000, FOD=-100000, pulseWidth=25, resolution=0.01)
 		g.generate_freq()
 		a,b = g.unpack()
 		f = FFTMethod(a, b)

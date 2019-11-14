@@ -12,7 +12,7 @@ if sys.version_info[:2] < (3, 5):
 
 MAJOR = 0
 MINOR = 0
-MICRO = 30
+MICRO = 31
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
 

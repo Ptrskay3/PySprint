@@ -90,7 +90,7 @@ def min_max_method(
     relPosFreqs = sorted(np.append(relPosMinFreqs, relPosMaxFreqs))
 
     if len(relNegFreqs) == 0 and len(relPosFreqs) == 0:
-    	return [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], 'No extremal points found.'
+    	raise ValueError('No extremal points found.')
     negValues = np.zeros_like(relNegFreqs)
     posValues = np.zeros_like(relPosFreqs)
     for freq in range(len(relPosFreqs)):

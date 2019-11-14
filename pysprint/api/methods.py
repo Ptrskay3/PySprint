@@ -40,7 +40,7 @@ class BaseApp(object):
 		try:
 			from PyQt5 import QtWidgets
 		except ImportError:
-			print('PyQt5 is essential for the UI. You can use the API instead.')
+			print('PyQt5 is essential for the UI. Use the API instead.')
 		print('Building up UI..')
 		app = QtWidgets.QApplication(sys.argv)
 		main_app = MainProgram()
@@ -57,6 +57,7 @@ class BaseApp(object):
 			pass
 		main_app.redraw_graph()
 		main_app.fill_table()
+		main_app.track_stats()
 		sys.exit(app.exec_())
 		
 
