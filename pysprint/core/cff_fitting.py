@@ -108,7 +108,7 @@ class FitOptimizer(object):
 				self._x_curr, self.func(self._x_curr, *self.popt), 'r--', label='Fit'
 				)
 			self.obj.draw()
-		except:
+		except Exception:
 			pass
 
 	def run_loop(
