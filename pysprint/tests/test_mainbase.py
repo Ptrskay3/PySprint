@@ -2,11 +2,14 @@
 
 import sys
 import unittest
+
 import numpy as np
+
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 from pysprint.logic import MainProgram
+
 
 
 class Test(unittest.TestCase):
@@ -36,8 +39,6 @@ class Test(unittest.TestCase):
         self.my_interface.gauss_cut_func()
         self.my_interface.ifft_handler()
         self.my_interface.fft_handler()
-        self.my_interface.apply_on_plot()
-        self.my_interface.commit_to_data()
         with self.assertRaises(ValueError):
             self.my_interface.get_it()
         with self.assertRaises(ValueError):
