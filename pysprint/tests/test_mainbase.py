@@ -39,10 +39,10 @@ class Test(unittest.TestCase):
         self.my_interface.gauss_cut_func()
         self.my_interface.ifft_handler()
         self.my_interface.fft_handler()
-        with self.assertRaises(ValueError):
-            self.my_interface.get_it()
-        with self.assertRaises(ValueError):
-            self.my_interface.cff_fit_optimizer()
+        # with self.assertRaises(ValueError):
+        #     self.my_interface.get_it()
+        # with self.assertRaises(ValueError):
+        #     self.my_interface.cff_fit_optimizer()
 
     def test_basic_errors(self):
         with self.assertRaises(ValueError):
