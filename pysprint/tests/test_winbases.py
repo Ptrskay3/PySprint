@@ -6,7 +6,7 @@ import numpy as np
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
-from pysprint.logic import GeneratorWindow, SPPWindow
+from pysprint.logic import GeneratorWindow
 
 
 class TestGen(unittest.TestCase):
@@ -32,19 +32,6 @@ class TestGen(unittest.TestCase):
         assert len(self.gen.xAxisData) != 0
         assert len(self.gen.yAxisData) != 0
         self.gen.generate_data()
-
-
-class TestSPP(unittest.TestCase):
-    def setUp(self):
-        self.app = QApplication(sys.argv)
-        self.spp = SPPWindow()
-        self.spp.showMaximized()
-
-    def tearDown(self):
-        self.spp.close()
-
-    def clean(self):
-        self.spp.clean_up()
 
 
 if __name__ == "__main__":
