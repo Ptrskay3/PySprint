@@ -4,7 +4,7 @@ Methods for manipulating the loaded data
 import numpy as np
 from scipy.signal import find_peaks, savgol_filter, gaussian, convolve
 from scipy.interpolate import interp1d
-from pysprint.utils import findNearest, _handle_input
+from pysprint.utils import findNearest, _handle_input, between
 
 
 def savgol(
@@ -28,49 +28,21 @@ def savgol(
 	else:
 		raise ValueError('window must be bigger than order (currently {}/{})'.format(window, order))
 
-# def cwt(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, proMax=1, proMin=1, threshold=0.1):   
-# 	if len(initSpectrumX) > 0 and len(referenceArmY)>0 and len(sampleArmY)>0:
-# 		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
-# 	if len(initSpectrumX) == 0:
-# 		raise
-# 	elif len(referenceArmY) == 0 or len(sampleArmY) == 0:
-# 		Ydata = initSpectrumY
-# 	Xdata = initSpectrumX
-
-# 	maxIndexes = find_peaks_cwt(Ydata, np.arange(1, 50)) 
-# 	Ydata_rec = 1/Ydata
-# 	minIndexes = find_peaks_cwt(Ydata_rec, np.arange(1, 1000))
-
-# 	min_idx = []
-# 	max_idx = []
-
-# 	for idx in maxIndexes:
-# 		if np.abs(Ydata[idx]) > threshold:
-# 			max_idx.append(idx)
-# 	for idx in minIndexes:
-# 		if np.abs(Ydata[idx]) > threshold:
-# 			min_idx.append(idx)
-
-# 	if len(Xdata[max_idx]) != len(Ydata[max_idx]) or len(Xdata[min_idx]) != len(Ydata[min_idx]):
-# 		raise ValueError('Something went wrong, try to cut the edges of data.')
-
-# 	return Xdata[max_idx], Ydata[max_idx], Xdata[min_idx], Ydata[min_idx]
-
 def find_peak(
 	initSpectrumX, initSpectrumY, referenceArmY, sampleArmY,
-	proMax=1, proMin=1, threshold=0.1):   
+	proMax=1, proMin=1, threshold=0.1, except_around=None):   
 
 	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
-	maxIndexes, _ = find_peaks(Ydata, prominence = proMax) 
+	maxIndexes, _ = find_peaks(Ydata, prominence=proMax) 
 	Ydata_rec = 1/Ydata
-	minIndexes, _ = find_peaks(Ydata_rec, prominence = proMin)
+	minIndexes, _ = find_peaks(Ydata_rec, prominence=proMin)
 	min_idx = []
 	max_idx = []
 	for idx in maxIndexes:
-		if np.abs(Ydata[idx]) > threshold:
+		if np.abs(Ydata[idx]) > threshold or between(Xdata[idx], except_around):
 			max_idx.append(idx)
 	for idx in minIndexes:
-		if np.abs(Ydata[idx]) > threshold:
+		if np.abs(Ydata[idx]) > threshold or between(Xdata[idx], except_around):
 			min_idx.append(idx)
 
 	if len(Xdata[max_idx]) != len(Ydata[max_idx]) or len(Xdata[min_idx]) != len(Ydata[min_idx]):

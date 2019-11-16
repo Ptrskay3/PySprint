@@ -246,8 +246,8 @@ class Dataset(BaseApp):
 		warnings.warn('Linear interpolation have been applied to data.', InterpolationWarning)
 
 
-	def detect_peak(self, pmax=0.1, pmin=0.1, threshold=0.1):
-		xmax, ymax, xmin, ymin = find_peak(self.x, self.y, self.ref, self.sam, proMax = pmax, proMin = pmin, threshold=threshold)
+	def detect_peak(self, pmax=0.1, pmin=0.1, threshold=0.1, except_around=None):
+		xmax, ymax, xmin, ymin = find_peak(self.x, self.y, self.ref, self.sam, proMax = pmax, proMin = pmin, threshold=threshold, except_around=except_around)
 		return xmax, ymax, xmin, ymin
 		
 	def show(self):

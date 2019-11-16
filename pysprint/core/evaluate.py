@@ -15,9 +15,8 @@ except ImportError:
     _has_lmfit = False
 
 
-from pysprint.core.dataedits import interpolate_data
 from pysprint.utils import (
-    findNearest, _handle_input, lmfit_disp, scipy_disp, fourier_interpolate
+    findNearest, _handle_input, lmfit_disp, fourier_interpolate
     )
 
 
@@ -90,7 +89,7 @@ def min_max_method(
     relPosFreqs = sorted(np.append(relPosMinFreqs, relPosMaxFreqs))
 
     if len(relNegFreqs) == 0 and len(relPosFreqs) == 0:
-    	raise ValueError('No extremal points found.')
+        raise ValueError('No extremal points found.')
     negValues = np.zeros_like(relNegFreqs)
     posValues = np.zeros_like(relPosFreqs)
     for freq in range(len(relPosFreqs)):
@@ -474,6 +473,8 @@ def fft_method(initSpectrumX, initSpectrumY):
 
 def gaussian_window(t, tau, standardDev, order):
     """
+    Returns a simple gaussian window of given parameters evaulated at t.
+
     Parameters
     ----------
     t: array-like
@@ -490,7 +491,7 @@ def gaussian_window(t, tau, standardDev, order):
 
     Returns
     -------
-    arr : array-like
+    array : array-like
     nth order gaussian window with params above
 
     """
@@ -561,7 +562,7 @@ def ifft_method(initSpectrumX, initSpectrumY, interpolate=True):
     N = len(Xdata)
     if interpolate:
         Xdata, Ydata = fourier_interpolate(Xdata, Ydata)
-    xf = np.fft.fftfreq(N, d=(Xdata[1]-Xdata[0])/(2*np.pi)) #* N * Xdata[-1]/(N-1)
+    xf = np.fft.fftfreq(N, d=(Xdata[1]-Xdata[0])/(2*np.pi))
     yf = np.fft.ifft(Ydata)
     return xf, yf
 
@@ -582,6 +583,9 @@ def args_comp(
 
     initSpectrumY: array-like
     the y-axis data
+
+    reference_point: float
+    the reference point to calculate order
 
     fitOrder: int
     degree of polynomial to fit data [1, 5]
