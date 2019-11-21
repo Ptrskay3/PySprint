@@ -432,4 +432,3 @@ class FFTMethod(Dataset):
 			self.x, self.y, reference_point=reference_point, fitOrder=fit_order, showGraph=show_graph
 			)
 		return dispersion, dispersion_std, fit_report
-
