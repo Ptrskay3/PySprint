@@ -8,7 +8,7 @@ import warnings
 import numpy as np
 import matplotlib.pyplot as plt 
 
-from pysprint.core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, ifft_method, spp_method, args_comp
+from pysprint.core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, ifft_method, spp_method, args_comp, gaussian_window
 from pysprint.core.dataedits import savgol, find_peak, convolution, cut_data
 from pysprint.core.generator import generatorFreq, generatorWave
 from pysprint.utils import print_disp
@@ -402,6 +402,9 @@ class FFTMethod(Dataset):
 			self.y_norm = self.y
 			self._is_normalized = False
 		self.original_x = self.x
+		self.at = None
+		self.std = None
+		self.window_order = None
 
 	def __str__(self):
 		return '''FFTMethod({},{})'''.format(self.x, self.y)
@@ -412,8 +415,16 @@ class FFTMethod(Dataset):
 	def fft(self):
 		self.x, self.y = fft_method(self.original_x, self.y)
 
-	def cut(self, at, std, window_order = 6):
-		self.y = cut_gaussian(self.x, self.y, spike = at, sigma = std, win_order = window_order)
+	def window(self, at, std, window_order=6):
+		self.at = at
+		self.std = std
+		self.window_order = window_order
+		gaussian = gaussian_window(self.x, self.at, self.std, self.window_order)
+		self.plotwidget.plot(self.x, gaussian, 'r--')
+
+	def apply_window(self):
+		self.plotwidget.clf()
+		self.y = cut_gaussian(self.x, self.y, spike=self.at, sigma=self.std, win_order=self.window_order)
 		
 	@print_disp
 	def calculate(self, reference_point, fit_order, show_graph=False):
@@ -421,3 +432,4 @@ class FFTMethod(Dataset):
 			self.x, self.y, reference_point=reference_point, fitOrder=fit_order, showGraph=show_graph
 			)
 		return dispersion, dispersion_std, fit_report
+

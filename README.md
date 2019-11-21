@@ -13,31 +13,10 @@ CURRENT RELEASE:
 
 [![PyPI version](https://badge.fury.io/py/pysprint.svg)](https://badge.fury.io/py/pysprint)
 
-**Under construction.**
+**Currently producing huge amount of bugs, working of fix.**
 
 PySprint is a UI and API for interferogram evaluation. 
 The GUI works only with 1920x1080 or bigger screen resolution. Lower resolution compatibility is queued on the To-Do List.
-
-### 0.0.30 release notes and bugfixes
-  - FFTMethod should work now properly, will be improved
-  - Generator now works properly
-
-
-### Known issues
-* There can be bigger bugs out there, I'm working on a fix.
-* There might be unnecessary imports
-* Some buttons has no effect yet.
-* In the menus some functions are unusually placed.
-
-
-### To-do list
-* Screen resolution compatibility
-* Clean up GUI from useless buttons
-* ERROR HANDLING!
-* Unittests
-* Selectable units
-* Possible performance enhancement by improving algorithms
-* Possible new data manipulating features + new options for existing ones
 
 
 ### Installation
@@ -66,3 +45,9 @@ import pysprint as ps
 
 ps.run()
 ```
+
+## Documentation
+
+In progress.
+
+
