@@ -34,7 +34,7 @@ $ pip install PyQt5
 ```
 or 
 ```sh
-conda install -c dsdale24 pyqt5
+$ conda install -c dsdale24 pyqt5
 ```
 * numpy, scipy, matplotlib, pandas, lmfit will be automatically collected.
 
