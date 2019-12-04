@@ -7,6 +7,7 @@ import warnings
 
 import numpy as np
 import matplotlib.pyplot as plt 
+from scipy.fftpack import fftshift
 
 from pysprint.core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, ifft_method, spp_method, args_comp, gaussian_window
 from pysprint.core.dataedits import savgol, find_peak, convolution, cut_data
@@ -228,19 +229,19 @@ class Dataset(BaseApp):
 		return self._is_normalized
 	
 	def savgol_fil(self, window=101, order=3):
-		self.x, self.y_norm = savgol(self.x, self.y, self.ref, self.sam, window = window, order = order)
+		self.x, self.y_norm = savgol(self.x, self.y, self.ref, self.sam, window=window, order=order)
 		self.ref = []
 		self.sam = []
 		warnings.warn('Linear interpolation have been applied to data.', InterpolationWarning)
 		
 
 	def slice(self, start=-9999, stop=9999):
-		self.x, self.y_norm = cut_data(self.x, self.y, self.ref, self.sam, startValue = start, endValue = stop)
-		self.ref = []
+		self.x, self.y_norm = cut_data(self.x, self.y, self.ref, self.sam, startValue=start, endValue=stop)
+		self.ref = [] # should be immutable None
 		self.sam = []
 
 	def convolution(self, window_length, std=20):
-		self.x, self.y_norm = convolution(self.x, self.y, self.ref, self.sam, window_length, standev = std)
+		self.x, self.y_norm = convolution(self.x, self.y, self.ref, self.sam, window_length, standev=std)
 		self.ref = []
 		self.sam = []
 		warnings.warn('Linear interpolation have been applied to data.', InterpolationWarning)
@@ -272,7 +273,7 @@ class MinMaxMethod(Dataset):
 		return '''MinMaxMethod({},{},{},{})'''.format(self.x, self.y, self.ref, self.sam)
 
 	@print_disp
-	def calculate(self, reference_point, fit_order, show_graph = False):
+	def calculate(self, reference_point, fit_order, show_graph=False):
 		dispersion, dispersion_std, fit_report = min_max_method(
 			self.x, self.y, self.ref, self.sam, ref_point = reference_point,
 			maxx = self.xmax, minx = self.xmin, fitOrder = fit_order, showGraph = show_graph
@@ -310,11 +311,11 @@ class CosFitMethod(Dataset):
 
 	def set_max_order(self, order):
 		if order > 5 or order < 1:
-			print('order should be an in integer from [1,5], currently {} is given'.format(order))
+			print('Order should be an integer from [1,5], currently {} is given'.format(order))
 		try:
 			int(order)
 		except ValueError:
-			print('order should be an in integer from [1,5], currently {} is given'.format(order))
+			print('Order should be an integer from [1,5], currently {} is given'.format(order))
 		order = 6 - order
 		for i in range(1, order):
 			self.params[-i] = 0
@@ -338,7 +339,7 @@ class CosFitMethod(Dataset):
 			pass
 		if self.fit is not None:
 			self.plotwidget.plot(self.x, self.fit, 'k--', label = 'fit', zorder=99)
-			self.plotwidget.legend()
+			# self.plotwidget.legend()
 			self.show()
 		else:
 			self.show()
@@ -405,14 +406,26 @@ class FFTMethod(Dataset):
 		self.at = None
 		self.std = None
 		self.window_order = None
+		self._ifft_called_first = False
 
 	def __str__(self):
 		return '''FFTMethod({},{})'''.format(self.x, self.y)
 
+	def shift(self, axis='x'):
+		if axis == 'x':
+			self.x = fftshift(self.x)
+		elif axis == 'y':
+			self.y = fftshift(self.y)
+		else:
+			raise ValueError(f'axis should be either x or y, currently -{axis}- is given.')
+
 	def ifft(self, interpolate=True):
+		self._ifft_called_first = True
 		self.x, self.y = ifft_method(self.x, self.y, interpolate=interpolate)
 
 	def fft(self):
+		if not self._ifft_called_first:
+			warnings.warn('This module is designed to call ifft before fft, so inconsistencies might occur when calling fft first. Consider using numpys fft package with your own logic. This functionality will be added later on.', FourierWarning)
 		self.x, self.y = fft_method(self.original_x, self.y)
 
 	def window(self, at, std, window_order=6):
