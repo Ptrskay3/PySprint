@@ -4,6 +4,8 @@ This file is the main API to use Interferometry without the PyQt5 UI.
 
 import sys
 import warnings
+warnings.filterwarnings("ignore", message="invalid value encountered in sqrt")
+warnings.filterwarnings("ignore", message="divide by zero encountered in true_divide")
 
 import numpy as np
 import matplotlib.pyplot as plt 
