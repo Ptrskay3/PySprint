@@ -4,6 +4,7 @@ This file is the main API to use Interferometry without the PyQt5 UI.
 
 import sys
 import warnings
+
 warnings.filterwarnings("ignore", message="invalid value encountered in sqrt")
 warnings.filterwarnings("ignore", message="divide by zero encountered in true_divide")
 
@@ -211,7 +212,7 @@ class Dataset(BaseApp):
 		if len(self.ref) == 0:
 			self.y_norm = self.y
 		else:
-			self.y_norm = (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
+			self.y_norm = (self.y - self.ref - self.sam)/(2  *np.sqrt(self.sam * self.ref))
 			self._is_normalized = True
 		self.plotwidget = plt
 		self.xmin = None
@@ -234,7 +235,7 @@ class Dataset(BaseApp):
 		return self._is_normalized
 	
 	def chdomain(self):
-		""" Changes from wavelength to ang. freq. domain and vica versa."""
+		""" Changes from wavelength [nm] to ang. freq. [PHz] domain and vica versa."""
 		self.x = (2*np.pi*C_LIGHT)/self.x
 
 	def savgol_fil(self, window=101, order=3):
@@ -247,8 +248,8 @@ class Dataset(BaseApp):
 	def slice(self, start=-9999, stop=9999):
 		self.x, self.y_norm = cut_data(self.x, self.y, self.ref, self.sam, startValue=start, endValue=stop)
 		self.ref = [] # should be immutable None
-		self.y = self.y_norm 
 		self.sam = []
+		self.y = self.y_norm 
 
 	def convolution(self, window_length, std=20):
 		self.x, self.y_norm = convolution(self.x, self.y, self.ref, self.sam, window_length, standev=std)
@@ -259,7 +260,7 @@ class Dataset(BaseApp):
 
 
 	def detect_peak(self, pmax=0.1, pmin=0.1, threshold=0.1, except_around=None):
-		xmax, ymax, xmin, ymin = find_peak(self.x, self.y, self.ref, self.sam, proMax = pmax, proMin = pmin, threshold=threshold, except_around=except_around)
+		xmax, ymax, xmin, ymin = find_peak(self.x, self.y, self.ref, self.sam, proMax=pmax, proMin=pmin, threshold=threshold, except_around=except_around)
 		return xmax, ymax, xmin, ymin
 		
 	def show(self):
@@ -291,8 +292,8 @@ class MinMaxMethod(Dataset):
 			_editpeak = EditPeak(self.x, self.y_norm, _xm, _ym)
 		except ValueError:
 			_editpeak = EditPeak(self.x, self.y, _xm, _ym)
-		# automatically propagate these points to the mins and maxes if it's MinMaxMethod
-		# just in case the default argrelextrema is surely not called:
+		# automatically propagate these points to the mins and maxes
+		# just in case the default argrelextrema is definitely not called in evaluate.py/min_max_method:
 		self.xmin = _editpeak.get_dat[0][:len(_editpeak.get_dat[0])//2]
 		self.xmax = _editpeak.get_dat[0][len(_editpeak.get_dat[0])//2:] 
 		print('Points were automatically passed to class, ready to calculate.')  
@@ -302,8 +303,8 @@ class MinMaxMethod(Dataset):
 	@print_disp
 	def calculate(self, reference_point, fit_order, show_graph=False):
 		dispersion, dispersion_std, fit_report = min_max_method(
-			self.x, self.y, self.ref, self.sam, ref_point = reference_point,
-			maxx = self.xmax, minx = self.xmin, fitOrder = fit_order, showGraph = show_graph
+			self.x, self.y, self.ref, self.sam, ref_point=reference_point,
+			maxx=self.xmax, minx=self.xmin, fitOrder=fit_order, showGraph=show_graph
 			)
 		return dispersion, dispersion_std, fit_report
 
@@ -325,16 +326,16 @@ class CosFitMethod(Dataset):
 		self.params[3] = value
 
 	def guess_GDD(self, value):
-		self.params[4] = value/2
+		self.params[4] = value / 2
 
 	def guess_TOD(self, value):
-		self.params[5] = value/6
+		self.params[5] = value / 6
 
 	def guess_FOD(self, value):
-		self.params[6] = value/24
+		self.params[6] = value / 24
 
 	def guess_QOD(self, value):
-		self.params[7] = value/120
+		self.params[7] = value / 120
 
 	def set_max_order(self, order):
 		if order > 5 or order < 1:
@@ -350,11 +351,11 @@ class CosFitMethod(Dataset):
 	@print_disp
 	def calculate(self, reference_point):
 		dispersion, self.fit = cff_method(self.x, self.y, self.ref, self.sam, 
-			ref_point = reference_point, p0 = self.params, maxtries = self.mt)
+			ref_point=reference_point, p0=self.params, maxtries=self.mt)
 		dispersion = list(dispersion)
-		while len(dispersion)<5:
+		while len(dispersion) < 5:
 			dispersion.append(0)
-		return dispersion, [0,0,0,0,0], 'Fit report for CFF not supported yet.'
+		return dispersion, [0, 0, 0, 0, 0], 'Fit report for CFF not supported yet.'
 
 	def plot_result(self):
 		try:
@@ -397,13 +398,13 @@ class SPPMethod(Dataset):
 	def calculate(self, reference_point, fit_order):
 		if self.raw:
 			_, _, dispersion, dispersion_std, self.bf = spp_method(
-				self.y, self.x, reference_point = reference_point, fitOrder = fit_order, from_raw = True
+				self.y, self.x, reference_point=reference_point, fitOrder=fit_order, from_raw=True
 				)
 			self.om = self.x
 			self.de = self.y
 		else:
 			self.om, self.de, dispersion, dispersion_std, self.bf = spp_method(
-				self.y, self.x, fitOrder = fit_order, from_raw = False
+				self.y, self.x, fitOrder=fit_order, from_raw=False
 				)
 		dispersion = list(dispersion)
 		dispersion_std = list(dispersion_std)
@@ -475,8 +476,8 @@ class FFTMethod(Dataset):
 
 class EditPeak(object):
 	""" This class helps to record and delete peaks from a dataset.
-	Right clicks will delete the closest (distance is measured with regards to x axis)
-	extremal point found on the graph, left clicks will add a new extremal point.
+	Right clicks will delete the closest (distance is measured with regards to x)
+	extremal point found on the graph, left clicks will add a new point.
 	Edits can be saved by just closing the matplotlib window.
 	Returns the x coordinates of the selected points.
 	Note that this class shouldn't be explicitly called by the user."""
@@ -491,7 +492,7 @@ class EditPeak(object):
 		self.y_extremal = y_extremal
 		if not len(self.x_extremal) == len(self.y_extremal):
 			raise ValueError('Data shapes are different')
-		self.lins = plt.plot(self.x_extremal, self.y_extremal, 'ko' ,markersize=8, zorder=99)
+		self.lins = plt.plot(self.x_extremal, self.y_extremal, 'ko', markersize=6, zorder=99)
 		plt.grid(alpha=0.7)
 		plt.show()
 
@@ -510,7 +511,7 @@ class EditPeak(object):
 	       		pass
 	        plt.cla()
 	        plt.plot(self.x, self.y, 'r')
-	        self.lins = plt.plot(self.x_extremal, self.y_extremal,'ko', markersize=8, zorder=99)
+	        self.lins = plt.plot(self.x_extremal, self.y_extremal, 'ko', markersize=6, zorder=99)
 	        plt.grid(alpha=0.7)
 	        plt.draw()
 	        return
