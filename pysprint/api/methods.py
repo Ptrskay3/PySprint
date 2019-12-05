@@ -7,12 +7,13 @@ import warnings
 
 import numpy as np
 import matplotlib.pyplot as plt 
+from matplotlib.backend_bases import MouseButton
 from scipy.fftpack import fftshift
 
 from pysprint.core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, ifft_method, spp_method, args_comp, gaussian_window
 from pysprint.core.dataedits import savgol, find_peak, convolution, cut_data
 from pysprint.core.generator import generatorFreq, generatorWave
-from pysprint.utils import print_disp
+from pysprint.utils import print_disp, get_closest
 
 
 __all__ = ['Generator', 'Dataset', 'MinMaxMethod', 'CosFitMethod', 'SPPMethod', 'FFTMethod']
@@ -211,6 +212,8 @@ class Dataset(BaseApp):
 			self.y_norm = (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 			self._is_normalized = True
 		self.plotwidget = plt
+		self.xmin = None
+		self.xmax = None
 
 	
 	def __str__(self):
@@ -228,22 +231,28 @@ class Dataset(BaseApp):
 	def is_normalized(self):
 		return self._is_normalized
 	
+	def chdomain(self):
+		""" Changes from wavelength to ang. freq. domain and vica versa."""
+		self.x = (2*np.pi*C_LIGHT)/self.x
+
 	def savgol_fil(self, window=101, order=3):
 		self.x, self.y_norm = savgol(self.x, self.y, self.ref, self.sam, window=window, order=order)
+		self.y = self.y_norm
 		self.ref = []
 		self.sam = []
 		warnings.warn('Linear interpolation have been applied to data.', InterpolationWarning)
 		
-
 	def slice(self, start=-9999, stop=9999):
 		self.x, self.y_norm = cut_data(self.x, self.y, self.ref, self.sam, startValue=start, endValue=stop)
 		self.ref = [] # should be immutable None
+		self.y = self.y_norm 
 		self.sam = []
 
 	def convolution(self, window_length, std=20):
 		self.x, self.y_norm = convolution(self.x, self.y, self.ref, self.sam, window_length, standev=std)
 		self.ref = []
 		self.sam = []
+		self.y = self.y_norm
 		warnings.warn('Linear interpolation have been applied to data.', InterpolationWarning)
 
 
@@ -266,11 +275,27 @@ class Dataset(BaseApp):
 class MinMaxMethod(Dataset):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		self.xmin = None
-		self.xmax = None
 
 	def __str__(self):
 		return '''MinMaxMethod({},{},{},{})'''.format(self.x, self.y, self.ref, self.sam)
+
+	def init_edit_session(self, pmax=0.1, pmin=0.1, threshold=0, except_around=None):
+		""" Function to initialize peak editing on a plot.
+		The args are the same as detect_peak."""
+		_x, _y, _xx, _yy = self.detect_peak(pmax=pmax, pmin=pmin, threshold=threshold, except_around=except_around)
+		_xm = np.append(_x, _xx)
+		_ym = np.append(_y, _yy)
+		try:
+			_editpeak = EditPeak(self.x, self.y_norm, _xm, _ym)
+		except ValueError:
+			_editpeak = EditPeak(self.x, self.y, _xm, _ym)
+		# automatically propagate these points to the mins and maxes if it's MinMaxMethod
+		# just in case the default argrelextrema is surely not called:
+		self.xmin = _editpeak.get_dat[0][:len(_editpeak.get_dat[0])//2]
+		self.xmax = _editpeak.get_dat[0][len(_editpeak.get_dat[0])//2:] 
+		print('Points were automatically passed to class, ready to calculate.')  
+		print(f'In total {len(_editpeak.get_dat[0])} extremal points were recorded.')
+		return _editpeak.get_dat[0]
 
 	@print_disp
 	def calculate(self, reference_point, fit_order, show_graph=False):
@@ -311,11 +336,11 @@ class CosFitMethod(Dataset):
 
 	def set_max_order(self, order):
 		if order > 5 or order < 1:
-			print('Order should be an integer from [1,5], currently {} is given'.format(order))
+			print('Order should be an in integer from [1,5], currently {} is given'.format(order))
 		try:
 			int(order)
 		except ValueError:
-			print('Order should be an integer from [1,5], currently {} is given'.format(order))
+			print('Order should be an in integer from [1,5], currently {} is given'.format(order))
 		order = 6 - order
 		for i in range(1, order):
 			self.params[-i] = 0
@@ -339,7 +364,7 @@ class CosFitMethod(Dataset):
 			pass
 		if self.fit is not None:
 			self.plotwidget.plot(self.x, self.fit, 'k--', label = 'fit', zorder=99)
-			# self.plotwidget.legend()
+			self.plotwidget.legend()
 			self.show()
 		else:
 			self.show()
@@ -417,7 +442,7 @@ class FFTMethod(Dataset):
 		elif axis == 'y':
 			self.y = fftshift(self.y)
 		else:
-			raise ValueError(f'axis should be either x or y, currently -{axis}- is given.')
+			raise ValueError(f'axis should be either x or y, currently {axis} is given.')
 
 	def ifft(self, interpolate=True):
 		self._ifft_called_first = True
@@ -445,3 +470,60 @@ class FFTMethod(Dataset):
 			self.x, self.y, reference_point=reference_point, fitOrder=fit_order, showGraph=show_graph
 			)
 		return dispersion, dispersion_std, fit_report
+
+class EditPeak(object):
+	""" This class helps to record and delete peaks from a dataset.
+	Right clicks will delete the closest (distance is measured with regards to x axis)
+	extremal point found on the graph, left clicks will add a new extremal point.
+	Edits can be saved by just closing the matplotlib window.
+	Returns the x coordinates of the selected points.
+	Note that this class shouldn't be explicitly called by the user."""
+	def __init__(self, x, y, x_extremal=None, y_extremal=None):
+		self.x = x
+		self.y = y
+		self.figure = plt.figure()
+		self.press()
+		plt.plot(self.x, self.y, 'r')
+		self.cid = None
+		self.x_extremal = x_extremal
+		self.y_extremal = y_extremal
+		if not len(self.x_extremal) == len(self.y_extremal):
+			raise ValueError('Data shapes are different')
+		self.lins = plt.plot(self.x_extremal, self.y_extremal, 'ko' ,markersize=8, zorder=99)
+		plt.grid(alpha=0.7)
+		plt.show()
+
+	def on_clicked(self, event):
+	        """ Function to record and discard points on plot."""
+	        ix, iy = event.xdata, event.ydata
+	        if event.button is MouseButton.RIGHT:
+	        	ix, iy, idx = get_closest(ix, self.x_extremal, self.y_extremal)
+	        	self.x_extremal = np.delete(self.x_extremal, idx)
+	        	self.y_extremal = np.delete(self.y_extremal, idx)
+	        elif event.button is MouseButton.LEFT:
+	        	ix, iy, idx = get_closest(ix, self.x, self.y)
+	        	self.x_extremal = np.append(self.x_extremal, ix)
+	        	self.y_extremal = np.append(self.y_extremal, iy)
+	       	else:
+	       		pass
+	        plt.cla()
+	        plt.plot(self.x, self.y, 'r')
+	        self.lins = plt.plot(self.x_extremal, self.y_extremal,'ko', markersize=8, zorder=99)
+	        plt.grid(alpha=0.7)
+	        plt.draw()
+	        return
+
+	def press(self):
+	        """Function to record clicks on plot."""
+	        self.cid = self.figure.canvas.mpl_connect('button_press_event', self.on_clicked)
+
+	def release(self):
+	        """ On release functionality. It's never called in the API, 
+	        just here for the GUI later.."""
+	        self.figure.canvas.mpl_disconnect(self.cid)
+
+	@property
+	def get_dat(self):
+		""" Returns the x coordinates of the selected points.
+		We might change it later to return y coords as well."""
+		return self.lins[0].get_data()

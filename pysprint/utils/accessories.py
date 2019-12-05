@@ -6,7 +6,12 @@ from scipy.interpolate import interp1d
 
 __all__ = ['scipy_disp', 'lmfit_disp', 'findNearest', 'find_closest',
            '_handle_input', 'print_disp', 'fourier_interpolate',
-           'between']
+           'between', 'get_closest']
+
+def get_closest(xValue, xArray, yArray):
+	idx = (np.abs(xArray-xValue)).argmin()
+	value = xArray[idx]
+	return value, yArray[idx], idx
 
 def between(val, except_around):
 	if except_around is None:
