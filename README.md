@@ -13,9 +13,10 @@ CURRENT RELEASE:
 
 [![PyPI version](https://badge.fury.io/py/pysprint.svg)](https://badge.fury.io/py/pysprint)
 
-**Currently producing huge amount of bugs, working of fix.**
+**PRE-ALPHA**
 
-PySprint is a UI and API for interferogram evaluation. 
+PySprint is a UI and API for interferogram evaluation.
+Some functions are not available in the GUI yet.
 The GUI works only with 1920x1080 or bigger screen resolution. Lower resolution compatibility is queued on the To-Do List.
 
 
@@ -48,6 +49,7 @@ ps.run()
 
 ## Documentation
 
+CURRENTLY THE IPYTHON NOTEBOOKS ARE NOT UP TO DATE.
 In progress.
 
 
