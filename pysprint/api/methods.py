@@ -377,7 +377,9 @@ class Dataset(BaseApp):
 		self.x, self.y_norm = cut_data(self.x, self.y, self.ref, self.sam, startValue=start, endValue=stop)
 		self.ref = []
 		self.sam = []
-		self.y = self.y_norm 
+		self.y = self.y_norm
+		if type(self).__name__ == 'FFTMethod':
+			self.original_x = self.x
 
 	def convolution(self, window_length, std=20):
 		"""
