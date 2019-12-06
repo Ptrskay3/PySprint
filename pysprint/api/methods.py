@@ -499,7 +499,7 @@ class MinMaxMethod(Dataset):
 
 		Currently this function is disabled when running it from IPython.
 		"""
-		if run_from_ipython:
+		if run_from_ipython():
 			return '''It seems you run this code in IPython. Interactive functionality does not work properly in Jupyter. Consider running it in console.'''
 		_x, _y, _xx, _yy = self.detect_peak(pmax=pmax, pmin=pmin, threshold=threshold, except_around=except_around)
 		_xm = np.append(_x, _xx)
