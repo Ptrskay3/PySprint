@@ -496,6 +496,8 @@ class MinMaxMethod(Dataset):
 		For the time being, zooming will not persist, because upon modifying the points we always
 		redraw the plot. Also, zooming will add a new point. We should rethink this and we might find 
 		a better way later on.
+
+		Currently this function is disabled when running it from IPython.
 		"""
 		if run_from_ipython:
 			return '''It seems you run this code in IPython. Interactive functionality does not work properly in Jupyter. Consider running it in console.'''

@@ -31,7 +31,14 @@ def savgol(
 def find_peak(
 	initSpectrumX, initSpectrumY, referenceArmY, sampleArmY,
 	proMax=1, proMin=1, threshold=0.1, except_around=None):   
-
+	if except_around is not None and len(except_around) != 2:
+		raise ValueError('Invalid except_around arg. Try [start, stop].')
+	if except_around is not None:
+		try:
+			float(except_around[0])
+			float(except_around[1])
+		except ValueError:
+			raise ValueError(f'Invalid except_around arg. Only numeric values are allowed.')
 	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
 	maxIndexes, _ = find_peaks(Ydata, prominence=proMax) 
 	Ydata_rec = 1/Ydata
@@ -39,17 +46,16 @@ def find_peak(
 	min_idx = []
 	max_idx = []
 	for idx in maxIndexes:
-		if np.abs(Ydata[idx]) > threshold or between(Xdata[idx], except_around):
+		if between(Xdata[idx], except_around) or np.abs(Ydata[idx]) > threshold:
 			max_idx.append(idx)
 	for idx in minIndexes:
-		if np.abs(Ydata[idx]) > threshold or between(Xdata[idx], except_around):
+		if between(Xdata[idx], except_around) or np.abs(Ydata[idx]) > threshold:
 			min_idx.append(idx)
 
 	if len(Xdata[max_idx]) != len(Ydata[max_idx]) or len(Xdata[min_idx]) != len(Ydata[min_idx]):
 		raise ValueError('Something went wrong, try to cut the edges of data.')
 
 	return Xdata[max_idx], Ydata[max_idx], Xdata[min_idx], Ydata[min_idx]
-
 
 def convolution(
 	initSpectrumX, initSpectrumY, referenceArmY, sampleArmY,
@@ -89,4 +95,3 @@ def cut_data(
 		return Xdata[mask], Ydata[mask]
 	else:
 		pass
-
