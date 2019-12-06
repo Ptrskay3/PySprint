@@ -17,7 +17,7 @@ from scipy.fftpack import fftshift
 from pysprint.core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, ifft_method, spp_method, args_comp, gaussian_window
 from pysprint.core.dataedits import savgol, find_peak, convolution, cut_data
 from pysprint.core.generator import generatorFreq, generatorWave
-from pysprint.utils import print_disp, get_closest
+from pysprint.utils import print_disp, get_closest, run_from_ipython
 
 
 __all__ = ['Generator', 'Dataset', 'MinMaxMethod', 'CosFitMethod', 'SPPMethod', 'FFTMethod']
@@ -497,6 +497,8 @@ class MinMaxMethod(Dataset):
 		redraw the plot. Also, zooming will add a new point. We should rethink this and we might find 
 		a better way later on.
 		"""
+		if run_from_ipython:
+			return '''It seems you run this code in IPython. Interactive functionality does not work properly in Jupyter. Consider running it in console.'''
 		_x, _y, _xx, _yy = self.detect_peak(pmax=pmax, pmin=pmin, threshold=threshold, except_around=except_around)
 		_xm = np.append(_x, _xx)
 		_ym = np.append(_y, _yy)

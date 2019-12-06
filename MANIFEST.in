@@ -1,3 +1,3 @@
 recursive-include pysprint icon.png _settings.ini
 include doc *
-recursive-include pysprint/examples *.txt
+include example_datasets *

@@ -6,7 +6,14 @@ from scipy.interpolate import interp1d
 
 __all__ = ['scipy_disp', 'lmfit_disp', 'findNearest', 'find_closest',
            '_handle_input', 'print_disp', 'fourier_interpolate',
-           'between', 'get_closest']
+           'between', 'get_closest', 'run_from_ipython']
+
+def run_from_ipython():
+    try:
+        __IPYTHON__
+        return True
+    except NameError:
+        return False
 
 def get_closest(xValue, xArray, yArray):
 	idx = (np.abs(xArray-xValue)).argmin()
