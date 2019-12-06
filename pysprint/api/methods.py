@@ -342,6 +342,8 @@ class Dataset(BaseApp):
 		Usually it's a good idea to stay with a low degree, e.g 3 or 5.
 
 		Notes:
+		------
+
 		If arms were given, it will merge them into the self.y and self.y_norm variables.
 		Also applies a linear interpolation on dataset (and raises warning).
 		"""
@@ -368,6 +370,8 @@ class Dataset(BaseApp):
 		Note that giving 9999 will leave original maximum untouched too.
 
 		Notes:
+		------
+
 		If arms were given, it will merge them into the self.y and self.y_norm variables.
 		"""
 		self.x, self.y_norm = cut_data(self.x, self.y, self.ref, self.sam, startValue=start, endValue=stop)
@@ -388,6 +392,8 @@ class Dataset(BaseApp):
 		standard deviation of the gaussian
 
 		Notes:
+		------
+
 		If arms were given, it will merge them into the self.y and self.y_norm variables.
 		Also applies a linear interpolation on dataset (and raises warning).
 		"""
@@ -485,6 +491,8 @@ class MinMaxMethod(Dataset):
 		format is (lower, higher) or [lower, higher].
 
 		Notes:
+		------
+		
 		For the time being, zooming will not persist, because upon modifying the points we always
 		redraw the plot. Also, zooming will add a new point. We should rethink this and we might find 
 		a better way later on.
