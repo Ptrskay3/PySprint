@@ -286,7 +286,8 @@ class Dataset(BaseApp):
 			self.probably_wavelength = False
 
 	@classmethod
-	def parse_raw(cls, basefile, ref=None, sam=None):
+	def parse_raw(cls, basefile, ref=None, sam=None, skiprows=8,
+		decimal=',', sep=';'):
 		'''
 		Dataset object alternative constructor. Helps to load in data just by giving the filenames
 		in the target directory.
@@ -307,10 +308,10 @@ class Dataset(BaseApp):
 		'''
 		with open(basefile) as file:
 			cls._metadata = ''.join(next(file) for _ in range(4))
-		df = pd.read_csv(basefile, skiprows=8, sep = ';', decimal=',', names=['x', 'y'])
+		df = pd.read_csv(basefile, skiprows=skiprows, sep=sep, decimal=decimal, names=['x', 'y'])
 		if (ref and sam) is not None:
-			r = pd.read_csv(ref, skiprows=8, sep = ';', decimal=',', names=['x', 'y'])
-			s = pd.read_csv(sam, skiprows=8, sep = ';', decimal=',', names=['x', 'y'])
+			r = pd.read_csv(ref, skiprows=skiprows, sep=sep, decimal=decimal, names=['x', 'y'])
+			s = pd.read_csv(sam, skiprows=skiprows, sep = sep, decimal=decimal, names=['x', 'y'])
 			return cls(df['x'].values, df['y'].values, r['y'].values, s['y'].values)
 		return cls(df['x'].values, df['y'].values)
 
@@ -593,7 +594,7 @@ class CosFitMethod(Dataset):
 			closest_val, idx1 = find_nearest(x_min, reference_point)
 			m_closest_val, m_idx1 = find_nearest(x_max, reference_point)
 		except ValueError:
-			raise ValueError('No extremal points found. Adjust peak detection parameters.')
+			print('No extremal values found. Adjust pmax, pmin, threshold parameters to find points.\nSkipping.. ')
 		truncated = np.delete(x_min, idx1)
 		second_closest_val, _ = find_nearest(truncated, reference_point)
 		m_truncated = np.delete(x_max, m_idx1)
