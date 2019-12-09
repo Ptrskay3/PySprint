@@ -1,5 +1,8 @@
 """
-CURRENTLY POORLY WRITTEN, BUT IT WORKS.. I WILL UPDATE IT SOON.
+NEED TO IMPLEMENT:
+ - reference point
+ - maximum order to fit
+ - better fit method
 """
 import numpy as np
 from scipy.optimize import curve_fit

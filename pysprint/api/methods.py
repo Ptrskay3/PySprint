@@ -17,7 +17,7 @@ from scipy.fftpack import fftshift
 from pysprint.core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, ifft_method, spp_method, args_comp, gaussian_window
 from pysprint.core.dataedits import savgol, find_peak, convolution, cut_data
 from pysprint.core.generator import generatorFreq, generatorWave
-from pysprint.utils import print_disp, get_closest, run_from_ipython
+from pysprint.utils import print_disp, get_closest, run_from_ipython, findNearest as find_nearest
 
 
 __all__ = ['Generator', 'Dataset', 'MinMaxMethod', 'CosFitMethod', 'SPPMethod', 'FFTMethod']
@@ -224,6 +224,7 @@ class Generator(BaseApp):
 class Dataset(BaseApp):
 	"""
 	Base class for the evaluating methods.
+	FIXME: ADD UNITS
 	"""
 	_metadata = None
 
@@ -255,13 +256,13 @@ class Dataset(BaseApp):
 			try:
 				self.ref = np.array(self.ref)
 				self.ref.astype(float)
-			except Exception:
+			except ValueError:
 				pass
 		if not isinstance(self.sam, np.ndarray):
 			try:
 				self.sam = np.array(self.sam)
 				self.sam.astype(float)
-			except Exception:
+			except ValueError:
 				pass
 		if len(self.ref) == 0:
 			self.y_norm = self.y
@@ -271,6 +272,18 @@ class Dataset(BaseApp):
 		self.plotwidget = plt
 		self.xmin = None
 		self.xmax = None
+		self.probably_wavelength = None
+		self.check_domain()
+
+	def check_domain(self):
+		"""
+		Checks the domain of data just by checking x axis' minimal value is higher than 100.
+		FIXME: Units should be added..
+		"""
+		if min(self.x) > 100:
+			self.probably_wavelength = True
+		else:
+			self.probably_wavelength = False
 
 	@classmethod
 	def parse_raw(cls, basefile, ref=None, sam=None):
@@ -303,14 +316,17 @@ class Dataset(BaseApp):
 
 	def __str__(self):
 		string = f'''
-				{type(self).__name__} object
+{type(self).__name__} object
 
-				Parameters:
-				Datapoints = {len(self.x)}
-				Normalized: {self._is_normalized}
-				Arms are separated: {True if len(self.ref) > 0 else False}
+Parameters
+----------
+Datapoints = {len(self.x)}
+Normalized: {self._is_normalized}
+Arms are separated: {True if len(self.ref) > 0 else False}
+Predicted domain: {'wavelength' if self.probably_wavelength else 'frequency'}
 
-				Metadata extracted from file:
+Metadata extracted from file
+----------------------------
 
 {str(self._metadata)}
 		'''
@@ -326,6 +342,7 @@ class Dataset(BaseApp):
 	def chdomain(self):
 		""" Changes from wavelength [nm] to ang. freq. [PHz] domain and vica versa."""
 		self.x = (2*np.pi*C_LIGHT)/self.x
+		self.check_domain()
 
 	def savgol_fil(self, window=101, order=3):
 		"""
@@ -502,7 +519,7 @@ class MinMaxMethod(Dataset):
 		Currently this function is disabled when running it from IPython.
 		"""
 		if run_from_ipython():
-			return '''It seems you run this code in IPython. Interactive functionality does not work properly in Jupyter. Consider running it in console.'''
+			return '''It seems you run this code in IPython. Interactive plotting is not yet supported. Consider running it in the regular console.'''
 		_x, _y, _xx, _yy = self.detect_peak(pmax=pmax, pmin=pmin, threshold=threshold, except_around=except_around)
 		_xm = np.append(_x, _xx)
 		_ym = np.append(_y, _yy)
@@ -514,8 +531,7 @@ class MinMaxMethod(Dataset):
 		# just in case the default argrelextrema is definitely not called in evaluate.py/min_max_method:
 		self.xmin = _editpeak.get_dat[0][:len(_editpeak.get_dat[0])//2]
 		self.xmax = _editpeak.get_dat[0][len(_editpeak.get_dat[0])//2:] 
-		print('Points were automatically passed to class, ready to calculate.')  
-		print(f'In total {len(_editpeak.get_dat[0])} extremal points were recorded.')
+		print(f'In total {len(_editpeak.get_dat[0])} extremal points were recorded. Ready to calculate.')
 		return _editpeak.get_dat[0]
 
 	@print_disp
@@ -571,11 +587,39 @@ class CosFitMethod(Dataset):
 		self.fit = None
 		self.mt = 8000
 
+	def smart_guess(self, reference_point=2.355, pmax=0.5, pmin=0.5, threshold=0.35):
+		x_min, _, x_max, _ = self.detect_peak(pmax=pmax, pmin=pmin, threshold=threshold)
+		try:
+			closest_val, idx1 = find_nearest(x_min, reference_point)
+			m_closest_val, m_idx1 = find_nearest(x_max, reference_point)
+		except ValueError:
+			raise ValueError('No extremal points found. Adjust peak detection parameters.')
+		truncated = np.delete(x_min, idx1)
+		second_closest_val, _ = find_nearest(truncated, reference_point)
+		m_truncated = np.delete(x_max, m_idx1)
+		m_second_closest_val, _ = find_nearest(m_truncated, reference_point)
+		lowguess = 2*np.pi/np.abs(closest_val-second_closest_val)
+		highguess = 2*np.pi/np.abs(m_closest_val-m_second_closest_val)
+		self.params[3] = (lowguess+highguess)/2
+		print(f'The predicted GD is ± {(lowguess+highguess)/2} based on reference point of {reference_point}.')
+
 	def set_max_tries(self, value):
 		"""
 		Overwrite the default scipy maximum try setting to fit the curve.
 		"""
 		self.mt = value
+
+	def adjust_offset(self, value):
+		"""
+		Initial guess for offset
+		"""
+		self.params[0] = value
+
+	def adjust_amplitude(self, value):
+		"""
+		Initial guess for amplitude
+		"""
+		self.params[1] = value
 
 	def guess_GD(self, value):
 		"""
@@ -800,7 +844,7 @@ class FFTMethod(Dataset):
 		"""
 		Equivalent to scipy.fftpack.fftshift, but it's easier to
 		use this function instead, because we don't need to explicitly
-		call the class's x and y arrays.
+		call the class' x and y attribute.
 		
 		Parameter(s):
 		------------
@@ -864,7 +908,7 @@ class FFTMethod(Dataset):
 		self.std = std
 		self.window_order = window_order
 		gaussian = gaussian_window(self.x, self.at, self.std, self.window_order)
-		self.plotwidget.plot(self.x, gaussian*max(self.y), 'r--')
+		self.plotwidget.plot(self.x, gaussian*max(abs(self.y)), 'r--')
 
 	def apply_window(self):
 		"""
