@@ -30,7 +30,8 @@ def savgol(
 
 def find_peak(
 	initSpectrumX, initSpectrumY, referenceArmY, sampleArmY,
-	proMax=1, proMin=1, threshold=0.1, except_around=None):   
+	proMax=1, proMin=1, threshold=0.1, except_around=None, 
+	rebase=None):   
 	if except_around is not None and len(except_around) != 2:
 		raise ValueError('Invalid except_around arg. Try [start, stop].')
 	if except_around is not None:
@@ -39,6 +40,8 @@ def find_peak(
 			float(except_around[1])
 		except ValueError:
 			raise ValueError(f'Invalid except_around arg. Only numeric values are allowed.')
+	if rebase is not None:
+		pass # TODO
 	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
 	maxIndexes, _ = find_peaks(Ydata, prominence=proMax) 
 	Ydata_rec = 1/Ydata

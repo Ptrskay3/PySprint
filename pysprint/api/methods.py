@@ -22,7 +22,7 @@ from pysprint.utils import print_disp, get_closest, run_from_ipython, findNeares
 
 __all__ = ['Generator', 'Dataset', 'MinMaxMethod', 'CosFitMethod', 'SPPMethod', 'FFTMethod']
 
-C_LIGHT = 299.793 #nm/fs
+C_LIGHT = 299.793 # nm/fs
 
 
 class DatasetError(Exception):
@@ -88,7 +88,7 @@ class Generator(BaseApp):
 	"""
 	def __init__(self, start, stop, center, delay=0,
 		GD=0, GDD=0, TOD=0, FOD=0, QOD=0, resolution=0.1,
-	 	delimiter=',', pulseWidth=10, normalize=False, chirp=0):
+	 	delimiter=',', pulse_width=10, normalize=False, chirp=0):
 		self.start = start
 		self.stop = stop
 		self.center = center
@@ -100,7 +100,7 @@ class Generator(BaseApp):
 		self.QOD = QOD
 		self.resolution = resolution
 		self.delimiter = delimiter
-		self.pulseWidth = pulseWidth
+		self.pulse_width = pulse_Width
 		self.chirp = chirp
 		self.normalize = normalize
 		self.x = np.array([])
@@ -111,12 +111,14 @@ class Generator(BaseApp):
 		self.is_wave = False
 		
 	def __str__(self):
-		return '''Generator({}, {}, {}, delay = {}, GD={}, GDD={}, TOD={}, FOD={}, QOD={}, resolution={}, 
-				  delimiter={}, pulseWidth={}, normalize={})'''.format(self.start, self.stop, self.center,
-				  self.delay, self.GD, self.GDD, self.TOD, self.FOD, self.QOD, self.resolution, 
-				  self.delimiter, self.pulseWidth, self.normalize)
+		return f'''Generator({self.start}, {self.stop}, {self.center}, delay = {self.delay},
+				   GD={self.GD}, GDD={self.GDD}, TOD={self.TOD}, FOD={self.FOD}, QOD={self.QOD}, resolution={self.resolution}, 
+				   delimiter={self.delimiter}, pulse_width={self.pulseWidth}, normalize={self.normalize})'''
 
 	def _check_norm(self):
+		"""
+		Does the normalization when we can.
+		"""
 		if len(self.ref) != 0:
 			self._y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
 
@@ -126,7 +128,7 @@ class Generator(BaseApp):
 		"""
 		self.x, self.y, self.ref, self.sam = generatorFreq(self.start, self.stop, self.center, self.delay, self.GD,
 			self.GDD, self.TOD, self.FOD, self.QOD,
-			self.resolution, self.delimiter, self.pulseWidth, self.normalize, self.chirp)
+			self.resolution, self.delimiter, self.pulse_width, self.normalize, self.chirp)
 
 	def generate_wave(self):
 		"""
@@ -135,7 +137,7 @@ class Generator(BaseApp):
 		self.is_wave = True
 		self.x, self.y, self.ref, self.sam = generatorWave(self.start, self.stop, self.center, self.delay, self.GD,
 			self.GDD, self.TOD, self.FOD, self.QOD,
-			self.resolution, self.delimiter, self.pulseWidth, self.normalize, self.chirp)
+			self.resolution, self.delimiter, self.pulse_width, self.normalize, self.chirp)
 
 	def show(self):
 		"""
@@ -170,30 +172,35 @@ class Generator(BaseApp):
 			np.savetxt('{}.txt'.format(name), np.transpose([self.x, self.y, self.ref, self.sam]), delimiter = self.delimiter)
 			print('Successfully saved as {}'.format(name))
 		else:
-			np.savetxt('{}/{}.txt'.format(path, name), np.transpose([self.x, self.y, self.ref, self.sam]), delimiter = self.delimiter)
-			print('Successfully saved as {}'.format(name))
+			np.savetxt(
+				'{}/{}.txt'.format(path, name),
+				 np.transpose([self.x, self.y, self.ref, self.sam]),
+				 delimiter = self.delimiter
+				 )
+			print(f'Successfully saved as {name}')
 
 	def _phase(self, j):
 		if self.is_wave:
-			lam = np.arange(self.start, self.stop+self.resolution, self.resolution) 
-			omega = (2*np.pi*C_LIGHT)/lam 
-			omega0 = (2*np.pi*C_LIGHT)/self.center 
-			j = omega-omega0
+			lam = np.arange(self.start, self.stop + self.resolution, self.resolution) 
+			omega = (2 * np.pi * C_LIGHT) / lam 
+			omega0 = (2 * np.pi * C_LIGHT) / self.center 
+			j = omega - omega0
 		else:
-			lamend = (2*np.pi*C_LIGHT)/self.start
-			lamstart = (2*np.pi*C_LIGHT)/self.stop
-			lam = np.arange(lamstart, lamend+self.resolution, self.resolution)
-			omega = (2*np.pi*C_LIGHT)/lam 
-			j = omega-self.center
-		return j+self.delay*j+j*self.GD+(self.GDD/2)*j**2+(self.TOD/6)*j**3+(self.FOD/24)*j**4+(self.QOD/120)*j**5
+			lamend = (2 * np.pi * C_LIGHT) / self.start
+			lamstart = (2 * np.pi * C_LIGHT) / self.stop
+			lam = np.arange(lamstart, lamend + self.resolution, self.resolution)
+			omega = (2 * np.pi * C_LIGHT) / lam 
+			j = omega - self.center
+		return (j + self.delay * j + j * self.GD + (self.GDD / 2) * j ** 2 
+			   + (self.TOD / 6)* j ** 3 + (self.FOD / 24) * j ** 4 + (self.QOD / 120) * j ** 5)
 
 	def phase_graph(self):
 		"""
-		Plots the spectrogram and the spectral phase.
+		Plots the spectrogram along with the spectral phase.
 		"""
 		self._check_norm()
-		self.fig, self.ax = self.plotwidget.subplots(2,1, figsize = (8,7))
-		self.plotwidget.subplots_adjust(top = 0.95)
+		self.fig, self.ax = self.plotwidget.subplots(2, 1, figsize=(8, 7))
+		self.plotwidget.subplots_adjust(top=0.95)
 		self.fig.canvas.set_window_title('Spectrum and phase')
 		try:
 			self.ax[0].plot(self.x, self._y, 'r')
@@ -205,7 +212,7 @@ class Generator(BaseApp):
 			raise ValueError('''The spectrum is not generated yet.
 			Use self.generate_freq() on frequency domain or self.generate_wave() on wavelength domain.''')
 		self.ax[0].set(xlabel="Frequency/Wavelength", ylabel="Intensity")
-		self.ax[1].set(xlabel="Frequency/Wavelength", ylabel="$\Phi \t[rad] $")
+		self.ax[1].set(xlabel="Frequency/Wavelength", ylabel="$\Phi $[rad]")
 		self.ax[0].grid()
 		self.ax[1].grid()
 		self.plotwidget.show()
@@ -267,18 +274,18 @@ class Dataset(BaseApp):
 		if len(self.ref) == 0:
 			self.y_norm = self.y
 		else:
-			self.y_norm = (self.y - self.ref - self.sam)/(2  *np.sqrt(self.sam * self.ref))
+			self.y_norm = (self.y - self.ref - self.sam) / (2 * np.sqrt(self.sam * self.ref))
 			self._is_normalized = True
 		self.plotwidget = plt
 		self.xmin = None
 		self.xmax = None
 		self.probably_wavelength = None
-		self.check_domain()
+		self._check_domain()
 
-	def check_domain(self):
+	def _check_domain(self):
 		"""
-		Checks the domain of data just by checking x axis' minimal value is higher than 100.
-		FIXME: Units should be added..
+		Checks the domain of data just by looking at x axis' minimal value.
+		FIXME: Units are obviously not added yet, we work in nm and PHz...
 		"""
 		if min(self.x) > 100:
 			self.probably_wavelength = True
@@ -336,14 +343,14 @@ Metadata extracted from file
 	@property
 	def is_normalized(self):
 		"""
-		Retuns whether the dataset is normalized or not.
+		Retuns whether the dataset is normalized.
 		"""
 		return self._is_normalized
 	
 	def chdomain(self):
 		""" Changes from wavelength [nm] to ang. freq. [PHz] domain and vica versa."""
 		self.x = (2*np.pi*C_LIGHT)/self.x
-		self.check_domain()
+		self._check_domain()
 
 	def savgol_fil(self, window=101, order=3):
 		"""
@@ -396,6 +403,7 @@ Metadata extracted from file
 		self.ref = []
 		self.sam = []
 		self.y = self.y_norm
+		# Just to make sure it's correctly shaped. Later on we might delete this.
 		if type(self).__name__ == 'FFTMethod':
 			self.original_x = self.x
 
@@ -466,7 +474,7 @@ Metadata extracted from file
 		
 	def show(self):
 		"""
-		Draws a graph of the current dataset.
+		Draws a graph of the current dataset using matplotlib.
 		"""
 		if np.iscomplexobj(self.y):
 			self.plotwidget.plot(self.x, np.abs(self.y))
@@ -520,8 +528,12 @@ class MinMaxMethod(Dataset):
 		Currently this function is disabled when running it from IPython.
 		"""
 		if run_from_ipython():
-			return '''It seems you run this code in IPython. Interactive plotting is not yet supported. Consider running it in the regular console.'''
-		_x, _y, _xx, _yy = self.detect_peak(pmax=pmax, pmin=pmin, threshold=threshold, except_around=except_around)
+			return '''It seems you run this code in IPython.
+			Interactive plotting is not yet supported. 
+			Consider running it in the regular console.'''
+		_x, _y, _xx, _yy = self.detect_peak(
+			pmax=pmax, pmin=pmin, threshold=threshold, except_around=except_around
+			)
 		_xm = np.append(_x, _xx)
 		_ym = np.append(_y, _yy)
 		try:
@@ -741,9 +753,9 @@ class SPPMethod(Dataset):
 		self.om = None
 		self.de = None
 		self.bf = None
-		print('With SPP-Method x and y values have a different meaning compared to other methods.')
-		print('\t\tMake sure you put delays to y and frequencies to x:')
-		print('\t\t\t\tSPPMethod(frequencies, delays)')
+		print('''With SPP-Method x and y values have a different meaning compared to other methods.
+		Make sure you put delays to y and frequencies to x:
+		SPPMethod(frequencies, delays)''')
 
 	@classmethod
 	def from_raw(cls, omegas, delays):
