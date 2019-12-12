@@ -87,7 +87,7 @@ class TestEvaluate(unittest.TestCase):
 
 
 	def test_ffts_advanced2(self):
-		g = Generator(2,2.8,2.4, delay=1500, GDD=2000, pulseWidth=25, resolution=0.01)
+		g = Generator(2,2.8,2.4, delay=1500, GDD=2000, pulse_width=25, resolution=0.01)
 		g.generate_freq()
 		a,b = g.unpack()
 		f = FFTMethod(a, b)
@@ -99,7 +99,7 @@ class TestEvaluate(unittest.TestCase):
 		np.testing.assert_array_almost_equal(d, [-1500.01, -1999.79, 0, 0, 0], decimal=2)
 
 	def test_ffts_advanced1(self):
-		g = Generator(2,2.8,2.4, delay = 1500, GD = 200, pulseWidth = 25, resolution = 0.01)
+		g = Generator(2,2.8,2.4, delay = 1500, GD = 200, pulse_width = 25, resolution = 0.01)
 		g.generate_freq()
 		a,b = g.unpack()
 		f = FFTMethod(a, b)
@@ -111,7 +111,7 @@ class TestEvaluate(unittest.TestCase):
 		np.testing.assert_array_almost_equal(d, [-1699.99, 0, 0, 0, 0], decimal=2)
 
 	def test_ffts_advanced3(self):
-		g = Generator(2,2.8,2.4, delay = 1500, TOD = 40000, pulseWidth = 25, resolution = 0.01)
+		g = Generator(2,2.8,2.4, delay = 1500, TOD = 40000, pulse_width = 25, resolution = 0.01)
 		g.generate_freq()
 		a,b = g.unpack()
 		f = FFTMethod(a, b)
@@ -124,7 +124,7 @@ class TestEvaluate(unittest.TestCase):
 
 
 	def test_ffts_advanced4(self):
-		g = Generator(2,2.8,2.4, delay=1500, GDD=2000, FOD=-100000, pulseWidth=25, resolution=0.01)
+		g = Generator(2,2.8,2.4, delay=1500, GDD=2000, FOD=-100000, pulse_width=25, resolution=0.01)
 		g.generate_freq()
 		a,b = g.unpack()
 		f = FFTMethod(a, b)
@@ -136,7 +136,7 @@ class TestEvaluate(unittest.TestCase):
 		np.testing.assert_array_almost_equal(d, [-1500.00, -1999.95, 0.21, 99995.00, 0], decimal=1)
 
 	def test_ffts_advanced5(self):
-		g = Generator(2,2.8,2.4, delay = 1500, QOD = 900000, pulseWidth = 25, resolution = 0.01)
+		g = Generator(2,2.8,2.4, delay = 1500, QOD = 900000, pulse_width = 25, resolution = 0.01)
 		g.generate_freq()
 		a,b = g.unpack()
 		f = FFTMethod(a, b)

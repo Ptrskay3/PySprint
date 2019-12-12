@@ -674,7 +674,6 @@ class CosFitMethod(Dataset):
 
 		order: int
 		maximum order of dispersion to look for. Must be in [1, 5]
-
 		"""
 		if order > 5 or order < 1:
 			print('Order should be an in integer from [1,5], currently {} is given'.format(order))
@@ -883,7 +882,6 @@ class FFTMethod(Dataset):
 
 		interpolate: bool, default is True
 		Whether to apply linear interpolation on the dataset before transforming.
-		
 		"""
 		self._ifft_called_first = True
 		self.x, self.y = ifft_method(self.x, self.y, interpolate=interpolate)
