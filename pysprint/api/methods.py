@@ -742,12 +742,18 @@ class CosFitMethod(Dataset):
 
 	def optimizer(self, reference_point, max_order=3, initial_region_ratio=0.1,
 		extend_by=0.1, coef_threshold=0.3, max_tries=5000, show_endpoint=True):
+		"""
+		Cosine fit optimizer. It's based on adding new terms to fit function successively
+		until we reach the max_order. 
+		"""
 		f = FitOptimizer(self.x, self.y, self.ref, self.sam, reference_point=reference_point,
 		max_order=max_order)
 		f.set_initial_region(initial_region_ratio)
 		f.set_final_guess(GD=self.params[3], GDD=self.params[4], TOD=self.params[5],
 		FOD=self.params[6], QOD=self.params[7]) # we can pass it higher params safely, they are ignored.
 		f.run_loop(extend_by, coef_threshold, max_tries=max_tries, show_endpoint=show_endpoint)
+		del f # FIXME: when calling from IPython notebook multiple times in independet cell, the
+		      # reference_point is subtracted every time. We should take care of that.
 
 class SPPMethod(Dataset):
 	"""
@@ -847,6 +853,7 @@ class SPPMethod(Dataset):
 class FFTMethod(Dataset):
 	"""
 	Basic interface for the Fourier transform method.
+	# FIXME: bug when calling show_graph on calulcate method: it opens up a clean figure.
 	"""
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -934,6 +941,8 @@ class FFTMethod(Dataset):
 		If window function is correctly set, applies changes to the dataset.
 		"""
 		self.plotwidget.clf()
+		self.plotwidget.cla()
+		self.plotwidget.close()
 		self.y = cut_gaussian(self.x, self.y, spike=self.at, sigma=self.std, win_order=self.window_order)
 		
 	@print_disp

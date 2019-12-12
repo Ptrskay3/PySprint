@@ -53,6 +53,9 @@ class FitOptimizer:
 		self.rest = None
 		self.figure = plt.figure
 
+	def __del__(self):
+		self.reference_point = 0 # Because we don't want decrease x again upon new calls.
+
 	def set_final_guess(self, GD, GDD=None, TOD=None, FOD=None, QOD=None):
 		self.p0[3] = GD
 		self.rest = []
@@ -72,8 +75,8 @@ class FitOptimizer:
 	def update_plot(self):
 		plt.clf()
 		plt.plot(self.x, self._y_norm)
-		plt.plot(self._x_curr, self._y_curr, 'k', label='affected')
-		plt.plot(self._x_curr, self.func(self._x_curr, *self.popt), 'r--', label='fit')
+		plt.plot(self._x_curr, self._y_curr, 'k', label='Affected data')
+		plt.plot(self._x_curr, self.func(self._x_curr, *self.popt), 'r--', label='Fit')
 		plt.grid()
 		plt.legend(loc='upper left')
 		plt.draw()
@@ -127,20 +130,20 @@ class FitOptimizer:
 		"""
 		Changes the last parameter randomly, we might get lucky..
 		"""
-		self.p0[-1] = np.random.normal(0, 1, 1) * self.p0[-1]
+		self.p0[-1] = float(np.random.uniform(-1, 1, 1)) * self.p0[-1]
 
 	def _make_fit(self):
 		try:
 			if len(self._x_curr) == len(self.x):
 				return True
 			self.popt, self.pcov = curve_fit(
-				self.func, self._x_curr, self._y_curr, maxfev=10000, p0=self.p0
+				self.func, self._x_curr, self._y_curr, p0=self.p0
 				)
 			self.p0 = self.popt
 		except RuntimeError:
 			self._finetune()
 			self.popt, self.pcov = curve_fit(
-				self.func, self._x_curr, self._y_curr, maxfev=10000, p0=self.p0
+				self.func, self._x_curr, self._y_curr, p0=self.p0
 				)
 
 
@@ -190,6 +193,7 @@ class FitOptimizer:
 
 		while self._fit_goodness() < r_threshold:
 			self._make_fit()
+			# self._finetune() # why does that stops executing?
 			self.counter += 1
 			pbar.update(1)
 			if self.counter == max_tries:
