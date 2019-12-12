@@ -7,14 +7,13 @@ except ImportError:
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-if sys.version_info[:2] < (3, 5):
-    raise RuntimeError("Python version >= 3.5 required.")
+if sys.version_info[:2] < (3, 6):
+    raise RuntimeError("Python version >= 3.6 required.")
 
 MAJOR = 0
 MINOR = 1
 MICRO = 0
-VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
-
+VERSION = f'{MAJOR}.{MINOR}.{MICRO}'
 
 setup(
     name="pysprint",

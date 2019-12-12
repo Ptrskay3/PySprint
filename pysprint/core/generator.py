@@ -62,5 +62,3 @@ def generatorWave(
 		return lam, i, i1, i2
 	else:
 		return lam, i, np.array([]), np.array([])
-
-

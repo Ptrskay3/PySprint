@@ -3,7 +3,6 @@ from functools import wraps
 import numpy as np
 from scipy.interpolate import interp1d
 
-
 __all__ = ['scipy_disp', 'lmfit_disp', 'findNearest', 'find_closest',
            '_handle_input', 'print_disp', 'fourier_interpolate',
            'between', 'get_closest', 'run_from_ipython']
@@ -16,7 +15,7 @@ def run_from_ipython():
         return False
 
 def get_closest(xValue, xArray, yArray):
-	idx = (np.abs(xArray-xValue)).argmin()
+	idx = (np.abs(xArray - xValue)).argmin()
 	value = xArray[idx]
 	return value, yArray[idx], idx
 
@@ -82,7 +81,7 @@ def _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY):
 
 	"""
 	if (len(initSpectrumX) > 0) and (len(referenceArmY) > 0) and (len(sampleArmY) > 0):
-		Ydata = (initSpectrumY-referenceArmY-sampleArmY)/(2*np.sqrt(referenceArmY*sampleArmY))
+		Ydata = (initSpectrumY - referenceArmY - sampleArmY) / (2 * np.sqrt(referenceArmY * sampleArmY))
 	elif (len(referenceArmY) == 0) or (len(sampleArmY) == 0):
 		Ydata = initSpectrumY
 	elif len(initSpectrumX) == 0:
@@ -95,7 +94,7 @@ def _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY):
 
 
 def find_closest(xValue, xArray, yArray):
-	idx = (np.abs(xArray-xValue)).argmin()
+	idx = (np.abs(xArray - xValue)).argmin()
 	value = xArray[idx]
 	return value, yArray[idx]
 
@@ -114,6 +113,6 @@ def print_disp(f):
 def fourier_interpolate(x, y):
     ''' Simple linear interpolation for FFTs'''
     xs = np.linspace(x[0], x[-1], len(x))
-    intp = interp1d(x, y, kind='linear', fill_value = 'extrapolate')
+    intp = interp1d(x, y, kind='linear', fill_value='extrapolate')
     ys = intp(xs)
     return xs, ys

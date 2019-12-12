@@ -1,7 +1,6 @@
 """
 This file is the main API to use Interferometry without the PyQt5 UI.
 """
-
 import sys
 import warnings
 
@@ -17,6 +16,7 @@ from scipy.fftpack import fftshift
 from pysprint.core.evaluate import min_max_method, cff_method, fft_method, cut_gaussian, ifft_method, spp_method, args_comp, gaussian_window
 from pysprint.core.dataedits import savgol, find_peak, convolution, cut_data
 from pysprint.core.generator import generatorFreq, generatorWave
+from pysprint.core.cff_fitting import FitOptimizer
 from pysprint.utils import print_disp, get_closest, run_from_ipython, findNearest as find_nearest
 
 
@@ -676,11 +676,11 @@ class CosFitMethod(Dataset):
 		maximum order of dispersion to look for. Must be in [1, 5]
 		"""
 		if order > 5 or order < 1:
-			print('Order should be an in integer from [1,5], currently {} is given'.format(order))
+			print(f'Order should be an in integer from [1,5], currently {order} is given')
 		try:
 			int(order)
 		except ValueError:
-			print('Order should be an in integer from [1,5], currently {} is given'.format(order))
+			print(f'Order should be an in integer from [1,5], currently {order} is given')
 		order = 6 - order
 		for i in range(1, order):
 			self.params[-i] = 0
@@ -740,6 +740,14 @@ class CosFitMethod(Dataset):
 		else:
 			self.show()
 
+	def optimizer(self, reference_point, max_order=3, initial_region_ratio=0.1,
+		extend_by=0.1, coef_threshold=0.3, max_tries=5000, show_endpoint=True):
+		f = FitOptimizer(self.x, self.y, self.ref, self.sam, reference_point=reference_point,
+		max_order=max_order)
+		f.set_initial_region(initial_region_ratio)
+		f.set_final_guess(GD=self.params[3], GDD=self.params[4], TOD=self.params[5],
+		FOD=self.params[6], QOD=self.params[7]) # we can pass it higher params safely, they are ignored.
+		f.run_loop(extend_by, coef_threshold, max_tries=max_tries, show_endpoint=show_endpoint)
 
 class SPPMethod(Dataset):
 	"""
