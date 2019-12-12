@@ -38,6 +38,7 @@ setup(
         'scipy', 
         'matplotlib',
         'pandas', 
-        'lmfit'
+        'lmfit',
+        'tqdm'
       ],
 )
