@@ -100,7 +100,7 @@ class Generator(BaseApp):
 		self.QOD = QOD
 		self.resolution = resolution
 		self.delimiter = delimiter
-		self.pulse_width = pulse_Width
+		self.pulse_width = pulse_width
 		self.chirp = chirp
 		self.normalize = normalize
 		self.x = np.array([])
