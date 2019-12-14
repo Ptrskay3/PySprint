@@ -1067,4 +1067,4 @@ class EditPeak(object):
 	def get_dat(self):
 		""" Returns the x coordinates of the selected points.
 		We might change it later to return y coords as well."""
-		return self.lins[0].get_data()
+		return self.lins.get_data()
