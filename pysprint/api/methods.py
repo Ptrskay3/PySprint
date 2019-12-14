@@ -6,10 +6,14 @@ import warnings
 
 warnings.filterwarnings("ignore", message="invalid value encountered in sqrt")
 warnings.filterwarnings("ignore", message="divide by zero encountered in true_divide")
+warnings.filterwarnings("ignore", category=UserWarning) # for matplotlib
 
 import numpy as np
+import matplotlib
+matplotlib.rcParams["toolbar"] = "toolmanager"
 import matplotlib.pyplot as plt 
 from matplotlib.backend_bases import MouseButton
+from matplotlib.backend_tools import ToolToggleBase
 import pandas as pd
 from scipy.fftpack import fftshift
 
@@ -24,6 +28,9 @@ __all__ = ['Generator', 'Dataset', 'MinMaxMethod', 'CosFitMethod', 'SPPMethod', 
 
 C_LIGHT = 299.793 # nm/fs
 
+# setting up the IPython notebook
+if run_from_ipython():
+	plt.rcParams['figure.figsize'] = [15, 5]
 
 class DatasetError(Exception):
 	"""
@@ -33,14 +40,14 @@ class DatasetError(Exception):
 	pass
 
 
-class InterpolationWarning(UserWarning):
+class InterpolationWarning(Warning):
 	"""
 	This warning is raised when a function applies linear interpolation on the data.
 	"""
 	pass
 
 
-class FourierWarning(UserWarning):
+class FourierWarning(Warning):
 	"""
 	This warning is raised when FFT is called first instead of IFFT.
 	Later on it will be improved. 
@@ -335,7 +342,6 @@ Predicted domain: {'wavelength' if self.probably_wavelength else 'frequency'}
 
 Metadata extracted from file
 ----------------------------
-
 {str(self._metadata)}
 		'''
 		return string
@@ -599,6 +605,7 @@ class CosFitMethod(Dataset):
 		self.params = [1, 1, 1, 1, 1, 1, 1, 1]
 		self.fit = None
 		self.mt = 8000
+		self.f = None
 
 	def smart_guess(self, reference_point=2.355, pmax=0.5, pmin=0.5, threshold=0.35):
 		x_min, _, x_max, _ = self.detect_peak(pmax=pmax, pmin=pmin, threshold=threshold)
@@ -614,7 +621,7 @@ class CosFitMethod(Dataset):
 		lowguess = 2*np.pi/np.abs(closest_val-second_closest_val)
 		highguess = 2*np.pi/np.abs(m_closest_val-m_second_closest_val)
 		self.params[3] = (lowguess+highguess)/2
-		print(f'The predicted GD is ± {(lowguess+highguess)/2} based on reference point of {reference_point}.')
+		print(f'The predicted GD is ± {((lowguess+highguess)/2):.5f} based on reference point of {reference_point}.')
 
 	def set_max_tries(self, value):
 		"""
@@ -746,14 +753,13 @@ class CosFitMethod(Dataset):
 		Cosine fit optimizer. It's based on adding new terms to fit function successively
 		until we reach the max_order. 
 		"""
-		f = FitOptimizer(self.x, self.y, self.ref, self.sam, reference_point=reference_point,
+		self.f = FitOptimizer(self.x, self.y, self.ref, self.sam, reference_point=reference_point,
 		max_order=max_order)
-		f.set_initial_region(initial_region_ratio)
-		f.set_final_guess(GD=self.params[3], GDD=self.params[4], TOD=self.params[5],
+		self.f.set_initial_region(initial_region_ratio)
+		self.f.set_final_guess(GD=self.params[3], GDD=self.params[4], TOD=self.params[5],
 		FOD=self.params[6], QOD=self.params[7]) # we can pass it higher params safely, they are ignored.
-		f.run_loop(extend_by, coef_threshold, max_tries=max_tries, show_endpoint=show_endpoint)
-		del f # FIXME: when calling from IPython notebook multiple times in independet cell, the
-		      # reference_point is subtracted every time. We should take care of that.
+		self.f.run_loop(extend_by, coef_threshold, max_tries=max_tries, show_endpoint=show_endpoint)
+		del self.f # making sure we don't subtract reference point again
 
 class SPPMethod(Dataset):
 	"""
@@ -991,6 +997,18 @@ class FFTMethod(Dataset):
 			)
 		return dispersion, dispersion_std, fit_report
 
+
+class SelectButton(ToolToggleBase):
+    """
+    Toggle button on matplotlib toolbar.
+    """
+    description = 'Enable click records'
+    default_toggled = True
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
 class EditPeak(object):
 	""" This class helps to record and delete peaks from a dataset.
 	Right clicks will delete the closest (distance is measured with regards to x)
@@ -1009,29 +1027,32 @@ class EditPeak(object):
 		self.y_extremal = y_extremal
 		if not len(self.x_extremal) == len(self.y_extremal):
 			raise ValueError('Data shapes are different')
-		self.lins = plt.plot(self.x_extremal, self.y_extremal, 'ko', markersize=6, zorder=99)
+		self.lins, = plt.plot(self.x_extremal, self.y_extremal, 'ko', markersize=6, zorder=99)
 		plt.grid(alpha=0.7)
+		# adding the button to navigation toolbar
+		tm = self.figure.canvas.manager.toolmanager
+		tm.add_tool('Toggle recording', SelectButton)
+		self.figure.canvas.manager.toolbar.add_tool(tm.get_tool('Toggle recording'), "toolgroup")
+		self.my_select_button = tm.get_tool('Toggle recording')
 		plt.show()
 
 	def on_clicked(self, event):
 	        """ Function to record and discard points on plot."""
 	        ix, iy = event.xdata, event.ydata
-	        if event.button is MouseButton.RIGHT:
-	        	ix, iy, idx = get_closest(ix, self.x_extremal, self.y_extremal)
-	        	self.x_extremal = np.delete(self.x_extremal, idx)
-	        	self.y_extremal = np.delete(self.y_extremal, idx)
-	        elif event.button is MouseButton.LEFT:
-	        	ix, iy, idx = get_closest(ix, self.x, self.y)
-	        	self.x_extremal = np.append(self.x_extremal, ix)
-	        	self.y_extremal = np.append(self.y_extremal, iy)
-	       	else:
-	       		pass
-	        plt.cla()
-	        plt.plot(self.x, self.y, 'r')
-	        self.lins = plt.plot(self.x_extremal, self.y_extremal, 'ko', markersize=6, zorder=99)
-	        plt.grid(alpha=0.7)
-	        plt.draw()
-	        return
+	        if self.my_select_button.toggled:
+		        if event.button is MouseButton.RIGHT:
+		        	ix, iy, idx = get_closest(ix, self.x_extremal, self.y_extremal)
+		        	self.x_extremal = np.delete(self.x_extremal, idx)
+		        	self.y_extremal = np.delete(self.y_extremal, idx)
+		        elif event.button is MouseButton.LEFT:
+		        	ix, iy, idx = get_closest(ix, self.x, self.y)
+		        	self.x_extremal = np.append(self.x_extremal, ix)
+		        	self.y_extremal = np.append(self.y_extremal, iy)
+		       	else:
+		       		pass
+		        self.lins.set_data(self.x_extremal, self.y_extremal)
+		        plt.draw()
+		        return
 
 	def press(self):
 	        """Usual function to connect matplotlib.."""

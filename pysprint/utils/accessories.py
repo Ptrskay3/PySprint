@@ -7,6 +7,7 @@ __all__ = ['scipy_disp', 'lmfit_disp', 'findNearest', 'find_closest',
            '_handle_input', 'print_disp', 'fourier_interpolate',
            'between', 'get_closest', 'run_from_ipython']
 
+
 def run_from_ipython():
     try:
         __IPYTHON__
@@ -103,9 +104,9 @@ def print_disp(f):
     @wraps(f)
     def wrapping(*args, **kwargs):
         disp, disp_std, stri = f(*args, **kwargs)
-        labels = ('GD', 'GDD','TOD', 'FOD', 'QOD')  
+        labels = ('GD', 'GDD','TOD', 'FOD', 'QOD')
         for i, (label, disp_item, disp_std_item) in enumerate(zip(labels, disp, disp_std)):
-             print(f'{label} = {disp_item} ± {disp_std_item} fs^{i+1}')
+             print(f'{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i+1}')
         return disp, disp_std, stri
     return wrapping
 

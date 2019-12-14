@@ -37,7 +37,7 @@ from pysprint.core.cff_fitting import FitOptimizer
 from pysprint.core.dataimport import ImportModel
 from pysprint.utils import find_closest
 
-
+# TODO: this is really dirty, we need to write an os independent function and maybe migrate this to utils
 def getpath():
     p = os.path.dirname(ps.__file__)
     spath = p + '\_settings.ini'
@@ -55,7 +55,6 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     refY = np.array([])
     a = np.array([])
     b = np.array([])
-    temp = np.array([])
     original_x = None
     minx = np.array([])
     maxx = np.array([])
@@ -125,7 +124,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.resize(self.settings.value('main_size', QtCore.QSize(1800, 921)))
         self.move(self.settings.value('main_pos', QtCore.QPoint(50, 50)))
         self.CFF_fitnow.clicked.connect(self.cff_fit)
-        self.cff_autofit.clicked.connect(self.cff_fit_optimizer)
+        # self.cff_autofit.clicked.connect(self.cff_fit_optimizer)
+        self.cff_autofit.setText('Not implemented')
         self.drop_arms.clicked.connect(self.drop_arms_func)
         QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+G"), self, self.open_generator)
 
@@ -251,9 +251,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         """ Changes the x and y axis"""
         self.tableWidget.setRowCount(0)
         if len(self.a)>0:
-            self.temp = self.a
-            self.a = self.b
-            self.b = self.temp
+            self.a, self.b = self.b, self.a
             self.redraw_graph()
             self.fill_table()
 
@@ -367,7 +365,6 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.original_x = None
         self.minx = []
         self.maxx = []
-        self.temp = []
         self.arms_separate.setChecked(False)
         self.data_length.setText('0')
         self.MplWidget.canvas.axes.clear()
@@ -552,7 +549,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.MplWidget.canvas.axes.grid()
             self.MplWidget.canvas.draw()
 
-
+    # TODO: rewrite these two..
     @pyqtSlot(float)
     def ref_arm_clicked(self, refX, refY):
         """ Loads in the reference arm data"""
@@ -602,8 +599,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.tableWidget.resizeColumnsToContents()
         self.tableWidget.resizeRowsToContents()
 
-
-    @pyqtSlot(float) 
+    # TODO: need to change that along with read_data
+    @pyqtSlot(float)
     def load_data(self, a, b): 
         """ Loads in the data with AI. If that fails, loads in manually with np.loadtxt."""
         self.data_length.setText('0')
@@ -625,7 +622,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.msg_output(e)
                     
                 
-   
+   # TODO: rewrite the calibration in a separate functions (also needs to be immutable type) and use f-strings.
     @waiting_effects
     def get_it(self):
         """ If everything's set, calculates the dispersion."""
@@ -730,8 +727,10 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         except Exception:
             pass
 
+
+
     @waiting_effects
-    def cff_fit(self):
+    def cff_fit(self):     
         if self.initGD.text() == '':
             self.initGD.setText('1')
         if self.initGDD.text() == '':
@@ -749,7 +748,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         if self.CFF_c2.text()== '':
             self.CFF_c2.setText('1')
         if self.CFF_ref.text() == '':
-            self.CFF_ref.setText('2.5')
+            self.CFF_ref.setText('2.355')
         try:
             disp, curr_fit = cff_method(self.a, self.b ,self.refY, self.samY, float(self.CFF_ref.text()),
                               p0=[float(self.CFF_c1.text()), float(self.CFF_c2.text()), float(self.CFF_b0.text()), float(self.initGD.text()),
@@ -760,12 +759,14 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.MplWidget.canvas.draw()
         except Exception as e:
             self.msg_output(e)
+            
 
 
-#fix: is it ok?
+    #TODO: This need to be completely changed, since cff fitting changed too.
     @waiting_effects
     def cff_fit_optimizer(self):
-        self.redraw_graph()
+        pass
+        """self.redraw_graph()
         if self.initGD.text() == '':
             self.initGD.setText('1')
         if self.initGDD.text() == '':
@@ -858,6 +859,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
 
         except Exception as e:
         	self.msg_output('{}\n Optimal parameters could not be estimated.'.format(str(e)))
+            """
 
 
 class HelpWindow(QtWidgets.QMainWindow, Help):
@@ -1093,7 +1095,6 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
 
     def on_clicked(self, event):
         """ Function to record clicks on plot."""
-        global ix, iy
         ix, iy = event.xdata, event.ydata
         curr = self.treeWidget.currentIndex().row()
         x = self.xData[curr]

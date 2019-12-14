@@ -55,6 +55,10 @@ class FitOptimizer:
 
 	def __del__(self):
 		self.reference_point = 0 # Because we don't want decrease x again upon new calls.
+		self.x = None
+		self.y = None
+		self.ref = None
+		self.sam = None
 
 	def set_final_guess(self, GD, GDD=None, TOD=None, FOD=None, QOD=None):
 		self.p0[3] = GD
@@ -160,13 +164,12 @@ class FitOptimizer:
 		labels = ('GD', 'GDD', 'TOD', 'FOD', 'QOD')
 		params = self.p0[3:]
 		for i, (label, param) in enumerate(zip(labels, params)):
-			print(f'{label} = {params[i]*factorial(i+1)} fs^{i + 1}')
+			print(f'{label} = {(params[i]*factorial(i+1)):.5f} fs^{i + 1}')
 
 	def run_loop(
 		self, r_extend_by, r_threshold,
 		max_tries=5000, show_endpoint=True
 		):
-		print('__Optimizer__')
 		pbar = tqdm(total=max_tries)
 		if self._init_set is False:
 			raise ValueError('Set the initial conditions.')
@@ -182,7 +185,7 @@ class FitOptimizer:
 				if show_endpoint:
 					self.update_plot()
 				self.result_wrapper()
-				print(f'with r^2 = {self._fit_goodness()}.')
+				print(f'with r^2 = {(self._fit_goodness()):.5f}.')
 				return self.popt
 			if self.counter == max_tries:
 				if show_endpoint:
