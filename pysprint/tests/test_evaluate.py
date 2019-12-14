@@ -153,7 +153,7 @@ class TestEvaluate(unittest.TestCase):
 		assert len(b) == len(y_data)
 		np.testing.assert_almost_equal(y_data[0], 0)
 		np.testing.assert_almost_equal(y_data[-1], 0)
-		np.testing.assert_almost_equal(np.median(y_data), np.median(b), decimal = 2)
+		np.testing.assert_almost_equal(np.median(y_data), np.median(b), decimal=2)
 
 	def test_spp(self):
 		pass
