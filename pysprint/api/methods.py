@@ -6,14 +6,9 @@ import warnings
 
 warnings.filterwarnings("ignore", message="invalid value encountered in sqrt")
 warnings.filterwarnings("ignore", message="divide by zero encountered in true_divide")
-warnings.filterwarnings("ignore", category=UserWarning) # for matplotlib
 
 import numpy as np
-import matplotlib
-matplotlib.rcParams["toolbar"] = "toolmanager"
 import matplotlib.pyplot as plt 
-from matplotlib.backend_bases import MouseButton
-from matplotlib.backend_tools import ToolToggleBase
 import pandas as pd
 from scipy.fftpack import fftshift
 
@@ -21,7 +16,8 @@ from pysprint.core.evaluate import min_max_method, cff_method, fft_method, cut_g
 from pysprint.core.dataedits import savgol, find_peak, convolution, cut_data
 from pysprint.core.generator import generatorFreq, generatorWave
 from pysprint.core.cff_fitting import FitOptimizer
-from pysprint.utils import print_disp, get_closest, run_from_ipython, findNearest as find_nearest
+from pysprint.core.peak import EditPeak
+from pysprint.utils import print_disp, run_from_ipython, findNearest as find_nearest
 
 
 __all__ = ['Generator', 'Dataset', 'MinMaxMethod', 'CosFitMethod', 'SPPMethod', 'FFTMethod']
@@ -996,75 +992,3 @@ class FFTMethod(Dataset):
 			self.x, self.y, reference_point=reference_point, fitOrder=fit_order, showGraph=show_graph
 			)
 		return dispersion, dispersion_std, fit_report
-
-
-class SelectButton(ToolToggleBase):
-    """
-    Toggle button on matplotlib toolbar.
-    """
-    description = 'Enable click records'
-    default_toggled = True
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-
-class EditPeak(object):
-	""" This class helps to record and delete peaks from a dataset.
-	Right clicks will delete the closest (distance is measured with regards to x)
-	extremal point found on the graph, left clicks will add a new point.
-	Edits can be saved by just closing the matplotlib window.
-	Returns the x coordinates of the selected points.
-	Note that this class shouldn't be explicitly called by the user."""
-	def __init__(self, x, y, x_extremal=None, y_extremal=None):
-		self.x = x
-		self.y = y
-		self.figure = plt.figure()
-		self.press()
-		plt.plot(self.x, self.y, 'r')
-		self.cid = None
-		self.x_extremal = x_extremal
-		self.y_extremal = y_extremal
-		if not len(self.x_extremal) == len(self.y_extremal):
-			raise ValueError('Data shapes are different')
-		self.lins, = plt.plot(self.x_extremal, self.y_extremal, 'ko', markersize=6, zorder=99)
-		plt.grid(alpha=0.7)
-		# adding the button to navigation toolbar
-		tm = self.figure.canvas.manager.toolmanager
-		tm.add_tool('Toggle recording', SelectButton)
-		self.figure.canvas.manager.toolbar.add_tool(tm.get_tool('Toggle recording'), "toolgroup")
-		self.my_select_button = tm.get_tool('Toggle recording')
-		plt.show()
-
-	def on_clicked(self, event):
-	        """ Function to record and discard points on plot."""
-	        ix, iy = event.xdata, event.ydata
-	        if self.my_select_button.toggled:
-		        if event.button is MouseButton.RIGHT:
-		        	ix, iy, idx = get_closest(ix, self.x_extremal, self.y_extremal)
-		        	self.x_extremal = np.delete(self.x_extremal, idx)
-		        	self.y_extremal = np.delete(self.y_extremal, idx)
-		        elif event.button is MouseButton.LEFT:
-		        	ix, iy, idx = get_closest(ix, self.x, self.y)
-		        	self.x_extremal = np.append(self.x_extremal, ix)
-		        	self.y_extremal = np.append(self.y_extremal, iy)
-		       	else:
-		       		pass
-		        self.lins.set_data(self.x_extremal, self.y_extremal)
-		        plt.draw()
-		        return
-
-	def press(self):
-	        """Usual function to connect matplotlib.."""
-	        self.cid = self.figure.canvas.mpl_connect('button_press_event', self.on_clicked)
-
-	def release(self):
-	        """ On release functionality. It's never called in the API, 
-	        just here for the GUI later.."""
-	        self.figure.canvas.mpl_disconnect(self.cid)
-
-	@property
-	def get_dat(self):
-		""" Returns the x coordinates of the selected points.
-		We might change it later to return y coords as well."""
-		return self.lins.get_data()
