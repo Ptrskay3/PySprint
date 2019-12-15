@@ -1,7 +1,6 @@
 __all__ = ['ImportModel']
 
 import numpy as np
-from pysprint.core.loading import read_data
 
 class InvalidCommand(Exception):
 	pass

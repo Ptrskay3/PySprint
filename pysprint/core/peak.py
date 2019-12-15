@@ -23,30 +23,39 @@ class SelectButton(ToolToggleBase):
 
 
 class EditPeak(object):
-	""" This class helps to record and delete peaks from a dataset.
+	"""
+	This class helps to record and delete peaks from a dataset.
 	Right clicks will delete the closest (distance is measured with regards to x)
 	extremal point found on the graph, left clicks will add a new point.
 	Edits can be saved by just closing the matplotlib window.
 	Returns the x coordinates of the selected points.
-	Note that this class shouldn't be explicitly called by the user."""
+	Note that this class shouldn't be explicitly called by the user.
+	"""
 	def __init__(self, x, y, x_extremal=None, y_extremal=None):
+
+		# This is here because other figures are not affected by this.
 		matplotlib.rcParams["toolbar"] = "toolmanager"
+		
+		self.figure = plt.figure()
+		self.cid = None
 		self.x = x
 		self.y = y
-		self.figure = plt.figure()
-		self.press()
 		plt.plot(self.x, self.y, 'r')
-		self.cid = None
 		self.x_extremal = x_extremal
 		self.y_extremal = y_extremal
 		if not len(self.x_extremal) == len(self.y_extremal):
 			raise ValueError('Data shapes are different')
-		self.lins, = plt.plot(self.x_extremal, self.y_extremal, 'ko', markersize=6, zorder=99)
+		self.press()
+		self.lins, = plt.plot(
+			self.x_extremal, self.y_extremal, 'ko', markersize=6, zorder=99
+			)
 		plt.grid(alpha=0.7)
 		# adding the button to navigation toolbar
 		tm = self.figure.canvas.manager.toolmanager
 		tm.add_tool('Toggle recording', SelectButton)
-		self.figure.canvas.manager.toolbar.add_tool(tm.get_tool('Toggle recording'), "toolgroup")
+		self.figure.canvas.manager.toolbar.add_tool(
+			tm.get_tool('Toggle recording'), "toolgroup"
+			)
 		self.my_select_button = tm.get_tool('Toggle recording')
 		plt.show()
 
@@ -70,15 +79,16 @@ class EditPeak(object):
 
 	def press(self):
 	        """Usual function to connect matplotlib.."""
-	        self.cid = self.figure.canvas.mpl_connect('button_press_event', self.on_clicked)
+	        self.cid = self.figure.canvas.mpl_connect(
+	        	'button_press_event', self.on_clicked
+	        	)
 
 	def release(self):
-	        """ On release functionality. It's never called in the API, 
-	        just here for the GUI later.."""
+	        """ On release functionality. It's never called but we will
+	        need this later on.."""
 	        self.figure.canvas.mpl_disconnect(self.cid)
 
 	@property
 	def get_dat(self):
-		""" Returns the x coordinates of the selected points.
-		We might change it later to return y coords as well."""
+		""" Returns the the selected points."""
 		return self.lins.get_data()

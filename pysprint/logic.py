@@ -4,6 +4,7 @@ The main logic behind the UI functions.
 """
 import os
 import sys
+from datetime import datetime
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QMainWindow, QDialogButtonBox, QApplication,
@@ -15,7 +16,6 @@ from PyQt5.QtCore import Qt, pyqtSignal, QObject, pyqtSlot, QSettings
 from PyQt5.QtGui import QIcon, QCursor, QKeySequence
 
 import numpy as np
-from datetime import datetime
 import matplotlib
 
 import pysprint as ps 
@@ -30,7 +30,7 @@ from pysprint.core.evaluate import (min_max_method, cff_method, fft_method,
      cut_gaussian, gaussian_window , ifft_method, spp_method, args_comp,
      cos_fit1, cos_fit2, cos_fit3, cos_fit5, cos_fit4)
 from pysprint.core.dataedits import (savgol, find_peak, convolution, 
-     interpolate_data, cut_data)#, cwt)
+     interpolate_data, cut_data)
 from pysprint.core.loading import read_data
 from pysprint.core.generator import generatorFreq, generatorWave
 from pysprint.core.cff_fitting import FitOptimizer
@@ -125,7 +125,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.move(self.settings.value('main_pos', QtCore.QPoint(50, 50)))
         self.CFF_fitnow.clicked.connect(self.cff_fit)
         # self.cff_autofit.clicked.connect(self.cff_fit_optimizer)
-        self.cff_autofit.setText('Not implemented')
+        self.cff_autofit.setText('Autofit')
+        self.cff_autofit.setEnabled(False)
         self.drop_arms.clicked.connect(self.drop_arms_func)
         QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+G"), self, self.open_generator)
 
@@ -169,9 +170,10 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     	self.window5 = ImportPage(self)
     	self.window5.show()
 
-    def msg_output(self, text):
+    def msg_output(self, text, clear_previous=True):
         """ Prints to the log dialog"""
-        self.logOutput.clear()
+        if clear_previous:
+            self.logOutput.clear()
         self.logOutput.insertPlainText('\n' + str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + ':')
         self.logOutput.insertPlainText('\n {}\n\n'.format(str(text)))
         self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
@@ -197,13 +199,14 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 QApplication.restoreOverrideCursor()
         return new_function
 
+    def replace_empty(self, box, value):
+        if box.text() == '':
+            box.setText(str(value))
+
     def show_window(self):
-        if self.gaussianCut.text() == '':
-            self.gaussianCut.setText('1000')
-        if self.gaussianCut2.text() == '':
-            self.gaussianCut2.setText('900')
-        if self.window_order.text() == '':
-            self.window_order.setText('6')
+        self.replace_empty(self.gaussianCut, 1000)
+        self.replace_empty(self.gaussianCut2, 1000)
+        self.replace_empty(self.window_order, 6)
         try:
         	gaussian = gaussian_window(self.a, float(self.gaussianCut.text()), float(self.gaussianCut2.text()),
         		int(self.window_order.text()))
@@ -216,12 +219,9 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
 
     def gauss_cut_func(self):
         """ On FFT tab perfoms a cut with custom order gaussian """
-        if self.gaussianCut.text() == '':
-            self.gaussianCut.setText('100')
-        if self.gaussianCut2.text() == '':
-            self.gaussianCut2.setText('40')
-        if self.window_order.text() == '':
-            self.window_order.setText('6')
+        self.replace_empty(self.gaussianCut, 1000)
+        self.replace_empty(self.gaussianCut2, 1000)
+        self.replace_empty(self.window_order, 6)
         if len(self.a)>0 and len(self.b)>0:
             xx = cut_gaussian(self.a ,self.b, spike= float(self.gaussianCut.text()), sigma = float(self.gaussianCut2.text()),
                               win_order = int(self.window_order.text()))
@@ -258,12 +258,9 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     def commit_to_data(self):
         """ On the data manipulation tab applies the current function with the given parameters to the loaded dataset."""
         if self.editTab.currentIndex() == 1:
-            if self.peaksMax.text() == '':
-                self.peaksMax.setText('0.1')
-            if self.peaksMin.text() == '':
-                self.peaksMin.setText('0.1')
-            if self.peaksThreshold.text() == '':
-                self.peaksThreshold.setText('0.1')
+            self.replace_empty(self.peaksMax, 0.1)
+            self.replace_empty(self.peaksMin, 0.1)
+            self.replace_empty(self.peaksThreshold, 0.1)
             try:
                 if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
                     j, k, l, m = find_peak(self.a, self.b, self.refY, self.samY, proMax = float(self.peaksMax.text()),
@@ -283,11 +280,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
 
 
         if self.editTab.currentIndex() == 0:
-            if self.savgolWindow.text() == '':
-                self.savgolWindow.setText('51')
-            if self.savgolOrder.text() == '':
-                self.savgolOrder.setText('3')
-
+            self.replace_empty(self.savgolWindow, 21)
+            self.replace_empty(self.savgolOrder, 3)
             if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
                 if len(self.a) == len(self.refY) and len(self.a) == len(self.samY):
                     self.a, self.b = savgol(self.a, self.b ,self.refY, self.samY, window = int(self.savgolWindow.text()), 
@@ -308,10 +302,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.redraw_graph()
 
         if self.editTab.currentIndex() == 2:
-            if self.convolutionStd.text() == '':
-                self.convolutionStd.setText('5')
-            if self.convolutionWindow.text() == '':
-                self.convolutionWindow.setText(str(len(self.a)//10))
+            self.replace_empty(self.convolutionStd, 5)
+            self.replace_empty(self.convolutionWindow, len(self.a)//10)
             if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
                 if len(self.a) == len(self.refY) and len(self.a) == len(self.samY):
                     self.a, self.b = convolution(self.a, self.b, self.refY, self.samY, int(self.convolutionWindow.text()), standev = float(self.convolutionStd.text()))
@@ -330,11 +322,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.redraw_graph()
         
         if self.editTab.currentIndex() == 3:
-            if self.sliceStart.text() =='':
-                self.sliceStart.setText('-9999')
-            if self.sliceStop.text() == '':
-                self.sliceStop.setText('9999')
-
+            self.replace_empty(self.sliceStart, -9999)
+            self.replace_empty(self.sliceStop, 9999)            
             if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
                 if len(self.a) == len(self.refY) and len(self.a) == len(self.b):
                     self.a, self.b = cut_data(self.a, self.b, self.refY, self.samY, startValue = float(self.sliceStart.text()),
@@ -379,12 +368,9 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     def apply_on_plot(self):
         """ On the data manipulation tab applies the current function but only shows the plot and doesn't commit the changes."""
         if self.editTab.currentIndex() == 1:
-            if self.peaksMax.text() == '':
-                self.peaksMax.setText('0.1')
-            if self.peaksMin.text() == '':
-                self.peaksMin.setText('0.1')
-            if self.peaksThreshold.text() == '':
-                self.peaksThreshold.setText('0.1')
+            self.replace_empty(self.peaksMax, 0.1)
+            self.replace_empty(self.peaksMin, 0.1)
+            self.replace_empty(self.peaksThreshold, 0.1)
             try:
                 if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
                     self.MplWidget.canvas.axes.clear()
@@ -416,10 +402,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
 
         if self.editTab.currentIndex() == 0:
 
-            if self.savgolWindow.text() == '':
-                self.savgolWindow.setText('51')
-            if self.savgolOrder.text() == '':
-                self.savgolOrder.setText('3')
+            self.replace_empty(self.savgolWindow, 21)
+            self.replace_empty(self.savgolOrder, 3)
 
             if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
                 self.MplWidget.canvas.axes.clear()
@@ -454,10 +438,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                     self.msg_output('Polynomial order must be less than window.')
 
         if self.editTab.currentIndex() == 2:
-            if self.convolutionStd.text() == '':
-                self.convolutionStd.setText('5')
-            if self.convolutionWindow.text() == '':
-                self.convolutionWindow.setText(str(len(self.a)//10))
+            self.replace_empty(self.convolutionStd, 5)
+            self.replace_empty(self.convolutionWindow, len(self.a)//10)
             if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
                 self.MplWidget.canvas.axes.clear()
                 if len(self.a) == len(self.refY) and len(self.a) == len(self.samY):
@@ -482,10 +464,8 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 self.MplWidget.canvas.draw()
 
         if self.editTab.currentIndex() == 3:
-            if self.sliceStart.text() =='':
-                self.sliceStart.setText('-9999')
-            if self.sliceStop.text() == '':
-                self.sliceStop.setText('9999')
+            self.replace_empty(self.sliceStart, -9999)
+            self.replace_empty(self.sliceStop, 9999) 
 
             if len(self.a) > 0 and len(self.refY)>0 and len(self.samY)>0:
                 if len(self.a) == len(self.refY) and len(self.a) == len(self.samY):
@@ -549,7 +529,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             self.MplWidget.canvas.axes.grid()
             self.MplWidget.canvas.draw()
 
-    # TODO: rewrite these two..
+    # TODO: rewrite these two.. also no need for pyqtSlot
     @pyqtSlot(float)
     def ref_arm_clicked(self, refX, refY):
         """ Loads in the reference arm data"""
@@ -627,8 +607,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
     def get_it(self):
         """ If everything's set, calculates the dispersion."""
         if self.methodWidget.currentIndex() == 2:
-            if self.mmPoly.text() == '':
-                self.mmPoly.setText('5')
+            self.replace_empty(self.mmPoly, 5)
             try:
                 disp, disp_std, fit_report = min_max_method(self.a, self.b,  self.refY, self.samY, float(self.getSPP.text()), self.maxx, self.minx,
                     int(self.mmPoly.text()), showGraph = self.checkGraph.isChecked())
@@ -641,31 +620,22 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
                 if self.printCheck.isChecked():
                     self.msg_output(str('Using Min-max method.. \n ' + fit_report))
                 for item in range(len(disp)):
-                    self.logOutput.insertPlainText(' '+ labels[item] +' =  ' + str(float(disp[item])-float(calibrate_label[item])) +' +/- ' 
+                    self.logOutput.insertPlainText(' ' + labels[item] +' =  ' + str(float(disp[item])-float(calibrate_label[item])) +' +/- ' 
                                                    + str(float(disp_std[item]) + float(calibrate_std_label[item]) ) + ' fs^'+str(item+1)+'\n')
 
                 self.logOutput.verticalScrollBar().setValue(self.logOutput.verticalScrollBar().maximum())
             except Exception as e:
                 self.msg_output(str(e))
         if self.methodWidget.currentIndex() == 1:
-            if self.initGD.text() == '':
-                self.initGD.setText('1')
-            if self.initGDD.text() == '':
-                self.initGDD.setText('1')
-            if self.initTOD.text() == '':
-                self.initTOD.setText('1')
-            if self.initFOD.text() == '':
-                self.initFOD.setText('1')
-            if self.initQOD.text() == '':
-                self.initQOD.setText('1')
-            if self.CFF_b0.text()== '':
-                self.CFF_b0.setText('1')
-            if self.CFF_c1.text()== '':
-                self.CFF_c1.setText('1')
-            if self.CFF_c2.text()== '':
-                self.CFF_c2.setText('1')
-            if self.CFF_ref.text() == '':
-                self.CFF_ref.setText('2.5')
+            self.replace_empty(self.initGD, 1)
+            self.replace_empty(self.initGDD, 1)
+            self.replace_empty(self.initTOD, 1)
+            self.replace_empty(self.initFOD, 1)
+            self.replace_empty(self.initQOD, 1)
+            self.replace_empty(self.CFF_b0, 1)
+            self.replace_empty(self.CFF_c1, 1)
+            self.replace_empty(self.CFF_c2, 1)
+            self.replace_empty(self.CFF_ref, 2.355)
             try:
                 cFF, _ = cff_method(self.a, self.b ,self.refY, self.samY, float(self.CFF_ref.text()),
                     p0=[float(self.CFF_c1.text()),float(self.CFF_c2.text()),float(self.CFF_b0.text()), float(self.initGD.text()),
@@ -731,24 +701,15 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
 
     @waiting_effects
     def cff_fit(self):     
-        if self.initGD.text() == '':
-            self.initGD.setText('1')
-        if self.initGDD.text() == '':
-            self.initGDD.setText('1')
-        if self.initTOD.text() == '':
-            self.initTOD.setText('1')
-        if self.initFOD.text() == '':
-            self.initFOD.setText('1')
-        if self.initQOD.text() == '':
-            self.initQOD.setText('1')
-        if self.CFF_b0.text()== '':
-            self.CFF_b0.setText('1')
-        if self.CFF_c1.text()== '':
-            self.CFF_c1.setText('1')
-        if self.CFF_c2.text()== '':
-            self.CFF_c2.setText('1')
-        if self.CFF_ref.text() == '':
-            self.CFF_ref.setText('2.355')
+        self.replace_empty(self.initGD, 1)
+        self.replace_empty(self.initGDD, 1)
+        self.replace_empty(self.initTOD, 1)
+        self.replace_empty(self.initFOD, 1)
+        self.replace_empty(self.initQOD, 1)
+        self.replace_empty(self.CFF_b0, 1)
+        self.replace_empty(self.CFF_c1, 1)
+        self.replace_empty(self.CFF_c2, 1)
+        self.replace_empty(self.CFF_ref, 2.355)
         try:
             disp, curr_fit = cff_method(self.a, self.b ,self.refY, self.samY, float(self.CFF_ref.text()),
                               p0=[float(self.CFF_c1.text()), float(self.CFF_c2.text()), float(self.CFF_b0.text()), float(self.initGD.text()),
@@ -762,7 +723,7 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
             
 
 
-    #TODO: This need to be completely changed, since cff fitting changed too.
+    #TODO: This needs to be completely changed, since cff fitting changed too.
     @waiting_effects
     def cff_fit_optimizer(self):
         pass
