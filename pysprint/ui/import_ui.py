@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'imp_ui.ui'
-#
-# Created by: PyQt5 UI code generator 5.13.1
-#
-# WARNING! All changes made in this file will be lost!
-
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
@@ -62,31 +55,48 @@ class Ui_ImportPage(object):
         self.gridLayout = QtWidgets.QGridLayout(self.groupBox)
         self.gridLayout.setObjectName("gridLayout")
         self.label_3 = QtWidgets.QLabel(self.groupBox)
+        self.label_4 = QtWidgets.QLabel(self.groupBox)
+        self.label_5 = QtWidgets.QLabel(self.groupBox)
         self.label_3.setObjectName("label_3")
-        self.gridLayout.addWidget(self.label_3, 1, 0, 1, 1)
-        self.imp_header = QtWidgets.QComboBox(self.groupBox)
-        self.imp_header.setObjectName("imp_header")
-        self.imp_header.addItem("")
-        self.imp_header.addItem("")
+        self.gridLayout.addWidget(self.label_3, 3, 0, 1, 1)
+        self.gridLayout.addWidget(self.label_4, 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.label_5, 2, 0, 1, 1)
+
+        self.imp_header = QtWidgets.QLineEdit(self.groupBox)
+        self.imp_header.setAlignment(QtCore.Qt.AlignCenter)
+        self.imp_header.setClearButtonEnabled(True)
+        self.imp_decimal = QtWidgets.QLineEdit(self.groupBox)
+        self.imp_decimal.setAlignment(QtCore.Qt.AlignCenter)
+        self.imp_decimal.setClearButtonEnabled(True)
+        self.imp_sep = QtWidgets.QLineEdit(self.groupBox)
+        self.imp_sep.setAlignment(QtCore.Qt.AlignCenter)
+        self.imp_sep.setClearButtonEnabled(True)
+        self.gridLayout.addWidget(self.imp_sep, 2, 1, 1, 1)
+        self.gridLayout.addWidget(self.imp_decimal, 1, 1, 1, 1)
         self.gridLayout.addWidget(self.imp_header, 0, 1, 1, 1)
+        
         self.label = QtWidgets.QLabel(self.groupBox)
         self.label.setObjectName("label")
         self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
         self.imp_commit = QtWidgets.QPushButton(self.groupBox)
         self.imp_commit.setObjectName("imp_commit")
-        self.gridLayout.addWidget(self.imp_commit, 3, 1, 1, 1)
+        self.gridLayout.addWidget(self.imp_commit, 5, 1, 1, 1)
         self.imp_command = QtWidgets.QTextEdit(self.groupBox)
         font = QtGui.QFont()
         font.setPointSize(10)
         self.imp_command.setFont(font)
         self.imp_command.setObjectName("imp_command")
-        self.gridLayout.addWidget(self.imp_command, 1, 1, 1, 1)
+
+        self.gridLayout.addWidget(self.imp_command, 3, 1, 1, 1)
+        
         self.imp_put = QtWidgets.QTextEdit(self.groupBox)
         self.imp_put.setObjectName("imp_put")
-        self.gridLayout.addWidget(self.imp_put, 2, 1, 1, 1)
+        
+        self.gridLayout.addWidget(self.imp_put, 4, 1, 1, 1)
+
         self.label_2 = QtWidgets.QLabel(self.groupBox)
         self.label_2.setObjectName("label_2")
-        self.gridLayout.addWidget(self.label_2, 2, 0, 1, 1)
+        self.gridLayout.addWidget(self.label_2, 4, 0, 1, 1)
         self.gridLayout_2.addWidget(self.groupBox, 1, 1, 1, 1)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
@@ -124,10 +134,10 @@ class Ui_ImportPage(object):
         item.setText(_translate("ImportPage", "sample"))
         self.groupBox.setTitle(_translate("ImportPage", "Behaviour"))
         self.label_3.setText(_translate("ImportPage", "Command line"))
-        self.imp_header.setItemText(0, _translate("ImportPage", "None"))
-        self.imp_header.setItemText(1, _translate("ImportPage", "1st row"))
-        self.label.setText(_translate("ImportPage", "Header mode(not implemented)"))
-        self.imp_commit.setText(_translate("ImportPage", "Commit"))
+        self.label_4.setText(_translate("ImportPage", "Decimal"))
+        self.label_5.setText(_translate("ImportPage", "Separator"))
+        self.label.setText(_translate("ImportPage", "Skip rows at top"))
+        self.imp_commit.setText(_translate("ImportPage", "Execute"))
 #         self.imp_command.setHtml(_translate("ImportPage", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 # "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 # "p, li { white-space: pre-wrap; }\n"

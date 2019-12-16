@@ -41,8 +41,8 @@ class FitOptimizer:
 			self._y_norm = self.y
 		else:
 			self._y_norm = (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
-		self.x -= reference_point
 		self.reference_point = reference_point
+		self.x -= self.reference_point
 		self.func = cos_fit1
 		self.p0 = [1, 1, 1, 1]
 		self.popt = self.p0

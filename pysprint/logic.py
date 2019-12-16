@@ -129,7 +129,22 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
         self.cff_autofit.setEnabled(False)
         self.drop_arms.clicked.connect(self.drop_arms_func)
         QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+G"), self, self.open_generator)
+        self.window1 = HelpWindow(self)
+        self.window2 = GeneratorWindow(self)
+        self.window3 = SPPWindow(self)
+        self.window4 = SettingsWindow(self)
+        self.window5 = ImportPage(self)
+        self.window5.imp_import.clicked.connect(self.from_import)
 
+    def from_import(self):
+        self.a = self.window5.x
+        self.b = self.window5.y
+        if len(self.window5.ref) > 0:
+            self.refY = self.window5.ref
+            self.samY = self.window5.sam
+        self.redraw_graph()
+        self.fill_table()
+        self.track_stats()
 
     def track_stats(self):
         if len(self.refY) != 0:
@@ -149,25 +164,20 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
 
     def open_help(self):
         """ Opens up help window."""
-        self.window1 = HelpWindow(self)
         self.window1.show()
 
     def open_generator(self):
         """ Opens up generator window"""
-        self.window2 = GeneratorWindow(self)
         self.window2.showMaximized()
 
     def open_sppanel(self):
         """ Opens up SPP Interface"""
-        self.window3 = SPPWindow(self)
         self.window3.showMaximized()
 
     def open_settings(self):
-        self.window4 = SettingsWindow(self)
         self.window4.show()
 
     def open_import(self):
-    	self.window5 = ImportPage(self)
     	self.window5.show()
 
     def msg_output(self, text, clear_previous=True):
@@ -1388,7 +1398,7 @@ class ImportPage(QtWidgets.QMainWindow, Ui_ImportPage):
         self.shortcut = QShortcut(QKeySequence("Ctrl+E"), self)
         self.shortcut.activated.connect(self.commit)
         sys.stdout = Stream(newText=self.onUpdateText)
-        self.imp_import.clicked.connect(self.import_)
+        # self.imp_import.clicked.connect(self.import_newwindow)
 
     def onUpdateText(self, text):
         cursor = self.imp_put.textCursor()
@@ -1399,7 +1409,6 @@ class ImportPage(QtWidgets.QMainWindow, Ui_ImportPage):
 
     def __del__(self):
         sys.stdout = sys.__stdout__
-
 
     def update_table(self):
         self.imp_table.clear()
@@ -1463,7 +1472,7 @@ class ImportPage(QtWidgets.QMainWindow, Ui_ImportPage):
 	    	except Exception as e:
 	    		print('''This shell is intended to work with loaded data. It seems you did not load anything. The following error message was raised:\n''', e)
 
-    def import_(self):
+    def import_newwindow(self):
         try:
             if len(self.x) > 0:
                 new_main = MainProgram()

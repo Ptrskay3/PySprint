@@ -90,12 +90,13 @@ class TestEvaluateNoLmfit(unittest.TestCase):
 
 	def test_ffts_advanced(self):
 		pass # will be added..  
-		# g = Generator(2,2.8,2.4, delay=1500, GDD=2000, pulseWidth=25, resolution=0.01)
+		# g = Generator(2,2.8,2.4, delay=1500, GDD=2000, pulse_width=25, resolution=0.01)
 		# g.generate_freq()
 		# a,b = g.unpack()
 		# f = FFTMethod(a, b)
 		# f.ifft()
-		# f.cut(1500, 2920)
+		# f.window(1500, 2920)
+		# f.apply_window()
 		# f.fft()
 		# d, _, _ = f.calculate(fit_order = 2, reference_point = 2.4)
 		# np.testing.assert_array_equal(d, [-1500.01, -1999.79, 0, 0, 0])
