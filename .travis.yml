@@ -29,6 +29,7 @@ install:
   - python -m pip install --upgrade pip
   - if [[ $version == latest ]]; then pip install -r requirements.txt codecov ; fi
   - python setup.py install
+  - python -m pip install --upgrade numpy scipy matplotlib pandas tqdm PyQt5 lmfit
   - pip list
 
 
