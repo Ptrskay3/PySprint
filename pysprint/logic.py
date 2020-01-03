@@ -29,8 +29,7 @@ from pysprint.ui.settings_dialog import Ui_SettingsWindow
 from pysprint.core.evaluate import (min_max_method, cff_method, fft_method,
      cut_gaussian, gaussian_window , ifft_method, spp_method, args_comp,
      cos_fit1, cos_fit2, cos_fit3, cos_fit5, cos_fit4)
-from pysprint.core.dataedits import (savgol, find_peak, convolution, 
-     interpolate_data, cut_data)
+from pysprint.core.dataedits import savgol, find_peak, convolution, cut_data
 from pysprint.core.loading import read_data
 from pysprint.core.generator import generatorFreq, generatorWave
 from pysprint.core.cff_fitting import FitOptimizer
@@ -734,9 +733,9 @@ class MainProgram(QtWidgets.QMainWindow, Ui_Interferometry):
 
 
     #TODO: This needs to be completely changed, since cff fitting changed too.
-    @waiting_effects
-    def cff_fit_optimizer(self):
-        pass
+    # @waiting_effects
+    # def cff_fit_optimizer(self):
+    #     pass
         """self.redraw_graph()
         if self.initGD.text() == '':
             self.initGD.setText('1')
@@ -972,6 +971,16 @@ class SPPWindow(QtWidgets.QMainWindow, Ui_SPP):
     def __init__(self, parent=None):
         super(SPPWindow, self).__init__(parent)
         self.setupUi(self)
+        self.xData = []
+        self.yData = []
+        self.ySam = []
+        self.yRef = []
+        self.xtemporal = []
+        self.ytemporal = []
+        self.xpoints = [[None]]*30
+        self.ypoints = [[None]]*30
+        self.delays = np.array([None]*30)
+        self.cid = None
         self.setWindowIcon(QtGui.QIcon(ipath))
         self.treeWidget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.loadButton.clicked.connect(self.load_up)

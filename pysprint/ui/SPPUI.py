@@ -14,16 +14,6 @@ from pysprint.ui.plotwidget import PlotWidget
 
 class Ui_SPP(object):
     def setupUi(self, SPP):
-        self.xData = []
-        self.yData = []
-        self.ySam = []
-        self.yRef = []
-        self.xtemporal = []
-        self.ytemporal = []
-        self.xpoints = [[None]]*30
-        self.ypoints = [[None]]*30
-        self.delays = np.array([None]*30)
-        self.cid = None
         SPP.setObjectName("SPP")
         SPP.resize(1302, 832)
         self.centralwidget = QtWidgets.QWidget(SPP)

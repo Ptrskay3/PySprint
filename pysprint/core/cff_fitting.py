@@ -111,7 +111,7 @@ class FitOptimizer:
 		self.func = _func_config[self.curr_order + 1]
 		try:
 			self.p0 = np.append(self.p0, self.rest[self.curr_order-1])
-		except (IndexError,ValueError):
+		except (IndexError, ValueError):
 			self.p0 = np.append(self.p0, 1)
 		self.curr_order += 1
 
@@ -171,7 +171,7 @@ class FitOptimizer:
 		max_tries=5000, show_endpoint=True
 		):
 		pbar = tqdm(total=max_tries)
-		if self._init_set is False:
+		if not self._init_set:
 			raise ValueError('Set the initial conditions.')
 		self._make_fit()
 		while self._fit_goodness() > r_threshold:
