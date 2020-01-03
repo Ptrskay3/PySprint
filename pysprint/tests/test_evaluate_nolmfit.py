@@ -82,8 +82,8 @@ class TestEvaluateNoLmfit(unittest.TestCase):
 
 	def test_ffts_primitive(self):
 		#adapted from scipy's unittests
-	    scipy.random.seed(1534)
-	    x = scipy.randn(10) + 1j * scipy.randn(10)
+	    np.random.seed(1534)
+	    x = np.random.randn(10) + 1j * np.random.randn(10)
 	    fr, yf = evaluate.ifft_method(x, x, interpolate = False)
 	    _, y = evaluate.fft_method(yf,yf)
 	    np.testing.assert_allclose(y, x)
