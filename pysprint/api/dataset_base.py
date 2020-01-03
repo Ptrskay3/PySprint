@@ -16,3 +16,7 @@ class DatasetBase(metaclass=ABCMeta):
 	@abstractmethod
 	def run(self):
 		pass
+
+	@abstractmethod
+	def show(self):
+		pass

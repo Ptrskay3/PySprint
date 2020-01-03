@@ -1,5 +1,13 @@
 """
 This file is the main API to use Interferometry without the PyQt5 UI.
+
+TODO:
+ * Create separate figure for all objects.
+ * SPP should be a different class, allow to pass in multiple datasets.
+ * FFT rewrite
+ * Add units
+ * Docstrings
+ * Debug
 """
 import sys
 import warnings
@@ -56,7 +64,7 @@ class FourierWarning(Warning):
 
 class BaseApp(DatasetBase):
 	def __init__(self):
-		pass
+		super.__init__()
 
 	def run(self):
 		"""
@@ -89,6 +97,10 @@ class BaseApp(DatasetBase):
 	@property
 	def data(self):
 		raise NotImplementedError
+
+	def show(self):
+		raise NotImplementedError
+
 	
 
 class Generator(BaseApp):
@@ -131,7 +143,7 @@ class Generator(BaseApp):
 
 	def _check_norm(self):
 		"""
-		Does the normalization when we can.
+		Do the normalization when we can.
 		"""
 		if len(self.ref) != 0:
 			self._y =  (self.y - self.ref - self.sam)/(2*np.sqrt(self.sam*self.ref))
@@ -297,6 +309,7 @@ class Dataset(BaseApp):
 		self.probably_wavelength = None
 		self._check_domain()
 
+		# FIXME: Don't do this in the constructor
 		if self._is_normalized:
 			self._data = pd.DataFrame({
 				'x': self.x,
@@ -346,7 +359,7 @@ class Dataset(BaseApp):
 		with open(basefile) as file:
 			cls._metadata = ''.join(next(file) for _ in range(meta_len))
 		df = pd.read_csv(basefile, skiprows=skiprows, sep=sep, decimal=decimal, names=['x', 'y'])
-		if (ref and sam) is not None:
+		if (ref is not None and sam is not None):
 			r = pd.read_csv(ref, skiprows=skiprows, sep=sep, decimal=decimal, names=['x', 'y'])
 			s = pd.read_csv(sam, skiprows=skiprows, sep = sep, decimal=decimal, names=['x', 'y'])
 			return cls(df['x'].values, df['y'].values, r['y'].values, s['y'].values)
@@ -594,7 +607,7 @@ class MinMaxMethod(Dataset):
 		# just in case the default argrelextrema is definitely not called in evaluate.py/min_max_method:
 		self.xmin = _editpeak.get_dat[0][:len(_editpeak.get_dat[0])//2]
 		self.xmax = _editpeak.get_dat[0][len(_editpeak.get_dat[0])//2:] 
-		print(f'In total {len(_editpeak.get_dat[0])} extremal points were recorded. Ready to calculate.')
+		print(f'In total {len(_editpeak.get_dat[0])} extremal points were recorded.')
 		return _editpeak.get_dat[0]
 
 	@print_disp
