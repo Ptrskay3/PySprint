@@ -9,18 +9,19 @@ from pysprint.logic import SPPWindow
 
 
 class TestSPP(unittest.TestCase):
-    def setUp(self):
-        self.app = QApplication(sys.argv)
-        self.spp = SPPWindow()
-        self.spp.show()
+    pass
+    # def setUp(self):
+    #     self.app = QApplication(sys.argv)
+    #     self.spp = SPPWindow()
+    #     self.spp.show()
 
-    def tearDown(self):
-        self.spp.close()
+    # def tearDown(self):
+    #     self.spp.close()
 
-    def test_clean(self):
-        self.spp.clean_up()
-        self.spp.preview_data()
-        self.spp.record_delay()
+    # def test_clean(self):
+    #     self.spp.clean_up()
+    #     self.spp.preview_data()
+    #     self.spp.record_delay()
 
 
 if __name__ == "__main__":
