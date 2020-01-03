@@ -89,7 +89,7 @@ class TestEvaluate(unittest.TestCase):
 	def test_ffts_advanced2(self):
 		g = Generator(2,2.8,2.4, delay=1500, GDD=2000, pulse_width=25, resolution=0.01)
 		g.generate_freq()
-		a,b = g.unpack()
+		a,b = g.data
 		f = FFTMethod(a, b)
 		f.ifft()
 		f.window(1500, 2920)
@@ -101,7 +101,7 @@ class TestEvaluate(unittest.TestCase):
 	def test_ffts_advanced1(self):
 		g = Generator(2,2.8,2.4, delay = 1500, GD = 200, pulse_width = 25, resolution = 0.01)
 		g.generate_freq()
-		a,b = g.unpack()
+		a,b = g.data
 		f = FFTMethod(a, b)
 		f.ifft()
 		f.window(1700, 3300)
@@ -113,7 +113,7 @@ class TestEvaluate(unittest.TestCase):
 	def test_ffts_advanced3(self):
 		g = Generator(2,2.8,2.4, delay = 1500, TOD = 40000, pulse_width = 25, resolution = 0.01)
 		g.generate_freq()
-		a,b = g.unpack()
+		a,b = g.data
 		f = FFTMethod(a, b)
 		f.ifft()
 		f.window(2500, 4830, window_order = 12)
@@ -126,7 +126,7 @@ class TestEvaluate(unittest.TestCase):
 	def test_ffts_advanced4(self):
 		g = Generator(2,2.8,2.4, delay=1500, GDD=2000, FOD=-100000, pulse_width=25, resolution=0.01)
 		g.generate_freq()
-		a,b = g.unpack()
+		a,b = g.data
 		f = FFTMethod(a, b)
 		f.ifft()
 		f.window(1500, 1490, window_order = 8)
@@ -138,7 +138,7 @@ class TestEvaluate(unittest.TestCase):
 	def test_ffts_advanced5(self):
 		g = Generator(2,2.8,2.4, delay = 1500, QOD = 900000, pulse_width = 25, resolution = 0.01)
 		g.generate_freq()
-		a,b = g.unpack()
+		a,b = g.data
 		f = FFTMethod(a, b)
 		f.ifft()
 		f.window(1600, 2950, window_order = 12)
