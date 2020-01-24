@@ -33,6 +33,7 @@ __all__ = ['Generator', 'Dataset', 'MinMaxMethod', 'CosFitMethod', 'SPPMethod', 
 
 C_LIGHT = 299.793 # nm/fs
 
+# TODO: Maybe put them into separate files and do this in the __init__.py
 # setting up the IPython notebook
 if run_from_ipython():
 	plt.rcParams['figure.figsize'] = [15, 5]
@@ -309,21 +310,6 @@ class Dataset(BaseApp):
 		self.probably_wavelength = None
 		self._check_domain()
 
-		# FIXME: Don't do this in the constructor
-		if self._is_normalized:
-			self._data = pd.DataFrame({
-				'x': self.x,
-				'y': self.y,
-				'sample': self.sam,
-				'reference': self.ref,
-				'y normalized': self.y_norm
-				})
-		else:
-			self._data = pd.DataFrame({
-				'x': self.x,
-				'y': self.y,
-				})
-
 
 	def _check_domain(self):
 		"""
@@ -401,6 +387,22 @@ Metadata extracted from file
 
 	@property
 	def data(self):
+		"""
+		Returns the *current* dataset as pandas DataFrame.
+		"""
+		if self._is_normalized:
+			self._data = pd.DataFrame({
+				'x': self.x,
+				'y': self.y,
+				'sample': self.sam,
+				'reference': self.ref,
+				'y normalized': self.y_norm
+				})
+		else:
+			self._data = pd.DataFrame({
+				'x': self.x,
+				'y': self.y,
+				})
 		return self._data
 
 	@property
@@ -671,6 +673,7 @@ class CosFitMethod(Dataset):
 			m_closest_val, m_idx1 = find_nearest(x_max, reference_point)
 		except ValueError:
 			print('No extremal values found. Adjust pmax, pmin, threshold parameters to find points.\nSkipping.. ')
+			return
 		truncated = np.delete(x_min, idx1)
 		second_closest_val, _ = find_nearest(truncated, reference_point)
 		m_truncated = np.delete(x_max, m_idx1)
@@ -798,7 +801,7 @@ class CosFitMethod(Dataset):
 		except Exception:
 			pass
 		if self.fit is not None:
-			self.plotwidget.plot(self.x, self.fit, 'k--', label = 'fit', zorder=99)
+			self.plotwidget.plot(self.x, self.fit, 'k--', label='fit', zorder=99)
 			self.plotwidget.legend()
 			self.show()
 		else:

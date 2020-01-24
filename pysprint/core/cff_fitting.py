@@ -14,7 +14,7 @@ from tqdm import tqdm
 from pysprint.utils import findNearest as find_nearest
 from pysprint.core.evaluate import cos_fit1, cos_fit2, cos_fit3, cos_fit4, cos_fit5
 
-_func_config = {i : eval(f'cos_fit{i}') for i in range(1, 6)}
+_func_config = {i : eval(f'cos_fit{i}') for i in range(1, 6)} # TODO: don't
 
 class FitOptimizer:
 	"""Class to help achieve better fitting results."""
@@ -76,6 +76,7 @@ class FitOptimizer:
 	def user_guess(self):
 		return self.rest
 
+	# TODO: Make this update the plot, not redraw
 	def update_plot(self):
 		plt.clf()
 		plt.plot(self.x, self._y_norm)
