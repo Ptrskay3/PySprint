@@ -166,7 +166,15 @@ if __name__ == '__main__':
     yy = d.get_data()
     d2 = DraggableLine(a.x, yy, 'u')
     yyy = d2.get_data()
-    plt.plot(a.x, yyy)
-    plt.grid()
-    plt.title('Final render')
-    plt.show()
+    # plt.plot(a.x, yyy)
+    # plt.grid()
+    # plt.title('Final render')
+    # plt.show()
+    b = pysprint.CosFitMethod(a.x, yyy)
+    # b.smart_guess()
+    b.guess_GD(500)
+    b.optimizer(2.355, initial_region_ratio=0.05)
+    ## GD = 505.68835 fs^1
+    ## GDD = -168.84100 fs^2
+    ## TOD = -113.34504 fs^3
+    ## with r^2 = 0.98010.
