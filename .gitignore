@@ -5,6 +5,7 @@ ui/__pycache__/
 core/__pycache__/
 *.py[cod]
 *$py.class
+mightneed/
 
 # C extensions
 *.so

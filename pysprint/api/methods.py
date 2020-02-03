@@ -417,13 +417,13 @@ Metadata extracted from file
 		self.x = (2*np.pi*C_LIGHT)/self.x
 		self._check_domain()
 
-	def savgol_fil(self, window=101, order=3):
+	def savgol_fil(self, window=10, order=3):
 		"""
 		Applies Savitzky-Golay filter on the dataset.
 
 		Parameters:
 		----------
-		window: int, default is 101
+		window: int, default is 10
 		length of the convolutional window for the filter
 
 		order: int, default is 3

@@ -109,7 +109,11 @@ class FitOptimizer:
 		"""
 		if self.curr_order == self.max_order:
 			return
-		self.func = _func_config[self.curr_order + 1]
+		try:
+			self.func = _func_config[self.curr_order + 1]
+		except KeyError as e:
+			e.args = (e.args[0], 'Order must be in [1, 5].')
+			raise
 		try:
 			self.p0 = np.append(self.p0, self.rest[self.curr_order-1])
 		except (IndexError, ValueError):

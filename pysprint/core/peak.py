@@ -7,7 +7,8 @@ import matplotlib
 import matplotlib.pyplot as plt 
 from matplotlib.backend_bases import MouseButton
 from matplotlib.backend_tools import ToolToggleBase
-from pysprint.utils import get_closest
+from pysprint.utils import get_closest 
+# TODO: implement real euclidean metrics with epsilon distance
 
 
 class SelectButton(ToolToggleBase):
@@ -33,7 +34,8 @@ class EditPeak(object):
 	"""
 	def __init__(self, x, y, x_extremal=None, y_extremal=None):
 
-		# This is here because other figures are not affected by this.
+		# This is here because we do not want other figures
+		# to be affected by this.
 		matplotlib.rcParams["toolbar"] = "toolmanager"
 		
 		self.figure = plt.figure()

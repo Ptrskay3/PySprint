@@ -5,8 +5,24 @@ from scipy.interpolate import interp1d
 
 __all__ = ['scipy_disp', 'lmfit_disp', 'findNearest', 'find_closest',
            '_handle_input', 'print_disp', 'fourier_interpolate',
-           'between', 'get_closest', 'run_from_ipython']
+           'between', 'get_closest', 'run_from_ipython',
+           'calc_envelope']
 
+
+
+def calc_envelope(x, ind, mode='u'):
+    '''Source: https://stackoverflow.com/a/39662343/11751294
+    '''
+    x_abs = np.abs(x)
+    if mode == 'u':
+    	loc = np.where(np.diff(np.sign(np.diff(x_abs))) < 0)[0] + 1
+    elif mode == 'l':
+    	loc = np.where(np.diff(np.sign(np.diff(x_abs))) > 0)[0] + 1
+    else:
+    	raise ValueError('mode must be u or l.')
+    peak = x_abs[loc]
+    envelope = np.interp(ind, loc, peak)
+    return envelope, peak, loc
 
 def run_from_ipython():
     try:
