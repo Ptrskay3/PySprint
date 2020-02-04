@@ -81,13 +81,6 @@ class DraggableLine:
         self._ind = self.get_ind_under_point(event)
 
 
-    def button_release_callback(self, event):
-        'whenever a mouse button is released'
-        if event.button != 1:
-            return
-        self._ind = None
-
-
     def key_press_callback(self, event):
         '''whenever a key is pressed'''
         if not event.inaxes:
@@ -158,9 +151,12 @@ class DraggableLine:
 if __name__ == '__main__':
 
     import pysprint
-    a = pysprint.MinMaxMethod.parse_raw('D:/Python/mrs/URES0087.trt')
+    a = pysprint.CosFitMethod.parse_raw('D:/Python/mrs/URES0078.trt')
     a.chdomain()
+    # print(a)
     a.slice(2,4)
+    # a.guess_GD(-304)
+    # a.optimizer(2.355, initial_region_ratio=0.05)
 
     d = DraggableLine(a.x, a.y, 'l')
     yy = d.get_data()
@@ -172,9 +168,17 @@ if __name__ == '__main__':
     # plt.show()
     b = pysprint.CosFitMethod(a.x, yyy)
     # b.smart_guess()
-    b.guess_GD(500)
+    b.guess_GD(-304)
     b.optimizer(2.355, initial_region_ratio=0.05)
     ## GD = 505.68835 fs^1
     ## GDD = -168.84100 fs^2
     ## TOD = -113.34504 fs^3
     ## with r^2 = 0.98010.
+
+    ## raw norm:
+    ## GD = 505.66241 fs^1
+    ## GDD = -168.60948 fs^2
+    ## TOD = -113.78394 fs^3
+    ## with r^2 = 0.94167.
+
+    #
