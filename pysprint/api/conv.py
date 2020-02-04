@@ -8,7 +8,7 @@ def convert_df(
 	):
 	"""
 	Convert and save given interferogram datafile (either single 
-	or along with arms) to PySprint-loadable format.
+	or along with arms) to PySprint GUI - loadable format.
 
 	Parameters
 	----------

@@ -7,7 +7,7 @@ from pysprint.core.peak import SelectButton
 
 class DraggableEnvelope:
 
-    epsilon = 5 # max absolute distance to count as a hit
+    epsilon = 5 # max absolute pixel distance to count as a hit
 
     def __init__(self, x, y, mode='l'):
         matplotlib.rcParams["toolbar"] = "toolmanager"

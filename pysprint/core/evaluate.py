@@ -98,14 +98,11 @@ def min_max_method(
         negValues[freq] = np.pi * (freq + 1)
     x_s = np.append(relPosFreqs, relNegFreqs)
     y_s = np.append(posValues, negValues)
-# making sure the data in right order
-# could be:
-# idx = np.argsort(x)
-# fullXValues, fullYValues = x_s[idx], y_s[idx]
-# FIXME: Do we even need this?
-    L = sorted(zip(x_s, y_s), key=operator.itemgetter(0))
-    fullXValues, fullYValues = zip(*L)
 
+    # FIXME: Do we even need this?
+    idx = np.argsort(x_s)
+    fullXValues, fullYValues = x_s[idx], y_s[idx]
+    
     if _has_lmfit:
         if fitOrder == 5:
             fitModel = Model(polynomialFit5)
@@ -438,7 +435,7 @@ def cff_method(
             dispersion[num] = popt[num+3]*factorial(num+1)
         return dispersion, _funct(Xdata-ref_point, *popt)
     except RuntimeError:
-        raise ValueError('Max tries ({}) reached.. \n Parameters could not be estimated.'.format(maxtries))
+        raise ValueError(f'Max tries ({maxtries}) reached.. \nParameters could not be estimated.')
 
 
 def fft_method(initSpectrumX, initSpectrumY):

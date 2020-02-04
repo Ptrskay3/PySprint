@@ -1,8 +1,5 @@
 """
-NEED TO IMPLEMENT:
- - better fit method (it's actually performing good with real datasets)
- - currently compatibility with GUI is dropped.. we should fix that.
- - clean up the code, it's messy
+- currently compatibility with GUI is dropped.. we should fix that.
 """
 from math import factorial
 
@@ -14,7 +11,13 @@ from tqdm import tqdm
 from pysprint.utils import findNearest as find_nearest
 from pysprint.core.evaluate import cos_fit1, cos_fit2, cos_fit3, cos_fit4, cos_fit5
 
-_func_config = {i : eval(f'cos_fit{i}') for i in range(1, 6)} # TODO: don't
+_func_config = {
+	1 : cos_fit1,
+	2 : cos_fit2,
+	3 : cos_fit3,
+	4 : cos_fit4,
+	5 : cos_fit5
+	}
 
 class FitOptimizer:
 	"""Class to help achieve better fitting results."""
@@ -54,7 +57,7 @@ class FitOptimizer:
 		self.figure = plt.figure
 
 	def __del__(self):
-		self.reference_point = 0 # Because we don't want decrease x again upon new calls.
+		self.reference_point = 0
 		self.x = None
 		self.y = None
 		self.ref = None

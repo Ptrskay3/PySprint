@@ -26,7 +26,7 @@ def savgol(
 		except Exception as e:
 			print(e)
 	else:
-		raise ValueError('window must be bigger than order (currently {}/{})'.format(window, order))
+		raise ValueError('Window must be bigger than order currently: {window} and {order})')
 
 def find_peak(
 	initSpectrumX, initSpectrumY, referenceArmY, sampleArmY,

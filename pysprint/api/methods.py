@@ -855,24 +855,24 @@ class CosFitMethod(Dataset):
 		If the fit fails some parameters must be tweaked in order to achieve results.
 		There is a list below with issues, its suspected reasons and solutions.
 
-        **SciPy raises OptimizeWarning and the affected area is small or not showing
-          any fit
-        
-        Reasons:
-        - Completely wrong initial GD guess (or lack of guessing).
-        - Too broad inital region, so that the optizer cannot find a suitable fit.
-          This usually happens when the used data is large, or the spectral resolution
-          is high.
+		**SciPy raises OptimizeWarning and the affected area is small or not showing
+		  any fit
+
+		Reasons:
+		- Completely wrong initial GD guess (or lack of guessing).
+		- Too broad inital region, so that the optizer cannot find a suitable fit.
+		  This usually happens when the used data is large, or the spectral resolution
+		  is high.
 
 		Solution:
 		- Provide better inital guess for GD.
 		- Lower the inital_region_ratio.
-		
+
 		**SciPy raises OptimizeWarning and the affected area is bigger
 
 		Reasons:
-        - When the optimizer steps up with order it also extends the region of fit.
-        This error usually present when the region of fit is too quickly growing.
+		- When the optimizer steps up with order it also extends the region of fit.
+		This error usually present when the region of fit is too quickly growing.
 
 		Solution:
 		- Lower extend_by argument.

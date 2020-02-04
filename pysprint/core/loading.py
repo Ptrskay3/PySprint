@@ -1,5 +1,6 @@
 '''
 This file helps to load in data with auto detection features. Bugs might be encountered, currently working on fix.
+Should be removed.
 
 '''
 import numpy as np
