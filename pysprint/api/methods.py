@@ -26,6 +26,7 @@ from pysprint.core.dataedits import savgol, find_peak, convolution, cut_data
 from pysprint.core.generator import generatorFreq, generatorWave
 from pysprint.core.cff_fitting import FitOptimizer
 from pysprint.core.peak import EditPeak
+from pysprint.core.normalize import DraggableEnvelope
 from pysprint.utils import print_disp, run_from_ipython, findNearest as find_nearest
 
 
@@ -552,6 +553,42 @@ Metadata extracted from file
 		self.plotwidget.show()
 
 
+	def normalize(self, filename=None):
+		'''
+		Normalize the interferogram by finding upper and lower envelope
+		on an interactive matplotlib editor.
+
+		Parameters
+		----------
+
+		filename: str, default None
+		Save the normalized interferogram named by filename in the 
+		working directory. If not given it will not be saved.
+
+		Returns
+		-------
+		None
+		'''
+		if run_from_ipython():
+			return '''It seems you run this code in IPython.
+			Interactive plotting is not yet supported. 
+			Consider running it in the regular console.'''
+		_l_env = DraggableEnvelope(self.x, self.y, 'l')
+		y_transform = _l_env.get_data()
+		_u_env = DraggableEnvelope(self.x, y_transform, 'u')
+		y_final = _u_env.get_data()
+		self.y = y_final
+		self.y_norm = y_final
+		self._is_normalized = True
+		self.plotwidget.title('Final')
+		self.show()
+		if filename:
+			if not filename.endswith('.txt'):
+				filename += '.txt'
+			np.savetxt(filename, np.transpose([self.x, self.y]), delimiter=',')
+			print(f'Successfully saved as {filename}')
+
+
 class MinMaxMethod(Dataset):
 	"""
 	Basic interface for Minimum-Maximum Method.
@@ -666,13 +703,13 @@ class CosFitMethod(Dataset):
 		self.mt = 8000
 		self.f = None
 
-	def smart_guess(self, reference_point=2.355, pmax=0.5, pmin=0.5, threshold=0.35):
+	def predict(self, reference_point=2.355, pmax=0.5, pmin=0.5, threshold=0.35):
 		x_min, _, x_max, _ = self.detect_peak(pmax=pmax, pmin=pmin, threshold=threshold)
 		try:
 			closest_val, idx1 = find_nearest(x_min, reference_point)
 			m_closest_val, m_idx1 = find_nearest(x_max, reference_point)
 		except ValueError:
-			print('No extremal values found. Adjust pmax, pmin, threshold parameters to find points.\nSkipping.. ')
+			print('Prediction failed.\nSkipping.. ')
 			return
 		truncated = np.delete(x_min, idx1)
 		second_closest_val, _ = find_nearest(truncated, reference_point)
@@ -811,7 +848,48 @@ class CosFitMethod(Dataset):
 		extend_by=0.1, coef_threshold=0.3, max_tries=5000, show_endpoint=True):
 		"""
 		Cosine fit optimizer. It's based on adding new terms to fit function successively
-		until we reach the max_order. 
+		until we reach the max_order.
+
+		Notes
+		-----
+		If the fit fails some parameters must be tweaked in order to achieve results.
+		There is a list below with issues, its suspected reasons and solutions.
+
+        **SciPy raises OptimizeWarning and the affected area is small or not showing
+          any fit
+        
+        Reasons:
+        - Completely wrong initial GD guess (or lack of guessing).
+        - Too broad inital region, so that the optizer cannot find a suitable fit.
+          This usually happens when the used data is large, or the spectral resolution
+          is high.
+
+		Solution:
+		- Provide better inital guess for GD.
+		- Lower the inital_region_ratio.
+		
+		**SciPy raises OptimizeWarning and the affected area is bigger
+
+		Reasons:
+        - When the optimizer steps up with order it also extends the region of fit.
+        This error usually present when the region of fit is too quickly growing.
+
+		Solution:
+		- Lower extend_by argument.
+
+		**The optimizer is finished, but wrong fit is produced.
+
+		Reasons:
+		- We measure the goodness of fit with r^2 value. To allow this
+		optimizer to smoothly find appropriate fits even for noisy datasets
+		it's a good practice to keep the r^2 a lower value, such as the default 0.3.
+		The way it works is we step up in order of fit (until max order) and extend
+		region every time when a fit reaches the specified r^2 threshold value.
+		This can be controlled via the coef_threshold argument.
+
+		Solution:
+		- Adjust the coef_threshold value. Note that it's highly recommended not to
+		set a higher value than 0.6.
 		"""
 		self.f = FitOptimizer(self.x, self.y, self.ref, self.sam, reference_point=reference_point,
 		max_order=max_order)
