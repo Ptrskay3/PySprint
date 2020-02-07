@@ -90,7 +90,7 @@ def measurement(array, confidence=0.95):
 	Example(s)
 	---------
 	>>> import numpy as np
-	>>> from pysprint import measurement
+	>>> from pysprint.utils import measurement
 	>>> a = np.array([123.783, 121.846, 122.248, 125.139, 122.569])
 	>>> mean, interval = measurement(a, 0.99)
 	123.117000 ± 2.763022
