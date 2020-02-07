@@ -2,11 +2,12 @@ from functools import wraps
 
 import numpy as np
 from scipy.interpolate import interp1d
+import scipy.stats as st
 
 __all__ = ['scipy_disp', 'lmfit_disp', 'findNearest', 'find_closest',
            '_handle_input', 'print_disp', 'fourier_interpolate',
            'between', 'get_closest', 'run_from_ipython',
-           'calc_envelope']
+           'calc_envelope', 'measurement']
 
 
 
@@ -61,6 +62,54 @@ def lmfit_disp(r):
 		dispersion.append(par.value)
 		dispersion_std.append(par.stderr)
 	return dispersion, dispersion_std
+
+
+def measurement(array, confidence=0.95):
+	"""
+	Give the measurement results with condifence interval
+	assuming the standard deviation is unknown.
+
+	Parameters
+	----------
+
+	array : ndarray
+		The array containing the measured values
+
+	confidence : float
+		The desired confidence level. Must be between 0 and 1.
+
+	Returns
+	-------
+
+	mean: float
+	The mean of the given array
+
+	conf: tuple-like (interval)
+	The confidence interval
+
+	Example(s)
+	---------
+	>>> import numpy as np
+	>>> from pysprint import measurement
+	>>> a = np.array([123.783, 121.846, 122.248, 125.139, 122.569])
+	>>> mean, interval = measurement(a, 0.99)
+	123.117000 ± 2.763022
+	>>> mean
+	123.117
+	>>> interval
+	(120.35397798230359, 125.88002201769642)
+
+	Notes
+	-----
+
+	I decided to print the results immediately, because people often don't use
+	it for further code. Of course, they are also returned if needed.
+
+	"""
+	mean = np.mean(array)
+	conf = st.t.interval(confidence, len(array)-1, loc=mean, scale=st.sem(array))
+	print(f'{mean:5f} ± {(mean-conf[0]):5f}')
+	return mean, conf
 
 
 def findNearest(array, value):
