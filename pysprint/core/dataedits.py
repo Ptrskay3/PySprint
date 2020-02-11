@@ -8,14 +8,14 @@ from pysprint.utils import findNearest, _handle_input, between, _maybe_increase_
 
 
 
-def cwt(x, y, ref, sam, width, floor_thres=0.1, *args):
+def cwt(x, y, ref, sam, width, floor_thres=0.1):
 	Xdata, Ydata = _handle_input(
 		x, y, ref, sam
 		)
-	idx = find_peaks_cwt(Ydata, np.arange(1, width), *args)
+	idx = find_peaks_cwt(Ydata, np.arange(1, width))
 	if _maybe_increase_before_cwt(Ydata, tolerance=floor_thres):
 		Ydata += 2
-	idx2 = find_peaks_cwt(1/Ydata, np.arange(1, width), *args)
+	idx2 = find_peaks_cwt(1/Ydata, np.arange(1, width))
 
 	return Xdata[idx], Ydata[idx]-2, Xdata[idx2], Ydata[idx2]-2
 

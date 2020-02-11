@@ -99,6 +99,8 @@ class EditPeak(object):
 	def on_clicked(self, event):
 	        """ Function to record and discard points on plot."""
 	        ix, iy = event.xdata, event.ydata
+	        if event.inaxes is None:
+	        	return
 	        if self.my_select_button.toggled:
 		        if event.button is MouseButton.RIGHT:
 		        	ix, iy, idx = get_closest(ix, self.x_extremal, self.y_extremal)
