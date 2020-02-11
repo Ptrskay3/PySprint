@@ -75,17 +75,17 @@ def measurement(array, confidence=0.95):
 	array : ndarray
 		The array containing the measured values
 
-	confidence : float
+	confidence : float, optional
 		The desired confidence level. Must be between 0 and 1.
 
 	Returns
 	-------
 
 	mean: float
-	The mean of the given array
+		The mean of the given array
 
 	conf: tuple-like (interval)
-	The confidence interval
+		The confidence interval
 
 	Example(s)
 	---------

@@ -26,7 +26,7 @@ def generatorFreq(
 	resolution=0.1,	delimiter=',', pulseWidth=10, includeArms=False,
 	chirp=0):
 	_ensure_input(start, stop, center, resolution, pulseWidth)
-	omega0 = center
+	omega0 = center # unnecessary renaming
 	window = (np.sqrt(1+chirp**2)*8*np.log(2))/(pulseWidth**2)
 	lamend = (2*np.pi*C_LIGHT)/start
 	lamstart = (2*np.pi*C_LIGHT)/stop

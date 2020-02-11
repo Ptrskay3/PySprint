@@ -204,7 +204,7 @@ class FitOptimizer:
 
 		while self._fit_goodness() < r_threshold:
 			self._make_fit()
-			# self._finetune() # why does that stops executing?
+			# self._finetune()
 			self.counter += 1
 			pbar.update(1)
 			if self.counter == max_tries:

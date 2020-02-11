@@ -24,7 +24,7 @@ from pysprint.core.evaluate import (min_max_method, cff_method, fft_method,
 	cut_gaussian, ifft_method, spp_method, args_comp, gaussian_window)
 from pysprint.core.dataedits import savgol, find_peak, convolution, cut_data
 from pysprint.core.generator import generatorFreq, generatorWave
-from pysprint.core.cff_fitting import FitOptimizer
+from pysprint.core.optimizer import FitOptimizer
 from pysprint.core.peak import EditPeak
 from pysprint.core.normalize import DraggableEnvelope
 from pysprint.utils import print_disp, run_from_ipython, findNearest as find_nearest
