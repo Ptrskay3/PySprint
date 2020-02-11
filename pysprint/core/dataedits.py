@@ -2,10 +2,22 @@
 Methods for manipulating the loaded data
 """
 import numpy as np
-from scipy.signal import find_peaks, savgol_filter, gaussian, convolve
+from scipy.signal import find_peaks, savgol_filter, gaussian, convolve, find_peaks_cwt
 from scipy.interpolate import interp1d
-from pysprint.utils import findNearest, _handle_input, between
+from pysprint.utils import findNearest, _handle_input, between, _maybe_increase_before_cwt
 
+
+
+def cwt(x, y, ref, sam, width, floor_thres=0.1, *args):
+	Xdata, Ydata = _handle_input(
+		x, y, ref, sam
+		)
+	idx = find_peaks_cwt(Ydata, np.arange(1, width), *args)
+	if _maybe_increase_before_cwt(Ydata, tolerance=floor_thres):
+		Ydata += 2
+	idx2 = find_peaks_cwt(1/Ydata, np.arange(1, width), *args)
+
+	return Xdata[idx], Ydata[idx]-2, Xdata[idx2], Ydata[idx2]-2
 
 def savgol(
 	initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, window=101,

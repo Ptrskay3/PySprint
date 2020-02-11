@@ -22,7 +22,7 @@ from scipy.fftpack import fftshift
 from pysprint.api.dataset_base import DatasetBase
 from pysprint.core.evaluate import (min_max_method, cff_method, fft_method,
 	cut_gaussian, ifft_method, spp_method, args_comp, gaussian_window)
-from pysprint.core.dataedits import savgol, find_peak, convolution, cut_data
+from pysprint.core.dataedits import savgol, find_peak, convolution, cut_data, cwt
 from pysprint.core.generator import generatorFreq, generatorWave
 from pysprint.core.optimizer import FitOptimizer
 from pysprint.core.peak import EditPeak
@@ -311,6 +311,14 @@ class Dataset(BaseApp):
 		self._check_domain()
 
 
+	def _safe_cast(self):
+		'''
+		Disable modifying inplace.
+		'''
+		x, y, ref, sam = np.copy(self.x), np.copy(self.y), np.copy(self.ref), np.copy(self.sam)
+		return x, y, ref, sam
+
+
 	def _check_domain(self):
 		"""
 		Checks the domain of data just by looking at x axis' minimal value.
@@ -433,6 +441,13 @@ Metadata extracted from file
 		self.x = (2*np.pi*C_LIGHT)/self.x
 		self._check_domain()
 
+
+
+	def detect_peak_cwt(self, width, floor_thres=0.05, *args):
+		x, y, ref, sam = self._safe_cast()
+		xmax, ymax, xmin, ymin = cwt(x, y, ref, sam, width=width, floor_thres=floor_thres, *args)
+		return xmax, ymax, xmin, ymin
+
 	def savgol_fil(self, window=10, order=3):
 		"""
 		Applies Savitzky-Golay filter on the dataset.
@@ -550,7 +565,8 @@ Metadata extracted from file
 		ymin: array-like
 		y coordinates of the minimums
 		"""
-		xmax, ymax, xmin, ymin = find_peak(self.x, self.y, self.ref, self.sam, proMax=pmax, proMin=pmin, threshold=threshold, except_around=except_around)
+		x, y, ref, sam = self._safe_cast()
+		xmax, ymax, xmin, ymin = find_peak(x, y, ref, sam, proMax=pmax, proMin=pmin, threshold=threshold, except_around=except_around)
 		return xmax, ymax, xmin, ymin
 		
 	def show(self):
@@ -611,7 +627,10 @@ class MinMaxMethod(Dataset):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 
-	def init_edit_session(self, pmax=0.1, pmin=0.1, threshold=0, except_around=None):
+	def init_edit_session(
+		self, pmax=0.1, pmin=0.1, threshold=0, 
+		except_around=None, engine='normal', width=10, *args
+		):
 		""" Function to initialize peak editing on a plot.
 		Right clicks will delete the closest point, left clicks 
 		will add a new point. Just close the window when finished.
@@ -648,9 +667,15 @@ class MinMaxMethod(Dataset):
 			return '''It seems you run this code in IPython.
 			Interactive plotting is not yet supported. 
 			Consider running it in the regular console.'''
-		_x, _y, _xx, _yy = self.detect_peak(
+		engines = ('cwt', 'normal', 'slope')
+		if engine not in engines:
+			raise ValueError(f'Engine must be in {str(engines)}')
+		if engine == 'normal':
+			_x, _y, _xx, _yy = self.detect_peak(
 			pmax=pmax, pmin=pmin, threshold=threshold, except_around=except_around
 			)
+		elif engine == 'cwt':
+			_x, _y, _xx, _yy = self.detect_peak_cwt(width, *args)
 		_xm = np.append(_x, _xx)
 		_ym = np.append(_y, _yy)
 		try:
@@ -718,6 +743,8 @@ class CosFitMethod(Dataset):
 		self.mt = 8000
 		self.f = None
 
+
+		# FIXME : DIFFERENT ERROR CASES SHOULD BE TAKEN CARE OF
 	def predict(self, reference_point=2.355, pmax=0.5, pmin=0.5, threshold=0.35):
 		x_min, _, x_max, _ = self.detect_peak(pmax=pmax, pmin=pmin, threshold=threshold)
 		try:
@@ -909,8 +936,7 @@ class CosFitMethod(Dataset):
 		
 		# We need to take a copy of each array in order not to modify them inplace.
 
-		x, y, ref, sam = np.copy(self.x), np.copy(self.y), np.copy(self.ref), np.copy(self.sam)
-
+		x, y, ref, sam = self._safe_cast()
 		self.f = FitOptimizer(x, y, ref, sam, reference_point=reference_point,
 		max_order=max_order)
 		self.f.set_initial_region(initial_region_ratio)

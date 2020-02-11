@@ -6,9 +6,44 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt 
 from matplotlib.backend_bases import MouseButton
+
+# ---------------------------MONKEY PATCH-------------------------------------
+import matplotlib.cbook as cbook
+import matplotlib.widgets as widgets
+from matplotlib.backend_tools import ToolBase
+from matplotlib.backend_managers import ToolManager
+
+def tm_init(self, figure=None):
+    self._key_press_handler_id = None
+
+    self._tools = {}
+    self._keys = {}
+    self._toggled = {}
+    self._callbacks = cbook.CallbackRegistry()
+
+    # to process keypress event
+    self.keypresslock = widgets.LockDraw()
+    self.messagelock = widgets.LockDraw()
+
+    self._figure = None
+    self.set_figure(figure)
+
+matplotlib.backend_managers.ToolManager.__init__ = tm_init
+
+def new_init(self, toolmanager, name):
+        self._name = name
+        self._toolmanager = toolmanager
+        self._figure = None
+
+matplotlib.backend_tools.ToolBase.__init__ = new_init
+
+# ----------------------------------------------------------------------------
+
+
 from matplotlib.backend_tools import ToolToggleBase
-from pysprint.utils import get_closest 
+from pysprint.utils import get_closest
 # TODO: implement real euclidean metrics with epsilon distance
+
 
 
 class SelectButton(ToolToggleBase):

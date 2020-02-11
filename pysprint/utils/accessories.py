@@ -7,8 +7,17 @@ import scipy.stats as st
 __all__ = ['scipy_disp', 'lmfit_disp', 'findNearest', 'find_closest',
            '_handle_input', 'print_disp', 'fourier_interpolate',
            'between', 'get_closest', 'run_from_ipython',
-           'calc_envelope', 'measurement']
+           'calc_envelope', 'measurement', '_maybe_increase_before_cwt']
 
+
+def _maybe_increase_before_cwt(y, tolerance=0.05):
+	y = np.asarray(y)
+	value = y.min()
+	if value - tolerance >= 0:
+		return False
+	if value < 0 and np.abs(value) - tolerance > 0:
+		return True
+	return True
 
 
 def calc_envelope(x, ind, mode='u'):
