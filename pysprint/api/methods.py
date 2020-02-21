@@ -27,7 +27,8 @@ from pysprint.core.generator import generatorFreq, generatorWave
 from pysprint.core.optimizer import FitOptimizer
 from pysprint.core.peak import EditPeak
 from pysprint.core.normalize import DraggableEnvelope
-from pysprint.utils import print_disp, run_from_ipython, findNearest as find_nearest
+from pysprint.utils import (print_disp, run_from_ipython, 
+	findNearest as find_nearest, calc_envelope, _maybe_increase_before_cwt)
 
 
 __all__ = ['Generator', 'Dataset', 'MinMaxMethod', 'CosFitMethod', 'SPPMethod', 'FFTMethod']
@@ -133,9 +134,7 @@ class Generator(BaseApp):
 		self.is_wave = False
 		
 	def __str__(self):
-		return f'''Generator({self.start}, {self.stop}, {self.center}, delay = {self.delay},
-				   GD={self.GD}, GDD={self.GDD}, TOD={self.TOD}, FOD={self.FOD}, QOD={self.QOD}, resolution={self.resolution}, 
-				   delimiter={self.delimiter}, pulse_width={self.pulseWidth}, normalize={self.normalize})'''
+		return self.__repr__()
 
 	def __repr__(self):
 		return f'''Generator({self.start}, {self.stop}, {self.center}, delay = {self.delay},
@@ -278,26 +277,26 @@ class Dataset(BaseApp):
 			try:
 				self.x = np.array(self.x)
 				self.x.astype(float)
-			except Exception:
+			except ValueError:
 				raise DatasetError('Invalid type of data')
 		if not isinstance(self.y, np.ndarray):
 			try:
 				self.y = np.array(self.y)
 				self.y.astype(float)
-			except Exception:
+			except ValueError:
 				raise DatasetError('Invalid type of data')
 		if not isinstance(self.ref, np.ndarray):
 			try:
 				self.ref = np.array(self.ref)
 				self.ref.astype(float)
 			except ValueError:
-				pass
+				pass # just ignore invalid arms
 		if not isinstance(self.sam, np.ndarray):
 			try:
 				self.sam = np.array(self.sam)
 				self.sam.astype(float)
 			except ValueError:
-				pass
+				pass # just ignore invalid arms
 		if len(self.ref) == 0:
 			self.y_norm = self.y
 		else:
@@ -368,28 +367,14 @@ class Dataset(BaseApp):
 		with open(basefile) as file:
 			cls._metadata = ''.join(next(file) for _ in range(meta_len))
 		df = pd.read_csv(basefile, skiprows=skiprows, sep=sep, decimal=decimal, names=['x', 'y'])
-		if (ref is not None) and (sam is not None):
+		if ref is not None and sam is not None:
 			r = pd.read_csv(ref, skiprows=skiprows, sep=sep, decimal=decimal, names=['x', 'y'])
 			s = pd.read_csv(sam, skiprows=skiprows, sep=sep, decimal=decimal, names=['x', 'y'])
 			return cls(df['x'].values, df['y'].values, r['y'].values, s['y'].values)
 		return cls(df['x'].values, df['y'].values)
 
 	def __str__(self):
-		string = f'''
-{type(self).__name__} object
-
-Parameters
-----------
-Datapoints = {len(self.x)}
-Normalized: {self._is_normalized}
-Arms are separated: {True if len(self.ref) > 0 else False}
-Predicted domain: {'wavelength' if self.probably_wavelength else 'frequency'}
-
-Metadata extracted from file
-----------------------------
-{str(self._metadata)}
-		'''
-		return string
+		return self.__repr__()
 
 	def __repr__(self):
 		string = f'''
@@ -414,13 +399,19 @@ Metadata extracted from file
 		Returns the *current* dataset as pandas DataFrame.
 		"""
 		if self._is_normalized:
-			self._data = pd.DataFrame({
+			try:
+				self._data = pd.DataFrame({
 				'x': self.x,
 				'y': self.y,
 				'sample': self.sam,
 				'reference': self.ref,
 				'y_normalized': self.y_norm
-				})
+					})
+			except ValueError:
+				self._data = pd.DataFrame({
+					'x': self.x,
+					'y': self.y,
+					})
 		else:
 			self._data = pd.DataFrame({
 				'x': self.x,
@@ -664,10 +655,24 @@ class MinMaxMethod(Dataset):
 			_x, _y, _xx, _yy = self.detect_peak(
 			pmax=pmax, pmin=pmin, threshold=threshold, except_around=except_around
 			)
+
+		elif engine == 'slope':
+			x, _, _, _ = self._safe_cast()
+			y = np.copy(self.y_norm)
+			if _maybe_increase_before_cwt(y):
+				y += 2
+			_, lp, lloc = calc_envelope(y, np.arange(len(y)), 'l')
+			_, up, uloc = calc_envelope(y, np.arange(len(y)), 'u')
+			lp -= 2
+			up -= 2
+			_x, _xx = x[lloc], x[uloc]
+			_y, _yy = lp, up
+
 		elif engine == 'cwt':
 			_x, _y, _xx, _yy = self.detect_peak_cwt(width)
 		_xm = np.append(_x, _xx)
 		_ym = np.append(_y, _yy)
+
 		try:
 			_editpeak = EditPeak(self.x, self.y_norm, _xm, _ym)
 		except ValueError:
@@ -680,7 +685,7 @@ class MinMaxMethod(Dataset):
 		return _editpeak.get_dat[0]
 
 	@print_disp
-	def calculate(self, reference_point, fit_order, show_graph=False):
+	def calculate(self, reference_point, order, show_graph=False):
 		""" 
 		MinMaxMethod's calculate function.
 
@@ -717,7 +722,7 @@ class MinMaxMethod(Dataset):
 		"""
 		dispersion, dispersion_std, fit_report = min_max_method(
 			self.x, self.y, self.ref, self.sam, ref_point=reference_point,
-			maxx=self.xmax, minx=self.xmin, fitOrder=fit_order, showGraph=show_graph
+			maxx=self.xmax, minx=self.xmin, fitOrder=order, showGraph=show_graph
 			)
 		return dispersion, dispersion_std, fit_report
 
@@ -876,7 +881,7 @@ class CosFitMethod(Dataset):
 		else:
 			self.show()
 
-	def optimizer(self, reference_point, max_order=3, initial_region_ratio=0.1,
+	def optimizer(self, reference_point, order=3, initial_region_ratio=0.1,
 		extend_by=0.1, coef_threshold=0.3, max_tries=5000, show_endpoint=True):
 		"""
 		Cosine fit optimizer. It's based on adding new terms to fit function successively
@@ -926,7 +931,7 @@ class CosFitMethod(Dataset):
 
 		x, y, ref, sam = self._safe_cast()
 		self.f = FitOptimizer(x, y, ref, sam, reference_point=reference_point,
-		max_order=max_order)
+		max_order=order)
 		self.f.set_initial_region(initial_region_ratio)
 		self.f.set_final_guess(GD=self.params[3], GDD=self.params[4], TOD=self.params[5],
 		FOD=self.params[6], QOD=self.params[7]) # we can pass it higher params safely, they are ignored.
@@ -943,9 +948,6 @@ class SPPMethod(Dataset):
 		self.om = None
 		self.de = None
 		self.bf = None
-		print('''With SPP-Method x and y values have a different meaning compared to other methods.
-		Make sure you put delays to y and frequencies to x:
-		SPPMethod(frequencies, delays)''')
 
 	@classmethod
 	def from_raw(cls, omegas, delays):
@@ -966,7 +968,7 @@ class SPPMethod(Dataset):
 		return cls(omegas, delays)
 
 	@print_disp
-	def calculate(self, reference_point, fit_order):
+	def calculate(self, reference_point, order):
 		""" 
 		SPP's calculate function.
 
@@ -999,13 +1001,13 @@ class SPPMethod(Dataset):
 		"""
 		if self.raw:
 			_, _, dispersion, dispersion_std, self.bf = spp_method(
-				self.y, self.x, reference_point=reference_point, fitOrder=fit_order, from_raw=True
+				self.y, self.x, reference_point=reference_point, fitOrder=order, from_raw=True
 				)
 			self.om = self.x
 			self.de = self.y
 		else:
 			self.om, self.de, dispersion, dispersion_std, self.bf = spp_method(
-				self.y, self.x, fitOrder=fit_order, from_raw=False
+				self.y, self.x, fitOrder=order, from_raw=False
 				)
 		dispersion = list(dispersion)
 		dispersion_std = list(dispersion_std)
