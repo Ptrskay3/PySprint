@@ -137,9 +137,7 @@ class Generator(BaseApp):
 		return self.__repr__()
 
 	def __repr__(self):
-		return f'''Generator({self.start}, {self.stop}, {self.center}, delay = {self.delay},
-				   GD={self.GD}, GDD={self.GDD}, TOD={self.TOD}, FOD={self.FOD}, QOD={self.QOD}, resolution={self.resolution}, 
-				   delimiter={self.delimiter}, pulse_width={self.pulseWidth}, normalize={self.normalize})'''
+		return f'''Generator({self.start}, {self.stop}, {self.center}, delay = {self.delay}, GD={self.GD}, GDD={self.GDD}, TOD={self.TOD}, FOD={self.FOD}, QOD={self.QOD}, resolution={self.resolution}, delimiter={self.delimiter}, pulse_width={self.pulse_width}, normalize={self.normalize})'''
 
 	def _check_norm(self):
 		"""
