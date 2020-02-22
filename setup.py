@@ -11,7 +11,7 @@ if sys.version_info[:2] < (3, 6):
     raise RuntimeError("Python version >= 3.6 required.")
 
 MAJOR = 0
-MINOR = 3
+MINOR = 4
 MICRO = 0
 VERSION = f'{MAJOR}.{MINOR}.{MICRO}'
 
