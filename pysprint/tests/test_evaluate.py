@@ -92,10 +92,10 @@ class TestEvaluate(unittest.TestCase):
 		a,b = g.data
 		f = FFTMethod(a, b)
 		f.ifft()
-		f.window(1500, 2920)
+		f.window(1500, 2920, plot=False)
 		f.apply_window()
 		f.fft()
-		d, _, _ = f.calculate(fit_order = 2, reference_point = 2.4)
+		d, _, _ = f.calculate(order = 2, reference_point = 2.4)
 		np.testing.assert_array_almost_equal(d, [-1500.01, -1999.79, 0, 0, 0], decimal=2)
 
 	def test_ffts_advanced1(self):
@@ -104,10 +104,10 @@ class TestEvaluate(unittest.TestCase):
 		a,b = g.data
 		f = FFTMethod(a, b)
 		f.ifft()
-		f.window(1700, 3300)
+		f.window(1700, 3300, plot=False)
 		f.apply_window()
 		f.fft()
-		d, _, _ = f.calculate(fit_order = 1, reference_point = 2.4)
+		d, _, _ = f.calculate(order = 1, reference_point = 2.4)
 		np.testing.assert_array_almost_equal(d, [-1699.99, 0, 0, 0, 0], decimal=2)
 
 	def test_ffts_advanced3(self):
@@ -116,10 +116,10 @@ class TestEvaluate(unittest.TestCase):
 		a,b = g.data
 		f = FFTMethod(a, b)
 		f.ifft()
-		f.window(2500, 4830, window_order = 12)
+		f.window(2500, 4830, window_order = 12, plot=False)
 		f.apply_window()
 		f.fft()
-		d, _, _ = f.calculate(fit_order = 3, reference_point = 2.4)
+		d, _, _ = f.calculate(order = 3, reference_point = 2.4)
 		np.testing.assert_array_almost_equal(d, [-1500.03, -0.03, -39996.60, 0, 0], decimal=2)
 
 
@@ -129,10 +129,10 @@ class TestEvaluate(unittest.TestCase):
 		a,b = g.data
 		f = FFTMethod(a, b)
 		f.ifft()
-		f.window(1500, 1490, window_order = 8)
+		f.window(1500, 1490, window_order = 8, plot=False)
 		f.apply_window()
 		f.fft()
-		d, _, _ = f.calculate(fit_order = 4, reference_point = 2.4)
+		d, _, _ = f.calculate(order = 4, reference_point = 2.4)
 		np.testing.assert_array_almost_equal(d, [-1500.00, -1999.95, 0.21, 99995.00, 0], decimal=1)
 
 	def test_ffts_advanced5(self):
@@ -141,10 +141,10 @@ class TestEvaluate(unittest.TestCase):
 		a,b = g.data
 		f = FFTMethod(a, b)
 		f.ifft()
-		f.window(1600, 2950, window_order = 12)
+		f.window(1600, 2950, window_order = 12, plot=False)
 		f.apply_window()
 		f.fft()
-		d, _, _ = f.calculate(fit_order = 5, reference_point = 2.4)
+		d, _, _ = f.calculate(order = 5, reference_point = 2.4)
 		np.testing.assert_array_almost_equal(d, [-1499.96, 0.14, -7.88, -15.99, -898920.79], decimal=1)
 
 	def test_windowing(self):

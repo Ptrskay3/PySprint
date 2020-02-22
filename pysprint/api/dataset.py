@@ -186,6 +186,9 @@ Metadata extracted from file
 		""" Changes from wavelength [nm] to ang. freq. [PHz] domain and vica versa."""
 		self.x = (2*np.pi*C_LIGHT)/self.x
 		self._check_domain()
+		if type(self).__name__ == 'FFTMethod':
+			self.original_x = self.x
+
 
 	def detect_peak_cwt(self, width, floor_thres=0.05):
 		x, y, ref, sam = self._safe_cast()

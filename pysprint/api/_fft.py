@@ -71,7 +71,7 @@ class FFTMethod(Dataset):
 			warnings.warn('This module is designed to call ifft before fft, so inconsistencies might occur when calling fft first. Consider using numpys fft package with your own logic. This functionality will be added later on.', FourierWarning)
 		self.x, self.y = fft_method(self.original_x, self.y)
 
-	def window(self, at, std, window_order=6):
+	def window(self, at, std, window_order=6, plot=True):
 		"""
 		Draws a gaussian window on the plot with the desired parameters.
 		The maximum value is adjusted for the dataset mostly for visibility reasons.
@@ -95,6 +95,8 @@ class FFTMethod(Dataset):
 		self.window_order = window_order
 		gaussian = gaussian_window(self.x, self.at, self.std, self.window_order)
 		self.plotwidget.plot(self.x, gaussian*max(abs(self.y)), 'r--')
+		if plot:
+			self.show()
 
 	def apply_window(self):
 		"""
@@ -106,7 +108,7 @@ class FFTMethod(Dataset):
 		self.y = cut_gaussian(self.x, self.y, spike=self.at, sigma=self.std, win_order=self.window_order)
 		
 	@print_disp
-	def calculate(self, reference_point, fit_order, show_graph=False):
+	def calculate(self, reference_point, order, show_graph=False):
 		""" 
 		FFTMethod's calculate function.
 
@@ -147,6 +149,6 @@ class FFTMethod(Dataset):
 		For consistency we should still implement that a better way later.
 		"""
 		dispersion, dispersion_std, fit_report = args_comp(
-			self.x, self.y, reference_point=reference_point, fitOrder=fit_order, showGraph=show_graph
+			self.x, self.y, reference_point=reference_point, fitOrder=order, showGraph=show_graph
 			)
 		return dispersion, dispersion_std, fit_report

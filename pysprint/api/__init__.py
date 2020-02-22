@@ -14,4 +14,5 @@ from .minmax import MinMaxMethod
 from pysprint.utils import run_from_ipython
 # setting up the IPython notebook
 if run_from_ipython():
+	from matplotlib import pyplot as plt
 	plt.rcParams['figure.figsize'] = [15, 5]
