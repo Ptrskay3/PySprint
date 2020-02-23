@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+
 from pysprint.api.app_base import BaseApp, C_LIGHT
 from pysprint.core.generator import generatorFreq, generatorWave
 

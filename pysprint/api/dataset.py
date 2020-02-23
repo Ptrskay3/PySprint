@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 from pysprint.api.app_base import BaseApp, C_LIGHT
 from pysprint.core.dataedits import savgol, find_peak, convolution, cut_data, cwt
 from pysprint.core.normalize import DraggableEnvelope
-from pysprint.utils import calc_envelope
 from pysprint.api.exceptions import *
+from pysprint.api.spp_editor import SPPEditor
 
 
 __all__ = ['Dataset']
@@ -63,7 +63,27 @@ class Dataset(BaseApp):
 		self.xmax = None
 		self.probably_wavelength = None
 		self._check_domain()
+		
+		self._delay = None
+		self._positions = None
 
+
+	@property
+	def delay(self):
+		return self._delay
+
+
+	@delay.setter
+	def delay(self, value):
+		self._delay = value
+
+	@property
+	def positions(self):
+		return self._positions
+
+	@positions.setter
+	def positions(self, value):
+		self._positions = value
 
 	def _safe_cast(self):
 		'''
@@ -363,3 +383,11 @@ Metadata extracted from file
 				filename += '.txt'
 			np.savetxt(filename, np.transpose([self.x, self.y]), delimiter=',')
 			print(f'Successfully saved as {filename}')
+
+
+	def open_SPP_panel(self):
+		_spp = SPPEditor(self.x, self.y_norm)
+		self.delay, self.positions = _spp.get_data()
+
+	def emit(self):
+		return self.delay, self.positions

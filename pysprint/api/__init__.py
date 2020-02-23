@@ -8,7 +8,7 @@ from .dataset import Dataset
 from .generator import Generator
 from .cosfit import CosFitMethod
 from ._fft import FFTMethod
-from .spp import SPPMethod
+from .spp_interface import SPPMethod
 from .minmax import MinMaxMethod
 
 from pysprint.utils import run_from_ipython

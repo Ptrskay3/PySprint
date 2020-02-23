@@ -1,4 +1,5 @@
 import numpy as np
+
 from pysprint.api.dataset import Dataset
 from pysprint.core.peak import EditPeak
 from pysprint.utils import _maybe_increase_before_cwt, print_disp, run_from_ipython, calc_envelope

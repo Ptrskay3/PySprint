@@ -39,7 +39,7 @@ class CosFitMethod(Dataset):
 		lowguess = 2*np.pi/np.abs(closest_val-second_closest_val)
 		highguess = 2*np.pi/np.abs(m_closest_val-m_second_closest_val)
 		self.params[3] = (lowguess+highguess)/2
-		print(f'The predicted GD is ± {((lowguess+highguess)/2):.5f} based on reference point of {reference_point}.')
+		print(f'The predicted GD is ± {((lowguess+highguess)/2):.5f} fs based on reference point of {reference_point}.')
 
 	def set_max_tries(self, value):
 		"""

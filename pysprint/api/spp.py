@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 from pysprint.api.dataset import Dataset
 from pysprint.utils import print_disp
