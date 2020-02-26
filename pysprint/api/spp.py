@@ -1,3 +1,7 @@
+'''
+Deprecated
+'''
+
 import numpy as np
 
 from pysprint.api.dataset import Dataset

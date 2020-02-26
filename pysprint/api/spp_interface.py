@@ -13,9 +13,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from pysprint.api.dataset import Dataset
-from pysprint.api.exceptions import DatasetError
-from pysprint.utils import print_disp
 from pysprint.core.evaluate import spp_method
+from pysprint.utils import print_disp
+from pysprint.api.exceptions import DatasetError
 
 
 __all__ = ['SPPMethod']
@@ -53,6 +53,9 @@ class SPPMethod:
 
     def __iter__(self):
         return self
+
+    def __str__(self):
+        return f'{type(self).__name__} object\nInterferogram count : {len(self)}'
 
     def __next__(self):
         if self.idx < len(self):
@@ -130,7 +133,7 @@ class SPPMethod:
         return self._info
     
     
-# EXAMPLE USAGE
+# # EXAMPLE USAGE
 # if __name__ == '__main__':
 
 #     i = [f"D:/Python/mrs/URES0{i:03d}.trt" for i in range(56, 81, 3)]
@@ -145,7 +148,7 @@ class SPPMethod:
 #         ifg.open_SPP_panel()
 #         ifgs.set_data(*ifg.emit())
 
-#     ifgs.calculate(2.355, order=3, show_graph=True)
+#     ifgs.calculate(2.355, order=2, show_graph=True)
 
 
 

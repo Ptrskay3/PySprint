@@ -72,7 +72,6 @@ class Dataset(BaseApp):
 	def delay(self):
 		return self._delay
 
-
 	@delay.setter
 	def delay(self, value):
 		self._delay = value
@@ -391,3 +390,12 @@ Metadata extracted from file
 
 	def emit(self):
 		return self.delay, self.positions
+
+	def set_SPP_data(self, delay, positions):
+		if not isinstance(positions, np.ndarray):
+			positions = np.asarray(positions)
+		if not isinstance(delay, float):
+			delay = float(delay)
+		delay = np.ones_like(positions) * delay
+		self._delay = delay
+		self._positions = positions

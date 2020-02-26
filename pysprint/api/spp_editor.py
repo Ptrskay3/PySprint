@@ -14,6 +14,8 @@ class SPPEditor:
 
     def __init__(self, x, y):
         self.fig, self.ax = plt.subplots()
+        self.fig.set_figheight(6)
+        self.fig.set_figwidth(10)
         plt.grid()
         plt.subplots_adjust(bottom=0.2)
         self.x = x
@@ -109,3 +111,4 @@ class SPPEditor:
 
         if self.points.stale:
             self.fig.canvas.draw_idle()
+
