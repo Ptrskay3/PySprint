@@ -1,10 +1,7 @@
 '''
 Experimental..
 
-#TODO:
- - format plot
- - ensure it's working correctly
- - error message is not raised when datapoints are less than fit order
+#TODO: implement @classmethod which handles pysprint.Dataset objects.
 '''
 
 import os
@@ -131,38 +128,3 @@ class SPPMethod:
     def info(self):
         self._info = f'Data is recorded from {len(self._delay)} interferograms ({len(self)} availabe in total)'
         return self._info
-    
-    
-# # EXAMPLE USAGE
-# if __name__ == '__main__':
-
-#     i = [f"D:/Python/mrs/URES0{i:03d}.trt" for i in range(56, 81, 3)]
-#     s = [f"D:/Python/mrs/URES0{i:03d}.trt" for i in range(57, 82, 3)]
-#     r = [f"D:/Python/mrs/URES0{i:03d}.trt" for i in range(58, 83, 3)]
-
-#     ifgs = SPPMethod(i, s, r)
-
-#     for ifg in ifgs:
-#         ifg.chdomain()
-#         ifg.slice(start=1.95, stop=4.4)
-#         ifg.open_SPP_panel()
-#         ifgs.set_data(*ifg.emit())
-
-#     ifgs.calculate(2.355, order=2, show_graph=True)
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
