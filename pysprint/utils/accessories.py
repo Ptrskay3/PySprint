@@ -4,7 +4,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 import scipy.stats as st
 
-__all__ = ['scipy_disp', 'lmfit_disp', 'findNearest', 'find_closest',
+__all__ = ['scipy_disp', 'lmfit_disp', 'findNearest',
            '_handle_input', 'print_disp', 'fourier_interpolate',
            'between', 'get_closest', 'run_from_ipython',
            'calc_envelope', 'measurement', '_maybe_increase_before_cwt']
@@ -167,11 +167,6 @@ def _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY):
 		raise TypeError('Input types are wrong.\n')
 	return initSpectrumX,  Ydata
 
-
-def find_closest(xValue, xArray, yArray):
-	idx = (np.abs(xArray - xValue)).argmin()
-	value = xArray[idx]
-	return value, yArray[idx]
 
 
 def print_disp(f):

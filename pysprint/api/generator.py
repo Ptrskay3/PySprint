@@ -94,11 +94,11 @@ class Generator(DatasetBase):
 			e.g path='C:/examplefolder'
 		"""
 		if path is None:
-			np.savetxt('{}.txt'.format(name), np.transpose([self.x, self.y, self.ref, self.sam]), delimiter=self.delimiter)
+			np.savetxt(f'{name}.txt', np.transpose([self.x, self.y, self.ref, self.sam]), delimiter=self.delimiter)
 			print(f'Successfully saved as {name}')
 		else:
 			np.savetxt(
-				'{}/{}.txt'.format(path, name),
+				f'{path}/{name}.txt',
 				 np.transpose([self.x, self.y, self.ref, self.sam]),
 				 delimiter = self.delimiter
 				 )

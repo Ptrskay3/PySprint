@@ -36,14 +36,14 @@ class SPPEditor:
     def submit(self, delay):
         try:
             # print(delay)
-            delay = re.sub(r'[^0-9\.,]', "", delay)
+            delay = re.sub(r'[^0-9\.,\-]', "", delay)
             self.delay = float(delay)
         except ValueError:
             pass # we ignore bad calls
 
     def text_change(self, delay):
         try:
-            delay = re.sub(r'[^0-9\.,]', "", delay)
+            delay = re.sub(r'[^0-9\.,\-]', "", delay)
             self.delay = float(delay)
         except ValueError:
             pass # we ignore bad calls
