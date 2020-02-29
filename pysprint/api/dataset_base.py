@@ -2,6 +2,8 @@ from abc import abstractmethod, ABCMeta
 
 __all__ = ['DatasetBase']
 
+C_LIGHT = 299.792458
+
 class DatasetBase(metaclass=ABCMeta):
 	"""Base metaclass that defines the interface
 	for any interferogram."""
@@ -14,11 +16,6 @@ class DatasetBase(metaclass=ABCMeta):
 	@abstractmethod
 	def data(self):
 		'''The stored dataset.'''
-		pass
-
-	@abstractmethod
-	def run(self):
-		'''Launch the PyQt application with the stored dataset.'''
 		pass
 
 	@abstractmethod

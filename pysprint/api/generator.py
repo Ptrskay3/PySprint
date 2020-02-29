@@ -1,12 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from pysprint.api.app_base import BaseApp, C_LIGHT
+from pysprint.api.dataset_base import DatasetBase, C_LIGHT
 from pysprint.core.generator import generatorFreq, generatorWave
 
 __all__ = ['Generator']
 
-class Generator(BaseApp):
+class Generator(DatasetBase):
 	"""
 	Basic dataset generator.
 	"""

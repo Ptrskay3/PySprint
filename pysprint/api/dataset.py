@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from pysprint.api.app_base import BaseApp, C_LIGHT
+from pysprint.api.dataset_base import  DatasetBase, C_LIGHT
 from pysprint.core.dataedits import savgol, find_peak, convolution, cut_data, cwt
 from pysprint.core.normalize import DraggableEnvelope
 from pysprint.api.exceptions import *
@@ -18,7 +18,7 @@ from pysprint.utils import MetaData
 
 __all__ = ['Dataset']
 
-class Dataset(BaseApp):
+class Dataset(DatasetBase):
 	"""
 	Base class for the evaluating methods.
 	"""
