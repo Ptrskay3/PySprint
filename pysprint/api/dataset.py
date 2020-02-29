@@ -98,7 +98,7 @@ class Dataset(BaseApp):
 		self._positions = value
 
 
-	def _safe_cast(self, arg):
+	def _safe_cast(self):
 		'''
 		Return a copy of key attributes in order to prevent inplace modification.
 		'''
