@@ -35,7 +35,6 @@ class SPPEditor:
 
     def submit(self, delay):
         try:
-            # print(delay)
             delay = re.sub(r'[^0-9\.,\-]', "", delay)
             self.delay = float(delay)
         except ValueError:
@@ -111,9 +110,3 @@ class SPPEditor:
 
         if self.points.stale:
             self.fig.canvas.draw_idle()
-
-if __name__ == '__main__':
-    x = np.arange(0,100, 0.1)
-    y = np.sin(x)
-    s = SPPEditor(x, y)
-    print(s.delay)
