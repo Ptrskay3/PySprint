@@ -1,11 +1,14 @@
 import sys
-import unittest
-import numpy as np
 
 sys.path.append('..')
 
-from pysprint.core.generator import generatorFreq, generatorWave, C_LIGHT
+import unittest
+from unittest.mock import patch
 
+import numpy as np
+
+from pysprint.core.generator import generatorFreq, generatorWave, C_LIGHT
+from pysprint import Generator as Generator_from_API
 class TestGenerator(unittest.TestCase):
 
 	def setUp(self):
@@ -39,6 +42,13 @@ class TestGenerator(unittest.TestCase):
 		assert len(a) == len(b)
 		e, f, _, _ = generatorWave(1,2,1.5, delay = 0)
 		assert len(e) == len(f)
+
+	@patch('matplotlib.pyplot.show')
+	def test_Generator_from_API(self, mock_show):
+		g = Generator_from_API(1,3,2,100)
+		g.generate_freq()
+		g.phase_graph()
+		mock_show.assert_called()
 
 if __name__ == '__main__':
 	unittest.main()
