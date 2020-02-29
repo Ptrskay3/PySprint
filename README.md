@@ -7,22 +7,13 @@
 [![codecov](https://codecov.io/gh/Ptrskay3/PySprint/branch/master/graph/badge.svg)](https://codecov.io/gh/Ptrskay3/PySprint)
 
 
-| | | |
-|-|-|-|
+| | |
+|-|-|
 |__Name__| PySprint|
 |__Version__| [![PyPI version](https://badge.fury.io/py/pysprint.svg)](https://badge.fury.io/py/pysprint) |
 |__Development status__ | Pre-Alpha |
 |__License__| [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) |
 
-
-
-==============  ===============
-Platform        Site           
-==============  ===============
-Linux           CircleCI        
-OS X            Github Actions  
-Windows x64     Appveyor        
-==============  ===============
 
 ### Decription
 PySprint provides an interface for Spectrally resolved interferometry in Python.
