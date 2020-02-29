@@ -4,7 +4,7 @@ __all__ = ['convert_df']
 
 def convert_df(
 	filename, ifg, ref=None, sam=None, delimiter=';', decimal=',',
-	skiprows=0, index=False, invert_axis=False, fmt=None
+	skiprows=0, index=False, invert_axis=False, single_axis=False, fmt=None
 	):
 	"""
 	Convert and save given interferogram datafile (either single 
@@ -58,13 +58,23 @@ def convert_df(
 		ifg, sep=delimiter, decimal=decimal, skiprows=skiprows, names=['x', 'y']
 		)
 	if (sam is not None and ref is not None):
-		sam_data = pd.read_csv(
-			sam, sep=delimiter, decimal=decimal, skiprows=skiprows, names=['x', 'y']
-			)
+		if not single_axis:
+			sam_data = pd.read_csv(
+				sam, sep=delimiter, decimal=decimal, skiprows=skiprows, names=['x', 'y']
+				)
+		else:
+			sam_data = pd.read_csv(
+				sam, sep=delimiter, decimal=decimal, skiprows=skiprows, names=['y']
+				)
 		samy = sam_data['y'].values if not invert_axis else sam_data['x'].values
-		ref_data = pd.read_csv(
-			ref, sep=delimiter, decimal=decimal, skiprows=skiprows, names=['x', 'y']
-			)
+		if not single_axis:
+			ref_data = pd.read_csv(
+				ref, sep=delimiter, decimal=decimal, skiprows=skiprows, names=['x', 'y']
+				)
+		else:
+			ref_data = pd.read_csv(
+				ref, sep=delimiter, decimal=decimal, skiprows=skiprows, names=['y']
+				)
 		refy = ref_data['y'].values if not invert_axis else ref_data['x'].values
 	x = ifg_data['x'].values
 	y = ifg_data['y'].values

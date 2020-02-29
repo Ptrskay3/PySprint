@@ -13,7 +13,7 @@ from pysprint.core.dataedits import savgol, find_peak, convolution, cut_data, cw
 from pysprint.core.normalize import DraggableEnvelope
 from pysprint.api.exceptions import *
 from pysprint.api.spp_editor import SPPEditor
-from pysprint.utils import MetaData
+from pysprint.utils import MetaData, run_from_ipython
 
 
 __all__ = ['Dataset']
