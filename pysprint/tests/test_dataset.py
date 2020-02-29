@@ -4,7 +4,6 @@ import unittest
 from unittest.mock import patch
 
 import numpy as np
-import scipy
 import pandas as pd
 
 from pysprint import Dataset
