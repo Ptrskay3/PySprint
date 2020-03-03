@@ -1,6 +1,13 @@
 import warnings
 
-__all__ = ['DatasetError', 'InterpolationWarning', 'FourierWarning']
+__all__ = ['PySprintWarning', 'DatasetError', 'InterpolationWarning', 'FourierWarning']
+
+
+class PySprintWarning(Warning):
+	'''
+	Base pysprint warning class.
+	'''
+	pass
 
 class DatasetError(Exception):
 	"""
@@ -10,14 +17,14 @@ class DatasetError(Exception):
 	pass
 
 
-class InterpolationWarning(Warning):
+class InterpolationWarning(PySprintWarning):
 	"""
 	This warning is raised when a function applies linear interpolation on the data.
 	"""
 	pass
 
 
-class FourierWarning(Warning):
+class FourierWarning(PySprintWarning):
 	"""
 	This warning is raised when FFT is called first instead of IFFT.
 	Later on it will be improved. 

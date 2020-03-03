@@ -23,24 +23,6 @@ class CosFitMethod(Dataset):
 		self.f = None
 
 
-		# FIXME : DIFFERENT ERROR CASES SHOULD BE TAKEN CARE OF
-	def predict(self, reference_point=2.355, pmax=0.5, pmin=0.5, threshold=0.35):
-		x_min, _, x_max, _ = self.detect_peak(pmax=pmax, pmin=pmin, threshold=threshold)
-		try:
-			closest_val, idx1 = find_nearest(x_min, reference_point)
-			m_closest_val, m_idx1 = find_nearest(x_max, reference_point)
-		except ValueError:
-			print('Prediction failed.\nSkipping.. ')
-			return
-		truncated = np.delete(x_min, idx1)
-		second_closest_val, _ = find_nearest(truncated, reference_point)
-		m_truncated = np.delete(x_max, m_idx1)
-		m_second_closest_val, _ = find_nearest(m_truncated, reference_point)
-		lowguess = 2*np.pi/np.abs(closest_val-second_closest_val)
-		highguess = 2*np.pi/np.abs(m_closest_val-m_second_closest_val)
-		self.params[3] = (lowguess+highguess)/2
-		print(f'The predicted GD is ± {((lowguess+highguess)/2):.5f} fs based on reference point of {reference_point}.')
-
 	def set_max_tries(self, value):
 		"""
 		Overwrite the default scipy maximum try setting to fit the curve.
@@ -219,4 +201,5 @@ class CosFitMethod(Dataset):
 		self.f.set_initial_region(initial_region_ratio)
 		self.f.set_final_guess(GD=self.params[3], GDD=self.params[4], TOD=self.params[5],
 		FOD=self.params[6], QOD=self.params[7]) # we can pass it higher params safely, they are ignored.
-		self.f.run_loop(extend_by, coef_threshold, max_tries=max_tries, show_endpoint=show_endpoint)
+		disp = self.f.run_loop(extend_by, coef_threshold, max_tries=max_tries, show_endpoint=show_endpoint)
+		return disp[3:]

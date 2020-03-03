@@ -15,10 +15,7 @@ class MinMaxMethod(Dataset):
 		super().__init__(*args, **kwargs)
 
 	# TODO: fix docstring
-	def init_edit_session(
-		self, pmax=0.1, pmin=0.1, threshold=0, 
-		except_around=None, engine='normal', width=10
-		):
+	def init_edit_session(self, engine='normal', **kwargs):
 		""" Function to initialize peak editing on a plot.
 		Right clicks will delete the closest point, left clicks 
 		will add a new point. Just close the window when finished.
@@ -26,21 +23,12 @@ class MinMaxMethod(Dataset):
 		Parameters:
 		----------
 
-		pmax: float, default is 0.1
-			prominence of maximum points
-			the lower it is, the more peaks will be found
-
-		pmin: float, default is 0.1
-			prominence of minimum points
-			the lower it is, the more peaks will be found
-
-		threshold: float, default is 0
-			sets the minimum distance (measured on y axis) required for a point to be
-			accepted as extremal
-
-		except_around: interval (array or tuple), default is None
-			Overwrites the threshold to be 0 at the given interval.
-			format is (lower, higher) or [lower, higher].
+		engine: str, default is `'normal'`
+			Must be `'cwt'`, `'normal'` or `'slope'`.
+			Peak detection algorithm to use.
+			
+		**kwargs:
+			pmax, pmin, threshold, except_arund, width
 
 		Notes:
 		------
@@ -53,9 +41,17 @@ class MinMaxMethod(Dataset):
 		if engine not in engines:
 			raise ValueError(f'Engine must be in {str(engines)}')
 		if engine == 'normal':
+			pmax = kwargs.pop('pmax', 0.1)
+			pmin = kwargs.pop('pmin', 0.1)
+			threshold = kwargs.pop('threshold', 0.1)
+			except_around = kwargs.pop('except_around', None)
 			_x, _y, _xx, _yy = self.detect_peak(
 			pmax=pmax, pmin=pmin, threshold=threshold, except_around=except_around
 			)
+			
+			# just for validation purposes
+			_ = kwargs.pop('width', 10)
+			_ = kwargs.pop('floor_thres', 0.05)
 
 		elif engine == 'slope':
 			x, _, _, _ = self._safe_cast()
@@ -70,9 +66,22 @@ class MinMaxMethod(Dataset):
 			_y, _yy = lp, up
 
 		elif engine == 'cwt':
-			_x, _y, _xx, _yy = self.detect_peak_cwt(width)
+			width = kwargs.pop('width', 10)
+			floor_thres = kwargs.pop('floor_thres', 0.05)
+			_x, _y, _xx, _yy = self.detect_peak_cwt(width=width, floor_thres=floor_thres)
+
+			# just for validation purposes
+			_ = kwargs.pop('pmax', 0.1)
+			_ = kwargs.pop('pmin', 0.1)
+			_ = kwargs.pop('threshold', 0.1)
+			_ = kwargs.pop('except_around', None)
+
 		_xm = np.append(_x, _xx)
 		_ym = np.append(_y, _yy)
+
+
+		if kwargs:
+			raise TypeError(f'Invalid argument:{kwargs}')
 
 		try:
 			_editpeak = EditPeak(self.x, self.y_norm, _xm, _ym)

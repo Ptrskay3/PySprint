@@ -24,6 +24,13 @@ PySprint provides an interface for Spectrally resolved interferometry in Python.
 * ✓ Fourier method
 * ✓ Stationary phase point method
 * Windowed Fourier transform method
+* Automated SPP detection, which is correctable by the user
+* Better SPP interface: make the constructor accept `~pysprint.Dataset` objects.
+* Calibration
+* Improve file parsing
+* Clean up utils, evaluate methods, edit methods
+* Docstrings
+
 
 Currently all the features are under testing.
 
@@ -36,9 +43,9 @@ PySprint requires at least [Python 3.6](https://www.python.org/downloads/) to ru
 $ pip install pysprint
 ```
 
-* numpy, scipy, matplotlib, pandas, lmfit, tqdm will be automatically collected.
+Requirements: numpy, scipy, matplotlib, pandas, lmfit (might be dropped), tqdm (might be dropped)
 
-Will be released on Anaconda Cloud.
+Will be released on Anaconda Cloud after the testing is done.
 
 ## Documentation
 

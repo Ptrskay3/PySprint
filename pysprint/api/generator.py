@@ -64,6 +64,10 @@ class Generator(DatasetBase):
 			self.GDD, self.TOD, self.FOD, self.QOD,
 			self.resolution, self.delimiter, self.pulse_width, self.normalize, self.chirp)
 
+
+	def GD_lookup(self, *args, **kwargs):
+		return self.GD + self.delay
+
 	def show(self):
 		"""
 		Draws the plot of the generated data.

@@ -7,7 +7,6 @@ from scipy.interpolate import interp1d
 from pysprint.utils import findNearest, _handle_input, between, _maybe_increase_before_cwt
 
 
-
 def cwt(x, y, ref, sam, width, floor_thres=0.1):
 	Xdata, Ydata = _handle_input(
 		x, y, ref, sam
@@ -15,8 +14,8 @@ def cwt(x, y, ref, sam, width, floor_thres=0.1):
 	idx = find_peaks_cwt(Ydata, np.arange(1, width))
 	if _maybe_increase_before_cwt(Ydata, tolerance=floor_thres):
 		Ydata += 2
-	idx2 = find_peaks_cwt(1/Ydata, np.arange(1, width))
-
+	Ydata_rec = 1/Ydata
+	idx2 = find_peaks_cwt(Ydata_rec, np.arange(1, width))
 	return Xdata[idx], Ydata[idx]-2, Xdata[idx2], Ydata[idx2]-2
 
 def savgol(
@@ -38,7 +37,7 @@ def savgol(
 		except Exception as e:
 			print(e)
 	else:
-		raise ValueError('Window must be bigger than order currently: {window} and {order})')
+		raise ValueError(f'Order must be lower than window length. Currently window is {window} and order is {order})')
 
 def find_peak(
 	initSpectrumX, initSpectrumY, referenceArmY, sampleArmY,

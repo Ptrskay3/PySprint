@@ -12,6 +12,11 @@ class DatasetBase(metaclass=ABCMeta):
 	def __init__(self):
 		pass
 
+	@abstractmethod
+	def GD_lookup(self, *args, **kwargs):
+		''' Quick GD lookup'''
+		pass
+
 	@property
 	@abstractmethod
 	def data(self):

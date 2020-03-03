@@ -3,6 +3,9 @@ This file implements the basic Dataset class.
 """
 
 import json # for pretty printing dict
+import warnings
+
+warnings.filterwarnings("ignore", message="divide by zero encountered in true_divide")
 
 import numpy as np
 import pandas as pd
@@ -13,7 +16,7 @@ from pysprint.core.dataedits import savgol, find_peak, convolution, cut_data, cw
 from pysprint.core.normalize import DraggableEnvelope
 from pysprint.api.exceptions import *
 from pysprint.api.spp_editor import SPPEditor
-from pysprint.utils import MetaData, run_from_ipython
+from pysprint.utils import MetaData, run_from_ipython, findNearest as find_nearest
 
 
 __all__ = ['Dataset']
@@ -97,6 +100,63 @@ class Dataset(DatasetBase):
 	def positions(self, value):
 		self._positions = value
 
+	def GD_lookup(self, reference_point=2.355, engine='cwt', silent=False, **kwargs):
+		'''
+		Quick GD lookup: it finds extremal points near the `reference_point` and returns
+		an avarage value of 2*np.pi divided by distances between consecutive minimal or
+		maximal values. Since it's relying on peak detection, the results may be irrelevant
+		in some cases. If the parent class is `~pysprint.CosFitMethod`, then it will set the
+		predicted value as inital parameter for fitting.
+		'''
+		if engine not in ('cwt', 'normal'):
+			raise ValueError('Engine must be `cwt` or `normal`.')
+		if engine == 'cwt':
+			width = kwargs.pop('width', 35)
+			floor_thres = kwargs.pop('floor_thres', 0.05)
+			x_min, _, x_max, _ = self.detect_peak_cwt(width=width, floor_thres=floor_thres)
+
+			#just validation
+			_ = kwargs.pop('pmin', 0.1)
+			_ = kwargs.pop('pmax', 0.1)
+			_ = kwargs.pop('threshold', 0.35)
+
+		else:
+			pmin = kwargs.pop('pmin', 0.1)
+			pmax = kwargs.pop('pmax', 0.1)
+			threshold = kwargs.pop('threshold', 0.35)
+			x_min, _, x_max, _ = self.detect_peak(pmin=pmin, pmax=pmax, threshold=threshold)
+
+			# just validation
+			_ = kwargs.pop('width', 10)
+			_ = kwargs.pop('floor_thres', 0.05)
+
+		if kwargs:
+			raise TypeError(f'Invalid argument:{kwargs}')
+
+		try:
+			closest_val, idx1 = find_nearest(x_min, reference_point)
+			m_closest_val, m_idx1 = find_nearest(x_max, reference_point)
+		except ValueError:
+			print('No extremal values found. Prediction failed.\nSkipping.. ')
+			return
+		try:
+			truncated = np.delete(x_min, idx1)
+			second_closest_val, _ = find_nearest(truncated, reference_point)
+		except IndexError:
+			print('Prediction failed.\nSkipping.. ')
+			return
+		try:
+			m_truncated = np.delete(x_max, m_idx1)
+			m_second_closest_val, _ = find_nearest(m_truncated, reference_point)
+		except IndexError:
+			print('Prediction failed.\nSkipping.. ')
+			return
+		lowguess = 2*np.pi/np.abs(closest_val-second_closest_val)
+		highguess = 2*np.pi/np.abs(m_closest_val-m_second_closest_val)
+		if type(self).__name__ == 'CosFitMethod':
+			self.params[3] = (lowguess+highguess)/2
+		if not silent:
+			print(f'The predicted GD is ± {((lowguess+highguess)/2):.5f} fs based on reference point of {reference_point}.')
 
 	def _safe_cast(self):
 		'''
@@ -153,21 +213,24 @@ class Dataset(DatasetBase):
 			The first `n` lines in the original file containing the meta information
 			about the dataset. It is parsed to be dict-like. If the parsing fails,
 			a new entry will be created in the dictionary with key `unparsed`.
-			Default is `4`.
+			Default is `5`.
 		'''
+		if skiprows < meta_len:
+			warnings.warn(f'Skiprows is currently {skiprows}, but meta information is set to {meta_len} lines. This implies that either one is probably wrong.', PySprintWarning)
 		with open(basefile) as file:
-			comm = next(file).strip('\n').split('-')[-1]
+			comm = next(file).strip('\n').split('-')[-1].lstrip(' ')
 			additional = (next(file).strip('\n').strip('\x00').split(':') for _ in range(1, meta_len))
-			cls.meta = {'comment': comm}
+			if meta_len != 0:
+				cls.meta = {'comment': comm}
 			try:
 				for info in additional:
 					cls.meta[info[0]] = info[1]
 			except IndexError:
 				cls.meta['unparsed'] = str(list(additional))
-		df = pd.read_csv(basefile, skiprows=skiprows, sep=sep, decimal=decimal, names=['x', 'y'])
+		df = pd.read_csv(basefile, skiprows=skiprows, sep=sep, decimal=decimal, usecols=[0,1], names=['x', 'y'])
 		if (ref is not None and sam is not None):
-			r = pd.read_csv(ref, skiprows=skiprows, sep=sep, decimal=decimal, names=['x', 'y'])
-			s = pd.read_csv(sam, skiprows=skiprows, sep=sep, decimal=decimal, names=['x', 'y'])
+			r = pd.read_csv(ref, skiprows=skiprows, sep=sep, decimal=decimal, usecols=[0,1], names=['x', 'y'])
+			s = pd.read_csv(sam, skiprows=skiprows, sep=sep, decimal=decimal, usecols=[0,1], names=['x', 'y'])
 			return cls(df['x'].values, df['y'].values, r['y'].values, s['y'].values)
 		return cls(df['x'].values, df['y'].values)
 
@@ -187,8 +250,7 @@ Predicted domain: {'wavelength' if self.probably_wavelength else 'frequency'}
 
 Metadata extracted from file
 ----------------------------
-{json.dumps(self.meta, indent=4)}
-		'''
+{json.dumps(self.meta, indent=4)}'''
 		return string
 
 	@property
@@ -381,7 +443,7 @@ Metadata extracted from file
 		self.plotwidget.show()
 
 
-	def normalize(self, filename=None):
+	def normalize(self, filename=None, smoothing_level=0):
 		'''
 		Normalize the interferogram by finding upper and lower envelope
 		on an interactive matplotlib editor.
@@ -400,9 +462,12 @@ Metadata extracted from file
 		'''
 		if run_from_ipython():
 			return '''It seems you run this code in IPython. Interactive plotting is not yet supported. Consider running it in the regular console.'''
-		_l_env = DraggableEnvelope(self.x, self.y, 'l')
+		x, y, _, _ = self._safe_cast()
+		if smoothing_level != 0:
+			x, y = savgol(x, y, [], [], window=smoothing_level)
+		_l_env = DraggableEnvelope(x, y, 'l')
 		y_transform = _l_env.get_data()
-		_u_env = DraggableEnvelope(self.x, y_transform, 'u')
+		_u_env = DraggableEnvelope(x, y_transform, 'u')
 		y_final = _u_env.get_data()
 		self.y = y_final
 		self.y_norm = y_final
