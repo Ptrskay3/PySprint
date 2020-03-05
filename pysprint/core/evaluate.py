@@ -90,8 +90,8 @@ def min_max_method(
 
     if len(relNegFreqs) == 0 and len(relPosFreqs) == 0:
         raise ValueError('No extremal points found.')
-    negValues = np.zeros_like(relNegFreqs)
-    posValues = np.zeros_like(relPosFreqs)
+    negValues = np.zeros_like(relNegFreqs, dtype=np.float64)
+    posValues = np.zeros_like(relPosFreqs, dtype=np.float64)
     for freq in range(len(relPosFreqs)):
         posValues[freq] = np.pi * (freq + 1)
     for freq in range(len(relNegFreqs)):

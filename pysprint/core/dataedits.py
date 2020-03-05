@@ -109,3 +109,23 @@ def cut_data(
 		return Xdata[mask], Ydata[mask]
 	else:
 		pass
+'''
+# better implementation
+
+def cut_data(x, y, start=None, stop=None):
+    if start is None:
+        start = np.NINF
+    if stop is None:
+        stop = np.inf
+    if start < stop:
+        low_item = find_nearest(x, start)
+        high_item = find_nearest(x, stop)
+        if stop is np.inf:
+            high_item = np.max(x)            
+        mask = np.where((x >= low_item) & (x <= high_item))
+        return x[mask], y[mask]
+    elif start > stop:
+        raise ValueError('Start value must not exceed stop.')
+    else:
+        return np.array([]), np.array([])
+'''

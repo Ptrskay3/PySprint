@@ -15,10 +15,10 @@ def correct_sign(x, flip_increasing=True):
 	if not (len(increasing) == 1 and len(decreasing) == 1):
 			raise ValueError('Values could not be split into two strictly monotonic parts safely.')
 	if flip_increasing:
+		x[increasing_idx[0][0]] *= -1
 		x[increasing_idx[0]+1] *= -1 
 		return x
-	x[decreasing_idx[0]+1] *= -1 
-	x[decreasing_idx[0][0]] *= -1
+	x[decreasing_idx[0]] *= -1
 	return x
 
 def group_consecutives(arr, step=1):

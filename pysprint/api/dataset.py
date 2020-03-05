@@ -68,6 +68,8 @@ class Dataset(DatasetBase):
 				pass # just ignore invalid arms
 		if len(self.ref) == 0:
 			self.y_norm = self.y
+			self._is_normalized = self._ensure_norm()
+
 		else:
 			self.y_norm = (self.y - self.ref - self.sam) / (2 * np.sqrt(self.sam * self.ref))
 			self._is_normalized = True
@@ -84,6 +86,23 @@ class Dataset(DatasetBase):
 		self._positions = None
 
 
+	# TODO: implement that group of functions
+	def plot_phase(self, exclude_GD=False):
+		pass
+
+	def plot_GDD(self):
+		pass
+
+	def plot_TOD(self):
+		pass
+
+	def plot_FOD(self):
+		pass
+
+	def plot_QOD(self):
+		pass
+		
+
 	@property
 	def delay(self):
 		return self._delay
@@ -99,6 +118,14 @@ class Dataset(DatasetBase):
 	@positions.setter
 	def positions(self, value):
 		self._positions = value
+
+
+	def _ensure_norm(self):
+		idx = np.where((self.y_norm > 2))
+		val = len(idx[0]) / len(self.y_norm)
+		if val > 0.015: # this is a custom threshold, which often works..
+			return False
+		return True
 
 	def GD_lookup(self, reference_point=2.355, engine='cwt', silent=False, **kwargs):
 		'''
@@ -137,7 +164,7 @@ class Dataset(DatasetBase):
 			closest_val, idx1 = find_nearest(x_min, reference_point)
 			m_closest_val, m_idx1 = find_nearest(x_max, reference_point)
 		except ValueError:
-			print('No extremal values found. Prediction failed.\nSkipping.. ')
+			print('Prediction failed.\nSkipping.. ')
 			return
 		try:
 			truncated = np.delete(x_min, idx1)
@@ -165,13 +192,28 @@ class Dataset(DatasetBase):
 		x, y, ref, sam = np.copy(self.x), np.copy(self.y), np.copy(self.ref), np.copy(self.sam)
 		return x, y, ref, sam
 
+	@staticmethod
+	def wave2freq(value):
+		'''
+		Switches values between wavelength and angular frequency.
+		'''
+		return (2*np.pi*C_LIGHT)/value
+
+	_dispatch = wave2freq.__func__
+
+	@staticmethod
+	def freq2wave(value):
+		'''
+		Switches values between angular frequency and wavelength.
+		'''
+		return Dataset._dispatch(value)
 
 	def _check_domain(self):
 		"""
 		Checks the domain of data just by looking at x axis' minimal value.
 		Units are obviously not added yet, we work in nm and PHz...
 		"""
-		if min(self.x) > 100:
+		if min(self.x) > 50:
 			self.probably_wavelength = True
 		else:
 			self.probably_wavelength = False
@@ -238,15 +280,20 @@ class Dataset(DatasetBase):
 		return self.__repr__()
 
 	def __repr__(self):
+		if isinstance(self._delay, np.ndarray):
+			pprint_delay = self._delay[0]
+		elif isinstance(self._delay, float):
+			pprint_delay = self._delay
 		string = f'''
 {type(self).__name__} object
 
 Parameters
 ----------
-Datapoints = {len(self.x)}
+Datapoints: {len(self.x)}
 Normalized: {self._is_normalized}
-Arms are separated: {True if len(self.ref) > 0 else False}
 Predicted domain: {'wavelength' if self.probably_wavelength else 'frequency'}
+Delay value: {(str(pprint_delay) + ' fs') if np.all(self._delay) else 'Not given'}
+SPP position(s): {self._positions if np.all(self._positions) else 'Not given'}
 
 Metadata extracted from file
 ----------------------------
@@ -299,7 +346,7 @@ Metadata extracted from file
 		xmax, ymax, xmin, ymin = cwt(x, y, ref, sam, width=width, floor_thres=floor_thres)
 		return xmax, ymax, xmin, ymin
 
-	def savgol_fil(self, window=10, order=3):
+	def savgol_fil(self, window=5, order=3):
 		"""
 		Applies Savitzky-Golay filter on the dataset.
 
@@ -357,6 +404,7 @@ Metadata extracted from file
 		# Just to make sure it's correctly shaped. Later on we might delete this.
 		if type(self).__name__ == 'FFTMethod':
 			self.original_x = self.x
+		self._is_normalized = self._ensure_norm()
 
 	def convolution(self, window_length, std=20):
 		"""
