@@ -97,7 +97,7 @@ def min_max_method(
     # for freq in range(len(relNegFreqs)):
     #     negValues[freq] = np.pi * (freq + 1)
     posValues = np.array([np.pi * (i+1) for i in range(len(relPosFreqs))])
-    negValues = np.array([np.pi * (i+1) for i in range(len(negPosFreqs))])
+    negValues = np.array([np.pi * (i+1) for i in range(len(relNegFreqs))])
 
     x_s = np.append(relPosFreqs, relNegFreqs)
     y_s = np.append(posValues, negValues)
