@@ -4,6 +4,7 @@ This file implements the basic Dataset class.
 
 import json # for pretty printing dict
 import warnings
+from math import factorial
 
 warnings.filterwarnings("ignore", message="divide by zero encountered in true_divide")
 
@@ -66,6 +67,7 @@ class Dataset(DatasetBase):
 				self.sam.astype(float)
 			except ValueError:
 				pass # just ignore invalid arms
+
 		if len(self.ref) == 0:
 			self.y_norm = self.y
 			self._is_normalized = self._ensure_norm()
@@ -73,6 +75,7 @@ class Dataset(DatasetBase):
 		else:
 			self.y_norm = (self.y - self.ref - self.sam) / (2 * np.sqrt(self.sam * self.ref))
 			self._is_normalized = True
+		
 		self.plotwidget = plt
 		self.xmin = None
 		self.xmax = None
@@ -85,24 +88,26 @@ class Dataset(DatasetBase):
 		self._delay = None
 		self._positions = None
 
+		self._dispersion_array = None
 
-	# TODO: implement that group of functions
-	def plot_phase(self, exclude_GD=False):
-		pass
 
-	def plot_GDD(self):
-		pass
+	def phase_plot(self, exclude_GD=False):
+		if not np.all(self._dispersion_array):
+			raise ValueError('Dispersion must be calculated before plotting the phase.')
 
-	def plot_TOD(self):
-		pass
+		coefs = np.array([self._dispersion_array[i]/factorial(i+1) for i in range(len(self._dispersion_array))])
 
-	def plot_FOD(self):
-		pass
+		if exclude_GD:
+			coefs[0] = 0
 
-	def plot_QOD(self):
-		pass
+		phase_poly = np.poly1d(coefs[::-1], r=False)
 		
-
+		self.plotwidget.plot(self.x, phase_poly(self.x))
+		self.plotwidget.grid()
+		self.plotwidget.ylabel('$\Phi\, [rad]$')
+		self.plotwidget.xlabel('$\omega \,[PHz]$')
+		self.plotwidget.show()
+		
 	@property
 	def delay(self):
 		return self._delay

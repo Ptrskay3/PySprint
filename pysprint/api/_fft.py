@@ -151,4 +151,5 @@ class FFTMethod(Dataset):
 		dispersion, dispersion_std, fit_report = args_comp(
 			self.x, self.y, reference_point=reference_point, fitOrder=order, showGraph=show_graph
 			)
+		self._dispersion_array = dispersion
 		return dispersion, dispersion_std, fit_report

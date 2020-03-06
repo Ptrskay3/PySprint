@@ -9,13 +9,6 @@ class PySprintWarning(Warning):
 	'''
 	pass
 
-class DatasetError(Exception):
-	"""
-	This error is raised when invalid type of data encountered when initializing 
-	a dataset or inherited object.
-	"""
-	pass
-
 
 class InterpolationWarning(PySprintWarning):
 	"""
@@ -29,5 +22,13 @@ class FourierWarning(PySprintWarning):
 	This warning is raised when FFT is called first instead of IFFT.
 	Later on it will be improved. 
 	For more details see help(pysprint.FFTMethod.calculate)
+	"""
+	pass
+
+
+class DatasetError(Exception):
+	"""
+	This error is raised when invalid type of data encountered when initializing 
+	a dataset or inherited object.
 	"""
 	pass
