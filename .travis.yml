@@ -30,7 +30,7 @@ addons:
 install:
   - python -m pip install --upgrade pip
   - if [[ $version == latest ]]; then python -m pip install --upgrade numpy scipy matplotlib pandas tqdm lmfit ; fi
-  - if [[ $version == minimum]]; then pip uninstall --yes numpy
+  - if [[ $version == minimum]]; then pip uninstall --yes numpy ; fi
   - if [[ $version == minimum ]]; then pip install -r requirements.txt ; fi
   - pip install codecov
   - python setup.py install
