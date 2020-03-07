@@ -14,10 +14,12 @@ python:
 
 env: 
     - version=latest
+    - verison=minimum
 
 
 before_install:
   - "export PYTHONPATH=$PYTHONPATH:$(pwd)"
+  - python -m pip install --upgrade setuptools
 
 addons:
   apt:
@@ -27,9 +29,9 @@ addons:
 
 install:
   - python -m pip install --upgrade pip
-  - if [[ $version == latest ]]; then pip install -r requirements.txt codecov ; fi
+  - if [[ $version == latest ]]; then python -m pip install --upgrade numpy scipy matplotlib pandas tqdm lmfit codecov ; fi
+  - if [[ $version == minimum ]]; then pip install -r requirements.txt codecov ; fi
   - python setup.py install
-  - python -m pip install --upgrade numpy scipy matplotlib pandas tqdm lmfit
   - pip list
 
 
