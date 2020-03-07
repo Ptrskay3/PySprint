@@ -34,7 +34,7 @@ setup(
         "Topic :: Scientific/Engineering :: Physics"        
     ],
     install_requires=[
-        'numpy',
+        'numpy>=1.16.6',
         'scipy', 
         'matplotlib',
         'pandas', 
