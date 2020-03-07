@@ -1,11 +1,10 @@
 import numpy as np
 from scipy.fftpack import fftshift
-import matplotlib.pyplot as plt
 
 from pysprint.api.dataset import Dataset
 from pysprint.utils import print_disp
 from pysprint.core.evaluate import (fft_method,	cut_gaussian, ifft_method, 
-	spp_method, args_comp, gaussian_window)
+	 args_comp, gaussian_window)
 from pysprint.api.exceptions import *
 
 __all__ = ['FFTMethod']

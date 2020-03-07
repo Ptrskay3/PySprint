@@ -1,12 +1,10 @@
 from math import factorial
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 from pysprint.api.dataset import Dataset
 from pysprint.core.optimizer import FitOptimizer
-from pysprint.core.peak import EditPeak
-from pysprint.utils import _maybe_increase_before_cwt, print_disp, run_from_ipython, findNearest as find_nearest
+from pysprint.utils import print_disp
 from pysprint.core.evaluate import cff_method
 
 
