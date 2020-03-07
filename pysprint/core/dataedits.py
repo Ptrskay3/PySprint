@@ -4,7 +4,7 @@ Methods for manipulating the loaded data
 import numpy as np
 from scipy.signal import find_peaks, savgol_filter, gaussian, convolve, find_peaks_cwt
 from scipy.interpolate import interp1d
-from pysprint.utils import findNearest, _handle_input, between, _maybe_increase_before_cwt
+from pysprint.utils import find_nearest, _handle_input, between, _maybe_increase_before_cwt
 
 
 def cwt(x, y, ref, sam, width, floor_thres=0.1):
@@ -103,8 +103,8 @@ def cut_data(
 		initSpectrumX, initSpectrumY, referenceArmY, sampleArmY
 		)
 	if startValue < endValue:
-		lowItem, lowIndex = findNearest(Xdata, startValue)
-		highItem, highIndex = findNearest(Xdata, endValue)
+		lowItem, lowIndex = find_nearest(Xdata, startValue)
+		highItem, highIndex = find_nearest(Xdata, endValue)
 		mask = np.where((Xdata>=lowItem) & (Xdata<=highItem))
 		return Xdata[mask], Ydata[mask]
 	else:

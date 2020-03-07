@@ -113,7 +113,8 @@ class SPPMethod:
         delays = np.concatenate([_ for _ in self._delay.values()]).ravel()
         positions = np.concatenate([_ for _ in self._positions.values()]).ravel()
         x, y, dispersion, dispersion_std, bf = spp_method(
-            delays, positions, reference_point=reference_point, fitOrder=order, from_raw=True)
+            delays, positions, ref_point=reference_point, fit_order=order, from_raw=True
+            )
         if show_graph:
             plt.plot(x, y, 'o')
             try:

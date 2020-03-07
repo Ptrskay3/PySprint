@@ -132,7 +132,7 @@ class MinMaxMethod(Dataset):
 		"""
 		dispersion, dispersion_std, fit_report = min_max_method(
 			self.x, self.y, self.ref, self.sam, ref_point=reference_point,
-			maxx=self.xmax, minx=self.xmin, fitOrder=order, showGraph=show_graph
+			maxx=self.xmax, minx=self.xmin, fit_order=order, show_graph=show_graph
 			)
 		self._dispersion_array = dispersion
 		return dispersion, dispersion_std, fit_report

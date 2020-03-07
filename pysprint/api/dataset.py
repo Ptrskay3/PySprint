@@ -17,7 +17,7 @@ from pysprint.core.dataedits import savgol, find_peak, convolution, cut_data, cw
 from pysprint.core.normalize import DraggableEnvelope
 from pysprint.api.exceptions import *
 from pysprint.api.spp_editor import SPPEditor
-from pysprint.utils import MetaData, run_from_ipython, findNearest as find_nearest
+from pysprint.utils import MetaData, run_from_ipython, find_nearest
 
 
 __all__ = ['Dataset']

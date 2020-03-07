@@ -27,45 +27,45 @@ class TestEvaluateNoLmfit(unittest.TestCase):
 		b = np.arange(100)
 		mins = [10,30,50,70,90]
 		maxs = [20,40,60,80,100]
-		disp, disp_s, fit = evaluate.min_max_method(a, b, [], [], 0, maxx=maxs, minx=mins, fitOrder=1, showGraph=False)
+		disp, disp_s, fit = evaluate.min_max_method(a, b, [], [], 0, maxx=maxs, minx=mins, fit_order=1, show_graph=False)
 		np.testing.assert_almost_equal(disp[0], 0, decimal=5)
 		with self.assertRaises(ValueError):
-			disp, disp_s, fit = evaluate.min_max_method([], b, [], [], 0, maxx=maxs, minx=mins, fitOrder=1, showGraph=False)
+			disp, disp_s, fit = evaluate.min_max_method([], b, [], [], 0, maxx=maxs, minx=mins, fit_order=1, show_graph=False)
 		with self.assertRaises(ValueError):
-			disp, disp_s, fit = evaluate.min_max_method([], [], [], [], 0, maxx=maxs, minx=mins, fitOrder=1, showGraph=False)
+			disp, disp_s, fit = evaluate.min_max_method([], [], [], [], 0, maxx=maxs, minx=mins, fit_order=1, show_graph=False)
 		# with self.assertRaises(ValueError):
-			# disp, disp_s, fit = evaluate.min_max_method(a, [], [], [], ref_point = 0, maxx=maxs, minx=mins, fitOrder=1, showGraph=False)
+			# disp, disp_s, fit = evaluate.min_max_method(a, [], [], [], ref_point = 0, maxx=maxs, minx=mins, fit_order=1, show_graph=False)
 		with self.assertRaises(ValueError):
-			disp, disp_s, fit = evaluate.min_max_method(a, b, [], [], 0, maxx=maxs, minx=mins, fitOrder=6, showGraph=False)
+			disp, disp_s, fit = evaluate.min_max_method(a, b, [], [], 0, maxx=maxs, minx=mins, fit_order=6, show_graph=False)
 		# with self.assertRaises(np.core._exceptions.UFuncTypeError):
-			# disp, disp_s, fit = evaluate.min_max_method(a, b, [], [], ref_point = 0, maxx='a', minx=mins, fitOrder=1, showGraph=False)
+			# disp, disp_s, fit = evaluate.min_max_method(a, b, [], [], ref_point = 0, maxx='a', minx=mins, fit_order=1, show_graph=False)
 		# with self.assertRaises(ValueError):
-			# disp, disp_s, fit = evaluate.min_max_method(a, b, b, b, ref_point=-50000, maxx=maxs, minx=mins, fitOrder=1, showGraph=False)
+			# disp, disp_s, fit = evaluate.min_max_method(a, b, b, b, ref_point=-50000, maxx=maxs, minx=mins, fit_order=1, show_graph=False)
 
 	def test_min_max_advanced(self):
 		# mp = np.zeros(5)
-		# j,k = evaluate.min_max_method(np.arange(100), np.arange(100), [], [], ref_point = 10, fitOrder = 1, showGraph=False)
+		# j,k = evaluate.min_max_method(np.arange(100), np.arange(100), [], [], ref_point = 10, fit_order = 1, show_graph=False)
 		# np.testing.assert_array_equal(emp, j)
 		# np.testing.assert_array_equal(emp, k)
 		a,b,c,d = np.loadtxt('test_arms.txt', delimiter = ',', unpack = True)
 		maxs, _, mins, _ = find_peak(a,b,c,d, proMax=1, proMin=1, threshold=0.4)
-		d1, d_s1, fit1 = evaluate.min_max_method(a,b,c,d, ref_point = 2.5, fitOrder = 1, maxx = maxs, minx = mins, showGraph = False)
+		d1, d_s1, fit1 = evaluate.min_max_method(a,b,c,d, ref_point = 2.5, fit_order = 1, maxx = maxs, minx = mins, show_graph = False)
 		np.testing.assert_array_equal(d1[1:], [0,0,0,0])
 		np.testing.assert_array_equal(d_s1[1:], [0,0,0,0])
 		assert len(d1) == len(d_s1) == 5
-		d2, d_s2, fit2 = evaluate.min_max_method(a,b,c,d, ref_point = 2.5, fitOrder = 2, maxx = maxs, minx = mins, showGraph = False)
+		d2, d_s2, fit2 = evaluate.min_max_method(a,b,c,d, ref_point = 2.5, fit_order = 2, maxx = maxs, minx = mins, show_graph = False)
 		np.testing.assert_array_equal(d2[2:], [0,0,0])
 		np.testing.assert_array_equal(d_s2[2:], [0,0,0])
 		assert len(d2) == len(d_s2) == 5
-		d3, d_s3, fit3 = evaluate.min_max_method(a,b,c,d, ref_point = 2.5, fitOrder = 3, maxx = maxs, minx = mins, showGraph = False)
+		d3, d_s3, fit3 = evaluate.min_max_method(a,b,c,d, ref_point = 2.5, fit_order = 3, maxx = maxs, minx = mins, show_graph = False)
 		np.testing.assert_array_equal(d3[3:], [0,0])
 		np.testing.assert_array_equal(d_s3[3:], [0,0])
 		assert len(d3) == len(d_s3) == 5
-		d4, d_s4, fit4 = evaluate.min_max_method(a,b,c,d, ref_point = 2.5, fitOrder = 4, maxx = maxs, minx = mins, showGraph = False)
+		d4, d_s4, fit4 = evaluate.min_max_method(a,b,c,d, ref_point = 2.5, fit_order = 4, maxx = maxs, minx = mins, show_graph = False)
 		np.testing.assert_array_equal(d4[4:], [0])
 		np.testing.assert_array_equal(d_s4[4:], [0])
 		assert len(d4) == len(d_s4) == 5
-		d5, d_s5, fit5 = evaluate.min_max_method(a,b,c,d, ref_point = 2.5, fitOrder = 5, maxx = maxs, minx = mins, showGraph = False)
+		d5, d_s5, fit5 = evaluate.min_max_method(a,b,c,d, ref_point = 2.5, fit_order = 5, maxx = maxs, minx = mins, show_graph = False)
 		# np.testing.assert_array_equal(d3[3:], [0,0])
 		# np.testing.assert_array_equal(d_s3[3:], [0,0])
 		# plt.close('all')

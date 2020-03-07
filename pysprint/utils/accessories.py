@@ -4,7 +4,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 import scipy.stats as st
 
-__all__ = ['scipy_disp', 'lmfit_disp', 'findNearest',
+__all__ = ['scipy_disp', 'lmfit_disp', 'find_nearest',
            '_handle_input', 'print_disp', 'fourier_interpolate',
            'between', 'get_closest', 'run_from_ipython',
            'calc_envelope', 'measurement', '_maybe_increase_before_cwt']
@@ -121,51 +121,48 @@ def measurement(array, confidence=0.95):
 	return mean, conf
 
 
-def findNearest(array, value):
-	#Finds the nearest element to the given value in the array
-	#returns tuple: (element, element's index)
-	
+def find_nearest(array, value):
     array = np.asarray(array)
     idx = (np.abs(value - array)).argmin()
     return array[idx], idx
 
 
-def _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY):
+def _handle_input(x, y, ref, sam):
 	"""
 	Instead of handling the inputs in every function, there is this private method.
 
 	Parameters
 	----------
 
-	initSpectrumX: array-like
+	x: array-like
 	x-axis data
 
-	initSpectrumY: array-like
+	y: array-like
 	y-axis data
 
-	referenceArmY, sampleArmY: array-like
-	reference and sample arm spectrum evaluated at initSpectrumX
+	ref, sam: array-like
+	reference and sample arm spectrum evaluated at x
 
 	Returns
 	-------
-	initSpectrumX: array-like
+	x: array-like
 	unchanged x data
 
 	Ydata: array-like
 	the transformed y data
 
 	"""
-	if (len(initSpectrumX) > 0) and (len(referenceArmY) > 0) and (len(sampleArmY) > 0):
-		Ydata = (initSpectrumY - referenceArmY - sampleArmY) / (2 * np.sqrt(referenceArmY * sampleArmY))
-	elif (len(referenceArmY) == 0) or (len(sampleArmY) == 0):
-		Ydata = initSpectrumY
-	elif len(initSpectrumX) == 0:
-		raise ValueError('Please load the spectrum!\n')
-	elif len(initSpectrumY) == 0:
-		raise ValueError('Please load the spectrum!\n')
+	if (len(x) > 0) and (len(ref) > 0) and (len(sam) > 0):
+		y_data = (y - ref - sam) / (2 * np.sqrt(ref * sam))
+	elif (len(ref) == 0) or (len(sam) == 0):
+		y_data = y
+	elif len(x) == 0:
+		raise ValueError('load the spectrum!\n')
+	elif len(y) == 0:
+		raise ValueError('load the spectrum!\n')
 	else:
 		raise TypeError('Input types are wrong.\n')
-	return initSpectrumX,  Ydata
+	return x,  y_data
 
 
 

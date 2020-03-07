@@ -70,7 +70,7 @@ class FFTMethod(Dataset):
 			warnings.warn('This module is designed to call ifft before fft, so inconsistencies might occur when calling fft first. Consider using numpys fft package with your own logic. This functionality will be added later on.', FourierWarning)
 		self.x, self.y = fft_method(self.original_x, self.y)
 
-	def window(self, at, std, window_order=6, plot=True):
+	def window(self, at, fwhm, window_order=6, plot=True):
 		"""
 		Draws a gaussian window on the plot with the desired parameters.
 		The maximum value is adjusted for the dataset mostly for visibility reasons.
@@ -82,7 +82,7 @@ class FFTMethod(Dataset):
 		at: float
 			maximum of the gaussian curve
 
-		std: float #FIXME: RENAME THIS TO FWHM
+		fwhm: float
 			Full width at half maximum of the gaussian
 
 		window_order: int, default is 6
@@ -90,9 +90,9 @@ class FFTMethod(Dataset):
 			If not even, it's incremented by 1 for safety reasons.
 		"""
 		self.at = at
-		self.std = std
+		self.fwhm = fwhm
 		self.window_order = window_order
-		gaussian = gaussian_window(self.x, self.at, self.std, self.window_order)
+		gaussian = gaussian_window(self.x, self.at, self.fwhm, self.window_order)
 		self.plotwidget.plot(self.x, gaussian*max(abs(self.y)), 'r--')
 		if plot:
 			self.show()
@@ -104,7 +104,7 @@ class FFTMethod(Dataset):
 		self.plotwidget.clf()
 		self.plotwidget.cla()
 		self.plotwidget.close()
-		self.y = cut_gaussian(self.x, self.y, spike=self.at, sigma=self.std, win_order=self.window_order)
+		self.y = cut_gaussian(self.x, self.y, spike=self.at, fwhm=self.fwhm, win_order=self.window_order)
 		
 	@print_disp
 	def calculate(self, reference_point, order, show_graph=False):
@@ -148,7 +148,7 @@ class FFTMethod(Dataset):
 		For consistency we should still implement that a better way later.
 		"""
 		dispersion, dispersion_std, fit_report = args_comp(
-			self.x, self.y, reference_point=reference_point, fitOrder=order, showGraph=show_graph
+			self.x, self.y, ref_point=reference_point, fit_order=order, show_graph=show_graph
 			)
 		self._dispersion_array = dispersion
 		return dispersion, dispersion_std, fit_report

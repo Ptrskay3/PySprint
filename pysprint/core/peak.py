@@ -10,8 +10,8 @@ from matplotlib.backend_bases import MouseButton
 # ---------------------------MONKEY PATCH-------------------------------------
 import matplotlib.cbook as cbook
 import matplotlib.widgets as widgets
-from matplotlib.backend_tools import ToolBase
-from matplotlib.backend_managers import ToolManager
+from matplotlib.backend_tools import ToolBase # lgtm [py/unused-import]
+from matplotlib.backend_managers import ToolManager # lgtm [py/unused-import]
 
 def tm_init(self, figure=None):
     self._key_press_handler_id = None

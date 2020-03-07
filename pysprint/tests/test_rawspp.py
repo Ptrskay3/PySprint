@@ -26,7 +26,7 @@ class TestEvaluate(unittest.TestCase):
 		 2.29993325, 2.40894031, 2.33825604])
 
 	def test_spp_in_core(self):
-		x, y, d, ds, _ = spp_method(self.delays, self.omegas, fitOrder=2, from_raw=True, reference_point=2.355)
+		x, y, d, ds, _ = spp_method(self.delays, self.omegas, fit_order=2, from_raw=True, ref_point=2.355)
 		np.testing.assert_array_equal(d, [258.84297727172856, -21.572879102888976, -100426.4054547129, 0, 0])
 	
 	def test_spp_from_raw_api(self):

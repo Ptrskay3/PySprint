@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from tqdm import tqdm
 
-from pysprint.utils import findNearest as find_nearest
+from pysprint.utils import find_nearest
 from pysprint.core.evaluate import cos_fit1, cos_fit2, cos_fit3, cos_fit4, cos_fit5
 
 _func_config = {
