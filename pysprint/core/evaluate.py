@@ -263,7 +263,7 @@ def cos_fit5(x, c0, c1, b0, b1, b2, b3, b4, b5):
 
 # TODO: implement higher order
 def cos_fit6(x, c0, c1, b0, b1, b2, b3, b4, b5, b6):
-    return c0 + c1 * np.cos(poly5(x, b0, b1, b2, b3, b4, b5, b6))
+    return c0 + c1 * np.cos(poly6(x, b0, b1, b2, b3, b4, b5, b6))
 
 
 def spp_method(delays, omegas, ref_point=0, fit_order=4, from_raw=False):
@@ -468,11 +468,6 @@ def fft_method(x, y):
     yf: array-like
     transformed y data
     """
-    if len(y) > 0 and len(x) > 0:
-        y = y
-        x = x
-    else:
-        raise FileNotFoundError
     yf = scipy.fftpack.fft(y)
     xf = np.linspace(x[0], x[-1], len(x))
     return xf, yf
@@ -561,11 +556,6 @@ def ifft_method(x, y, interpolate=True):
     transformed y data
 
     """
-    if len(y) > 0 and len(x) > 0:
-        y = y
-        x = x
-    else:
-        raise ValueError
     N = len(x)
     if interpolate:
         x, y = fourier_interpolate(x, y)

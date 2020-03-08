@@ -15,13 +15,12 @@ class DatasetBase(metaclass=ABCMeta):
 	@abstractmethod
 	def GD_lookup(self, *args, **kwargs):
 		''' Quick GD lookup'''
-		pass
 
 	@property
 	@abstractmethod
 	def data(self):
 		'''The stored dataset.'''
-		pass
+		return None
 
 	@abstractmethod
 	def show(self):
