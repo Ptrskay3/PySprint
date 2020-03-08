@@ -1,2 +1,2 @@
-include doc *
-include example_datasets *
+recursive-include doc *
+recursive-include example_datasets *
