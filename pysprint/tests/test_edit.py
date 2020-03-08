@@ -4,7 +4,7 @@ import numpy as np
 
 sys.path.append('..')
 
-from pysprint.core.dataedits import *
+from pysprint.core.preprocess import *
 
 class TestEdit(unittest.TestCase):
 

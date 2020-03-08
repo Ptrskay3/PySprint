@@ -1,18 +1,5 @@
-import warnings
+'''
+Importing everything we need to pysprint namespace
+'''
+from pysprint.core import *
 
-warnings.filterwarnings("ignore", message="invalid value encountered in sqrt")
-warnings.filterwarnings("ignore", message="divide by zero encountered in true_divide")
-
-from .conv import convert_df
-from .dataset import Dataset
-from .generator import Generator
-from .cosfit import CosFitMethod
-from ._fft import FFTMethod
-from .spp_interface import SPPMethod
-from .minmax import MinMaxMethod
-
-from pysprint.utils import run_from_ipython
-# setting up the IPython notebook
-if run_from_ipython():
-	from matplotlib import pyplot as plt
-	plt.rcParams['figure.figsize'] = [15, 5]

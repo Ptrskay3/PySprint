@@ -2,7 +2,7 @@ import matplotlib
 from matplotlib import pyplot as plt
 import numpy as np
 from pysprint.utils import calc_envelope
-from pysprint.core.peak import SelectButton
+from pysprint.mpl_tools.peak import SelectButton
 
 
 class DraggableEnvelope:

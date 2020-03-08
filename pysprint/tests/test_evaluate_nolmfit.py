@@ -10,7 +10,7 @@ import numpy as np
 import scipy
 
 from pysprint.core import evaluate
-from pysprint.core.dataedits import find_peak
+from pysprint.core.preprocess import find_peak
 from pysprint import Generator, FFTMethod
 
 

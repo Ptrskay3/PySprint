@@ -9,10 +9,10 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-from pysprint.api.dataset import Dataset
+from pysprint.core.bases.dataset import Dataset
 from pysprint.core.evaluate import spp_method
 from pysprint.utils import print_disp
-from pysprint.api.exceptions import DatasetError
+from pysprint.utils.exceptions import DatasetError
 
 
 __all__ = ['SPPMethod']

@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from pysprint.api.dataset_base import DatasetBase, C_LIGHT
-from pysprint.core.generator import generatorFreq, generatorWave
+from pysprint.core.bases.dataset_base import DatasetBase, C_LIGHT
+from pysprint.core._generator import generatorFreq, generatorWave
 
 __all__ = ['Generator']
 

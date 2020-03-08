@@ -2,7 +2,7 @@ from math import factorial
 
 import numpy as np
 
-from pysprint.api.dataset import Dataset
+from pysprint.core.bases.dataset import Dataset
 from pysprint.core.optimizer import FitOptimizer
 from pysprint.utils import print_disp
 from pysprint.core.evaluate import cff_method

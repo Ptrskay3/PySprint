@@ -12,11 +12,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from pysprint.api.dataset_base import  DatasetBase, C_LIGHT
-from pysprint.core.dataedits import savgol, find_peak, convolution, cut_data, cwt
-from pysprint.core.normalize import DraggableEnvelope
-from pysprint.api.exceptions import *
-from pysprint.api.spp_editor import SPPEditor
+from pysprint.core.bases.dataset_base import  DatasetBase, C_LIGHT
+from pysprint.core.preprocess import savgol, find_peak, convolution, cut_data, cwt
+from pysprint.mpl_tools.normalize import DraggableEnvelope
+from pysprint.utils.exceptions import *
+from pysprint.mpl_tools.spp_editor import SPPEditor
 from pysprint.utils import MetaData, run_from_ipython, find_nearest
 
 

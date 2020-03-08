@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from pysprint import Dataset
-from pysprint.api.exceptions import DatasetError
+from pysprint.utils.exceptions import DatasetError
 
 
 class TestEvaluate(unittest.TestCase):

@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 import numpy as np
 
-from pysprint.core.generator import generatorFreq, generatorWave, C_LIGHT
+from pysprint.core._generator import generatorFreq, generatorWave, C_LIGHT
 from pysprint import Generator as Generator_from_API
 class TestGenerator(unittest.TestCase):
 
