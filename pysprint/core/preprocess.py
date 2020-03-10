@@ -8,41 +8,35 @@ from pysprint.utils import find_nearest, _handle_input, between, _maybe_increase
 
 
 def cwt(x, y, ref, sam, width, floor_thres=0.1):
-	Xdata, Ydata = _handle_input(
+	x, y = _handle_input(
 		x, y, ref, sam
 		)
-	idx = find_peaks_cwt(Ydata, np.arange(1, width))
-	if _maybe_increase_before_cwt(Ydata, tolerance=floor_thres):
-		Ydata += 2
-	Ydata_rec = 1/Ydata
-	idx2 = find_peaks_cwt(Ydata_rec, np.arange(1, width))
-	return Xdata[idx], Ydata[idx]-2, Xdata[idx2], Ydata[idx2]-2
+	idx = find_peaks_cwt(y, np.arange(1, width))
+	if _maybe_increase_before_cwt(y, tolerance=floor_thres):
+		y += 2
+	y_rec = 1/y
+	idx2 = find_peaks_cwt(y_rec, np.arange(1, width))
+	return x[idx], y[idx]-2, x[idx2], y[idx2]-2
 
-def savgol(
-	initSpectrumX, initSpectrumY, referenceArmY, sampleArmY, window=101,
-	order=3):
-
-	Xdata, Ydata = _handle_input(
-		initSpectrumX, initSpectrumY, referenceArmY, sampleArmY
+def savgol(x, y, ref, sam, window=101, order=3):
+	x, y = _handle_input(
+		x, y, ref, sam
 		)
-	xint, yint = interpolate_data(Xdata, Ydata, [], [])
+	xint, yint = interpolate_data(x, y, [], [])
 	if window > order:
 		try:
 			if window % 2 == 1:
-				fil = savgol_filter(yint, window_length = window, polyorder = order)
+				fil = savgol_filter(yint, window_length=window, polyorder=order)
 				return xint, fil
 			else:
-				fil = savgol_filter(yint, window_length = window + 1, polyorder = order)
+				fil = savgol_filter(yint, window_length=window + 1, polyorder=order)
 				return xint, fil
 		except Exception as e:
 			print(e)
 	else:
 		raise ValueError(f'Order must be lower than window length. Currently window is {window} and order is {order})')
 
-def find_peak(
-	initSpectrumX, initSpectrumY, referenceArmY, sampleArmY,
-	proMax=1, proMin=1, threshold=0.1, except_around=None, 
-	rebase=None):   
+def find_peak(x, y, ref, sam, proMax=1, proMin=1, threshold=0.1, except_around=None):   
 	if except_around is not None and len(except_around) != 2:
 		raise ValueError('Invalid except_around arg. Try [start, stop].')
 	if except_around is not None:
@@ -51,81 +45,56 @@ def find_peak(
 			float(except_around[1])
 		except ValueError:
 			raise ValueError(f'Invalid except_around arg. Only numeric values are allowed.')
-	if rebase is not None:
-		pass # TODO
-	Xdata, Ydata = _handle_input(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY)
-	maxIndexes, _ = find_peaks(Ydata, prominence=proMax) 
-	Ydata_rec = 1/Ydata
-	minIndexes, _ = find_peaks(Ydata_rec, prominence=proMin)
+	x, y = _handle_input(x, y, ref, sam)
+	maxIndexes, _ = find_peaks(y, prominence=proMax) 
+	y_rec = 1/y
+	minIndexes, _ = find_peaks(y_rec, prominence=proMin)
 	min_idx = []
 	max_idx = []
 	for idx in maxIndexes:
-		if between(Xdata[idx], except_around) or np.abs(Ydata[idx]) > threshold:
+		if between(x[idx], except_around) or np.abs(y[idx]) > threshold:
 			max_idx.append(idx)
 	for idx in minIndexes:
-		if between(Xdata[idx], except_around) or np.abs(Ydata[idx]) > threshold:
+		if between(x[idx], except_around) or np.abs(y[idx]) > threshold:
 			min_idx.append(idx)
 
-	if len(Xdata[max_idx]) != len(Ydata[max_idx]) or len(Xdata[min_idx]) != len(Ydata[min_idx]):
+	if len(x[max_idx]) != len(y[max_idx]) or len(x[min_idx]) != len(y[min_idx]):
 		raise ValueError('Something went wrong, try to cut the edges of data.')
 
-	return Xdata[max_idx], Ydata[max_idx], Xdata[min_idx], Ydata[min_idx]
+	return x[max_idx], y[max_idx], x[min_idx], y[min_idx]
 
-def convolution(
-	initSpectrumX, initSpectrumY, referenceArmY, sampleArmY,
-	win_len ,standev=200):
-	Xdata, Ydata = _handle_input(
-		initSpectrumX, initSpectrumY, referenceArmY, sampleArmY
+def convolution(x, y, ref, sam,	win_len, standev=200):
+	x, y = _handle_input(
+		x, y, ref, sam
 		)
-	if win_len < 0 or win_len > len(Xdata):
+	if win_len < 0 or win_len > len(x):
 		raise ValueError('Window length must be 0 < window_length < len(x)')
 
-	xint, yint = interpolate_data(Xdata, Ydata, [], [])
+	xint, yint = interpolate_data(x, y, [], [])
 	window = gaussian(win_len, std=standev)
 	smoothed = convolve(yint, window/window.sum(), mode='same')
 	return xint, smoothed
 
-def interpolate_data(initSpectrumX, initSpectrumY, referenceArmY, sampleArmY):
-	Xdata, Ydata = _handle_input(
-		initSpectrumX, initSpectrumY, referenceArmY, sampleArmY
-		)
-	xint = np.linspace(Xdata[0], Xdata[-1], len(Xdata))
-	intp = interp1d(Xdata,Ydata, kind='linear')
+def interpolate_data(x, y, ref, sam):
+	x, y = _handle_input(x, y, ref, sam)
+	xint = np.linspace(x[0], x[-1], len(x))
+	intp = interp1d(x,y, kind='linear')
 	yint = intp(xint)
 	return xint, yint
 
 
-def cut_data(
-	initSpectrumX, initSpectrumY, referenceArmY, sampleArmY,
-	startValue=-9999, endValue=9999):
-
-	Xdata, Ydata = _handle_input(
-		initSpectrumX, initSpectrumY, referenceArmY, sampleArmY
-		)
-	if startValue < endValue:
-		lowItem, lowIndex = find_nearest(Xdata, startValue)
-		highItem, highIndex = find_nearest(Xdata, endValue)
-		mask = np.where((Xdata>=lowItem) & (Xdata<=highItem))
-		return Xdata[mask], Ydata[mask]
+def cut_data(x, y, ref, sam, start=None, stop=None):
+	x, y = _handle_input(x, y, ref, sam)
+	if start is None:
+		start = np.min(x)
+	if stop is None:
+		stop = np.max(x)
+	if start < stop:
+		low_item, _ = find_nearest(x, start)
+		high_item, _ = find_nearest(x, stop)
+		mask = np.where((x >= low_item) & (x <= high_item))
+		return x[mask], y[mask]
+	elif stop < start:
+		raise ValueError('Start must not exceed stop value.')
 	else:
-		pass
-'''
-# better implementation
-
-def cut_data(x, y, start=None, stop=None):
-    if start is None:
-        start = np.NINF
-    if stop is None:
-        stop = np.inf
-    if start < stop:
-        low_item = find_nearest(x, start)
-        high_item = find_nearest(x, stop)
-        if stop is np.inf:
-            high_item = np.max(x)            
-        mask = np.where((x >= low_item) & (x <= high_item))
-        return x[mask], y[mask]
-    elif start > stop:
-        raise ValueError('Start value must not exceed stop.')
-    else:
-        return np.array([]), np.array([])
-'''
+		return np.array([]), np.array([])

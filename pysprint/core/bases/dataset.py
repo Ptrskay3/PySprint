@@ -1,7 +1,6 @@
 """
 This file implements the basic Dataset class.
 """
-
 import json # for pretty printing dict
 import warnings
 from math import factorial
@@ -378,8 +377,8 @@ Metadata extracted from file
 		self.sam = []
 		warnings.warn('Linear interpolation have been applied to data.', InterpolationWarning)
 		
-	# TODO: implement a better way
-	def slice(self, start=-9999, stop=9999):
+	
+	def slice(self, start=None, stop=None):
 		"""
 		Cuts the dataset on x axis in this form: [start, stop]
 
@@ -388,21 +387,21 @@ Metadata extracted from file
 		start: `float`
 			start value of cutting interval
 			Not giving a value will keep the dataset's original minimum value.
-			Note that giving `-9999` will leave original minimum untouched too.
-			Default is `-9999`.
+			Note that giving `None` will leave original minimum untouched too.
+			Default is `None`.
 
 		stop: `float`
 			stop value of cutting interval
 			Not giving a value will keep the dataset's original maximum value.
-			Note that giving `9999` will leave original maximum untouched too.
-			Default is `9999`.
+			Note that giving `None` will leave original maximum untouched too.
+			Default is `None`.
 
 		Notes:
 		------
 
 		If arms were given, it will merge them into the `self.y` and `self.y_norm` variables.
 		"""
-		self.x, self.y_norm = cut_data(self.x, self.y, self.ref, self.sam, startValue=start, endValue=stop)
+		self.x, self.y_norm = cut_data(self.x, self.y, self.ref, self.sam, start=start, stop=stop)
 		self.ref = []
 		self.sam = []
 		self.y = self.y_norm

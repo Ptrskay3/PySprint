@@ -46,11 +46,11 @@ class TestEdit(unittest.TestCase):
 		j = abs(a[idx2] - a[idx2-1])
 		np.testing.assert_almost_equal(i, j)
 		with self.assertRaises(TypeError):
-			interpolate_data({'a': '1', 'b':'2'}, x,y,v, window = 1, order = 3)
+			interpolate_data({'a': '1', 'b':'2'}, x,y,v, window=1, order=3)
 
 	def test_cut(self):
-		x, y, v, w = np.loadtxt('test_arms.txt', delimiter = ',', unpack = True)
-		a, b = cut_data(x, y, v, w, startValue = 2.2, endValue = 2.8)
+		x, y, v, w = np.loadtxt('test_arms.txt', delimiter = ',', unpack=True)
+		a, b = cut_data(x, y, v, w, start=2.2, stop=2.8)
 		assert len(a) == len(b)
 		np.testing.assert_almost_equal(min(a), 2.2, decimal = 2)
 		np.testing.assert_almost_equal(max(a), 2.8, decimal = 2)
@@ -60,10 +60,10 @@ class TestEdit(unittest.TestCase):
 
 	def test_convolution(self):
 		x, y, v, w = np.loadtxt('test_arms.txt', delimiter = ',', unpack = True)
-		a, b = convolution(x, y, v, w, len(x), standev = 200)
+		a, b = convolution(x, y, v, w, len(x), standev=200)
 		assert len(a) == len(b)
 		with self.assertRaises(ValueError):
-			convolution(x, [], v, w, 10, standev = -541)
+			convolution(x, [], v, w, 10, standev=-541)
 
 if __name__ == '__main__':
 	unittest.main()
