@@ -1,4 +1,5 @@
 from functools import wraps
+from math import factorial
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -59,6 +60,7 @@ def between(val, except_around):
 	return False
 
 def scipy_disp(r):
+	dispersion, dispersion_std = [], []
 	for idx in range(len(r)):
 		dispersion[idx] = dispersion[idx] * factorial(idx+1)
 		dispersion_std[idx] = dispersion_std[idx] * factorial(idx+1)

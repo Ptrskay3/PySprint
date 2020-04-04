@@ -33,8 +33,12 @@ install:
   - if [[ $version == minimum ]]; then pip install -r requirements.txt --force-reinstall ; fi
   - pip install codecov
   - python setup.py install
+  - pip install flake8
   - pip list
 
+before_script:
+  # stop upon syntax errors or undefined names
+  - flake8 pysprint/ --count --select=E9,F63,F72,F82 --show-source --statistics
 
 script:
   - cd pysprint/tests

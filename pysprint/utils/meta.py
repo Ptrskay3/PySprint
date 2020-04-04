@@ -1,5 +1,6 @@
 from collections.abc import Mapping
 from collections import OrderedDict
+from copy import deepcopy
 
 __all__ = ['MetaData']
 
