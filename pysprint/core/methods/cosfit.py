@@ -201,7 +201,7 @@ class CosFitMethod(Dataset):
 		self.f.set_initial_region(initial_region_ratio)
 		self.f.set_final_guess(GD=self.params[3], GDD=self.params[4], TOD=self.params[5],
 		FOD=self.params[6], QOD=self.params[7]) # we can pass it higher params safely, they are ignored.
-		disp = self.f.run_loop(extend_by, coef_threshold, max_tries=max_tries, show_endpoint=show_endpoint)
+		disp = self.f.run(extend_by, coef_threshold, max_tries=max_tries, show_endpoint=show_endpoint)
 		disp = disp[3:]
 		retval = [disp[i]*factorial(i+1) for i in range(len(disp))]
 		self._dispersion_array = retval

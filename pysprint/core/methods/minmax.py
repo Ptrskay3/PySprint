@@ -28,7 +28,7 @@ class MinMaxMethod(Dataset):
 			Peak detection algorithm to use.
 			
 		**kwargs:
-			pmax, pmin, threshold, except_arund, width
+			pmax, pmin, threshold, except_around, width
 
 		Notes:
 		------
@@ -88,7 +88,9 @@ class MinMaxMethod(Dataset):
 		except ValueError:
 			_editpeak = EditPeak(self.x, self.y, _xm, _ym)
 		# automatically propagate these points to the mins and maxes
-		# just in case the default argrelextrema is definitely not called in evaluate.py/min_max_method:
+		# better distribute these points between min and max, just in case
+		# the default argrelextrema is definitely not called
+		# in `pysprint.core.evaluate.min_max_method`.
 		self.xmin = _editpeak.get_dat[0][:len(_editpeak.get_dat[0])//2]
 		self.xmax = _editpeak.get_dat[0][len(_editpeak.get_dat[0])//2:] 
 		print(f'In total {len(_editpeak.get_dat[0])} extremal points were recorded.')

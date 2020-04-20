@@ -30,12 +30,12 @@ def tm_init(self, figure=None):
 
 matplotlib.backend_managers.ToolManager.__init__ = tm_init
 
-def new_init(self, toolmanager, name):
+def tb_init(self, toolmanager, name):
         self._name = name
         self._toolmanager = toolmanager
         self._figure = None
 
-matplotlib.backend_tools.ToolBase.__init__ = new_init
+matplotlib.backend_tools.ToolBase.__init__ = tb_init
 
 # ----------------------------------------------------------------------------
 

@@ -1,4 +1,3 @@
-import numpy as np
 from scipy.fftpack import fftshift
 
 from pysprint.core.bases.dataset import Dataset

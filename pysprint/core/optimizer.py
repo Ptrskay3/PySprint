@@ -54,7 +54,7 @@ class FitOptimizer:
 		self.curr_order = 1
 		self.max_order = max_order
 		self.rest = None
-		self.figure = plt.figure
+		self.figure = plt.figure()
 
 	def __del__(self):
 		self.reference_point = 0
@@ -86,9 +86,11 @@ class FitOptimizer:
 		plt.plot(self._x_curr, self._y_curr, 'k', label='Affected data')
 		plt.plot(self._x_curr, self.func(self._x_curr, *self.popt), 'r--', label='Fit')
 		plt.grid()
-		plt.legend(loc='upper left')
+		# plt.legend(loc='upper left')
 		plt.draw()
-		plt.show()
+		plt.xlabel('$\Delta\omega\, [PHz]$')
+		plt.ylabel('I')
+		# plt.show()
 
 	def set_initial_region(self, percent):
 		""" Determines the initial region to fit"""
@@ -144,7 +146,7 @@ class FitOptimizer:
 		"""
 		self.p0[-1] = float(np.random.uniform(-1, 1, 1)) * self.p0[-1]
 
-	def _make_fit(self):
+	def _fit(self):
 		try:
 			if len(self._x_curr) == len(self.x):
 				return True
@@ -174,24 +176,31 @@ class FitOptimizer:
 		for i, (label, param) in enumerate(zip(labels, params)):
 			print(f'{label} = {(params[i]*factorial(i+1)):.5f} fs^{i + 1}')
 
-	def run_loop(
+	def run(
 		self, r_extend_by, r_threshold,
 		max_tries=5000, show_endpoint=True
 		):
 		pbar = tqdm(total=max_tries)
 		if not self._init_set:
 			raise ValueError('Set the initial conditions.')
-		self._make_fit()
+		self._fit()
 		while self._fit_goodness() > r_threshold:
+			
+			# self.figure.savefig(f'{self.counter}.eps')
+			# self.update_plot()
+
 			self._extend_region(r_extend_by)
-			self._make_fit()
+			self._fit()
 			self.counter += 1
 			self._step_up_func()
 			pbar.update(1)
-			if self._make_fit() is True:
+			if self._fit() is True:
+				pbar.n = 100
 				pbar.close()
 				if show_endpoint:
 					self.update_plot()
+					# self.figure.savefig(f'{self.counter}.eps')
+
 				self.result_wrapper()
 				print(f'with r^2 = {(self._fit_goodness()):.5f}.')
 				return self.popt
@@ -203,7 +212,7 @@ class FitOptimizer:
 				return np.zeros_like(self.popt)
 
 		while self._fit_goodness() < r_threshold:
-			self._make_fit()
+			self._fit()
 			# self._finetune()
 			self.counter += 1
 			pbar.update(1)
