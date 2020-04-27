@@ -1,4 +1,4 @@
-import matplotlib
+from matplotlib import rcParams
 from matplotlib import pyplot as plt
 import numpy as np
 from pysprint.utils import calc_envelope
@@ -10,7 +10,7 @@ class DraggableEnvelope:
     epsilon = 5 # max absolute pixel distance to count as a hit
 
     def __init__(self, x, y, mode='l'):
-        matplotlib.rcParams["toolbar"] = "toolmanager"
+        rcParams["toolbar"] = "toolmanager"
         self.fig, self.ax = plt.subplots()
         self.x = x
         self.y = y

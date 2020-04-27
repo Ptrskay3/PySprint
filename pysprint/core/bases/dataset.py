@@ -286,8 +286,10 @@ class Dataset(DatasetBase):
 	def __repr__(self):
 		if isinstance(self._delay, np.ndarray):
 			pprint_delay = self._delay[0]
-		elif isinstance(self._delay, float):
+		elif isinstance(self._delay, float) or isinstance(self._delay, int):
 			pprint_delay = self._delay
+		else:
+			raise ValueError(f'''Delay is expected to be a number, but it's set to {self._delay}.''')
 		string = f'''
 {type(self).__name__} object
 
