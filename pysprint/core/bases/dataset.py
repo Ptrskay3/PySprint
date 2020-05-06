@@ -131,6 +131,13 @@ class Dataset(DatasetBase):
 			return False
 		return True
 
+	def scale_up(self):
+		'''
+		If the interferogram is normalized to [0, 1] interval, scale up to [-1, 1]
+		with easy algerbra.. Just in case you need comparison, or any other purpose.
+		'''
+		self.y_norm = (self.y_norm - 0.5) * 2
+
 	def GD_lookup(self, reference_point=2.355, engine='cwt', silent=False, **kwargs):
 		'''
 		Quick GD lookup: it finds extremal points near the `reference_point` and returns
@@ -289,7 +296,7 @@ class Dataset(DatasetBase):
 		elif isinstance(self._delay, float) or isinstance(self._delay, int):
 			pprint_delay = self._delay
 		else:
-			raise ValueError(f'''Delay is expected to be a number, but it's set to {self._delay}.''')
+			pprint_delay = '-'
 		string = f'''
 {type(self).__name__} object
 
@@ -542,7 +549,7 @@ Metadata extracted from file
 	def emit(self):
 		# validate if it's typed by hand..
 		if not isinstance(self._positions, np.ndarray):
-			np.asarray(self.positions)
+			self._positions = np.asarray(self.positions)
 		if not isinstance(self.delay, np.ndarray):
 			self.delay = np.ones_like(self.positions) * self.delay
 		return self.delay, self.positions

@@ -1,9 +1,6 @@
 '''
-Experimental..
-
 #TODO: implement @classmethod which handles pysprint.Dataset objects.
 '''
-
 import os
 
 import numpy as np
@@ -107,6 +104,23 @@ class SPPMethod:
     def set_data(self, delay, position):
         self._delay[self.idx] = delay
         self._positions[self.idx] = position
+
+
+    def save_data(self, filename):
+        if not filename.endswith('.txt'):
+            filename += '.txt'
+        delay = np.concatenate([_ for _ in self._delay.values()]).ravel()
+        position = np.concatenate([_ for _ in self._positions.values()]).ravel()
+        np.savetxt(f'{filename}', np.transpose(np.array([position, delay])), delimiter=',')
+
+
+    @staticmethod
+    def calculate_from_raw(omegas, delays, reference_point, order):
+        x, y, dispersion, dispersion_std, bf = spp_method(
+            delays, omegas, ref_point=reference_point, fit_order=order, from_raw=True
+            )
+        return dispersion, dispersion_std
+
 
     @print_disp
     def calculate(self, reference_point, order=2, show_graph=False):

@@ -90,7 +90,7 @@ class FitOptimizer:
 		plt.draw()
 		plt.xlabel('$\Delta\omega\, [PHz]$')
 		plt.ylabel('I')
-		# plt.show()
+		plt.show()
 
 	def set_initial_region(self, percent):
 		""" Determines the initial region to fit"""
