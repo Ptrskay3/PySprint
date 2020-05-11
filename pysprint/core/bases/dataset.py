@@ -137,6 +137,7 @@ class Dataset(DatasetBase):
 		with easy algerbra.. Just in case you need comparison, or any other purpose.
 		'''
 		self.y_norm = (self.y_norm - 0.5) * 2
+		self.y = (self.y - 0.5) * 2
 
 	def GD_lookup(self, reference_point=2.355, engine='cwt', silent=False, **kwargs):
 		'''

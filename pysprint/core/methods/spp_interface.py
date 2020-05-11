@@ -101,7 +101,7 @@ class SPPMethod:
                     raise FileNotFoundError(f'''File named '{ref}' is not found.''')
 
 
-    def set_data(self, delay, position):
+    def listen(self, delay, position):
         self._delay[self.idx] = delay
         self._positions[self.idx] = position
 

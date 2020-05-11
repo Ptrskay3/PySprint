@@ -32,7 +32,7 @@ class TestEvaluate(unittest.TestCase):
 	def test_spp_from_raw_api(self):
 		with patch('matplotlib.pyplot.show') as p:
 			ifgs = SPPMethod('')
-			ifgs.set_data(self.delays, self.omegas)
+			ifgs.listen(self.delays, self.omegas)
 			d, ds, _ = ifgs.calculate(2.355, 2, show_graph=True)
 			np.testing.assert_array_equal(d, [258.84297727172856, -21.572879102888976, -100426.4054547129, 0, 0])
 			p.assert_called()
