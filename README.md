@@ -15,7 +15,7 @@
 |__License__| [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) |
 
 
-### Decription
+## Decription & Features
 PySprint provides an interface for Spectrally resolved interferometry in Python.
 
 
@@ -23,6 +23,8 @@ PySprint provides an interface for Spectrally resolved interferometry in Python.
 * ✓ Phase modulated cosine function fit method
 * ✓ Fourier method
 * ✓ Stationary phase point method
+
+### There's many more to work on..
 * Windowed Fourier transform method
 * Automated SPP detection, which is correctable by the user
 * Better SPP interface: make the constructor accept `~pysprint.Dataset` objects.
