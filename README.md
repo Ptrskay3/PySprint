@@ -15,7 +15,7 @@
 |__License__| [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) |
 
 
-## Decription & Features
+## Description & Features
 PySprint provides an interface for Spectrally resolved interferometry in Python.
 
 
