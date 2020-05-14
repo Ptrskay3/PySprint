@@ -27,6 +27,15 @@ __all__ = [
     ]
 
 
+_fit_config = {
+    1: poly1,
+    2: poly2,
+    3: poly3,
+    4: poly4,
+    5: poly5
+}
+
+
 def min_max_method(
         x, y, ref, sam, ref_point,
         maxx=None, minx=None, fit_order=5, show_graph=False
@@ -66,7 +75,7 @@ def min_max_method(
     dispersion_std: array-like
     [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
 
-    fit_report: lmfit report object
+    fit_report: lmfit report
     """
     x, y = _handle_input(x, y, ref, sam)
     if maxx is None:
@@ -98,47 +107,18 @@ def min_max_method(
     idx = np.argsort(x_s)
     full_x, full_y = x_s[idx], y_s[idx]
     
+    if fit_order not in range(6):
+        raise ValueError('fit order must be in [1, 5]')
+
+    _function = _fit_config[fit_order]
+
     if _has_lmfit:
-        if fit_order == 5:
-            fitModel = Model(poly5)
-            params = fitModel.make_params(b0=0, b1=1, b2=1, b3=1, b4=1, b5=1)
-            result = fitModel.fit(full_y, x=full_x, params=params, method='leastsq')
-        elif fit_order == 4:
-            fitModel = Model(poly4)
-            params = fitModel.make_params(b0=0, b1=1, b2=1, b3=1, b4=1)
-            result = fitModel.fit(full_y, x=full_x, params=params, method='leastsq')
-        elif fit_order == 3:
-            fitModel = Model(poly3)
-            params = fitModel.make_params(b0=0, b1=1, b2=1, b3=1)
-            result = fitModel.fit(full_y, x=full_x, params=params, method='leastsq')
-        elif fit_order == 2:
-            fitModel = Model(poly2)
-            params = fitModel.make_params(b0=0, b1=1, b2=1)
-            result = fitModel.fit(full_y, x=full_x, params=params, method='leastsq')
-        elif fit_order == 1:
-            fitModel = Model(poly1)
-            params = fitModel.make_params(b0=0, b1=1)
-            result = fitModel.fit(full_y, x=full_x, params=params, method='leastsq')
-        else:
-            raise ValueError('Order is out of range, please select from [1,5]')
+        fitmodel = Model(_function)
+        pars = fitmodel.make_params(**{f'b{i}':1 for i in range(fit_order + 1)})
+        result = fitmodel.fit(full_y, x=full_x, params=pars)
     else:
-        if fit_order == 5:
-            popt, pcov = curve_fit(poly5, full_x, full_y, maxfev=8000)
-            _function = poly5
-        elif fit_order == 4:
-            popt, pcov = curve_fit(poly4, full_x, full_y, maxfev=8000)
-            _function = poly4
-        elif fit_order == 3:
-            popt, pcov = curve_fit(poly3, full_x, full_y, maxfev=8000)
-            _function = poly3
-        elif fit_order == 2:
-            popt, pcov = curve_fit(poly2, full_x, full_y, maxfev=8000)
-            _function = poly2
-        elif fit_order == 1:
-            popt, pcov = curve_fit(poly1, full_x, full_y, maxfev=8000)
-            _function = poly1
-        else:
-            raise ValueError('Order is out of range, please select from [1,5]')
+        popt, pcov = curve_fit(_function, full_x, full_y, maxfev=8000)
+
     try:
         if _has_lmfit:
             dispersion, dispersion_std = lmfit_disp(result.params.items())
@@ -161,7 +141,7 @@ def min_max_method(
                 dispersion.append(0)
             while len(dispersion_std) < len(dispersion):
                 dispersion_std.append(0)
-            fit_report = '\nTo display detailed results, you must have lmfit installed.'
+            fit_report = 'To display detailed results, you must have lmfit installed.'
         if show_graph:
             fig = plt.figure(figsize=(7, 7))
             fig.canvas.set_window_title('Min-max method fitted')
@@ -423,7 +403,7 @@ def cff_method(
     # bounds=((-1000, -10000, -10000, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf),
     # (1000, 10000, 10000, np.inf, np.inf, np.inf, np.inf, np.inf))
     x, y = _handle_input(x, y, ref, sam)
-# TODO: include lmfit version..
+
     try:
         if len(np.trim_zeros(p0, 'b')) + 4 == len(p0):
             _funct = cos_fit1
@@ -599,32 +579,20 @@ def args_comp(x, y, ref_point=0, fit_order=5, show_graph=False):
 
     fit_report: lmfit report
     """
+    if fit_order not in range(6):
+        raise ValueError('fit order must be in [1, 5]')
+
     x -= ref_point
     # shifting to [0, 2pi] if necessary
     # angles = (angles + 2 * np.pi) % (2 * np.pi)
     y = np.unwrap(np.angle(y), axis=0)
-    if fit_order == 5:
-        fitModel = Model(poly5)
-        params = fitModel.make_params(b0=0, b1=1, b2=1, b3=1, b4=1, b5=1)
-        result = fitModel.fit(y, x=x, params=params, method='leastsq')
-    elif fit_order == 4:
-        fitModel = Model(poly4)
-        params = fitModel.make_params(b0=0, b1=1, b2=1, b3=1, b4=1)
-        result = fitModel.fit(y, x=x, params=params, method='leastsq')
-    elif fit_order == 3:
-        fitModel = Model(poly3)
-        params = fitModel.make_params(b0=0, b1=1, b2=1, b3=1)
-        result = fitModel.fit(y, x=x, params=params, method='leastsq')
-    elif fit_order == 2:
-        fitModel = Model(poly2)
-        params = fitModel.make_params(b0=0, b1=1, b2=1)
-        result = fitModel.fit(y, x=x, params=params, method='leastsq')
-    elif fit_order == 1:
-        fitModel = Model(poly1)
-        params = fitModel.make_params(b0=0, b1=1)
-        result = fitModel.fit(y, x=x, params=params, method='leastsq')
-    else:
-        raise ValueError('Order is out of range, please select from [1, 5].')
+
+    _function = _fit_config[fit_order]
+
+    fitmodel = Model(_function)
+    pars = fitmodel.make_params(**{f'b{i}':1 for i in range(fit_order + 1)})
+    result = fitmodel.fit(y, x=x, params=pars)
+
     try:
         dispersion, dispersion_std = lmfit_disp(result.params.items())
         dispersion = dispersion[1:]

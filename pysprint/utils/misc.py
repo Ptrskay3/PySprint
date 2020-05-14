@@ -8,7 +8,8 @@ import scipy.stats as st
 __all__ = ['scipy_disp', 'lmfit_disp', 'find_nearest',
            '_handle_input', 'print_disp', 'fourier_interpolate',
            'between', 'get_closest', 'run_from_ipython',
-           'calc_envelope', 'measurement', '_maybe_increase_before_cwt']
+           'calc_envelope', 'measurement', '_maybe_increase_before_cwt',
+           'pad_with_trailing_zeros']
 
 
 def _maybe_increase_before_cwt(y, tolerance=0.05):
@@ -185,3 +186,10 @@ def fourier_interpolate(x, y):
     intp = interp1d(x, y, kind='linear', fill_value='extrapolate')
     ys = intp(xs)
     return xs, ys
+
+def pad_with_trailing_zeros(array, shape):
+    '''
+    Pad an array with trailing zeros to be the desired shape
+    '''
+    c = shape - len(array)
+    return np.pad(array, pad_width=(0, c), mode='constant')
