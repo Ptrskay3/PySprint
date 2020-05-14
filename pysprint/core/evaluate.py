@@ -27,12 +27,12 @@ __all__ = [
     ]
 
 
-_fit_config = {
-    1: poly1,
-    2: poly2,
-    3: poly3,
-    4: poly4,
-    5: poly5
+_fit_config = { 
+    1: poly1,  # noqa
+    2: poly2,  # noqa
+    3: poly3,  # noqa
+    4: poly4,  # noqa
+    5: poly5  # noqa
 }
 
 
