@@ -27,6 +27,70 @@ __all__ = [
     ]
 
 
+# TODO: implement higher orders
+
+def poly6(x, b0, b1, b2, b3, b4, b5, b6):
+    """
+    Taylor polynomial for fit
+    b1 = GD
+    b2 = GDD / 2
+    b3 = TOD / 6
+    b4 = FOD / 24
+    b5 = QOD / 120
+    b6 = SOD / 720
+    """
+    return b0+b1*x+b2*x**2+b3*x**3+b4*x**4+b5*x**5+b6*x**6
+
+def poly5(x, b0, b1, b2, b3, b4, b5):
+    """
+    Taylor polynomial for fit
+    b1 = GD
+    b2 = GDD / 2
+    b3 = TOD / 6
+    b4 = FOD / 24
+    b5 = QOD / 120
+    """
+    return b0+b1*x+b2*x**2+b3*x**3+b4*x**4+b5*x**5
+
+
+def poly4(x, b0, b1, b2, b3, b4):
+    """
+    Taylor polynomial for fit
+    b1 = GD
+    b2 = GDD / 2
+    b3 = TOD / 6
+    b4 = FOD / 24
+    """
+    return b0+b1*x+b2*x**2+b3*x**3+b4*x**4
+
+
+def poly3(x, b0, b1, b2, b3):
+    """
+    Taylor polynomial for fit
+    b1 = GD
+    b2 = GDD / 2
+    b3 = TOD / 6
+
+    """
+    return b0+b1*x+b2*x**2+b3*x**3
+
+
+def poly2(x, b0, b1, b2):
+    """
+    Taylor polynomial for fit
+    b1 = GD
+    b2 = GDD / 2
+    """
+    return b0+b1*x+b2*x**2
+
+
+def poly1(x, b0, b1):
+    """
+    Taylor polynomial for fit
+    b1 = GD
+    """
+    return b0+b1*x
+
 _fit_config = { 
     1: poly1,  # noqa
     2: poly2,  # noqa
@@ -156,71 +220,6 @@ def min_max_method(
         return dispersion, dispersion_std, fit_report
     except Exception as e:
         return [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], e
-
-# TODO: implement higher orders
-
-def poly6(x, b0, b1, b2, b3, b4, b5, b6):
-    """
-    Taylor polynomial for fit
-    b1 = GD
-    b2 = GDD / 2
-    b3 = TOD / 6
-    b4 = FOD / 24
-    b5 = QOD / 120
-    b6 = SOD / 720
-    """
-    return b0+b1*x+b2*x**2+b3*x**3+b4*x**4+b5*x**5+b6*x**6
-
-def poly5(x, b0, b1, b2, b3, b4, b5):
-    """
-    Taylor polynomial for fit
-    b1 = GD
-    b2 = GDD / 2
-    b3 = TOD / 6
-    b4 = FOD / 24
-    b5 = QOD / 120
-    """
-    return b0+b1*x+b2*x**2+b3*x**3+b4*x**4+b5*x**5
-
-
-def poly4(x, b0, b1, b2, b3, b4):
-    """
-    Taylor polynomial for fit
-    b1 = GD
-    b2 = GDD / 2
-    b3 = TOD / 6
-    b4 = FOD / 24
-    """
-    return b0+b1*x+b2*x**2+b3*x**3+b4*x**4
-
-
-def poly3(x, b0, b1, b2, b3):
-    """
-    Taylor polynomial for fit
-    b1 = GD
-    b2 = GDD / 2
-    b3 = TOD / 6
-
-    """
-    return b0+b1*x+b2*x**2+b3*x**3
-
-
-def poly2(x, b0, b1, b2):
-    """
-    Taylor polynomial for fit
-    b1 = GD
-    b2 = GDD / 2
-    """
-    return b0+b1*x+b2*x**2
-
-
-def poly1(x, b0, b1):
-    """
-    Taylor polynomial for fit
-    b1 = GD
-    """
-    return b0+b1*x
-
 
 def cos_fit1(x, c0, c1, b0, b1):
     return c0 + c1 * np.cos(poly1(x, b0, b1))
