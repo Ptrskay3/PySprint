@@ -3,6 +3,7 @@ This file implements the basic Dataset class.
 """
 import json # for pretty printing dict
 import warnings
+from textwrap import dedent
 from math import factorial
 
 warnings.filterwarnings("ignore", message="divide by zero encountered in true_divide")
@@ -11,15 +12,15 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from pysprint.core.bases.dataset_base import  DatasetBase, C_LIGHT
+from pysprint.core.bases.dataset_base import DatasetBase, C_LIGHT
 from pysprint.core.preprocess import savgol, find_peak, convolution, cut_data, cwt
 from pysprint.mpl_tools.normalize import DraggableEnvelope
 from pysprint.utils.exceptions import *
 from pysprint.mpl_tools.spp_editor import SPPEditor
 from pysprint.utils import MetaData, run_from_ipython, find_nearest
 
-
 __all__ = ['Dataset']
+
 
 class Dataset(DatasetBase):
 	"""
@@ -298,20 +299,20 @@ class Dataset(DatasetBase):
 			pprint_delay = self._delay
 		else:
 			pprint_delay = '-'
-		string = f'''
-{type(self).__name__} object
+		string = dedent(f'''
+		{type(self).__name__} object
 
-Parameters
-----------
-Datapoints: {len(self.x)}
-Normalized: {self._is_normalized}
-Predicted domain: {'wavelength' if self.probably_wavelength else 'frequency'}
-Delay value: {(str(pprint_delay) + ' fs') if np.all(self._delay) else 'Not given'}
-SPP position(s): {self._positions if np.all(self._positions) else 'Not given'}
+		Parameters
+		----------
+		Datapoints: {len(self.x)}
+		Normalized: {self._is_normalized}
+		Predicted domain: {'wavelength' if self.probably_wavelength else 'frequency'}
+		Delay value: {(str(pprint_delay) + ' fs') if np.all(self._delay) else 'Not given'}
+		SPP position(s): {self._positions if np.all(self._positions) else 'Not given'}
 
-Metadata extracted from file
-----------------------------
-{json.dumps(self.meta, indent=4)}'''
+		Metadata extracted from file
+		----------------------------
+		{json.dumps(self.meta, indent=4)}''')
 		return string
 
 	@property

@@ -1,15 +1,16 @@
 '''
 Experimental
 '''
-import re 
+import re
 
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.widgets import TextBox
 
+
 class SPPEditor:
 
-    epsilon = 5 # max absolute pixel distance to count as a hit
+    epsilon = 5  # max absolute pixel distance to count as a hit
 
     def __init__(self, x, y):
         self.fig, self.ax = plt.subplots()
@@ -19,41 +20,42 @@ class SPPEditor:
         plt.subplots_adjust(bottom=0.2)
         self.x = x
         self.y = y
-        self._ind = None # the active point index
+        self._ind = None  # the active point index
         self.x_pos, self.y_pos = np.array([]), np.array([])
         self.basedata, = self.ax.plot(self.x, self.y)
         self.points, = self.ax.plot(self.x_pos, self.y_pos, 'ko')
-        self.fig.canvas.mpl_connect('key_press_event', self.key_press_callback)
-        self.fig.canvas.mpl_connect('button_release_event', self.button_release_callback)
+        self.fig.canvas.mpl_connect(
+            'key_press_event', self.key_press_callback
+            )
+        self.fig.canvas.mpl_connect(
+            'button_release_event', self.button_release_callback
+            )
         self.axbox = plt.axes([0.1, 0.05, 0.8, 0.1])
         self.text_box = TextBox(self.axbox, 'Delay [fs]', initial='0')
         self.text_box.on_submit(self.submit)
         self.text_box.on_text_change(self.text_change)
         plt.show()
 
-
     def submit(self, delay):
         try:
             delay = re.sub(r'[^0-9\.,\-]', "", delay)
             self.delay = float(delay)
         except ValueError:
-            pass # we ignore bad calls
+            pass  # we ignore bad calls
 
     def text_change(self, delay):
         try:
             delay = re.sub(r'[^0-9\.,\-]', "", delay)
             self.delay = float(delay)
         except ValueError:
-            pass # we ignore bad calls
-
+            pass  # we ignore bad calls
 
     def get_data(self):
         positions, _ = self.points.get_data()
-        if not hasattr(self ,'delay'):
+        if not hasattr(self, 'delay'):
             self.delay = 0
         self.delay = np.ones_like(positions) * self.delay
         return self.delay, positions
-
 
     def button_release_callback(self, event):
         '''whenever a mouse button is released'''
@@ -61,9 +63,10 @@ class SPPEditor:
             return
         self._ind = None
 
-
     def get_ind_under_point(self, event):
-        '''Get the index of the selected point within the given epsilon tolerance.'''
+        '''
+        Get the index of the selected point within the given epsilon tolerance
+        '''
 
         # We use the pixel coordinates, because the axes are usually really
         # differently scaled.
@@ -72,7 +75,7 @@ class SPPEditor:
         if event.inaxes in [self.ax]:
             try:
                 x, y = self.points.get_data()
-                xy_pixels = self.ax.transData.transform(np.vstack([x,y]).T)
+                xy_pixels = self.ax.transData.transform(np.vstack([x, y]).T)
                 xpix, ypix = xy_pixels.T
 
                 # return the index of the point iff within epsilon distance.
@@ -85,7 +88,6 @@ class SPPEditor:
             except ValueError:
                 return
             return ind
-
 
     def key_press_callback(self, event):
         '''whenever a key is pressed'''
