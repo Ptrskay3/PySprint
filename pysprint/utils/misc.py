@@ -168,15 +168,18 @@ def _handle_input(x, y, ref, sam):
 	return x,  y_data
 
 
-
 def print_disp(f):
     @wraps(f)
     def wrapping(*args, **kwargs):
-        disp, disp_std, stri = f(*args, **kwargs)
+        zero_printed = False
+        disp, disp_std, st = f(*args, **kwargs)
         labels = ('GD', 'GDD','TOD', 'FOD', 'QOD')
         for i, (label, disp_item, disp_std_item) in enumerate(zip(labels, disp, disp_std)):
-             print(f'{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i+1}')
-        return disp, disp_std, stri
+            if disp_item == 0 and zero_printed:
+                continue
+            zero_printed |= disp_item == 0
+            print(f'{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i+1}')
+        return disp, disp_std, st
     return wrapping
 
 
