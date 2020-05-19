@@ -28,7 +28,7 @@ class TestEvaluateNoLmfit(unittest.TestCase):
 		mins = [10,30,50,70,90]
 		maxs = [20,40,60,80,100]
 		disp, disp_s, fit = evaluate.min_max_method(a, b, [], [], 0, maxx=maxs, minx=mins, fit_order=1, show_graph=False)
-		np.testing.assert_almost_equal(disp[0], 0, decimal=5)
+		np.testing.assert_almost_equal(disp[0], -0.314159265359)
 		with self.assertRaises(ValueError):
 			disp, disp_s, fit = evaluate.min_max_method([], b, [], [], 0, maxx=maxs, minx=mins, fit_order=1, show_graph=False)
 		with self.assertRaises(ValueError):

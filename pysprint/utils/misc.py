@@ -5,7 +5,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 import scipy.stats as st
 
-__all__ = ['scipy_disp', 'lmfit_disp', 'find_nearest',
+__all__ = ['unpack_lmfit', 'find_nearest',
            '_handle_input', 'print_disp', 'fourier_interpolate',
            'between', 'get_closest', 'run_from_ipython',
            'calc_envelope', 'measurement', '_maybe_increase_before_cwt',
@@ -60,15 +60,8 @@ def between(val, except_around):
 		return True
 	return False
 
-def scipy_disp(r):
-	dispersion, dispersion_std = [], []
-	for idx in range(len(r)):
-		dispersion[idx] = dispersion[idx] * factorial(idx+1)
-		dispersion_std[idx] = dispersion_std[idx] * factorial(idx+1)
-	return dispersion, dispersion_std
 
-
-def lmfit_disp(r):
+def unpack_lmfit(r):
 	dispersion, dispersion_std = [], []
 	for name, par in r:
 		dispersion.append(par.value)
@@ -160,9 +153,9 @@ def _handle_input(x, y, ref, sam):
 	elif (len(ref) == 0) or (len(sam) == 0):
 		y_data = y
 	elif len(x) == 0:
-		raise ValueError('load the spectrum!\n')
+		raise ValueError('No values for x.')
 	elif len(y) == 0:
-		raise ValueError('load the spectrum!\n')
+		raise ValueError('No values for y.')
 	else:
 		raise TypeError('Input types are wrong.\n')
 	return x,  y_data
@@ -171,13 +164,11 @@ def _handle_input(x, y, ref, sam):
 def print_disp(f):
     @wraps(f)
     def wrapping(*args, **kwargs):
-        zero_printed = False
         disp, disp_std, st = f(*args, **kwargs)
         labels = ('GD', 'GDD','TOD', 'FOD', 'QOD')
+        disp = np.trim_zeros(disp, 'b')
+        disp_std = disp_std[:len(disp)]
         for i, (label, disp_item, disp_std_item) in enumerate(zip(labels, disp, disp_std)):
-            if disp_item == 0 and zero_printed:
-                continue
-            zero_printed |= disp_item == 0
             print(f'{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i+1}')
         return disp, disp_std, st
     return wrapping

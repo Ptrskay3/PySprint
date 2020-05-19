@@ -117,7 +117,7 @@ class SPPMethod:
     @staticmethod
     def calculate_from_raw(omegas, delays, reference_point, order):
         x, y, dispersion, dispersion_std, bf = spp_method(
-            delays, omegas, ref_point=reference_point, fit_order=order, from_raw=True
+            delays, omegas, ref_point=reference_point, fit_order=order
             )
         return dispersion, dispersion_std
 
@@ -127,7 +127,7 @@ class SPPMethod:
         delays = np.concatenate([_ for _ in self._delay.values()]).ravel()
         positions = np.concatenate([_ for _ in self._positions.values()]).ravel()
         x, y, dispersion, dispersion_std, bf = spp_method(
-            delays, positions, ref_point=reference_point, fit_order=order, from_raw=True
+            delays, positions, ref_point=reference_point, fit_order=order
             )
         if show_graph:
             plt.plot(x, y, 'o')

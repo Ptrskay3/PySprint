@@ -26,7 +26,7 @@ class TestEvaluate(unittest.TestCase):
 		mins = [10,30,50,70,90]
 		maxs = [20,40,60,80,100]
 		disp, disp_s, fit = evaluate.min_max_method(a, b, [], [], 0, maxx=maxs, minx=mins, fit_order=1, show_graph=False)
-		np.testing.assert_almost_equal(disp[0], 0)
+		np.testing.assert_almost_equal(disp[0], -0.314159265359)
 		with self.assertRaises(ValueError):
 			disp, disp_s, fit = evaluate.min_max_method([], b, [], [], 0, maxx=maxs, minx=mins, fit_order=1, show_graph=False)
 		with self.assertRaises(ValueError):
@@ -96,7 +96,7 @@ class TestEvaluate(unittest.TestCase):
 		f.apply_window()
 		f.fft()
 		d, _, _ = f.calculate(order = 2, reference_point = 2.4)
-		np.testing.assert_array_almost_equal(d, [-1500.01, -1999.79, 0, 0, 0], decimal=2)
+		np.testing.assert_array_almost_equal(d, [-1500.01, -1999.79], decimal=2)
 
 	def test_ffts_advanced1(self):
 		g = Generator(2,2.8,2.4, delay = 1500, GD = 200, pulse_width = 25, resolution = 0.01)
@@ -108,7 +108,7 @@ class TestEvaluate(unittest.TestCase):
 		f.apply_window()
 		f.fft()
 		d, _, _ = f.calculate(order = 1, reference_point = 2.4)
-		np.testing.assert_array_almost_equal(d, [-1699.99, 0, 0, 0, 0], decimal=2)
+		np.testing.assert_array_almost_equal(d, [-1699.99], decimal=2)
 
 	def test_ffts_advanced3(self):
 		g = Generator(2,2.8,2.4, delay = 1500, TOD = 40000, pulse_width = 25, resolution = 0.01)
@@ -120,7 +120,7 @@ class TestEvaluate(unittest.TestCase):
 		f.apply_window()
 		f.fft()
 		d, _, _ = f.calculate(order = 3, reference_point = 2.4)
-		np.testing.assert_array_almost_equal(d, [-1500.03, -0.03, -39996.60, 0, 0], decimal=2)
+		np.testing.assert_array_almost_equal(d, [-1500.03, -0.03, -39996.60], decimal=2)
 
 
 	def test_ffts_advanced4(self):
@@ -133,7 +133,7 @@ class TestEvaluate(unittest.TestCase):
 		f.apply_window()
 		f.fft()
 		d, _, _ = f.calculate(order = 4, reference_point = 2.4)
-		np.testing.assert_array_almost_equal(d, [-1500.00, -1999.95, 0.21, 99995.00, 0], decimal=1)
+		np.testing.assert_array_almost_equal(d, [-1500.00, -1999.95, 0.21, 99995.00], decimal=1)
 
 	def test_ffts_advanced5(self):
 		g = Generator(2,2.8,2.4, delay = 1500, QOD = 900000, pulse_width = 25, resolution = 0.01)

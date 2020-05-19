@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from math import factorial
-import operator
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,7 +15,9 @@ except ImportError:
 
 
 from pysprint.utils import (
-    find_nearest, _handle_input, lmfit_disp, fourier_interpolate
+    find_nearest, _handle_input, unpack_lmfit, fourier_interpolate,
+    transform_cf_params_to_dispersion, transform_lmfit_params_to_dispersion,
+    plot_phase
     )
 
 
@@ -128,7 +129,7 @@ def min_max_method(
     degree of polynomial to fit data [1, 5]
 
     show_graph: bool, optional
-    if True returns a matplotlib plot and pauses execution until closing the window
+    if True plot the calculated phase
 
     Returns
     -------
@@ -141,6 +142,9 @@ def min_max_method(
 
     fit_report: lmfit report
     """
+    if fit_order not in range(6):
+        raise ValueError('fit order must be in [1, 5]')
+
     x, y = _handle_input(x, y, ref, sam)
     if maxx is None:
         maxInd = argrelextrema(y, np.greater)
@@ -170,9 +174,6 @@ def min_max_method(
     # Yes, we do. This generates a prettier plot.
     idx = np.argsort(x_s)
     full_x, full_y = x_s[idx], y_s[idx]
-    
-    if fit_order not in range(6):
-        raise ValueError('fit order must be in [1, 5]')
 
     _function = _fit_config[fit_order]
 
@@ -185,41 +186,17 @@ def min_max_method(
 
     try:
         if _has_lmfit:
-            dispersion, dispersion_std = lmfit_disp(result.params.items())
-            dispersion = dispersion[1:]
-            dispersion_std = dispersion_std[1:]
-            for idx in range(len(dispersion)):
-                dispersion[idx] = dispersion[idx] * factorial(idx+1)
-                dispersion_std[idx] = dispersion_std[idx] * factorial(idx+1)
-            while len(dispersion) < 5:
-                dispersion.append(0)
-                dispersion_std.append(0)
+            dispersion, dispersion_std = transform_lmfit_params_to_dispersion(*unpack_lmfit(result.params.items()), drop_first=True, dof=1)
             fit_report = result.fit_report()
         else:
-            full_x = np.asarray(full_x)
-            dispersion = []
-            dispersion_std = []
-            for idx in range(len(popt) - 1):
-                dispersion.append(popt[idx + 1] * factorial(idx + 1))
-            while len(dispersion) < 5:
-                dispersion.append(0)
-            while len(dispersion_std) < len(dispersion):
-                dispersion_std.append(0)
+            dispersion, dispersion_std = transform_cf_params_to_dispersion(popt, drop_first=True)
             fit_report = 'To display detailed results, you must have lmfit installed.'
         if show_graph:
-            fig = plt.figure(figsize=(7, 7))
-            fig.canvas.set_window_title('Min-max method fitted')
-            plt.plot(full_x, full_y, 'o', label='dataset')
-            try:
-                plt.plot(full_x, result.best_fit, 'r*', label='fitted')
-            except Exception:
-                plt.plot(full_x, _function(full_x, *popt), 'r*', label='fitted')
-            plt.legend()
-            plt.grid()
-            plt.show()
+            plot_phase(full_x, full_y, bf=result.best_fit, bf_fallback=_function(full_x, *popt),
+                window_title='Min-max method fitted')
         return dispersion, dispersion_std, fit_report
     except Exception as e:
-        return [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], e
+        raise
 
 def cos_fit1(x, c0, c1, b0, b1):
     return c0 + c1 * np.cos(poly1(x, b0, b1))
@@ -240,12 +217,12 @@ def cos_fit4(x, c0, c1, b0, b1, b2, b3, b4):
 def cos_fit5(x, c0, c1, b0, b1, b2, b3, b4, b5):
     return c0 + c1 * np.cos(poly5(x, b0, b1, b2, b3, b4, b5))
 
-# TODO: implement higher order
+
 def cos_fit6(x, c0, c1, b0, b1, b2, b3, b4, b5, b6):
     return c0 + c1 * np.cos(poly6(x, b0, b1, b2, b3, b4, b5, b6))
 
 
-def spp_method(delays, omegas, ref_point=0, fit_order=4, from_raw=False):
+def spp_method(delays, omegas, ref_point=0, fit_order=4):
     """
     Calculates the dispersion from SPP's positions and delays.
 
@@ -253,28 +230,20 @@ def spp_method(delays, omegas, ref_point=0, fit_order=4, from_raw=False):
     ----------
 
     delays: array-like
-    the time delays in fs
-    if from_raw is enabled you must pass matching pairs with omegas
+    The delay values in fs exactly where omegas taken.
 
     omegas: array-like
-    in form of [[SPP1, SPP2, SPP3, SPP4],[SPP1, SPP2, SPP3, SPP4], ..]
-    for lesser SPP cases replace elements with None:
-    [[SPP1, None, None, None],[SPP1, None, None, None], ..]
-    if from_raw is enabled, you must pass matching pairs with delays
+    The angular frequency values where SPP's are located
 
     fit_order: int
     order of polynomial to fit the given data
 
-    from_raw: bool
-    if True you can pass matching pairs to delays and omegas, and it will perform
-    a normal curve fitting. It's useful at the API.
-
     Returns
     -------
-    omegas_unpacked: array-like
+    omegas: array-like
     x axis data
 
-    delays_unpacked : array-like
+    delays: array-like
     y axis data
 
     dispersion: array-like
@@ -286,83 +255,30 @@ def spp_method(delays, omegas, ref_point=0, fit_order=4, from_raw=False):
     bf: array-like
     best fitting curve for plotting
     """
-    if from_raw:
-        delays_unpacked = delays
-        omegas_unpacked = omegas
-    else:
-        delays = delays[delays != np.array(None)]
-        omegas_unpacked = []
-        delays_unpacked = []
-        for delay, element in zip(delays, omegas):
-            item = [x for x in element if x is not None]
-            omegas_unpacked.extend(item)
-            delays_unpacked.extend(len(item) * [delay])
-    # FIXME: should be numpy arrays..
-    L = sorted(zip(omegas_unpacked, delays_unpacked), key=operator.itemgetter(0))
-    omegas_unpacked, delays_unpacked = zip(*L)
-    omegas_unpacked = [val-ref_point for val in omegas_unpacked]
+    if fit_order not in range(5):
+        raise ValueError('fit order must be in [1, 4]')
+
+    idx = np.argsort(omegas)
+    omegas, delays = omegas[idx], delays[idx]
+    omegas -= ref_point
+
+    _function = _fit_config[fit_order]
+
     try:
         if _has_lmfit:
-            if fit_order == 2:
-                fitModel = Model(poly2)
-                params = fitModel.make_params(b0=1, b1=1, b2=1)
-                result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params=params, method='leastsq')
-            elif fit_order == 3:
-                fitModel = Model(poly3)
-                params = fitModel.make_params(b0=1, b1=1, b2=1, b3=1)
-                result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params=params, method='leastsq')
-            elif fit_order == 4:
-                fitModel = Model(poly4)
-                params = fitModel.make_params(b0=1, b1=1, b2=1, b3=1, b4=1)
-                result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params=params, method='leastsq')
-            elif fit_order == 1:
-                fitModel = Model(poly1)
-                params = fitModel.make_params(b0=1, b1=1)
-                result = fitModel.fit(delays_unpacked, x=omegas_unpacked, params=params, method='leastsq')
-            else:
-                raise ValueError('Order is out of range, please select from [1,4]')
-            dispersion, dispersion_std = lmfit_disp(result.params.items())
-            for idx in range(len(dispersion)):
-                dispersion[idx] = dispersion[idx]*factorial(idx)
-            for idx in range(len(dispersion_std)):
-                if dispersion_std[idx] is not None:
-                    dispersion_std[idx] = dispersion_std[idx] * factorial(idx)
-                else:
-                    dispersion_std[idx] = 0
-            while len(dispersion) < 5:
-                dispersion.append(0)
-                dispersion_std.append(0)
-            while len(dispersion_std) < 5:
-                dispersion_std.append(0)
+            fitmodel = Model(_function)
+            pars = fitmodel.make_params(**{f'b{i}':1 for i in range(fit_order + 1)})
+            result = fitmodel.fit(delays, x=omegas, params=pars)
+            dispersion, dispersion_std = transform_lmfit_params_to_dispersion(*unpack_lmfit(result.params.items()), drop_first=False, dof=0)
             bf = result.best_fit
         else:
-            if fit_order == 4:
-                popt, pcov = curve_fit(poly4, omegas_unpacked, delays_unpacked, maxfev=8000)
-                _function = poly4
-            elif fit_order == 3:
-                popt, pcov = curve_fit(poly3, omegas_unpacked, delays_unpacked, maxfev=8000)
-                _function = poly3
-            elif fit_order == 2:
-                popt, pcov = curve_fit(poly2, omegas_unpacked, delays_unpacked, maxfev=8000)
-                _function = poly2
-            elif fit_order == 1:
-                popt, pcov = curve_fit(poly1, omegas_unpacked, delays_unpacked, maxfev=8000)
-                _function = poly1
-            else:
-                raise ValueError('Order is out of range, please select from [1,4]')
-            omegas_unpacked = np.asarray(omegas_unpacked)
-            dispersion = []
-            dispersion_std = []
-            for idx in range(len(popt)):
-                dispersion.append(popt[idx] * factorial(idx))
-            while len(dispersion) < 5:
-                dispersion.append(0)
-            while len(dispersion_std) < len(dispersion):
-                dispersion_std.append(0)
-            bf = _function(omegas_unpacked, *popt)
-        return omegas_unpacked, delays_unpacked, dispersion, dispersion_std, bf
+            popt, pcov = curve_fit(_function, omegas, delays, maxfev=8000)
+            dispersion, dispersion_std = transform_cf_params_to_dispersion(popt, drop_first=False)
+            bf = _function(omegas, *popt)
+        return omegas, delays, dispersion, dispersion_std, bf
+
     except Exception as e:
-        return [], [], [e], [], [] # ??? this must be a wrong way of treating errors.
+        raise
 
 
 def cff_method(
@@ -593,24 +509,10 @@ def args_comp(x, y, ref_point=0, fit_order=5, show_graph=False):
     result = fitmodel.fit(y, x=x, params=pars)
 
     try:
-        dispersion, dispersion_std = lmfit_disp(result.params.items())
-        dispersion = dispersion[1:]
-        dispersion_std = dispersion_std[1:]
-        for idx in range(len(dispersion)):
-            dispersion[idx] = dispersion[idx] * factorial(idx+1)
-            dispersion_std[idx] = dispersion_std[idx] * factorial(idx+1)
-        while len(dispersion) < 5:
-            dispersion.append(0)
-            dispersion_std.append(0)
+        dispersion, dispersion_std = transform_lmfit_params_to_dispersion(*unpack_lmfit(result.params.items()), drop_first=True, dof=1)
         fit_report = result.fit_report()
         if show_graph:
-            fig = plt.figure(figsize=(7, 7))
-            fig.canvas.set_window_title('Phase')
-            plt.plot(x, y, 'o', label='dataset')
-            plt.plot(x, result.best_fit, 'r--', label='fitted')
-            plt.legend()
-            plt.grid()
-            plt.show()
+            plot_phase(x, y, result.best_fit, window_title='Phase')
         return dispersion, dispersion_std, fit_report
     except Exception as e:
-        return [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], e
+        raise
