@@ -74,7 +74,7 @@ class TestEvaluate(unittest.TestCase):
 	def test_cff(self):
 		a = np.arange(100)
 		b = np.arange(100)
-		with self.assertRaises(TypeError):
+		with self.assertRaises(KeyError):
 			evaluate.cff_method(a, b, [], [], ref_point=0 , p0=[1, 1, 1, 1, 1, 1, 1, 1, 1])
 
 	def test_ffts_primitive(self):

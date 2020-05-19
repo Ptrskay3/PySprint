@@ -92,12 +92,45 @@ def poly1(x, b0, b1):
     """
     return b0+b1*x
 
+
+def cos_fit1(x, c0, c1, b0, b1):
+    return c0 + c1 * np.cos(poly1(x, b0, b1))
+
+
+def cos_fit2(x, c0, c1, b0, b1, b2):
+    return c0 + c1 * np.cos(poly2(x, b0, b1, b2))
+
+
+def cos_fit3(x, c0, c1, b0, b1, b2, b3):
+    return c0 + c1 * np.cos(poly3(x, b0, b1, b2, b3))
+
+
+def cos_fit4(x, c0, c1, b0, b1, b2, b3, b4):
+    return c0 + c1 * np.cos(poly4(x, b0, b1, b2, b3, b4))
+
+
+def cos_fit5(x, c0, c1, b0, b1, b2, b3, b4, b5):
+    return c0 + c1 * np.cos(poly5(x, b0, b1, b2, b3, b4, b5))
+
+
+def cos_fit6(x, c0, c1, b0, b1, b2, b3, b4, b5, b6):
+    return c0 + c1 * np.cos(poly6(x, b0, b1, b2, b3, b4, b5, b6))
+
+
 _fit_config = { 
-    1: poly1,  # noqa
-    2: poly2,  # noqa
-    3: poly3,  # noqa
-    4: poly4,  # noqa
-    5: poly5  # noqa
+    1: poly1,
+    2: poly2,
+    3: poly3,
+    4: poly4,
+    5: poly5
+}
+
+_cosfit_config = {
+    1: cos_fit1,
+    2: cos_fit2,
+    3: cos_fit3,
+    4: cos_fit4,
+    5: cos_fit5
 }
 
 
@@ -190,36 +223,13 @@ def min_max_method(
             fit_report = result.fit_report()
         else:
             dispersion, dispersion_std = transform_cf_params_to_dispersion(popt, drop_first=True)
-            fit_report = 'To display detailed results, you must have lmfit installed.'
+            fit_report = 'To display detailed results, you must have `lmfit` installed.'
         if show_graph:
             plot_phase(full_x, full_y, bf=result.best_fit, bf_fallback=_function(full_x, *popt),
                 window_title='Min-max method fitted')
         return dispersion, dispersion_std, fit_report
     except Exception as e:
         raise
-
-def cos_fit1(x, c0, c1, b0, b1):
-    return c0 + c1 * np.cos(poly1(x, b0, b1))
-
-
-def cos_fit2(x, c0, c1, b0, b1, b2):
-    return c0 + c1 * np.cos(poly2(x, b0, b1, b2))
-
-
-def cos_fit3(x, c0, c1, b0, b1, b2, b3):
-    return c0 + c1 * np.cos(poly3(x, b0, b1, b2, b3))
-
-
-def cos_fit4(x, c0, c1, b0, b1, b2, b3, b4):
-    return c0 + c1 * np.cos(poly4(x, b0, b1, b2, b3, b4))
-
-
-def cos_fit5(x, c0, c1, b0, b1, b2, b3, b4, b5):
-    return c0 + c1 * np.cos(poly5(x, b0, b1, b2, b3, b4, b5))
-
-
-def cos_fit6(x, c0, c1, b0, b1, b2, b3, b4, b5, b6):
-    return c0 + c1 * np.cos(poly6(x, b0, b1, b2, b3, b4, b5, b6))
 
 
 def spp_method(delays, omegas, ref_point=0, fit_order=4):
@@ -314,31 +324,22 @@ def cff_method(
     best fitting curve
 
     """
-    # TODO: BOUNDS WILL BE SET  ..
-    # bounds=((-1000, -10000, -10000, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf),
-    # (1000, 10000, 10000, np.inf, np.inf, np.inf, np.inf, np.inf))
+
     x, y = _handle_input(x, y, ref, sam)
 
     try:
-        if len(np.trim_zeros(p0, 'b')) + 4 == len(p0):
-            _funct = cos_fit1
-            p0 = p0[:-4]
-        elif p0[-1] == 0 and p0[-2] == 0 and p0[-3] == 0:
-            _funct = cos_fit2
-            p0 = p0[:-3]
-        elif p0[-1] == 0 and p0[-2] == 0:
-            _funct = cos_fit3
-            p0 = p0[:-2]
-        elif p0[-1] == 0:
-            _funct = cos_fit4
-            p0 = p0[:-1]
-        else:
-            _funct = cos_fit5
-        popt, pcov = curve_fit(_funct, x-ref_point, y, p0, maxfev=maxtries)
+        orderhelper = np.max(np.flatnonzero(p0)) - 2
+
+        p0 = np.trim_zeros(p0, 'b')
+
+        _funct = _cosfit_config[orderhelper]
+
+        popt, pcov = curve_fit(_funct, x - ref_point, y, p0, maxfev=maxtries)
+
         dispersion = np.zeros_like(popt)[:-3]
-        for num in range(len(popt)-3):
-            dispersion[num] = popt[num+3]*factorial(num+1)
-        return dispersion, _funct(x-ref_point, *popt)
+        for num in range(len(popt) - 3):
+            dispersion[num] = popt[num + 3] * factorial(num + 1)
+        return dispersion, _funct(x - ref_point, *popt)
     except RuntimeError:
         raise ValueError(f'Max tries ({maxtries}) reached.. \nParameters could not be estimated.')
 
