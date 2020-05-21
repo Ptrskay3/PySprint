@@ -165,7 +165,7 @@ def print_disp(f):
     @wraps(f)
     def wrapping(*args, **kwargs):
         disp, disp_std, st = f(*args, **kwargs)
-        labels = ('GD', 'GDD','TOD', 'FOD', 'QOD')
+        labels = ('GD', 'GDD','TOD', 'FOD', 'QOD', 'SOD')
         disp = np.trim_zeros(disp, 'b')
         disp_std = disp_std[:len(disp)]
         for i, (label, disp_item, disp_std_item) in enumerate(zip(labels, disp, disp_std)):

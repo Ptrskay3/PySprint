@@ -1,6 +1,3 @@
-"""
-- currently compatibility with GUI is dropped.. we should fix that.
-"""
 from math import factorial
 
 import numpy as np
@@ -9,9 +6,9 @@ from scipy.optimize import curve_fit
 from tqdm import tqdm
 
 from pysprint.utils import find_nearest
-from pysprint.core.evaluate import cos_fit1, cos_fit2, cos_fit3, cos_fit4, cos_fit5
+from pysprint.core.functions import cos_fit1, cos_fit2, cos_fit3, cos_fit4, cos_fit5
 
-_func_config = {
+_cosfit_config = {
 	1 : cos_fit1,
 	2 : cos_fit2,
 	3 : cos_fit3,
@@ -115,7 +112,7 @@ class FitOptimizer:
 		if self.curr_order == self.max_order:
 			return
 		try:
-			self.func = _func_config[self.curr_order + 1]
+			self.func = _cosfit_config[self.curr_order + 1]
 		except KeyError as e:
 			e.args = (e.args[0], 'Order must be in [1, 5].')
 			raise

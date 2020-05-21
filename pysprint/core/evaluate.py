@@ -2,8 +2,7 @@
 from math import factorial
 
 import numpy as np
-import matplotlib.pyplot as plt
-import scipy
+from scipy import fftpack
 from scipy.optimize import curve_fit
 from scipy.signal import argrelextrema
 
@@ -20,104 +19,16 @@ from pysprint.utils import (
     plot_phase
     )
 
+from pysprint.core.functions import *
+
 
 __all__ = [
-    'min_max_method', 'cos_fit1', 'cos_fit2', 'cos_fit3',
-    'cos_fit4', 'cos_fit5', 'spp_method', 'cff_method', 'fft_method',
+    'min_max_method', 'spp_method', 'cff_method', 'fft_method',
     'cut_gaussian', 'ifft_method', 'args_comp'
     ]
 
 
-# TODO: implement higher orders
-
-def poly6(x, b0, b1, b2, b3, b4, b5, b6):
-    """
-    Taylor polynomial for fit
-    b1 = GD
-    b2 = GDD / 2
-    b3 = TOD / 6
-    b4 = FOD / 24
-    b5 = QOD / 120
-    b6 = SOD / 720
-    """
-    return b0+b1*x+b2*x**2+b3*x**3+b4*x**4+b5*x**5+b6*x**6
-
-def poly5(x, b0, b1, b2, b3, b4, b5):
-    """
-    Taylor polynomial for fit
-    b1 = GD
-    b2 = GDD / 2
-    b3 = TOD / 6
-    b4 = FOD / 24
-    b5 = QOD / 120
-    """
-    return b0+b1*x+b2*x**2+b3*x**3+b4*x**4+b5*x**5
-
-
-def poly4(x, b0, b1, b2, b3, b4):
-    """
-    Taylor polynomial for fit
-    b1 = GD
-    b2 = GDD / 2
-    b3 = TOD / 6
-    b4 = FOD / 24
-    """
-    return b0+b1*x+b2*x**2+b3*x**3+b4*x**4
-
-
-def poly3(x, b0, b1, b2, b3):
-    """
-    Taylor polynomial for fit
-    b1 = GD
-    b2 = GDD / 2
-    b3 = TOD / 6
-
-    """
-    return b0+b1*x+b2*x**2+b3*x**3
-
-
-def poly2(x, b0, b1, b2):
-    """
-    Taylor polynomial for fit
-    b1 = GD
-    b2 = GDD / 2
-    """
-    return b0+b1*x+b2*x**2
-
-
-def poly1(x, b0, b1):
-    """
-    Taylor polynomial for fit
-    b1 = GD
-    """
-    return b0+b1*x
-
-
-def cos_fit1(x, c0, c1, b0, b1):
-    return c0 + c1 * np.cos(poly1(x, b0, b1))
-
-
-def cos_fit2(x, c0, c1, b0, b1, b2):
-    return c0 + c1 * np.cos(poly2(x, b0, b1, b2))
-
-
-def cos_fit3(x, c0, c1, b0, b1, b2, b3):
-    return c0 + c1 * np.cos(poly3(x, b0, b1, b2, b3))
-
-
-def cos_fit4(x, c0, c1, b0, b1, b2, b3, b4):
-    return c0 + c1 * np.cos(poly4(x, b0, b1, b2, b3, b4))
-
-
-def cos_fit5(x, c0, c1, b0, b1, b2, b3, b4, b5):
-    return c0 + c1 * np.cos(poly5(x, b0, b1, b2, b3, b4, b5))
-
-
-def cos_fit6(x, c0, c1, b0, b1, b2, b3, b4, b5, b6):
-    return c0 + c1 * np.cos(poly6(x, b0, b1, b2, b3, b4, b5, b6))
-
-
-_fit_config = { 
+_fit_config = {
     1: poly1,
     2: poly2,
     3: poly3,
@@ -188,11 +99,15 @@ def min_max_method(
 
     _, ref_index = find_nearest(x, ref_point)
 
-    max_freq = x[ref_index] - maxx 
+    max_freq = x[ref_index] - maxx
     min_freq = x[ref_index] - minx
 
-    neg_freq = np.sort(np.append(max_freq[max_freq < 0], min_freq[min_freq < 0]))[::-1]
-    pos_freq = np.sort(np.append(max_freq[max_freq > 0], min_freq[min_freq > 0]))
+    neg_freq = np.sort(
+        np.append(max_freq[max_freq < 0], min_freq[min_freq < 0])
+        )[::-1]
+    pos_freq = np.sort(
+        np.append(max_freq[max_freq > 0], min_freq[min_freq > 0])
+        )
 
     if len(neg_freq) == 0 and len(pos_freq) == 0:
         raise ValueError('No extremal points found.')
@@ -203,7 +118,7 @@ def min_max_method(
     x_s = np.append(pos_freq, neg_freq)
     y_s = np.append(pos_values, neg_values)
 
-    # FIXME: Do we even need this? 
+    # FIXME: Do we even need this?
     # Yes, we do. This generates a prettier plot.
     idx = np.argsort(x_s)
     full_x, full_y = x_s[idx], y_s[idx]
@@ -212,24 +127,32 @@ def min_max_method(
 
     if _has_lmfit:
         fitmodel = Model(_function)
-        pars = fitmodel.make_params(**{f'b{i}':1 for i in range(fit_order + 1)})
+        pars = fitmodel.make_params(
+            **{f'b{i}': 1 for i in range(fit_order + 1)}
+            )
         result = fitmodel.fit(full_y, x=full_x, params=pars)
     else:
         popt, pcov = curve_fit(_function, full_x, full_y, maxfev=8000)
 
     try:
         if _has_lmfit:
-            dispersion, dispersion_std = transform_lmfit_params_to_dispersion(*unpack_lmfit(result.params.items()), drop_first=True, dof=1)
+            dispersion, dispersion_std = transform_lmfit_params_to_dispersion(
+                *unpack_lmfit(result.params.items()), drop_first=True, dof=1
+                )
             fit_report = result.fit_report()
         else:
-            dispersion, dispersion_std = transform_cf_params_to_dispersion(popt, drop_first=True)
-            fit_report = 'To display detailed results, you must have `lmfit` installed.'
+            dispersion, dispersion_std = transform_cf_params_to_dispersion(
+                popt, drop_first=True
+                )
+            fit_report = ('To display detailed results,'
+                          ' you must have `lmfit` installed.')
         if show_graph:
-            plot_phase(full_x, full_y, bf=result.best_fit, bf_fallback=_function(full_x, *popt),
-                window_title='Min-max method fitted')
+            plot_phase(full_x, full_y, bf=result.best_fit,
+                       bf_fallback=_function(full_x, *popt),
+                       window_title='Min-max method fitted')
         return dispersion, dispersion_std, fit_report
     except Exception as e:
-        raise
+        raise e
 
 
 def spp_method(delays, omegas, ref_point=0, fit_order=4):
@@ -277,18 +200,25 @@ def spp_method(delays, omegas, ref_point=0, fit_order=4):
     try:
         if _has_lmfit:
             fitmodel = Model(_function)
-            pars = fitmodel.make_params(**{f'b{i}':1 for i in range(fit_order + 1)})
+            pars = fitmodel.make_params(
+                **{f'b{i}': 1 for i in range(fit_order + 1)}
+                )
             result = fitmodel.fit(delays, x=omegas, params=pars)
-            dispersion, dispersion_std = transform_lmfit_params_to_dispersion(*unpack_lmfit(result.params.items()), drop_first=False, dof=0)
+
+            dispersion, dispersion_std = transform_lmfit_params_to_dispersion(
+                *unpack_lmfit(result.params.items()), drop_first=False, dof=0
+                )
             bf = result.best_fit
         else:
             popt, pcov = curve_fit(_function, omegas, delays, maxfev=8000)
-            dispersion, dispersion_std = transform_cf_params_to_dispersion(popt, drop_first=False)
+            dispersion, dispersion_std = transform_cf_params_to_dispersion(
+                popt, drop_first=False
+                )
             bf = _function(omegas, *popt)
         return omegas, delays, dispersion, dispersion_std, bf
 
     except Exception as e:
-        raise
+        raise e
 
 
 def cff_method(
@@ -334,14 +264,17 @@ def cff_method(
 
         _funct = _cosfit_config[orderhelper]
 
-        popt, pcov = curve_fit(_funct, x - ref_point, y, p0, maxfev=maxtries)
+        popt, pcov = curve_fit(
+            _funct, x - ref_point, y, p0, maxfev=maxtries
+            )
 
         dispersion = np.zeros_like(popt)[:-3]
         for num in range(len(popt) - 3):
             dispersion[num] = popt[num + 3] * factorial(num + 1)
         return dispersion, _funct(x - ref_point, *popt)
     except RuntimeError:
-        raise ValueError(f'Max tries ({maxtries}) reached.. \nParameters could not be estimated.')
+        raise ValueError(f'''Max tries ({maxtries}) reached..
+                             Parameters could not be estimated.''')
 
 
 def fft_method(x, y):
@@ -364,7 +297,7 @@ def fft_method(x, y):
     yf: array-like
     transformed y data
     """
-    yf = scipy.fftpack.fft(y)
+    yf = fftpack.fft(y)
     xf = np.linspace(x[0], x[-1], len(x))
     return xf, yf
 
@@ -423,7 +356,7 @@ def cut_gaussian(x, y, spike, fwhm, win_order):
     y: array-like
     the windowed y values
     """
-    y = y * gaussian_window(x, tau=spike, fwhm=fwhm, order=win_order)
+    y *= gaussian_window(x, tau=spike, fwhm=fwhm, order=win_order)
     return y
 
 
@@ -462,9 +395,9 @@ def ifft_method(x, y, interpolate=True):
 
 def args_comp(x, y, ref_point=0, fit_order=5, show_graph=False):
     """
-    Calculates the phase of complex dataset then unwrap by changing deltas between
-    values to 2*pi complement. At the end, fit a polynomial curve to determine
-    dispersion coeffs.
+    Calculates the phase of complex dataset then unwrap by changing
+    deltas between values to 2*pi complement. At the end, fit a
+    polynomial curve to determine dispersion coeffs.
 
     Parameters
     ----------
@@ -482,7 +415,7 @@ def args_comp(x, y, ref_point=0, fit_order=5, show_graph=False):
     degree of polynomial to fit data [1, 5]
 
     show_graph: bool
-    if True returns a matplotlib plot and pauses execution until closing the window
+    if True return a plot with the results
 
     Returns
     -------
@@ -499,21 +432,23 @@ def args_comp(x, y, ref_point=0, fit_order=5, show_graph=False):
         raise ValueError('fit order must be in [1, 5]')
 
     x -= ref_point
-    # shifting to [0, 2pi] if necessary
-    # angles = (angles + 2 * np.pi) % (2 * np.pi)
     y = np.unwrap(np.angle(y), axis=0)
 
     _function = _fit_config[fit_order]
 
     fitmodel = Model(_function)
-    pars = fitmodel.make_params(**{f'b{i}':1 for i in range(fit_order + 1)})
+    pars = fitmodel.make_params(
+        **{f'b{i}': 1 for i in range(fit_order + 1)}
+        )
     result = fitmodel.fit(y, x=x, params=pars)
 
     try:
-        dispersion, dispersion_std = transform_lmfit_params_to_dispersion(*unpack_lmfit(result.params.items()), drop_first=True, dof=1)
+        dispersion, dispersion_std = transform_lmfit_params_to_dispersion(
+            *unpack_lmfit(result.params.items()), drop_first=True, dof=1
+            )
         fit_report = result.fit_report()
         if show_graph:
             plot_phase(x, y, result.best_fit, window_title='Phase')
         return dispersion, dispersion_std, fit_report
     except Exception as e:
-        raise
+        raise e
