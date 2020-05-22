@@ -45,26 +45,22 @@ class Dataset(DatasetBase):
 		self._is_normalized = False
 		if not isinstance(self.x, np.ndarray):
 			try:
-				self.x = np.array(self.x)
-				self.x.astype(float)
+				self.x = np.array(self.x).astype(float)
 			except ValueError:
 				raise DatasetError('Invalid type of data')
 		if not isinstance(self.y, np.ndarray):
 			try:
-				self.y = np.array(self.y)
-				self.y.astype(float)
+				self.y = np.array(self.y).astype(float)
 			except ValueError:
 				raise DatasetError('Invalid type of data')
 		if not isinstance(self.ref, np.ndarray):
 			try:
-				self.ref = np.array(self.ref)
-				self.ref.astype(float)
+				self.ref = np.array(self.ref).astype(float)
 			except ValueError:
 				pass # just ignore invalid arms
 		if not isinstance(self.sam, np.ndarray):
 			try:
-				self.sam = np.array(self.sam)
-				self.sam.astype(float)
+				self.sam = np.array(self.sam).astype(float)
 			except ValueError:
 				pass # just ignore invalid arms
 
@@ -95,7 +91,9 @@ class Dataset(DatasetBase):
 		if not np.all(self._dispersion_array):
 			raise ValueError('Dispersion must be calculated before plotting the phase.')
 
-		coefs = np.array([self._dispersion_array[i]/factorial(i+1) for i in range(len(self._dispersion_array))])
+		coefs = np.array(
+			[self._dispersion_array[i]/factorial(i+1) for i in range(len(self._dispersion_array))]
+			)
 
 		if exclude_GD:
 			coefs[0] = 0
@@ -177,26 +175,29 @@ class Dataset(DatasetBase):
 			closest_val, idx1 = find_nearest(x_min, reference_point)
 			m_closest_val, m_idx1 = find_nearest(x_max, reference_point)
 		except ValueError:
-			print('Prediction failed.\nSkipping.. ')
+			if not silent:
+				print('Prediction failed.\nSkipping.. ')
 			return
 		try:
 			truncated = np.delete(x_min, idx1)
 			second_closest_val, _ = find_nearest(truncated, reference_point)
 		except IndexError:
-			print('Prediction failed.\nSkipping.. ')
+			if not silent:
+				print('Prediction failed.\nSkipping.. ')
 			return
 		try:
 			m_truncated = np.delete(x_max, m_idx1)
 			m_second_closest_val, _ = find_nearest(m_truncated, reference_point)
 		except IndexError:
-			print('Prediction failed.\nSkipping.. ')
+			if not silent:
+				print('Prediction failed.\nSkipping.. ')
 			return
 		lowguess = 2*np.pi/np.abs(closest_val-second_closest_val)
 		highguess = 2*np.pi/np.abs(m_closest_val-m_second_closest_val)
 		if type(self).__name__ == 'CosFitMethod':
-			self.params[3] = (lowguess+highguess)/2
+			self.params[3] = (lowguess + highguess) / 2
 		if not silent:
-			print(f'The predicted GD is ± {((lowguess+highguess)/2):.5f} fs based on reference point of {reference_point}.')
+			print(f'The predicted GD is ± {((lowguess + highguess) / 2):.5f} fs based on reference point of {reference_point}.')
 
 	def _safe_cast(self):
 		'''
