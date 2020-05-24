@@ -1,6 +1,8 @@
+import numpy as np
 from scipy.fftpack import fftshift
 
 from pysprint.core.bases.dataset import Dataset
+from pysprint.core.ffts_non_uniform import nuifft
 from pysprint.utils import print_disp
 from pysprint.core.evaluate import (fft_method,	cut_gaussian, ifft_method, 
 	 args_comp, gaussian_window)
@@ -46,7 +48,7 @@ class FFTMethod(Dataset):
 		else:
 			raise ValueError(f'axis should be either x, y or both, currently {axis} is given.')
 
-	def ifft(self, interpolate=True):
+	def ifft(self, interpolate=True, usenifft=False, eps=1E-12, exponent='positive'):
 		"""
 		Applies ifft to the dataset.
 		
@@ -55,9 +57,24 @@ class FFTMethod(Dataset):
 
 		interpolate: bool, default is True
 			Whether to apply linear interpolation on the dataset before transforming.
+
+		usenifft: bool, default is False
+			Whether to use non unifrom fft
+
+		...
 		"""
 		self._ifft_called_first = True
-		self.x, self.y = ifft_method(self.x, self.y, interpolate=interpolate)
+		if usenifft:
+			x_spaced = np.linspace(self.x[0], self.x[-1], len(self.x))
+			timestep = np.diff(x_spaced)[0]
+			x_axis = np.fft.fftfreq(len(self.x), d=timestep/(2*np.pi))
+			y_transform = nuifft(
+				self.x, self.y, gl=len(self.x), df=(x_axis[1]-x_axis[0]), epsilon=eps, exponent=exponent
+				)
+			self.x, self.y = x_axis, np.fft.fftshift(y_transform)
+
+		else:
+			self.x, self.y = ifft_method(self.x, self.y, interpolate=interpolate)
 
 	def fft(self):
 		"""
