@@ -41,4 +41,7 @@ setup(
         'lmfit',
         'tqdm'
       ],
+    extras_require={
+    'optional': ['numba']
+    }
 )

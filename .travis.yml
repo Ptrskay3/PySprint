@@ -8,7 +8,6 @@ services:
 
 language: python
 
-
 python:
     - 3.6
     - 3.7
@@ -17,10 +16,7 @@ python:
 env: 
     - version=latest
     - verison=minimum
-
-jobs:
-  allow_failures:
-    - os: osx
+    - version=withextras
 
 before_install:
   - "export PYTHONPATH=$PYTHONPATH:$(pwd)"
@@ -34,11 +30,11 @@ addons:
 
 install:
   - python -m pip install --upgrade pip
+  - if [[ $version == withextras ]]; then python -m pip install --upgrade numpy scipy matplotlib pandas tqdm lmfit numba ; fi
   - if [[ $version == latest ]]; then python -m pip install --upgrade numpy scipy matplotlib pandas tqdm lmfit ; fi
   - if [[ $version == minimum ]]; then pip install -r requirements.txt --force-reinstall ; fi
-  - pip install codecov
+  - pip install codecov flake8
   - python setup.py install
-  - pip install flake8
   - pip list
 
 before_script:
@@ -49,7 +45,6 @@ script:
   - cd pysprint/tests
   - python -m unittest
   - coverage run -m unittest
-
 
 after_success:
   - codecov
