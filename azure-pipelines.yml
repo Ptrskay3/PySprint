@@ -5,6 +5,7 @@
 
 trigger:
 - master
+- NUFFT
 
 pool:
   vmImage: 'ubuntu-latest'
