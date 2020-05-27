@@ -33,7 +33,7 @@ install:
   - if [[ $version == withextras ]]; then python -m pip install --upgrade numpy scipy matplotlib pandas tqdm lmfit numba ; fi
   - if [[ $version == latest ]]; then python -m pip install --upgrade numpy scipy matplotlib pandas tqdm lmfit ; fi
   - if [[ $version == minimum ]]; then pip install -r requirements.txt --force-reinstall ; fi
-  - pip install codecov flake8
+  - pip install codecov coverage flake8
   - python setup.py install
   - pip list
 
@@ -43,8 +43,8 @@ before_script:
 
 script:
   - cd pysprint/tests
-  - python -m unittest
-  - coverage run -m unittest
+  - coverage run --source=pysprint -m pytest
+  - coverage report -m
 
 after_success:
   - codecov
