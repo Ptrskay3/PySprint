@@ -235,7 +235,6 @@ def cff_method(
     """
     Phase modulated cosine function fit method.
 
-
     Parameters
     ----------
 
