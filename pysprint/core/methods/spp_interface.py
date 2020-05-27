@@ -1,6 +1,3 @@
-'''
-#TODO: implement @classmethod which handles pysprint.Dataset objects.
-'''
 import os
 
 import numpy as np
@@ -33,10 +30,13 @@ class SPPMethod:
             if not len(self.ifg_names) == len(self.ref_names):
                 raise DatasetError('Missmatching length of files.')
         self.idx = 0
-        self.skiprows = kwargs.get('skiprows', 8)
-        self.decimal = kwargs.get('decimal', ',')
-        self.sep = kwargs.get('sep', ';')
-        self.meta_len = kwargs.get('meta_len', 4)
+        self.skiprows = kwargs.pop('skiprows', 8)
+        self.decimal = kwargs.pop('decimal', ',')
+        self.sep = kwargs.pop('sep', ';')
+        self.meta_len = kwargs.pop('meta_len', 4)
+
+        if kwargs:
+            raise TypeError(f'invalid keyword argument:{kwargs}')
 
         self._delay = {}
         self._positions = {}

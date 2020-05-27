@@ -1,3 +1,7 @@
+import sys
+
+sys.modules['lmfit'] = None
+
 import unittest
 from unittest.mock import patch
 

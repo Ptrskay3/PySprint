@@ -191,6 +191,13 @@ def spp_method(delays, omegas, ref_point=0, fit_order=4):
     if fit_order not in range(5):
         raise ValueError('fit order must be in [1, 4]')
 
+    omegas = np.asarray(omegas).astype(np.float64)
+
+    delays = np.asarray(delays).astype(np.float64)
+
+    if not len(delays) == len(omegas):
+        raise ValueError(f'data shapes are different: {delays.shape} & {omegas.shape}')
+
     idx = np.argsort(omegas)
     omegas, delays = omegas[idx], delays[idx]
     omegas -= ref_point
@@ -218,7 +225,7 @@ def spp_method(delays, omegas, ref_point=0, fit_order=4):
         return omegas, delays, dispersion, dispersion_std, bf
 
     except Exception as e:
-        raise e
+        raise e # this should be deleted..
 
 
 def cff_method(
