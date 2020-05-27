@@ -148,6 +148,7 @@ class Dataset(DatasetBase):
 		'''
 		if engine not in ('cwt', 'normal'):
 			raise ValueError('Engine must be `cwt` or `normal`.')
+
 		if engine == 'cwt':
 			width = kwargs.pop('width', 35)
 			floor_thres = kwargs.pop('floor_thres', 0.05)
@@ -192,10 +193,14 @@ class Dataset(DatasetBase):
 			if not silent:
 				print('Prediction failed.\nSkipping.. ')
 			return
+
 		lowguess = 2*np.pi/np.abs(closest_val-second_closest_val)
 		highguess = 2*np.pi/np.abs(m_closest_val-m_second_closest_val)
-		if type(self).__name__ == 'CosFitMethod':
+
+		#  estimate the GD with that
+		if hasattr(self, 'params'):
 			self.params[3] = (lowguess + highguess) / 2
+
 		if not silent:
 			print(f'The predicted GD is ± {((lowguess + highguess) / 2):.5f} fs based on reference point of {reference_point}.')
 

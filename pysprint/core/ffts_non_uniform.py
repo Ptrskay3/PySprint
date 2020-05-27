@@ -77,7 +77,7 @@ def _compute_gaussian_grid(x, c, Mr, Msp, tau):
 
 
 def nuifft_times(gl, df=1):
-    """Compute the time range used in nufft for gl frequency bins"""
+    """Compute the time range used in nufft for gl time bins"""
     return df * np.arange(-(gl // 2), gl - (gl // 2))
 
 

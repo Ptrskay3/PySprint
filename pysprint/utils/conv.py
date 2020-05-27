@@ -1,3 +1,7 @@
+'''
+We might drop this.
+'''
+
 import pandas as pd
 
 __all__ = ['convert_df']

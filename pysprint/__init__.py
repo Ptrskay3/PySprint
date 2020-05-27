@@ -10,7 +10,7 @@ if run_from_ipython():
 	from matplotlib import pyplot as plt
 	plt.rcParams['figure.figsize'] = [15, 5]
 
-__version__ = '0.5.0'
+__version__ = '0.6.0'
 __author__ = 'Leéh Péter'
 
 from .api import *

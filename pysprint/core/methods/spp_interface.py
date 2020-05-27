@@ -113,13 +113,13 @@ class SPPMethod:
         position = np.concatenate([_ for _ in self._positions.values()]).ravel()
         np.savetxt(f'{filename}', np.transpose(np.array([position, delay])), delimiter=',')
 
-
     @staticmethod
+    @print_disp
     def calculate_from_raw(omegas, delays, reference_point, order):
         x, y, dispersion, dispersion_std, bf = spp_method(
             delays, omegas, ref_point=reference_point, fit_order=order
             )
-        return dispersion, dispersion_std
+        return dispersion, dispersion_std, ''
 
 
     @print_disp
