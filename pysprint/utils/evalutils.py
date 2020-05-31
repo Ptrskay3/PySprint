@@ -9,14 +9,14 @@ from pysprint.utils import pad_with_trailing_zeros
 __all__ = ['transform_cf_params_to_dispersion',
 'transform_lmfit_params_to_dispersion', 'plot_phase']
 
-def transform_cf_params_to_dispersion(popt, drop_first=True):
+def transform_cf_params_to_dispersion(popt, drop_first=True, dof=0):
     if drop_first:
         popt = popt[1:]
 
     _disp = popt
 
     for idx in range(len(popt)):
-        _disp[idx] = popt[idx] * factorial(idx)
+        _disp[idx] = popt[idx] * factorial(idx + dof)
 
     _disp = pad_with_trailing_zeros(_disp, 5)
     return _disp, np.zeros(5)

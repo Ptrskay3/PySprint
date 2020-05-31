@@ -461,7 +461,7 @@ def args_comp(x, y, ref_point=0, fit_order=5, show_graph=False):
             fit_report = result.fit_report()
         else:
             dispersion, dispersion_std = transform_cf_params_to_dispersion(
-                popt, drop_first=True
+                popt, drop_first=True, dof=1
                 )
             fit_report = ('To display detailed results,'
                           ' you must have `lmfit` installed.')
