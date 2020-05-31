@@ -46,7 +46,15 @@ PySprint requires at least [Python 3.6](https://www.python.org/downloads/) to ru
 $ pip install pysprint
 ```
 
-Requirements: numpy, scipy, matplotlib, pandas, lmfit (might be dropped), tqdm (might be dropped)
+Requirements: 
+* numpy
+* scipy
+* matplotlib 
+* pandas
+
+Optional packages: 
+* lmfit - for detailed curve fitting results
+* numba - to speed up non uniform FFT calculation
 
 Will be released on Anaconda Cloud after the testing is done.
 
@@ -54,7 +62,4 @@ Will be released on Anaconda Cloud after the testing is done.
 
 In progress.
 
-## GUI
-
-GUI support have been dropped, mostly due to lack of time.
 

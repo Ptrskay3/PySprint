@@ -11,7 +11,7 @@ if sys.version_info[:2] < (3, 6):
     raise RuntimeError("Python version >= 3.6 required.")
 
 MAJOR = 0
-MINOR = 6
+MINOR = 7
 MICRO = 0
 VERSION = f'{MAJOR}.{MINOR}.{MICRO}'
 
@@ -37,11 +37,9 @@ setup(
         'numpy>=1.16.6',
         'scipy', 
         'matplotlib',
-        'pandas', 
-        'lmfit',
-        'tqdm'
+        'pandas'
       ],
     extras_require={
-    'optional': ['numba']
+    'optional': ['numba', 'lmfit']
     }
 )

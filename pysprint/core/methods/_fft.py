@@ -1,12 +1,18 @@
+import os
+import contextlib
+import warnings
+
 import numpy as np
 from scipy.fftpack import fftshift
 
 from pysprint.core.bases.dataset import Dataset
 from pysprint.core.ffts_non_uniform import nuifft
 from pysprint.utils import print_disp
-from pysprint.core.evaluate import (fft_method,	cut_gaussian, ifft_method, 
-	 args_comp, gaussian_window)
+from pysprint.core.evaluate import (fft_method,	cut_gaussian, ifft_method,
+	args_comp, gaussian_window)
 from pysprint.utils.exceptions import *
+from pysprint.core.ffts_auto import _run
+from pysprint.core.phase import Phase
 
 __all__ = ['FFTMethod']
 
@@ -17,7 +23,7 @@ class FFTMethod(Dataset):
 	"""
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		#making sure it's not normalized
+		#  making sure it's not normalized
 		if self._is_normalized:
 			self.y_norm = self.y
 			self._is_normalized = False
@@ -26,6 +32,7 @@ class FFTMethod(Dataset):
 		self.std = None
 		self.window_order = None
 		self._ifft_called_first = False
+		self.phase = None
 
 	def shift(self, axis='x'):
 		"""
@@ -103,7 +110,7 @@ class FFTMethod(Dataset):
 
 		window_order: int, default is 6
 			Order of the gaussian curve.
-			If not even, it's incremented by 1 for safety reasons.
+			If not even, it's incremented by 1.
 		"""
 		self.at = at
 		self.fwhm = fwhm
@@ -157,10 +164,10 @@ class FFTMethod(Dataset):
 
 		Decorated with print_disp, so the results are immediately printed without explicitly saying so.
 
-		Currently the x-axis transformation is sloppy, because we cache the original x axis and not transforming it
-		backwards. In addition we need to keep track of interpolation and zero-padding too.
-		Currently the transforms are correct only if first ifft was used.
-		For now it's doing okay: giving good results. 
+		Currently the x-axis transformation is sloppy, because we cache the 
+		original x axis and not transforming it	backwards. In addition we need to keep track 
+		of interpolation and zero-padding too. Currently the transforms are correct only if 
+		first ifft was used. For now it's doing okay: giving good results. 
 		For consistency we should still implement that a better way later.
 		"""
 		dispersion, dispersion_std, fit_report = args_comp(
@@ -168,3 +175,32 @@ class FFTMethod(Dataset):
 			)
 		self._dispersion_array = dispersion
 		return dispersion, dispersion_std, fit_report
+
+
+	def autorun(
+		self, reference_point=None, order=None, *, enable_printing=True,
+		skip_domain_check=False, only_phase=False, show_graph=True,
+		usenifft=False
+		):
+
+		if not reference_point or not order:
+			only_phase = True
+
+		if not enable_printing:
+
+			with open(os.devnull, "w") as g, contextlib.redirect_stdout(g):
+				_run(self, skip_domain_check=skip_domain_check, show_graph=show_graph, usenifft=usenifft)
+			if only_phase:
+				y = np.unwrap(np.angle(self.y), axis=0)
+				self.phase = Phase(self.x, y)
+				self.phase.plot()
+				return self.x, y
+			self.calculate(reference_point=reference_point, order=order, show_graph=True)
+		else:
+			_run(self, skip_domain_check=skip_domain_check, show_graph=show_graph, usenifft=usenifft)
+			if only_phase:
+				y = np.unwrap(np.angle(self.y), axis=0)
+				self.phase = Phase(self.x, y)
+				self.phase.plot()
+				return self.x, y
+			self.calculate(reference_point=reference_point, order=order, show_graph=True)

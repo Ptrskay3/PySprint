@@ -442,19 +442,31 @@ def args_comp(x, y, ref_point=0, fit_order=5, show_graph=False):
 
     _function = _fit_config[fit_order]
 
-    fitmodel = Model(_function)
-    pars = fitmodel.make_params(
-        **{f'b{i}': 1 for i in range(fit_order + 1)}
-        )
-    result = fitmodel.fit(y, x=x, params=pars)
+
+
+    if _has_lmfit:
+        fitmodel = Model(_function)
+        pars = fitmodel.make_params(
+            **{f'b{i}': 1 for i in range(fit_order + 1)}
+            )
+        result = fitmodel.fit(y, x=x, params=pars)
+    else:
+        popt, pcov = curve_fit(_function, x, y, maxfev=8000)
 
     try:
-        dispersion, dispersion_std = transform_lmfit_params_to_dispersion(
-            *unpack_lmfit(result.params.items()), drop_first=True, dof=1
-            )
-        fit_report = result.fit_report()
+        if _has_lmfit:
+            dispersion, dispersion_std = transform_lmfit_params_to_dispersion(
+                *unpack_lmfit(result.params.items()), drop_first=True, dof=1
+                )
+            fit_report = result.fit_report()
+        else:
+            dispersion, dispersion_std = transform_cf_params_to_dispersion(
+                popt, drop_first=True
+                )
+            fit_report = ('To display detailed results,'
+                          ' you must have `lmfit` installed.')
         if show_graph:
             plot_phase(x, y, result.best_fit, window_title='Phase')
-        return dispersion, dispersion_std, fit_report
+        return -dispersion, dispersion_std, fit_report
     except Exception as e:
         raise e

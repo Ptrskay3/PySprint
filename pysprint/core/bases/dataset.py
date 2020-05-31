@@ -318,7 +318,7 @@ class Dataset(DatasetBase):
 
 		Metadata extracted from file
 		----------------------------
-		{json.dumps(self.meta, indent=4)}''')
+		{json.dumps(self.meta, indent=8)}''')
 		return string
 
 	@property

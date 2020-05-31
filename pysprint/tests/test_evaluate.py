@@ -96,7 +96,7 @@ class TestEvaluate(unittest.TestCase):
 		f.apply_window()
 		f.fft()
 		d, _, _ = f.calculate(order = 2, reference_point = 2.4)
-		np.testing.assert_array_almost_equal(d, [-1500.01, -1999.79], decimal=2)
+		np.testing.assert_array_almost_equal(d, [1500.01, 1999.79], decimal=2)
 
 	def test_ffts_advanced1(self):
 		g = Generator(2,2.8,2.4, delay = 1500, GD = 200, pulse_width = 25, resolution = 0.01)
@@ -108,7 +108,7 @@ class TestEvaluate(unittest.TestCase):
 		f.apply_window()
 		f.fft()
 		d, _, _ = f.calculate(order = 1, reference_point = 2.4)
-		np.testing.assert_array_almost_equal(d, [-1699.99], decimal=2)
+		np.testing.assert_array_almost_equal(d, [1699.99], decimal=2)
 
 	def test_ffts_advanced3(self):
 		g = Generator(2,2.8,2.4, delay = 1500, TOD = 40000, pulse_width = 25, resolution = 0.01)
@@ -120,7 +120,7 @@ class TestEvaluate(unittest.TestCase):
 		f.apply_window()
 		f.fft()
 		d, _, _ = f.calculate(order = 3, reference_point = 2.4)
-		np.testing.assert_array_almost_equal(d, [-1500.03, -0.03, -39996.60], decimal=2)
+		np.testing.assert_array_almost_equal(d, [1500.03, 0.03, 39996.60], decimal=2)
 
 
 	def test_ffts_advanced4(self):
@@ -133,7 +133,7 @@ class TestEvaluate(unittest.TestCase):
 		f.apply_window()
 		f.fft()
 		d, _, _ = f.calculate(order = 4, reference_point = 2.4)
-		np.testing.assert_array_almost_equal(d, [-1500.00, -1999.95, 0.21, 99995.00], decimal=1)
+		np.testing.assert_array_almost_equal(d, [1500.00, 1999.95, -0.21, -99995.00], decimal=1)
 
 	def test_ffts_advanced5(self):
 		g = Generator(2,2.8,2.4, delay = 1500, QOD = 900000, pulse_width = 25, resolution = 0.01)
@@ -145,7 +145,7 @@ class TestEvaluate(unittest.TestCase):
 		f.apply_window()
 		f.fft()
 		d, _, _ = f.calculate(order = 5, reference_point = 2.4)
-		np.testing.assert_array_almost_equal(d, [-1499.96, 0.14, -7.88, -15.99, -898920.79], decimal=1)
+		np.testing.assert_array_almost_equal(d, [1499.96, -0.14, 7.88, 15.99, 898920.79], decimal=1)
 
 	def test_windowing(self):
 		a,b = np.loadtxt('test_window.txt', unpack = True, delimiter = ',')

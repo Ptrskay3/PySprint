@@ -3,7 +3,6 @@ from math import factorial
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-from tqdm import tqdm
 
 from pysprint.utils import find_nearest
 from pysprint.core.functions import cos_fit1, cos_fit2, cos_fit3, cos_fit4, cos_fit5
@@ -177,9 +176,10 @@ class FitOptimizer:
 		self, r_extend_by, r_threshold,
 		max_tries=5000, show_endpoint=True
 		):
-		pbar = tqdm(total=max_tries)
+
 		if not self._init_set:
 			raise ValueError('Set the initial conditions.')
+		print('This action might take a little time..')
 		self._fit()
 		while self._fit_goodness() > r_threshold:
 			
@@ -190,10 +190,7 @@ class FitOptimizer:
 			self._fit()
 			self.counter += 1
 			self._step_up_func()
-			pbar.update(1)
 			if self._fit() is True:
-				pbar.n = 100
-				pbar.close()
 				if show_endpoint:
 					self.update_plot()
 					# self.figure.savefig(f'{self.counter}.eps')
@@ -204,7 +201,6 @@ class FitOptimizer:
 			if self.counter == max_tries:
 				if show_endpoint:
 					self.update_plot()
-				pbar.close()
 				print(f'''Max tries ({max_tries}) reached.. try another initial params''')
 				return np.zeros_like(self.popt)
 
@@ -212,10 +208,8 @@ class FitOptimizer:
 			self._fit()
 			# self._finetune()
 			self.counter += 1
-			pbar.update(1)
 			if self.counter == max_tries:
 				if show_endpoint:
 					self.update_plot()
-				pbar.close()
 				print(f'''\nMax tries ({max_tries}) reached.. try another initial params''')
 				return np.zeros_like(self.popt)
