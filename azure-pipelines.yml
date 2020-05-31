@@ -27,7 +27,7 @@ steps:
 - script: |
     python -m pip install --upgrade pip
     pip install -r requirements.txt
-    pip install flake8 coverage codecov pytest
+    pip install lmfit numba flake8 coverage codecov pytest
     python setup.py install
   displayName: 'Install dependencies'
 
