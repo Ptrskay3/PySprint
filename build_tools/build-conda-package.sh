@@ -1,11 +1,11 @@
 #!/bin/bash
 
 pkg='pysprint'
-array=( 3.6 3.7 3.8 )
+array=( 3.6 3.7 )
 
 echo "Building conda package ..."
 cd ~
-conda skeleton pypi $pkg
+conda skeleton pypi --version 0.8.0 $pkg
 cd $pkg
 wget https://conda.io/docs/_downloads/build1.sh
 wget https://conda.io/docs/_downloads/bld.bat
