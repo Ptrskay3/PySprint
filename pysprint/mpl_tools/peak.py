@@ -97,7 +97,9 @@ class EditPeak(object):
             tm.get_tool('Toggle recording'), "toolgroup"
             )
         self.my_select_button = tm.get_tool('Toggle recording')
-        plt.show()
+
+        plt.show(block=True)
+
 
     def on_clicked(self, event):
         """ Function to record and discard points on plot."""

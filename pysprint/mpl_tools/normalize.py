@@ -59,7 +59,8 @@ class DraggableEnvelope:
             )
         self.my_select_button = tm.get_tool('Toggle recording')
         plt.grid()
-        plt.show()
+        plt.show(block=True)
+
 
     def button_release_callback(self, event):
         '''whenever a mouse button is released'''

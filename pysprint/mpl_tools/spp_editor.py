@@ -8,11 +8,13 @@ from matplotlib import pyplot as plt
 from matplotlib.widgets import TextBox
 
 
+
 class SPPEditor:
 
-    epsilon = 5  # max absolute pixel distance to count as a hit
+    epsilon = 7  # max absolute pixel distance to count as a hit
 
     def __init__(self, x, y):
+        plt.ion()
         self.fig, self.ax = plt.subplots()
         self.fig.set_figheight(6)
         self.fig.set_figwidth(10)
@@ -34,7 +36,9 @@ class SPPEditor:
         self.text_box = TextBox(self.axbox, 'Delay [fs]', initial='0')
         self.text_box.on_submit(self.submit)
         self.text_box.on_text_change(self.text_change)
-        plt.show()
+
+        plt.show(block=True)
+
 
     def submit(self, delay):
         try:

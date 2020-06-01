@@ -5,11 +5,8 @@ array=( 3.6 3.7 )
 
 echo "Building conda package ..."
 cd ~
-conda skeleton pypi --version 0.8.0 $pkg
+conda skeleton pypi --version 0.10.0 $pkg
 cd $pkg
-wget https://conda.io/docs/_downloads/build1.sh
-wget https://conda.io/docs/_downloads/bld.bat
-cd ~
 
 for i in "${array[@]}"
 do

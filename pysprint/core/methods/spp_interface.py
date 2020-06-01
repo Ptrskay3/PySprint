@@ -136,7 +136,9 @@ class SPPMethod:
             except Exception as e:
                 print(e)
             plt.grid()
-            plt.show()
+
+            plt.show(block=True)
+
         return dispersion, dispersion_std, bf
 
     @property

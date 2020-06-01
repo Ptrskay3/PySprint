@@ -37,11 +37,7 @@ def calc_envelope(x, ind, mode='u'):
     return envelope, peak, loc
 
 def run_from_ipython():
-    try:
-        __IPYTHON__
-        return True
-    except NameError:
-        return False
+    return hasattr(__builtins__,'__IPYTHON__')
 
 def get_closest(xValue, xArray, yArray):
     idx = (np.abs(xArray - xValue)).argmin()
