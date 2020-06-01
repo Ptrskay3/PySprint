@@ -11,7 +11,8 @@
 | | |
 |-|-|
 |__Name__| PySprint|
-|__Version__| [![PyPI version](https://badge.fury.io/py/pysprint.svg)](https://badge.fury.io/py/pysprint) |
+|__PyPI package__| [![PyPI version](https://badge.fury.io/py/pysprint.svg)](https://badge.fury.io/py/pysprint) |
+|__Anaconda package__| [![Anaconda-Server Badge](https://anaconda.org/ptrskay/pysprint/badges/version.svg)](https://anaconda.org/ptrskay/pysprint) |
 |__Development status__ | Pre-Alpha |
 |__License__| [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) |
 
@@ -46,6 +47,11 @@ PySprint requires at least [Python 3.6](https://www.python.org/downloads/) to ru
 $ pip install pysprint
 ```
 
+Install on Anaconda with:
+```sh
+conda install -c ptrskay pysprint -c conda-forge
+```
+
 Requirements: 
 * numpy
 * scipy
@@ -56,7 +62,6 @@ Optional packages:
 * lmfit - for detailed curve fitting results
 * numba - to speed up non uniform FFT calculation
 
-Will be released on Anaconda Cloud after the testing is done.
 
 ## Documentation
 

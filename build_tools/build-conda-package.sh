@@ -7,6 +7,7 @@ echo "Building conda package ..."
 cd ~
 conda skeleton pypi --version 0.10.0 $pkg
 cd $pkg
+cd ~
 
 for i in "${array[@]}"
 do
