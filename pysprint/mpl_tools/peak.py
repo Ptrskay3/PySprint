@@ -1,7 +1,3 @@
-import warnings
-
-warnings.filterwarnings("ignore", category=UserWarning)
-
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt

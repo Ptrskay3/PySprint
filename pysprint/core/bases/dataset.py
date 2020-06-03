@@ -318,7 +318,7 @@ class Dataset(DatasetBase):
 
 		Metadata extracted from file
 		----------------------------
-		{json.dumps(self.meta, indent=8)}''')
+		{json.dumps(self.meta, indent=4)}''')
 		return string
 
 	@property
@@ -551,6 +551,8 @@ class Dataset(DatasetBase):
 
 
 	def open_SPP_panel(self):
+		if run_from_ipython():
+			raise NotebookError('To enable interactive plots, use `pysprint.setup_notebook()`.')
 		_spp = SPPEditor(self.x, self.y_norm)
 		self.delay, self.positions = _spp.get_data()
 

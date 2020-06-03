@@ -36,7 +36,7 @@ class MinMaxMethod(Dataset):
 		Currently this function is disabled when running it from IPython.
 		"""
 		if run_from_ipython():
-			return '''It seems you run this code in IPython. Interactive plotting is not yet supported. Consider running it in the regular console.'''
+			return '''It seems you run this code in Jupyter Notebook. Use `pysprint.setup_notebook()` to enable interactive plots.'''
 		engines = ('cwt', 'normal', 'slope')
 		if engine not in engines:
 			raise ValueError(f'Engine must be in {str(engines)}')
@@ -94,7 +94,7 @@ class MinMaxMethod(Dataset):
 		self.xmin = _editpeak.get_dat[0][:len(_editpeak.get_dat[0])//2]
 		self.xmax = _editpeak.get_dat[0][len(_editpeak.get_dat[0])//2:] 
 		print(f'In total {len(_editpeak.get_dat[0])} extremal points were recorded.')
-		return _editpeak.get_dat[0]
+		return _editpeak.get_dat[0] # we should return None
 
 	@print_disp
 	def calculate(self, reference_point, order, show_graph=False):

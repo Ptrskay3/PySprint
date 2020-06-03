@@ -37,7 +37,16 @@ def calc_envelope(x, ind, mode='u'):
     return envelope, peak, loc
 
 def run_from_ipython():
-    return hasattr(__builtins__,'__IPYTHON__')
+    '''
+    Detect explicitly if code is run inside Jupyter.
+    '''
+    try:
+        __IPYTHON__
+        if any('SPYDER' in name for name in os.environ):
+            return False
+        return True
+    except NameError:
+        return False
 
 def get_closest(xValue, xArray, yArray):
     idx = (np.abs(xArray - xValue)).argmin()

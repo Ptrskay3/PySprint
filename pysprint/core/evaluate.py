@@ -134,25 +134,33 @@ def min_max_method(
     else:
         popt, pcov = curve_fit(_function, full_x, full_y, maxfev=8000)
 
-    try:
-        if _has_lmfit:
-            dispersion, dispersion_std = transform_lmfit_params_to_dispersion(
-                *unpack_lmfit(result.params.items()), drop_first=True, dof=1
-                )
-            fit_report = result.fit_report()
-        else:
-            dispersion, dispersion_std = transform_cf_params_to_dispersion(
-                popt, drop_first=True
-                )
-            fit_report = ('To display detailed results,'
-                          ' you must have `lmfit` installed.')
-        if show_graph:
+
+    if _has_lmfit:
+        dispersion, dispersion_std = transform_lmfit_params_to_dispersion(
+            *unpack_lmfit(result.params.items()), drop_first=True, dof=1
+            )
+        fit_report = result.fit_report()
+    else:
+        dispersion, dispersion_std = transform_cf_params_to_dispersion(
+            popt, drop_first=True
+            )
+        fit_report = ('To display detailed results,'
+                      ' you must have `lmfit` installed.')
+    if show_graph:
+        try:
             plot_phase(full_x, full_y, bf=result.best_fit,
-                       bf_fallback=_function(full_x, *popt),
-                       window_title='Min-max method fitted')
-        return dispersion, dispersion_std, fit_report
-    except Exception as e:
-        raise e
+                   bf_fallback=_function(full_x, *popt),
+                   window_title='Min-max method fitted')
+        except UnboundLocalError:
+            class result:
+                def best_fit():
+                    return None
+            plot_phase(full_x, full_y, bf=result.best_fit,
+                   bf_fallback=_function(full_x, *popt),
+                   window_title='Min-max method fitted')
+
+    return dispersion, dispersion_std, fit_report
+
 
 
 def spp_method(delays, omegas, ref_point=0, fit_order=4):
@@ -453,20 +461,25 @@ def args_comp(x, y, ref_point=0, fit_order=5, show_graph=False):
     else:
         popt, pcov = curve_fit(_function, x, y, maxfev=8000)
 
-    try:
-        if _has_lmfit:
-            dispersion, dispersion_std = transform_lmfit_params_to_dispersion(
-                *unpack_lmfit(result.params.items()), drop_first=True, dof=1
-                )
-            fit_report = result.fit_report()
-        else:
-            dispersion, dispersion_std = transform_cf_params_to_dispersion(
-                popt, drop_first=True, dof=1
-                )
-            fit_report = ('To display detailed results,'
-                          ' you must have `lmfit` installed.')
-        if show_graph:
-            plot_phase(x, y, result.best_fit, window_title='Phase')
-        return -dispersion, dispersion_std, fit_report
-    except Exception as e:
-        raise e
+
+    if _has_lmfit:
+        dispersion, dispersion_std = transform_lmfit_params_to_dispersion(
+            *unpack_lmfit(result.params.items()), drop_first=True, dof=1
+            )
+        fit_report = result.fit_report()
+    else:
+        dispersion, dispersion_std = transform_cf_params_to_dispersion(
+            popt, drop_first=True, dof=1
+            )
+        fit_report = ('To display detailed results,'
+                      ' you must have `lmfit` installed.')
+    if show_graph:
+        try:
+            plot_phase(x, y, result.best_fit, bf_fallback=_function(x, *popt), window_title='Phase')
+        except UnboundLocalError:
+            class result:
+                def best_fit():
+                    return None
+            plot_phase(x, y, result.best_fit, bf_fallback=_function(x, *popt), window_title='Phase')
+
+    return -dispersion, dispersion_std, fit_report
