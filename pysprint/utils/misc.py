@@ -5,11 +5,20 @@ import numpy as np
 from scipy.interpolate import interp1d
 import scipy.stats as st
 
-__all__ = ['unpack_lmfit', 'find_nearest',
-           '_handle_input', 'print_disp', 'fourier_interpolate',
-           'between', 'get_closest', 'run_from_ipython',
-           'calc_envelope', 'measurement', '_maybe_increase_before_cwt',
-           'pad_with_trailing_zeros']
+__all__ = [
+    "unpack_lmfit",
+    "find_nearest",
+    "_handle_input",
+    "print_disp",
+    "fourier_interpolate",
+    "between",
+    "get_closest",
+    "run_from_ipython",
+    "calc_envelope",
+    "measurement",
+    "_maybe_increase_before_cwt",
+    "pad_with_trailing_zeros",
+]
 
 
 def _maybe_increase_before_cwt(y, tolerance=0.05):
@@ -22,42 +31,47 @@ def _maybe_increase_before_cwt(y, tolerance=0.05):
     return True
 
 
-def calc_envelope(x, ind, mode='u'):
-    '''Source: https://stackoverflow.com/a/39662343/11751294
-    '''
+def calc_envelope(x, ind, mode="u"):
+    """Source: https://stackoverflow.com/a/39662343/11751294
+    """
     x_abs = np.abs(x)
-    if mode == 'u':
+    if mode == "u":
         loc = np.where(np.diff(np.sign(np.diff(x_abs))) < 0)[0] + 1
-    elif mode == 'l':
+    elif mode == "l":
         loc = np.where(np.diff(np.sign(np.diff(x_abs))) > 0)[0] + 1
     else:
-        raise ValueError('mode must be u or l.')
+        raise ValueError("mode must be u or l.")
     peak = x_abs[loc]
     envelope = np.interp(ind, loc, peak)
     return envelope, peak, loc
 
+
 def run_from_ipython():
-    '''
+    """
     Detect explicitly if code is run inside Jupyter.
-    '''
+    """
     try:
         __IPYTHON__
-        if any('SPYDER' in name for name in os.environ):
+        if any("SPYDER" in name for name in os.environ):
             return False
         return True
     except NameError:
         return False
+
 
 def get_closest(xValue, xArray, yArray):
     idx = (np.abs(xArray - xValue)).argmin()
     value = xArray[idx]
     return value, yArray[idx], idx
 
+
 def between(val, except_around):
     if except_around is None:
         return False
     elif len(except_around) != 2:
-        raise ValueError(f'Invalid interval. Try [start, end] instead of {except_around}')
+        raise ValueError(
+            f"Invalid interval. Try [start, end] instead of {except_around}"
+        )
     else:
         lower = float(min(except_around))
         upper = float(max(except_around))
@@ -117,9 +131,11 @@ def measurement(array, confidence=0.95, silent=False):
 
     """
     mean = np.mean(array)
-    conf = st.t.interval(confidence, len(array)-1, loc=mean, scale=st.sem(array))
+    conf = st.t.interval(
+        confidence, len(array) - 1, loc=mean, scale=st.sem(array)
+    )
     if not silent:
-        print(f'{mean:5f} ± {(mean-conf[0]):5f}')
+        print(f"{mean:5f} ± {(mean-conf[0]):5f}")
     return mean, conf
 
 
@@ -155,43 +171,47 @@ def _handle_input(x, y, ref, sam):
 
     """
     if len(x) == 0:
-        raise ValueError('No values for x.')
+        raise ValueError("No values for x.")
 
     if len(y) == 0:
-        raise ValueError('No values for y.')
+        raise ValueError("No values for y.")
 
     if (len(x) > 0) and (len(ref) > 0) and (len(sam) > 0):
         y_data = (y - ref - sam) / (2 * np.sqrt(ref * sam))
     elif (len(ref) == 0) or (len(sam) == 0):
         y_data = y
     else:
-        raise TypeError('Input types are wrong.\n')
-    return np.asarray(x),  np.asarray(y_data)
+        raise TypeError("Input types are wrong.\n")
+    return np.asarray(x), np.asarray(y_data)
 
 
 def print_disp(f):
     @wraps(f)
     def wrapping(*args, **kwargs):
         disp, disp_std, st = f(*args, **kwargs)
-        labels = ('GD', 'GDD','TOD', 'FOD', 'QOD', 'SOD')
-        disp = np.trim_zeros(disp, 'b')
-        disp_std = disp_std[:len(disp)]
-        for i, (label, disp_item, disp_std_item) in enumerate(zip(labels, disp, disp_std)):
-            print(f'{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i+1}')
+        labels = ("GD", "GDD", "TOD", "FOD", "QOD", "SOD")
+        disp = np.trim_zeros(disp, "b")
+        disp_std = disp_std[: len(disp)]
+        for i, (label, disp_item, disp_std_item) in enumerate(
+            zip(labels, disp, disp_std)
+        ):
+            print(f"{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i+1}")
         return disp, disp_std, st
+
     return wrapping
 
 
 def fourier_interpolate(x, y):
-    ''' Simple linear interpolation for FFTs'''
+    """ Simple linear interpolation for FFTs"""
     xs = np.linspace(x[0], x[-1], len(x))
-    intp = interp1d(x, y, kind='linear', fill_value='extrapolate')
+    intp = interp1d(x, y, kind="linear", fill_value="extrapolate")
     ys = intp(xs)
     return xs, ys
 
+
 def pad_with_trailing_zeros(array, shape):
-    '''
+    """
     Pad an array with trailing zeros to be the desired shape
-    '''
+    """
     c = shape - len(array)
-    return np.pad(array, pad_width=(0, c), mode='constant')
+    return np.pad(array, pad_width=(0, c), mode="constant")

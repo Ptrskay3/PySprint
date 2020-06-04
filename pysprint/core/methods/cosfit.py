@@ -8,71 +8,71 @@ from pysprint.utils import print_disp
 from pysprint.core.evaluate import cff_method
 
 
-__all__ = ['CosFitMethod']
+__all__ = ["CosFitMethod"]
 
 
 class CosFitMethod(Dataset):
-	"""
+    """
 	Basic interface for the Cosine Function Fit Method.
 	"""
-	def __init__(self, *args, **kwargs):
-		super().__init__(*args, **kwargs)
-		self.params = [1, 1, 1, 1, 1, 1, 1, 1]
-		self.fit = None
-		self.mt = 8000
-		self.f = None
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.params = [1, 1, 1, 1, 1, 1, 1, 1]
+        self.fit = None
+        self.mt = 8000
+        self.f = None
 
-	def set_max_tries(self, value):
-		"""
+    def set_max_tries(self, value):
+        """
 		Overwrite the default scipy maximum try setting to fit the curve.
 		"""
-		self.mt = value
+        self.mt = value
 
-	def adjust_offset(self, value):
-		"""
+    def adjust_offset(self, value):
+        """
 		Initial guess for offset
 		"""
-		self.params[0] = value
+        self.params[0] = value
 
-	def adjust_amplitude(self, value):
-		"""
+    def adjust_amplitude(self, value):
+        """
 		Initial guess for amplitude
 		"""
-		self.params[1] = value
+        self.params[1] = value
 
-	def guess_GD(self, value):
-		"""
+    def guess_GD(self, value):
+        """
 		Initial guess for GD in fs
 		"""
-		self.params[3] = value
+        self.params[3] = value
 
-	def guess_GDD(self, value):
-		"""
+    def guess_GDD(self, value):
+        """
 		Initial guess for GDD in fs^2
 		"""
-		self.params[4] = value / 2
+        self.params[4] = value / 2
 
-	def guess_TOD(self, value):
-		"""
+    def guess_TOD(self, value):
+        """
 		Initial guess for TOD in fs^3
 		"""
-		self.params[5] = value / 6
+        self.params[5] = value / 6
 
-	def guess_FOD(self, value):
-		"""
+    def guess_FOD(self, value):
+        """
 		Initial guess for FOD in fs^4
 		"""
-		self.params[6] = value / 24
+        self.params[6] = value / 24
 
-	def guess_QOD(self, value):
-		"""
+    def guess_QOD(self, value):
+        """
 		Initial guess for QOD in fs^5
 		"""
-		self.params[7] = value / 120
+        self.params[7] = value / 120
 
-	def set_max_order(self, order):
-		"""
+    def set_max_order(self, order):
+        """
 		Sets the maximum order of dispersion to look for.
 		Should be called after guessing the initial parameters.
 
@@ -82,19 +82,23 @@ class CosFitMethod(Dataset):
 		order: int
 			maximum order of dispersion to look for. Must be in [1, 5]
 		"""
-		if order > 5 or order < 1:
-			print(f'Order should be an in integer from [1,5], currently {order} is given')
-		try:
-			int(order)
-		except ValueError:
-			print(f'Order should be an in integer from [1,5], currently {order} is given')
-		order = 6 - order
-		for i in range(1, order):
-			self.params[-i] = 0
+        if order > 5 or order < 1:
+            print(
+                f"Order should be an in integer from [1,5], currently {order} is given"
+            )
+        try:
+            int(order)
+        except ValueError:
+            print(
+                f"Order should be an in integer from [1,5], currently {order} is given"
+            )
+        order = 6 - order
+        for i in range(1, order):
+            self.params[-i] = 0
 
-	@print_disp
-	def calculate(self, reference_point):
-		""" 
+    @print_disp
+    def calculate(self, reference_point):
+        """ 
 		Cosine fit's calculate function.
 
 		Parameters:
@@ -121,35 +125,56 @@ class CosFitMethod(Dataset):
 
 		Decorated with print_disp, so the results are immediately printed without explicitly saying so.
 		"""
-		dispersion, self.fit = cff_method(self.x, self.y, self.ref, self.sam, 
-			ref_point=reference_point, p0=self.params, maxtries=self.mt)
-		dispersion = list(dispersion)
-		while len(dispersion) < 5:
-			dispersion.append(0)
-		return dispersion, [0, 0, 0, 0, 0], 'Fit report for CFF not supported yet.'
+        dispersion, self.fit = cff_method(
+            self.x,
+            self.y,
+            self.ref,
+            self.sam,
+            ref_point=reference_point,
+            p0=self.params,
+            maxtries=self.mt,
+        )
+        dispersion = list(dispersion)
+        while len(dispersion) < 5:
+            dispersion.append(0)
+        return (
+            dispersion,
+            [0, 0, 0, 0, 0],
+            "Fit report for CFF not supported yet.",
+        )
 
-	def plot_result(self):
-		"""
+    def plot_result(self):
+        """
 		If the fitting happened, draws the fitted curve on the original dataset.
 		Also prints the coeffitient of determination of the fit (a.k.a. r^2).
 		"""
-		try:
-			residuals = self.y_norm - self.fit
-			ss_res = np.sum(residuals**2)
-			ss_tot = np.sum((self.y_norm - np.mean(self.y_norm))**2)
-			print('r^2 = ' + str(1 - (ss_res / ss_tot)))
-		except Exception:
-			pass
-		if self.fit is not None:
-			self.plotwidget.plot(self.x, self.fit, 'k--', label='fit', zorder=99)
-			self.plotwidget.legend()
-			self.show()
-		else:
-			self.show()
+        try:
+            residuals = self.y_norm - self.fit
+            ss_res = np.sum(residuals ** 2)
+            ss_tot = np.sum((self.y_norm - np.mean(self.y_norm)) ** 2)
+            print("r^2 = " + str(1 - (ss_res / ss_tot)))
+        except Exception:
+            pass
+        if self.fit is not None:
+            self.plotwidget.plot(
+                self.x, self.fit, "k--", label="fit", zorder=99
+            )
+            self.plotwidget.legend()
+            self.show()
+        else:
+            self.show()
 
-	def optimizer(self, reference_point, order=3, initial_region_ratio=0.1,
-		extend_by=0.1, coef_threshold=0.3, max_tries=5000, show_endpoint=True):
-		"""
+    def optimizer(
+        self,
+        reference_point,
+        order=3,
+        initial_region_ratio=0.1,
+        extend_by=0.1,
+        coef_threshold=0.3,
+        max_tries=5000,
+        show_endpoint=True,
+    ):
+        """
 		Cosine fit optimizer. It's based on adding new terms to fit function successively
 		until we reach the max_order.
 
@@ -195,14 +220,25 @@ class CosFitMethod(Dataset):
 		set a higher value than 0.6.
 		"""
 
-		x, y, ref, sam = self._safe_cast()
-		self.f = FitOptimizer(x, y, ref, sam, reference_point=reference_point,
-		max_order=order)
-		self.f.set_initial_region(initial_region_ratio)
-		self.f.set_final_guess(GD=self.params[3], GDD=self.params[4], TOD=self.params[5],
-		FOD=self.params[6], QOD=self.params[7]) # we can pass it higher params safely, they are ignored.
-		disp = self.f.run(extend_by, coef_threshold, max_tries=max_tries, show_endpoint=show_endpoint)
-		disp = disp[3:]
-		retval = [disp[i]*factorial(i+1) for i in range(len(disp))]
-		self._dispersion_array = retval
-		return retval
+        x, y, ref, sam = self._safe_cast()
+        self.f = FitOptimizer(
+            x, y, ref, sam, reference_point=reference_point, max_order=order
+        )
+        self.f.set_initial_region(initial_region_ratio)
+        self.f.set_final_guess(
+            GD=self.params[3],
+            GDD=self.params[4],
+            TOD=self.params[5],
+            FOD=self.params[6],
+            QOD=self.params[7],
+        )  # we can pass it higher params safely, they are ignored.
+        disp = self.f.run(
+            extend_by,
+            coef_threshold,
+            max_tries=max_tries,
+            show_endpoint=show_endpoint,
+        )
+        disp = disp[3:]
+        retval = [disp[i] * factorial(i + 1) for i in range(len(disp))]
+        self._dispersion_array = retval
+        return retval

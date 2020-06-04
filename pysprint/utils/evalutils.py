@@ -6,8 +6,12 @@ import matplotlib.pyplot as plt
 from pysprint.utils import pad_with_trailing_zeros
 
 
-__all__ = ['transform_cf_params_to_dispersion',
-'transform_lmfit_params_to_dispersion', 'plot_phase']
+__all__ = [
+    "transform_cf_params_to_dispersion",
+    "transform_lmfit_params_to_dispersion",
+    "plot_phase",
+]
+
 
 def transform_cf_params_to_dispersion(popt, drop_first=True, dof=0):
     if drop_first:
@@ -22,8 +26,9 @@ def transform_cf_params_to_dispersion(popt, drop_first=True, dof=0):
     return _disp, np.zeros(5)
 
 
-
-def transform_lmfit_params_to_dispersion(popt, popt_std, drop_first=True, dof=1):
+def transform_lmfit_params_to_dispersion(
+    popt, popt_std, drop_first=True, dof=1
+):
     if drop_first:
         popt, popt_std = popt[1:], popt_std[1:]
 
@@ -40,7 +45,6 @@ def transform_lmfit_params_to_dispersion(popt, popt_std, drop_first=True, dof=1)
     return _disp, _disp_std
 
 
-
 def plot_phase(
     x,
     y,
@@ -50,24 +54,30 @@ def plot_phase(
     figsize=(7, 7),
     window_title=None,
     show_labels=True,
-    dataset_color='k',
-    fit_color='r',
+    dataset_color="k",
+    fit_color="r",
     grid=True
-    ):
+):
 
     if window_title is None:
-        window_title = 'Phase'
+        window_title = "Phase"
 
     fig = plt.figure(figsize=figsize)
     fig.canvas.set_window_title(window_title)
-    plt.plot(x, y, c=dataset_color, label='Dataset')
+    plt.plot(x, y, c=dataset_color, label="Dataset")
     try:
-        plt.plot(x, bf, c=fit_color, linestyle='dashed', label='Best fit')
+        plt.plot(x, bf, c=fit_color, linestyle="dashed", label="Best fit")
     except ValueError:
         if bf_fallback is None:
             pass
         else:
-            plt.plot(x, bf_fallback, c=fit_color, linestyle='dashed', label='Best fit')
+            plt.plot(
+                x,
+                bf_fallback,
+                c=fit_color,
+                linestyle="dashed",
+                label="Best fit",
+            )
     if show_labels:
         plt.legend()
     if grid:

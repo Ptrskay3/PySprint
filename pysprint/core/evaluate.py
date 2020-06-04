@@ -8,47 +8,58 @@ from scipy.signal import argrelextrema
 
 try:
     from lmfit import Model
+
     _has_lmfit = True
 except ImportError:
     _has_lmfit = False
 
 
 from pysprint.utils import (
-    find_nearest, _handle_input, unpack_lmfit, fourier_interpolate,
-    transform_cf_params_to_dispersion, transform_lmfit_params_to_dispersion,
-    plot_phase
-    )
+    find_nearest,
+    _handle_input,
+    unpack_lmfit,
+    fourier_interpolate,
+    transform_cf_params_to_dispersion,
+    transform_lmfit_params_to_dispersion,
+    plot_phase,
+)
 
 from pysprint.core.functions import *
 
 
 __all__ = [
-    'min_max_method', 'spp_method', 'cff_method', 'fft_method',
-    'cut_gaussian', 'ifft_method', 'args_comp'
-    ]
+    "min_max_method",
+    "spp_method",
+    "cff_method",
+    "fft_method",
+    "cut_gaussian",
+    "ifft_method",
+    "args_comp",
+]
 
 
-_fit_config = {
-    1: poly1,
-    2: poly2,
-    3: poly3,
-    4: poly4,
-    5: poly5
-}
+_fit_config = {1: poly1, 2: poly2, 3: poly3, 4: poly4, 5: poly5}
 
 _cosfit_config = {
     1: cos_fit1,
     2: cos_fit2,
     3: cos_fit3,
     4: cos_fit4,
-    5: cos_fit5
+    5: cos_fit5,
 }
 
 
 def min_max_method(
-        x, y, ref, sam, ref_point,
-        maxx=None, minx=None, fit_order=5, show_graph=False
-        ):
+    x,
+    y,
+    ref,
+    sam,
+    ref_point,
+    maxx=None,
+    minx=None,
+    fit_order=5,
+    show_graph=False,
+):
     """Calculates the dispersion with minimum-maximum method
 
     Parameters
@@ -87,7 +98,7 @@ def min_max_method(
     fit_report: lmfit report
     """
     if fit_order not in range(6):
-        raise ValueError('fit order must be in [1, 5]')
+        raise ValueError("fit order must be in [1, 5]")
 
     x, y = _handle_input(x, y, ref, sam)
     if maxx is None:
@@ -104,13 +115,13 @@ def min_max_method(
 
     neg_freq = np.sort(
         np.append(max_freq[max_freq < 0], min_freq[min_freq < 0])
-        )[::-1]
+    )[::-1]
     pos_freq = np.sort(
         np.append(max_freq[max_freq > 0], min_freq[min_freq > 0])
-        )
+    )
 
     if len(neg_freq) == 0 and len(pos_freq) == 0:
-        raise ValueError('No extremal points found.')
+        raise ValueError("No extremal points found.")
 
     pos_values = np.pi * np.arange(1, len(pos_freq) + 1)
     neg_values = np.pi * np.arange(1, len(neg_freq) + 1)
@@ -128,39 +139,48 @@ def min_max_method(
     if _has_lmfit:
         fitmodel = Model(_function)
         pars = fitmodel.make_params(
-            **{f'b{i}': 1 for i in range(fit_order + 1)}
-            )
+            **{f"b{i}": 1 for i in range(fit_order + 1)}
+        )
         result = fitmodel.fit(full_y, x=full_x, params=pars)
     else:
         popt, pcov = curve_fit(_function, full_x, full_y, maxfev=8000)
 
-
     if _has_lmfit:
         dispersion, dispersion_std = transform_lmfit_params_to_dispersion(
             *unpack_lmfit(result.params.items()), drop_first=True, dof=1
-            )
+        )
         fit_report = result.fit_report()
     else:
         dispersion, dispersion_std = transform_cf_params_to_dispersion(
             popt, drop_first=True
-            )
-        fit_report = ('To display detailed results,'
-                      ' you must have `lmfit` installed.')
+        )
+        fit_report = (
+            "To display detailed results," " you must have `lmfit` installed."
+        )
     if show_graph:
         try:
-            plot_phase(full_x, full_y, bf=result.best_fit,
-                   bf_fallback=_function(full_x, *popt),
-                   window_title='Min-max method fitted')
+            plot_phase(
+                full_x,
+                full_y,
+                bf=result.best_fit,
+                bf_fallback=_function(full_x, *popt),
+                window_title="Min-max method fitted",
+            )
         except UnboundLocalError:
+
             class result:
                 def best_fit():
                     return None
-            plot_phase(full_x, full_y, bf=result.best_fit,
-                   bf_fallback=_function(full_x, *popt),
-                   window_title='Min-max method fitted')
+
+            plot_phase(
+                full_x,
+                full_y,
+                bf=result.best_fit,
+                bf_fallback=_function(full_x, *popt),
+                window_title="Min-max method fitted",
+            )
 
     return dispersion, dispersion_std, fit_report
-
 
 
 def spp_method(delays, omegas, ref_point=0, fit_order=4):
@@ -197,14 +217,16 @@ def spp_method(delays, omegas, ref_point=0, fit_order=4):
     best fitting curve for plotting
     """
     if fit_order not in range(5):
-        raise ValueError('fit order must be in [1, 4]')
+        raise ValueError("fit order must be in [1, 4]")
 
     omegas = np.asarray(omegas).astype(np.float64)
 
     delays = np.asarray(delays).astype(np.float64)
 
     if not len(delays) == len(omegas):
-        raise ValueError(f'data shapes are different: {delays.shape} & {omegas.shape}')
+        raise ValueError(
+            f"data shapes are different: {delays.shape} & {omegas.shape}"
+        )
 
     idx = np.argsort(omegas)
     omegas, delays = omegas[idx], delays[idx]
@@ -216,30 +238,29 @@ def spp_method(delays, omegas, ref_point=0, fit_order=4):
         if _has_lmfit:
             fitmodel = Model(_function)
             pars = fitmodel.make_params(
-                **{f'b{i}': 1 for i in range(fit_order + 1)}
-                )
+                **{f"b{i}": 1 for i in range(fit_order + 1)}
+            )
             result = fitmodel.fit(delays, x=omegas, params=pars)
 
             dispersion, dispersion_std = transform_lmfit_params_to_dispersion(
                 *unpack_lmfit(result.params.items()), drop_first=False, dof=0
-                )
+            )
             bf = result.best_fit
         else:
             popt, pcov = curve_fit(_function, omegas, delays, maxfev=8000)
             dispersion, dispersion_std = transform_cf_params_to_dispersion(
                 popt, drop_first=False
-                )
+            )
             bf = _function(omegas, *popt)
         return omegas, delays, dispersion, dispersion_std, bf
 
     except Exception as e:
-        raise e # this should be deleted..
+        raise e  # this should be deleted..
 
 
 def cff_method(
-        x, y, ref, sam, ref_point=0,
-        p0=[1, 1, 1, 1, 1, 1, 1, 1], maxtries=8000
-        ):
+    x, y, ref, sam, ref_point=0, p0=[1, 1, 1, 1, 1, 1, 1, 1], maxtries=8000
+):
     """
     Phase modulated cosine function fit method.
 
@@ -274,21 +295,21 @@ def cff_method(
     try:
         orderhelper = np.max(np.flatnonzero(p0)) - 2
 
-        p0 = np.trim_zeros(p0, 'b')
+        p0 = np.trim_zeros(p0, "b")
 
         _funct = _cosfit_config[orderhelper]
 
-        popt, pcov = curve_fit(
-            _funct, x - ref_point, y, p0, maxfev=maxtries
-            )
+        popt, pcov = curve_fit(_funct, x - ref_point, y, p0, maxfev=maxtries)
 
         dispersion = np.zeros_like(popt)[:-3]
         for num in range(len(popt) - 3):
             dispersion[num] = popt[num + 3] * factorial(num + 1)
         return dispersion, _funct(x - ref_point, *popt)
     except RuntimeError:
-        raise ValueError(f'''Max tries ({maxtries}) reached..
-                             Parameters could not be estimated.''')
+        raise ValueError(
+            f"""Max tries ({maxtries}) reached..
+                             Parameters could not be estimated."""
+        )
 
 
 def fft_method(x, y):
@@ -342,8 +363,8 @@ def gaussian_window(t, tau, fwhm, order):
     """
     if order % 2 == 1:
         order += 1
-    std = fwhm/(2 * (np.log(2)**(1 / order)))
-    return np.exp(-((t - tau)**order)/(std**order))
+    std = fwhm / (2 * (np.log(2) ** (1 / order)))
+    return np.exp(-((t - tau) ** order) / (std ** order))
 
 
 def cut_gaussian(x, y, spike, fwhm, win_order):
@@ -402,7 +423,7 @@ def ifft_method(x, y, interpolate=True):
     N = len(x)
     if interpolate:
         x, y = fourier_interpolate(x, y)
-    xf = np.fft.fftfreq(N, d=(x[1]-x[0])/(2*np.pi))
+    xf = np.fft.fftfreq(N, d=(x[1] - x[0]) / (2 * np.pi))
     yf = np.fft.ifft(y)
     return xf, yf
 
@@ -443,43 +464,55 @@ def args_comp(x, y, ref_point=0, fit_order=5, show_graph=False):
     fit_report: lmfit report
     """
     if fit_order not in range(6):
-        raise ValueError('fit order must be in [1, 5]')
+        raise ValueError("fit order must be in [1, 5]")
 
     x -= ref_point
     y = np.unwrap(np.angle(y), axis=0)
 
     _function = _fit_config[fit_order]
 
-
-
     if _has_lmfit:
         fitmodel = Model(_function)
         pars = fitmodel.make_params(
-            **{f'b{i}': 1 for i in range(fit_order + 1)}
-            )
+            **{f"b{i}": 1 for i in range(fit_order + 1)}
+        )
         result = fitmodel.fit(y, x=x, params=pars)
     else:
         popt, pcov = curve_fit(_function, x, y, maxfev=8000)
 
-
     if _has_lmfit:
         dispersion, dispersion_std = transform_lmfit_params_to_dispersion(
             *unpack_lmfit(result.params.items()), drop_first=True, dof=1
-            )
+        )
         fit_report = result.fit_report()
     else:
         dispersion, dispersion_std = transform_cf_params_to_dispersion(
             popt, drop_first=True, dof=1
-            )
-        fit_report = ('To display detailed results,'
-                      ' you must have `lmfit` installed.')
+        )
+        fit_report = (
+            "To display detailed results," " you must have `lmfit` installed."
+        )
     if show_graph:
         try:
-            plot_phase(x, y, result.best_fit, bf_fallback=_function(x, *popt), window_title='Phase')
+            plot_phase(
+                x,
+                y,
+                result.best_fit,
+                bf_fallback=_function(x, *popt),
+                window_title="Phase",
+            )
         except UnboundLocalError:
+
             class result:
                 def best_fit():
                     return None
-            plot_phase(x, y, result.best_fit, bf_fallback=_function(x, *popt), window_title='Phase')
+
+            plot_phase(
+                x,
+                y,
+                result.best_fit,
+                bf_fallback=_function(x, *popt),
+                window_title="Phase",
+            )
 
     return -dispersion, dispersion_std, fit_report

@@ -2,7 +2,8 @@ from collections.abc import Mapping
 from collections import OrderedDict
 from copy import deepcopy
 
-__all__ = ['MetaData']
+__all__ = ["MetaData"]
+
 
 class MetaData:
     """
@@ -30,7 +31,7 @@ class MetaData:
     def __get__(self, instance, owner):
         if instance is None:
             return self
-        if not hasattr(instance, '_meta'):
+        if not hasattr(instance, "_meta"):
             instance._meta = OrderedDict()
         return instance._meta
 

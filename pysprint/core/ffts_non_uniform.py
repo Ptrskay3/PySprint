@@ -1,4 +1,4 @@
-'''
+"""
 This file contains code from a blog post by Jake VanderPlas.
 See at: https://jakevdp.github.io/blog/2015/02/24/optimizing-python-with-numpy-and-numba/
 
@@ -12,7 +12,7 @@ References:
 [2] Greengard, Leslie & Lee, June-Yub.: Accelerating the Nonuniform Fast Fourier Transform,
     Society for Industrial and Applied Mathematics. 46. 443-454. 10.1137/S003614450343200X.
     (2004)
-'''
+"""
 
 import warnings
 from inspect import isfunction
@@ -21,14 +21,17 @@ import numpy as np
 
 try:
     from numba import jit
+
     _has_numba = True
 except ImportError:
     _has_numba = False
 
     def jit(func=None, *args, **kwargs):
-        '''Replace jit if numba is not available.'''
+        """Replace jit if numba is not available."""
+
         def _jit(f):
             return f
+
         if isfunction(func):
             return func
         else:
@@ -36,11 +39,12 @@ except ImportError:
 
 
 def _grid_params(gl, eps):
-    if eps <= 1E-33 or eps >= 1E-1:
-        raise ValueError(f"eps = {eps:.0e}, but it must satisfy "
-                         "1e-33 < eps < 1e-1.")
+    if eps <= 1e-33 or eps >= 1e-1:
+        raise ValueError(
+            f"eps = {eps:.0e}, but it must satisfy " "1e-33 < eps < 1e-1."
+        )
 
-    ratio = 2 if eps > 1E-11 else 3
+    ratio = 2 if eps > 1e-11 else 3
     Msp = int(-np.log(eps) / (np.pi * (ratio - 1) / (ratio - 0.5)) + 0.5)
     Mr = max(ratio * gl, 2 * Msp)
     lambda_ = Msp / (ratio * (ratio - 0.5))
@@ -54,12 +58,12 @@ def _grid(x, c, tau, Msp, ftau, E3):
     hx = 2 * np.pi / Mr
 
     for j in range(Msp + 1):
-        E3[j] = np.exp(-(np.pi * j / Mr) ** 2 / tau)
+        E3[j] = np.exp(-((np.pi * j / Mr) ** 2) / tau)
 
     for i in range(x.shape[0]):
         xi = x[i] % (2 * np.pi)
         m = 1 + int(xi // hx)
-        xi = (xi - hx * m)
+        xi = xi - hx * m
         E1 = np.exp(-0.25 * xi ** 2 / tau)
         E2 = np.exp((xi * np.pi) / (Mr * tau))
         E2mm = 1
@@ -94,17 +98,17 @@ def _compute_gaussian_grid_nonumba(x, c, Mr, Msp, tau):
 
     E1 = np.exp(-0.25 * (xmod - hx * m) ** 2 / tau)
 
-    # Basically in the following lines we compute 
+    # Basically in the following lines we compute
     # this in a tricky way:
     # E2 = np.exp(msp * (xmod - hx * m) * np.pi / (Mr * tau))
 
     E2 = np.empty((2 * Msp, N), dtype=xmod.dtype)
     E2[Msp] = 1
-    E2[Msp + 1:] = np.exp((xmod - hx * m) * np.pi / (Mr * tau))
-    E2[Msp + 1:].cumprod(0, out=E2[Msp + 1:])
-    E2[Msp - 1::-1] = 1. / (E2[Msp + 1] * E2[Msp:])
+    E2[Msp + 1 :] = np.exp((xmod - hx * m) * np.pi / (Mr * tau))
+    E2[Msp + 1 :].cumprod(0, out=E2[Msp + 1 :])
+    E2[Msp - 1 :: -1] = 1.0 / (E2[Msp + 1] * E2[Msp:])
 
-    E3 = np.exp(-(np.pi * msp / Mr) ** 2 / tau)
+    E3 = np.exp(-((np.pi * msp / Mr) ** 2) / tau)
     spread = (c * E1) * E2 * E3
 
     np.add.at(ftau, mm % Mr, spread)
@@ -112,7 +116,7 @@ def _compute_gaussian_grid_nonumba(x, c, Mr, Msp, tau):
     return ftau
 
 
-def nuifft(x, y, gl, df=1.0, epsilon=1E-12, exponent='positive'):
+def nuifft(x, y, gl, df=1.0, epsilon=1e-12, exponent="positive"):
     """Non-Uniform (inverse) Fast Fourier Transform to avoid linear interpolation
     of interferograms.
 
@@ -145,8 +149,8 @@ def nuifft(x, y, gl, df=1.0, epsilon=1E-12, exponent='positive'):
     -----
     If numba is not installed it's approximately 5x times slower.
     """
-    if exponent not in ('positive', 'negative'):
-        raise ValueError('exponent must be `positive` or `negative`.')
+    if exponent not in ("positive", "negative"):
+        raise ValueError("exponent must be `positive` or `negative`.")
 
     x = df * np.asarray(x)
     y = np.asarray(y)
@@ -166,13 +170,13 @@ def nuifft(x, y, gl, df=1.0, epsilon=1E-12, exponent='positive'):
     if _has_numba:
         ftau = _compute_gaussian_grid(x, y, Mr, Msp, tau)
     else:
-        warnings.warn('Numba is not availabe, falling back to slower version.')
+        warnings.warn("Numba is not availabe, falling back to slower version.")
         ftau = _compute_gaussian_grid_nonumba(x, y, Mr, Msp, tau)
 
-    if exponent == 'negative':
+    if exponent == "negative":
         Ftau = (1 / Mr) * np.fft.fft(ftau)
     else:
         Ftau = np.fft.ifft(ftau)
-    Ftau = np.concatenate([Ftau[-(gl//2):], Ftau[:gl//2 + gl % 2]])
+    Ftau = np.concatenate([Ftau[-(gl // 2) :], Ftau[: gl // 2 + gl % 2]])
 
     return (1 / N) * np.sqrt(np.pi / tau) * np.exp(tau * k ** 2) * Ftau

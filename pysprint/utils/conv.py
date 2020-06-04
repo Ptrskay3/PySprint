@@ -1,16 +1,26 @@
-'''
+"""
 We might drop this.
-'''
+"""
 
 import pandas as pd
 
-__all__ = ['convert_df']
+__all__ = ["convert_df"]
+
 
 def convert_df(
-	filename, ifg, ref=None, sam=None, delimiter=';', decimal=',',
-	skiprows=0, index=False, invert_axis=False, single_axis=False, fmt=None
-	):
-	"""
+    filename,
+    ifg,
+    ref=None,
+    sam=None,
+    delimiter=";",
+    decimal=",",
+    skiprows=0,
+    index=False,
+    invert_axis=False,
+    single_axis=False,
+    fmt=None,
+):
+    """
 	Convert and save given interferogram datafile (either single 
 	or along with arms) to PySprint GUI - loadable format.
 
@@ -58,35 +68,61 @@ def convert_df(
 	-------
 	None
 	"""
-	ifg_data = pd.read_csv(
-		ifg, sep=delimiter, decimal=decimal, skiprows=skiprows, names=['x', 'y']
-		)
-	if (sam is not None and ref is not None):
-		if not single_axis:
-			sam_data = pd.read_csv(
-				sam, sep=delimiter, decimal=decimal, skiprows=skiprows, names=['x', 'y']
-				)
-		else:
-			sam_data = pd.read_csv(
-				sam, sep=delimiter, decimal=decimal, skiprows=skiprows, names=['y']
-				)
-		samy = sam_data['y'].values if not invert_axis else sam_data['x'].values
-		if not single_axis:
-			ref_data = pd.read_csv(
-				ref, sep=delimiter, decimal=decimal, skiprows=skiprows, names=['x', 'y']
-				)
-		else:
-			ref_data = pd.read_csv(
-				ref, sep=delimiter, decimal=decimal, skiprows=skiprows, names=['y']
-				)
-		refy = ref_data['y'].values if not invert_axis else ref_data['x'].values
-	x = ifg_data['x'].values
-	y = ifg_data['y'].values
-	if invert_axis:
-		x, y = y, x
-	try:
-		fulldf = pd.DataFrame({'x': x, 'y': y, 'ref': refy, 'sam': samy})
-	except NameError:
-		fulldf = pd.DataFrame({'x': x, 'y': y})
-	fulldf.to_csv(filename, sep=',', decimal='.', index=index, float_format=fmt)
-	return
+    ifg_data = pd.read_csv(
+        ifg,
+        sep=delimiter,
+        decimal=decimal,
+        skiprows=skiprows,
+        names=["x", "y"],
+    )
+    if sam is not None and ref is not None:
+        if not single_axis:
+            sam_data = pd.read_csv(
+                sam,
+                sep=delimiter,
+                decimal=decimal,
+                skiprows=skiprows,
+                names=["x", "y"],
+            )
+        else:
+            sam_data = pd.read_csv(
+                sam,
+                sep=delimiter,
+                decimal=decimal,
+                skiprows=skiprows,
+                names=["y"],
+            )
+        samy = (
+            sam_data["y"].values if not invert_axis else sam_data["x"].values
+        )
+        if not single_axis:
+            ref_data = pd.read_csv(
+                ref,
+                sep=delimiter,
+                decimal=decimal,
+                skiprows=skiprows,
+                names=["x", "y"],
+            )
+        else:
+            ref_data = pd.read_csv(
+                ref,
+                sep=delimiter,
+                decimal=decimal,
+                skiprows=skiprows,
+                names=["y"],
+            )
+        refy = (
+            ref_data["y"].values if not invert_axis else ref_data["x"].values
+        )
+    x = ifg_data["x"].values
+    y = ifg_data["y"].values
+    if invert_axis:
+        x, y = y, x
+    try:
+        fulldf = pd.DataFrame({"x": x, "y": y, "ref": refy, "sam": samy})
+    except NameError:
+        fulldf = pd.DataFrame({"x": x, "y": y})
+    fulldf.to_csv(
+        filename, sep=",", decimal=".", index=index, float_format=fmt
+    )
+    return
