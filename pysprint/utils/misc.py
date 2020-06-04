@@ -59,10 +59,10 @@ def run_from_ipython():
         return False
 
 
-def get_closest(xValue, xArray, yArray):
-    idx = (np.abs(xArray - xValue)).argmin()
-    value = xArray[idx]
-    return value, yArray[idx], idx
+def get_closest(x_val, y_val, x_array, y_array):
+    idx = np.argmin((np.hypot(x_array - x_val, y_array - y_val)))
+    value = x_array[idx]
+    return value, y_array[idx], idx
 
 
 def between(val, except_around):

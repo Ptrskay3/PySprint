@@ -43,8 +43,6 @@ matplotlib.backend_tools.ToolBase.__init__ = tb_init
 from matplotlib.backend_tools import ToolToggleBase
 from pysprint.utils import get_closest
 
-# TODO: implement real euclidean metrics with epsilon distance
-
 
 class SelectButton(ToolToggleBase):
     """
@@ -106,11 +104,11 @@ class EditPeak(object):
             return
         if self.my_select_button.toggled:
             if event.button is MouseButton.RIGHT:
-                ix, iy, idx = get_closest(ix, self.x_extremal, self.y_extremal)
+                ix, iy, idx = get_closest(ix, iy, self.x_extremal, self.y_extremal)
                 self.x_extremal = np.delete(self.x_extremal, idx)
                 self.y_extremal = np.delete(self.y_extremal, idx)
             elif event.button is MouseButton.LEFT:
-                ix, iy, idx = get_closest(ix, self.x, self.y)
+                ix, iy, idx = get_closest(ix, iy, self.x, self.y)
                 self.x_extremal = np.append(self.x_extremal, ix)
                 self.y_extremal = np.append(self.y_extremal, iy)
             self.lins.set_data(self.x_extremal, self.y_extremal)
