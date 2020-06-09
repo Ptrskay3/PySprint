@@ -1,4 +1,9 @@
 import sys
+
+if sys.version_info[:2] < (3, 6):
+    raise RuntimeError("Python version >= 3.6 required.")
+
+
 try:
     from setuptools import setup, find_packages
 except ImportError:
@@ -7,8 +12,7 @@ except ImportError:
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-if sys.version_info[:2] < (3, 6):
-    raise RuntimeError("Python version >= 3.6 required.")
+
 
 MAJOR = 0
 MINOR = 10

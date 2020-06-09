@@ -1,0 +1,45 @@
+{% set name = "pysprint" %}
+{% set version = "0.10.0" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
+  sha256: a769f55a6c3747317a6b103eeba89b4511815881a7949c4b228130f89088e356
+
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install . -vv"
+
+requirements:
+  host:
+    - matplotlib
+    - numpy >=1.16.6
+    - pandas
+    - pip
+    - python
+    - scipy
+  run:
+    - matplotlib
+    - numpy >=1.16.6
+    - pandas
+    - python
+    - scipy
+
+test:
+  imports:
+    - pysprint
+    - pysprint.api
+    - pysprint.core
+    - pysprint.core.bases
+    - pysprint.core.methods
+    - pysprint.mpl_tools
+    - pysprint.tests
+    - pysprint.utils
+
+about:
+  home: "https://github.com/Ptrskay3/PySprint"
+  license: MIT
+
