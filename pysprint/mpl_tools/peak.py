@@ -104,7 +104,9 @@ class EditPeak(object):
             return
         if self.my_select_button.toggled:
             if event.button is MouseButton.RIGHT:
-                ix, iy, idx = get_closest(ix, iy, self.x_extremal, self.y_extremal)
+                ix, iy, idx = get_closest(
+                    ix, iy, self.x_extremal, self.y_extremal
+                )
                 self.x_extremal = np.delete(self.x_extremal, idx)
                 self.y_extremal = np.delete(self.y_extremal, idx)
             elif event.button is MouseButton.LEFT:

@@ -38,7 +38,14 @@ __all__ = [
 ]
 
 
-_fit_config = {1: poly1, 2: poly2, 3: poly3, 4: poly4, 5: poly5}
+_fit_config = {
+    1: poly1,
+    2: poly2,
+    3: poly3, 
+    4: poly4,
+    5: poly5
+}
+
 
 _cosfit_config = {
     1: cos_fit1,

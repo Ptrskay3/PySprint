@@ -10,12 +10,19 @@ import matplotlib.pyplot as plt
 
 try:
     from lmfit import Model
+
     _has_lmfit = True
 except ImportError:
     _has_lmfit = False
 
 from pysprint.core.evaluate import _fit_config
-from pysprint.utils import print_disp, transform_lmfit_params_to_dispersion, transform_cf_params_to_dispersion, unpack_lmfit
+from pysprint.utils import (
+    print_disp,
+    transform_lmfit_params_to_dispersion,
+    transform_cf_params_to_dispersion,
+    unpack_lmfit,
+)
+
 
 class Phase:
     """
@@ -35,7 +42,9 @@ class Phase:
     def __call__(self, value):
         if self.poly:
             return self.poly.__call__(value)
-        raise NotImplementedError(f'Before calling, a polinomial must be fitted.')
+        raise NotImplementedError(
+            f"Before calling, a polinomial must be fitted."
+        )
 
     @classmethod
     def from_disperion_array(cls, dispersion_array, domain=None):
@@ -44,7 +53,7 @@ class Phase:
             x = np.linspace(2, 4, num=2000)
         else:
             x = np.asarray(domain)
-        coeffs = [i / factorial(i+1) for i in dispersion_array]
+        coeffs = [i / factorial(i + 1) for i in dispersion_array]
         cls.poly = np.poly1d(coeffs[::-1])
         return cls(x, cls.poly(x))
 
@@ -62,7 +71,9 @@ class Phase:
     def __str__(self):
         if self.poly is not None:
             return self.poly.__str__()
-        raise NotImplementedError(f'Before calling, a polinomial must be fitted.')
+        raise NotImplementedError(
+            f"Before calling, a polinomial must be fitted."
+        )
 
     def plot(self, ax=None, **kwargs):
         if ax is None:
@@ -70,17 +81,16 @@ class Phase:
         if not self.is_dispersion_array or not self.is_coeff:
             ax.plot(self.x, self.y, **kwargs)
             if self.fit is not None:
-                ax.plot(self.x, self.fit, 'r--')
+                ax.plot(self.x, self.fit, "r--")
         else:
             ax.plot(self.x, self.poly(self.x), **kwargs)
         plt.grid()
         plt.show()
 
-
     @print_disp
     def fit(self, reference_point, order):
         if self.is_coeff or self.is_dispersion_array:
-            warnings.warn('No need to fit another curve.')
+            warnings.warn("No need to fit another curve.")
             return
 
         self.fitorder = order
@@ -111,13 +121,13 @@ class Phase:
                 popt, drop_first=True, dof=1
             )
             fit_report = (
-                "To display detailed results," " you must have `lmfit` installed."
+                "To display detailed results,"
+                " you must have `lmfit` installed."
             )
 
             self.fit = _function(x, *popt)
 
         return dispersion, dispersion_std, fit_report
-
 
     @property
     def order(self):
