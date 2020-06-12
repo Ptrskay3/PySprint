@@ -71,6 +71,7 @@ class EditPeak(object):
 
         # This is here because we do not want other figures
         # to be affected by this.
+        plt.ion()
         matplotlib.rcParams["toolbar"] = "toolmanager"
 
         self.figure = plt.figure()

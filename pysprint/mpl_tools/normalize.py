@@ -11,6 +11,7 @@ class DraggableEnvelope:
     epsilon = 5
 
     def __init__(self, x, y, mode="l"):
+        plt.ion()
         rcParams["toolbar"] = "toolmanager"
         self.fig, self.ax = plt.subplots()
         self.x = x
