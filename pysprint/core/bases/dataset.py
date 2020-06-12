@@ -30,10 +30,8 @@ from pysprint.utils import MetaData, run_from_ipython, find_nearest
 __all__ = ["Dataset"]
 
 
-class Dataset(DatasetBase):
-    """
-	Base class for the evaluating methods.
-	"""
+class Dataset(metaclass=DatasetBase):
+    """Base class for the evaluating methods."""
 
     meta = MetaData("""Additional info about the dataset""", copy=False)
 
@@ -97,6 +95,16 @@ class Dataset(DatasetBase):
 
         self._dispersion_array = None
 
+    def __call__(self, reference_point, order, show_graph):
+        '''Alias for self.calculate.'''
+        if hasattr(self, "calculate"):
+            self.calculate(reference_point, order, show_graph)
+        else:
+            raise NotImplementedError
+
+    def __len__(self):
+        return len(self.x)
+
     def phase_plot(self, exclude_GD=False):
         if not np.all(self._dispersion_array):
             raise ValueError(
@@ -145,8 +153,7 @@ class Dataset(DatasetBase):
         return True
 
     def scale_up(self):
-        """
-		If the interferogram is normalized to [0, 1] interval, scale up to [-1, 1]
+        """If the interferogram is normalized to [0, 1] interval, scale up to [-1, 1]
 		with easy algerbra.. Just in case you need comparison, or any other purpose.
 		"""
         self.y_norm = (self.y_norm - 0.5) * 2
@@ -155,8 +162,7 @@ class Dataset(DatasetBase):
     def GD_lookup(
         self, reference_point=2.355, engine="cwt", silent=False, **kwargs
     ):
-        """
-		Quick GD lookup: it finds extremal points near the `reference_point` and returns
+        """Quick GD lookup: it finds extremal points near the `reference_point` and returns
 		an avarage value of 2*np.pi divided by distances between consecutive minimal or
 		maximal values. Since it's relying on peak detection, the results may be irrelevant
 		in some cases. If the parent class is `~pysprint.CosFitMethod`, then it will set the
@@ -229,9 +235,7 @@ class Dataset(DatasetBase):
             )
 
     def _safe_cast(self):
-        """
-		Return a copy of key attributes in order to prevent inplace modification.
-		"""
+        """Return a copy of key attributes in order to prevent inplace modification."""
         x, y, ref, sam = (
             np.copy(self.x),
             np.copy(self.y),
@@ -242,23 +246,19 @@ class Dataset(DatasetBase):
 
     @staticmethod
     def wave2freq(value):
-        """
-		Switches values between wavelength and angular frequency.
-		"""
+        """Switches values between wavelength and angular frequency."""
         return (2 * np.pi * C_LIGHT) / value
 
     _dispatch = wave2freq.__func__
 
     @staticmethod
     def freq2wave(value):
-        """
-		Switches values between angular frequency and wavelength.
+        """Switches values between angular frequency and wavelength.
 		"""
         return Dataset._dispatch(value)
 
     def _check_domain(self):
-        """
-		Checks the domain of data just by looking at x axis' minimal value.
+        """Checks the domain of data just by looking at x axis' minimal value.
 		Units are obviously not added yet, we work in nm and PHz...
 		"""
         if min(self.x) > 50:
@@ -277,9 +277,8 @@ class Dataset(DatasetBase):
         sep=";",
         meta_len=5,
     ):
-        """
-		Dataset object alternative constructor. Helps to load in data just by giving the filenames
-		in the target directory.
+        """Dataset object alternative constructor. 
+        Helps to load in data just by giving the filenames in the target directory.
 
 		Parameters:
 		----------
@@ -391,8 +390,7 @@ class Dataset(DatasetBase):
 
     @property
     def data(self):
-        """
-		Returns the *current* dataset as `pandas.DataFrame`.
+        """ Returns the *current* dataset as `pandas.DataFrame`.
 		"""
         if self._is_normalized:
             try:
@@ -413,13 +411,12 @@ class Dataset(DatasetBase):
 
     @property
     def is_normalized(self):
-        """
-		Retuns whether the dataset is normalized.
+        """ Retuns whether the dataset is normalized.
 		"""
         return self._is_normalized
 
     def chdomain(self):
-        """ Changes from wavelength [nm] to ang. freq. [PHz] domain and vica versa."""
+        """Changes from wavelength [nm] to ang. freq. [PHz] domain and vica versa."""
         self.x = (2 * np.pi * C_LIGHT) / self.x
         self._check_domain()
         if type(self).__name__ == "FFTMethod":
@@ -433,8 +430,7 @@ class Dataset(DatasetBase):
         return xmax, ymax, xmin, ymin
 
     def savgol_fil(self, window=5, order=3):
-        """
-		Applies Savitzky-Golay filter on the dataset.
+        """ Applies Savitzky-Golay filter on the dataset.
 
 		Parameters:
 		----------
@@ -465,8 +461,7 @@ class Dataset(DatasetBase):
         )
 
     def slice(self, start=None, stop=None):
-        """
-		Cuts the dataset on x axis in this form: [start, stop]
+        """Cuts the dataset on x axis in this form: [start, stop]
 
 		Parameters:
 		----------
@@ -499,8 +494,7 @@ class Dataset(DatasetBase):
         self._is_normalized = self._ensure_norm()
 
     def convolution(self, window_length, std=20):
-        """
-		Applies a convolution with a gaussian on the dataset
+        """ Applies a convolution with a gaussian on the dataset
 
 		Parameters:
 		----------
@@ -530,8 +524,8 @@ class Dataset(DatasetBase):
     def detect_peak(
         self, pmax=0.1, pmin=0.1, threshold=0.1, except_around=None
     ):
-        """
-		Basic algorithm to find extremal points in data using ``scipy.signal.find_peaks``.
+        """Basic algorithm to find extremal points in data 
+        using ``scipy.signal.find_peaks``.
 
 		Parameters:
 		----------
@@ -584,8 +578,7 @@ class Dataset(DatasetBase):
         return xmax, ymax, xmin, ymin
 
     def show(self):
-        """
-		Draws a graph of the current dataset using matplotlib.
+        """Draws a graph of the current dataset using matplotlib.
 		"""
         if np.iscomplexobj(self.y):
             self.plotwidget.plot(self.x, np.abs(self.y))
@@ -598,8 +591,7 @@ class Dataset(DatasetBase):
         self.plotwidget.show()
 
     def normalize(self, filename=None, smoothing_level=0):
-        """
-		Normalize the interferogram by finding upper and lower envelope
+        """ Normalize the interferogram by finding upper and lower envelope
 		on an interactive matplotlib editor.
 
 		Parameters

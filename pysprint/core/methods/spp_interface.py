@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 
 from pysprint.core.bases.dataset import Dataset
 from pysprint.core.evaluate import spp_method
-from pysprint.utils import print_disp
 from pysprint.utils.exceptions import DatasetError
 
 
@@ -141,14 +140,13 @@ class SPPMethod:
         )
 
     @staticmethod
-    @print_disp
     def calculate_from_raw(omegas, delays, reference_point, order):
         x, y, dispersion, dispersion_std, bf = spp_method(
             delays, omegas, ref_point=reference_point, fit_order=order
         )
         return dispersion, dispersion_std, ""
 
-    @print_disp
+
     def calculate(self, reference_point, order=2, show_graph=False):
         delays = np.concatenate([_ for _ in self._delay.values()]).ravel()
         positions = np.concatenate(
@@ -173,3 +171,8 @@ class SPPMethod:
     def info(self):
         self._info = f"Data is recorded from {len(self._delay)} interferograms ({len(self)} availabe in total)"
         return self._info
+
+    @property
+    def stats(self):
+        raise NotImplementedError
+    

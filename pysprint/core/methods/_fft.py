@@ -7,7 +7,6 @@ from scipy.fftpack import fftshift
 
 from pysprint.core.bases.dataset import Dataset
 from pysprint.core.ffts_non_uniform import nuifft
-from pysprint.utils import print_disp
 from pysprint.core.evaluate import (
     fft_method,
     cut_gaussian,
@@ -158,7 +157,6 @@ class FFTMethod(Dataset):
             win_order=self.window_order,
         )
 
-    @print_disp
     def calculate(self, reference_point, order, show_graph=False):
         """ 
 		FFTMethod's calculate function.

@@ -24,7 +24,8 @@ from pysprint.utils import (
     plot_phase,
 )
 
-from pysprint.core.functions import *
+from pysprint.core.functions import _fit_config, _cosfit_config
+
 
 
 __all__ = [
@@ -38,22 +39,6 @@ __all__ = [
 ]
 
 
-_fit_config = {
-    1: poly1,
-    2: poly2,
-    3: poly3, 
-    4: poly4,
-    5: poly5
-}
-
-
-_cosfit_config = {
-    1: cos_fit1,
-    2: cos_fit2,
-    3: cos_fit3,
-    4: cos_fit4,
-    5: cos_fit5,
-}
 
 
 def min_max_method(
@@ -170,19 +155,15 @@ def min_max_method(
                 full_x,
                 full_y,
                 bf=result.best_fit,
-                bf_fallback=_function(full_x, *popt),
+                bf_fallback=result.best_fit,
                 window_title="Min-max method fitted",
             )
         except UnboundLocalError:
 
-            class result:
-                def best_fit():
-                    return None
-
             plot_phase(
                 full_x,
                 full_y,
-                bf=result.best_fit,
+                bf=_function(full_x, *popt),
                 bf_fallback=_function(full_x, *popt),
                 window_title="Min-max method fitted",
             )
@@ -241,28 +222,26 @@ def spp_method(delays, omegas, ref_point=0, fit_order=4):
 
     _function = _fit_config[fit_order]
 
-    try:
-        if _has_lmfit:
-            fitmodel = Model(_function)
-            pars = fitmodel.make_params(
-                **{f"b{i}": 1 for i in range(fit_order + 1)}
-            )
-            result = fitmodel.fit(delays, x=omegas, params=pars)
 
-            dispersion, dispersion_std = transform_lmfit_params_to_dispersion(
-                *unpack_lmfit(result.params.items()), drop_first=False, dof=0
-            )
-            bf = result.best_fit
-        else:
-            popt, pcov = curve_fit(_function, omegas, delays, maxfev=8000)
-            dispersion, dispersion_std = transform_cf_params_to_dispersion(
-                popt, drop_first=False
-            )
-            bf = _function(omegas, *popt)
-        return omegas, delays, dispersion, dispersion_std, bf
+    if _has_lmfit:
+        fitmodel = Model(_function)
+        pars = fitmodel.make_params(
+            **{f"b{i}": 1 for i in range(fit_order + 1)}
+        )
+        result = fitmodel.fit(delays, x=omegas, params=pars)
 
-    except Exception as e:
-        raise e  # this should be deleted..
+        dispersion, dispersion_std = transform_lmfit_params_to_dispersion(
+            *unpack_lmfit(result.params.items()), drop_first=False, dof=0
+        )
+        bf = result.best_fit
+    else:
+        popt, pcov = curve_fit(_function, omegas, delays, maxfev=8000)
+        dispersion, dispersion_std = transform_cf_params_to_dispersion(
+            popt, drop_first=False
+        )
+        bf = _function(omegas, *popt)
+    return omegas, delays, -dispersion, dispersion_std, bf
+
 
 
 def cff_method(
@@ -505,19 +484,16 @@ def args_comp(x, y, ref_point=0, fit_order=5, show_graph=False):
                 x,
                 y,
                 result.best_fit,
-                bf_fallback=_function(x, *popt),
+                bf_fallback=result.best_fit,
                 window_title="Phase",
             )
         except UnboundLocalError:
 
-            class result:
-                def best_fit():
-                    return None
 
             plot_phase(
                 x,
                 y,
-                result.best_fit,
+                _function(x, *popt),
                 bf_fallback=_function(x, *popt),
                 window_title="Phase",
             )

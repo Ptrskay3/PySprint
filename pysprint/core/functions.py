@@ -14,6 +14,8 @@ __all__ = [
     "poly4",
     "poly5",
     "poly6",
+    "_fit_config",
+    "_cosfit_config"
 ]
 
 
@@ -111,3 +113,21 @@ def cos_fit5(x, c0, c1, b0, b1, b2, b3, b4, b5):
 
 def cos_fit6(x, c0, c1, b0, b1, b2, b3, b4, b5, b6):
     return c0 + c1 * np.cos(poly6(x, b0, b1, b2, b3, b4, b5, b6))
+
+
+_fit_config = {
+    1: poly1,
+    2: poly2,
+    3: poly3, 
+    4: poly4,
+    5: poly5
+}
+
+
+_cosfit_config = {
+    1: cos_fit1,
+    2: cos_fit2,
+    3: cos_fit3,
+    4: cos_fit4,
+    5: cos_fit5,
+}

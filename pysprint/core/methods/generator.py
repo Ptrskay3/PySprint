@@ -7,7 +7,7 @@ from pysprint.core._generator import generatorFreq, generatorWave
 __all__ = ["Generator"]
 
 
-class Generator(DatasetBase):
+class Generator(metaclass=DatasetBase):
     """
 	Basic dataset generator.
 	"""

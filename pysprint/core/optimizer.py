@@ -5,21 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
 from pysprint.utils import find_nearest
-from pysprint.core.functions import (
-    cos_fit1,
-    cos_fit2,
-    cos_fit3,
-    cos_fit4,
-    cos_fit5,
-)
-
-_cosfit_config = {
-    1: cos_fit1,
-    2: cos_fit2,
-    3: cos_fit3,
-    4: cos_fit4,
-    5: cos_fit5,
-}
+from pysprint.core.functions import _cosfit_config, cos_fit1
 
 
 class FitOptimizer:

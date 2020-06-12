@@ -4,7 +4,6 @@ import numpy as np
 
 from pysprint.core.bases.dataset import Dataset
 from pysprint.core.optimizer import FitOptimizer
-from pysprint.utils import print_disp
 from pysprint.core.evaluate import cff_method
 
 
@@ -96,7 +95,6 @@ class CosFitMethod(Dataset):
         for i in range(1, order):
             self.params[-i] = 0
 
-    @print_disp
     def calculate(self, reference_point):
         """ 
 		Cosine fit's calculate function.

@@ -4,7 +4,6 @@ from pysprint.core.bases.dataset import Dataset
 from pysprint.mpl_tools.peak import EditPeak
 from pysprint.utils import (
     _maybe_increase_before_cwt,
-    print_disp,
     run_from_ipython,
     calc_envelope,
 )
@@ -109,7 +108,7 @@ class MinMaxMethod(Dataset):
         )
         return _editpeak.get_dat[0]  # we should return None
 
-    @print_disp
+
     def calculate(self, reference_point, order, show_graph=False):
         """ 
 		MinMaxMethod's calculate function.
