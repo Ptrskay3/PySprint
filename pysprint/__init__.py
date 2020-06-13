@@ -66,7 +66,7 @@ if run_from_notebook():
     #     matplotlib.use('Qt5Agg')
 
 
-__version__ = "0.10.0"
+__version__ = "0.11.0"
 __author__ = "Leéh Péter"
 
 from .api import *
