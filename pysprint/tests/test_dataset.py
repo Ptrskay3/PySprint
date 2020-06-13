@@ -51,7 +51,7 @@ class TestEvaluate(unittest.TestCase):
         np.testing.assert_array_equal(sam, ifg.sam)
 
     def test_rawparsing(self):
-        ifg = Dataset.parse_raw("test_rawparsing.trt")
+        ifg = Dataset.parse_raw('test_rawparsing.trt')
         assert issubclass(ifg.meta.__class__, collections.abc.Mapping)
         with self.assertRaises(OSError):
             ifg = Dataset.parse_raw(546)

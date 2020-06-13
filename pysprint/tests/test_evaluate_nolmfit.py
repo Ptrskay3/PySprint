@@ -1,3 +1,4 @@
+import os
 import sys
 import unittest
 
@@ -83,7 +84,7 @@ class TestEvaluateNoLmfit(unittest.TestCase):
         # j,k = evaluate.min_max_method(np.arange(100), np.arange(100), [], [], ref_point = 10, fit_order = 1, show_graph=False)
         # np.testing.assert_array_equal(emp, j)
         # np.testing.assert_array_equal(emp, k)
-        a, b, c, d = np.loadtxt("test_arms.txt", delimiter=",", unpack=True)
+        a, b, c, d = np.loadtxt('test_arms.txt', delimiter=",", unpack=True)
         maxs, _, mins, _ = find_peak(
             a, b, c, d, proMax=1, proMin=1, threshold=0.4
         )
@@ -178,7 +179,7 @@ class TestEvaluateNoLmfit(unittest.TestCase):
 
     def test_windowing(self):
         _has_lmfit = False
-        a, b = np.loadtxt("test_window.txt", unpack=True, delimiter=",")
+        a, b = np.loadtxt('test_window.txt', unpack=True, delimiter=",")
         y_data = evaluate.cut_gaussian(a, b, 2.5, 0.2, 6)
         assert len(b) == len(y_data)
         np.testing.assert_almost_equal(y_data[0], 0)

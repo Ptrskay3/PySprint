@@ -1,3 +1,4 @@
+import os
 import sys
 import unittest
 import numpy as np
@@ -15,7 +16,7 @@ class TestEdit(unittest.TestCase):
         pass
 
     def test_savgol(self):
-        x, y, v, w = np.loadtxt("test_arms.txt", delimiter=",", unpack=True)
+        x, y, v, w = np.loadtxt('test_arms.txt', delimiter=",", unpack=True)
         a, b = savgol(x, y, v, w, window=10, order=3)
         c, d = savgol(x, y, v, w, window=11, order=3)
         assert len(a) == len(b)
@@ -24,7 +25,7 @@ class TestEdit(unittest.TestCase):
             savgol(x, y, v, w, window=1, order=3)
 
     def test_peak(self):
-        x, y = np.loadtxt("test_peak.txt", delimiter=",", unpack=True)
+        x, y = np.loadtxt('test_peak.txt', delimiter=",", unpack=True)
         a, b, c, d = find_peak(
             x, y, [], [], threshold=0.01, proMin=0.5, proMax=0.5
         )
@@ -36,7 +37,7 @@ class TestEdit(unittest.TestCase):
             assert abs(val) > 0.01
 
     def test_interpolate(self):
-        x, y, v, w = np.loadtxt("test_arms.txt", delimiter=",", unpack=True)
+        x, y, v, w = np.loadtxt('test_arms.txt', delimiter=",", unpack=True)
         a, b = interpolate_data(x, y, v, w)
         assert len(a) == len(b)
         np.random.seed(1000)
@@ -49,7 +50,7 @@ class TestEdit(unittest.TestCase):
             interpolate_data({"a": "1", "b": "2"}, x, y, v, window=1, order=3)
 
     def test_cut(self):
-        x, y, v, w = np.loadtxt("test_arms.txt", delimiter=",", unpack=True)
+        x, y, v, w = np.loadtxt('test_arms.txt', delimiter=",", unpack=True)
         a, b = cut_data(x, y, v, w, start=2.2, stop=2.8)
         assert len(a) == len(b)
         np.testing.assert_almost_equal(min(a), 2.2, decimal=2)
@@ -58,7 +59,7 @@ class TestEdit(unittest.TestCase):
             cut_data(x, [], v, w)
 
     def test_convolution(self):
-        x, y, v, w = np.loadtxt("test_arms.txt", delimiter=",", unpack=True)
+        x, y, v, w = np.loadtxt('test_arms.txt', delimiter=",", unpack=True)
         a, b = convolution(x, y, v, w, len(x), standev=200)
         assert len(a) == len(b)
         with self.assertRaises(ValueError):
