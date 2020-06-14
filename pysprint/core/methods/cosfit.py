@@ -12,8 +12,8 @@ __all__ = ["CosFitMethod"]
 
 class CosFitMethod(Dataset):
     """
-	Basic interface for the Cosine Function Fit Method.
-	"""
+    Basic interface for the Cosine Function Fit Method.
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -24,105 +24,106 @@ class CosFitMethod(Dataset):
 
     def set_max_tries(self, value):
         """
-		Overwrite the default scipy maximum try setting to fit the curve.
-		"""
+        Overwrite the default scipy maximum try setting to fit the curve.
+        """
         self.mt = value
 
     def adjust_offset(self, value):
         """
-		Initial guess for offset
-		"""
+        Initial guess for offset
+        """
         self.params[0] = value
 
     def adjust_amplitude(self, value):
         """
-		Initial guess for amplitude
-		"""
+        Initial guess for amplitude
+        """
         self.params[1] = value
 
     def guess_GD(self, value):
         """
-		Initial guess for GD in fs
-		"""
+        Initial guess for GD in fs
+        """
         self.params[3] = value
 
     def guess_GDD(self, value):
         """
-		Initial guess for GDD in fs^2
-		"""
+        Initial guess for GDD in fs^2
+        """
         self.params[4] = value / 2
 
     def guess_TOD(self, value):
         """
-		Initial guess for TOD in fs^3
-		"""
+        Initial guess for TOD in fs^3
+        """
         self.params[5] = value / 6
 
     def guess_FOD(self, value):
         """
-		Initial guess for FOD in fs^4
-		"""
+        Initial guess for FOD in fs^4
+        """
         self.params[6] = value / 24
 
     def guess_QOD(self, value):
         """
-		Initial guess for QOD in fs^5
-		"""
+        Initial guess for QOD in fs^5
+        """
         self.params[7] = value / 120
 
     def set_max_order(self, order):
         """
-		Sets the maximum order of dispersion to look for.
-		Should be called after guessing the initial parameters.
+        Sets the maximum order of dispersion to look for.
+        Should be called after guessing the initial parameters.
 
-		Parameters:
-		----------
+        Parameters:
+        ----------
 
-		order: int
-			maximum order of dispersion to look for. Must be in [1, 5]
-		"""
+        order: int
+            maximum order of dispersion to look for. Must be in [1, 5]
+        """
         if order > 5 or order < 1:
             print(
-                f"Order should be an in integer from [1,5], currently {order} is given"
+                "Order should be an in integer from [1,5]"
             )
         try:
             int(order)
         except ValueError:
             print(
-                f"Order should be an in integer from [1,5], currently {order} is given"
+                "Order should be an in integer from [1,5]"
             )
         order = 6 - order
         for i in range(1, order):
             self.params[-i] = 0
 
     def calculate(self, reference_point):
-        """ 
-		Cosine fit's calculate function.
+        """
+        Cosine fit's calculate function.
 
-		Parameters:
-		----------
-		reference_point: float
-			reference point on x axis
+        Parameters:
+        ----------
+        reference_point: float
+            reference point on x axis
 
-		Returns:
-		-------
+        Returns:
+        -------
 
-		dispersion: array-like
-			[GD, GDD, TOD, FOD, QOD]
+        dispersion: array-like
+            [GD, GDD, TOD, FOD, QOD]
 
-		dispersion_std: array-like
-			standard deviations due to uncertanity of the fit
-			[GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
+        dispersion_std: array-like
+            standard deviations due to uncertanity of the fit
+            [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
 
-		fit_report: lmfit report
-			WILL BE IMPLEMENTED
+        fit_report: lmfit report
+            WILL BE IMPLEMENTED
 
 
-		Notes:
-		------
+        Notes:
+        ------
 
-		Decorated with print_disp, so the results are immediately printed without explicitly saying so.
-		"""
+        Decorated with print_disp, so the results are
+        immediately printed without explicitly saying so.
+        """
         dispersion, self.fit = cff_method(
             self.x,
             self.y,
@@ -143,9 +144,10 @@ class CosFitMethod(Dataset):
 
     def plot_result(self):
         """
-		If the fitting happened, draws the fitted curve on the original dataset.
-		Also prints the coeffitient of determination of the fit (a.k.a. r^2).
-		"""
+        If the fitting happened, draws the fitted curve on the original
+        dataset. Also prints the coeffitient of determination of the
+        fit (a.k.a. r^2).
+        """
         try:
             residuals = self.y_norm - self.fit
             ss_res = np.sum(residuals ** 2)
@@ -173,50 +175,57 @@ class CosFitMethod(Dataset):
         show_endpoint=True,
     ):
         """
-		Cosine fit optimizer. It's based on adding new terms to fit function successively
-		until we reach the max_order.
+        Cosine fit optimizer. It's based on adding new terms to fit
+        function successively until we reach the max_order.
 
-		Notes
-		-----
-		If the fit fails some parameters must be tweaked in order to achieve results.
-		There is a list below with issues, its suspected reasons and solutions.
+        Notes
+        -----
+        If the fit fails some parameters must be tweaked in order to
+        achieve results. There is a list below with issues,
+        its suspected reasons and solutions.
 
-		**SciPy raises OptimizeWarning and the affected area is small or not showing
-		  any fit
+        **SciPy raises OptimizeWarning and the affected area is small
+        or not showing any fit
 
-		Reasons:
-		- Completely wrong initial GD guess (or lack of guessing).
-		- Too broad inital region, so that the optimizer cannot find a suitable fit.
-		  This usually happens when the used data is large, or the spectral resolution
-		  is high.
+        Reasons:
+        - Completely wrong initial GD guess (or lack of guessing).
+        - Too broad inital region, so that the optimizer cannot find a
+        suitable fit.
 
-		Solution:
-		- Provide better inital guess for GD.
-		- Lower the inital_region_ratio.
+        This usually happens when the used data is large, or the spectral
+        resolution is high.
 
-		**SciPy raises OptimizeWarning and the affected area is bigger
+        Solution:
+        - Provide better inital guess for GD.
+        - Lower the inital_region_ratio.
 
-		Reasons:
-		- When the optimizer steps up with order it also extends the region of fit.
-		This error usually present when the region of fit is too quickly growing.
+        **SciPy raises OptimizeWarning and the affected area is bigger
 
-		Solution:
-		- Lower extend_by argument.
+        Reasons:
+        - When the optimizer steps up with order it also extends the
+        region of fit.
 
-		**The optimizer is finished, but wrong fit is produced.
+        This error usually present when the region of fit is too quickly
+        growing.
 
-		Reasons:
-		- We measure the goodness of fit with r^2 value. To allow this
-		optimizer to smoothly find appropriate fits even for noisy datasets
-		it's a good practice to keep the r^2 a lower value, such as the default 0.3.
-		The way it works is we step up in order of fit (until max order) and extend
-		region every time when a fit reaches the specified r^2 threshold value.
-		This can be controlled via the coef_threshold argument.
+        Solution:
+        - Lower extend_by argument.
 
-		Solution:
-		- Adjust the coef_threshold value. Note that it's highly recommended not to
-		set a higher value than 0.6.
-		"""
+        **The optimizer is finished, but wrong fit is produced.
+
+        Reasons:
+        - We measure the goodness of fit with r^2 value. To allow this
+        optimizer to smoothly find appropriate fits even for noisy datasets
+        it's a good practice to keep the r^2 a lower value, such as
+        the default 0.3. The way it works is we step up in order of fit
+        (until max order) and extend region every time when a fit reaches
+        the specified r^2 threshold value. This can be controlled via the
+        coef_threshold argument.
+
+        Solution:
+        - Adjust the coef_threshold value. Note that it's highly
+        recommended not to set a higher value than 0.6.
+        """
 
         x, y, ref, sam = self._safe_cast()
         self.f = FitOptimizer(

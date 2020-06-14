@@ -9,7 +9,6 @@ class MetaData:
     """
     A class to store additional meta property.
     This can be set to any valid ~collections.abc.Mapping.
-    Shamefully borrowed from astropy, all the credits to them.
 
     Parameters
     ----------

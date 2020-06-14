@@ -43,7 +43,7 @@ class Phase:
         if self.poly:
             return self.poly.__call__(value)
         raise NotImplementedError(
-            f"Before calling, a polinomial must be fitted."
+            "Before calling, a polinomial must be fitted."
         )
 
     @classmethod
@@ -72,7 +72,7 @@ class Phase:
         if self.poly is not None:
             return self.poly.__str__()
         raise NotImplementedError(
-            f"Before calling, a polinomial must be fitted."
+            "Before calling, a polinomial must be fitted."
         )
 
     def plot(self, ax=None, **kwargs):

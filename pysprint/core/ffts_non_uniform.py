@@ -1,6 +1,8 @@
 """
 This file contains code from a blog post by Jake VanderPlas.
-See at: https://jakevdp.github.io/blog/2015/02/24/optimizing-python-with-numpy-and-numba/
+
+See at:
+https://jakevdp.github.io/blog/2015/02/24/optimizing-python-with-numpy-and-numba/
 
 References:
 
@@ -9,8 +11,10 @@ References:
     Volume 2, Issue 1, January 1995, Pages 85-100
     (1995)
 
-[2] Greengard, Leslie & Lee, June-Yub.: Accelerating the Nonuniform Fast Fourier Transform,
-    Society for Industrial and Applied Mathematics. 46. 443-454. 10.1137/S003614450343200X.
+[2] Greengard, Leslie & Lee, June-Yub.: Accelerating the
+    Nonuniform Fast Fourier Transform,
+    Society for Industrial and Applied Mathematics.
+    46. 443-454. 10.1137/S003614450343200X.
     (2004)
 """
 
@@ -104,9 +108,9 @@ def _compute_gaussian_grid_nonumba(x, c, Mr, Msp, tau):
 
     E2 = np.empty((2 * Msp, N), dtype=xmod.dtype)
     E2[Msp] = 1
-    E2[Msp + 1 :] = np.exp((xmod - hx * m) * np.pi / (Mr * tau))
-    E2[Msp + 1 :].cumprod(0, out=E2[Msp + 1 :])
-    E2[Msp - 1 :: -1] = 1.0 / (E2[Msp + 1] * E2[Msp:])
+    E2[Msp + 1:] = np.exp((xmod - hx * m) * np.pi / (Mr * tau))
+    E2[Msp + 1:].cumprod(0, out=E2[Msp + 1:])
+    E2[Msp - 1::-1] = 1.0 / (E2[Msp + 1] * E2[Msp:])
 
     E3 = np.exp(-((np.pi * msp / Mr) ** 2) / tau)
     spread = (c * E1) * E2 * E3
@@ -117,8 +121,8 @@ def _compute_gaussian_grid_nonumba(x, c, Mr, Msp, tau):
 
 
 def nuifft(x, y, gl, df=1.0, epsilon=1e-12, exponent="positive"):
-    """Non-Uniform (inverse) Fast Fourier Transform to avoid linear interpolation
-    of interferograms.
+    """Non-Uniform (inverse) Fast Fourier Transform to avoid linear
+    interpolation of interferograms.
 
     Compute the non-uniform FFT of one-dimensional points x with (complex)
     values y. Result is computed at frequencies (df * gl)
@@ -128,7 +132,7 @@ def nuifft(x, y, gl, df=1.0, epsilon=1e-12, exponent="positive"):
     Parameters
     ----------
     x, y : array-like
-        real locations x and (complex) values y of the points to be transformed.
+        real locations x and (complex) values y to be transformed.
     gl, df : int & float
         Parameters specifying the desired frequency grid. Transform will be
         computed at frequencies df * (-(gl//2) + arange(gl))
@@ -170,13 +174,15 @@ def nuifft(x, y, gl, df=1.0, epsilon=1e-12, exponent="positive"):
     if _has_numba:
         ftau = _compute_gaussian_grid(x, y, Mr, Msp, tau)
     else:
-        warnings.warn("Numba is not availabe, falling back to slower version.")
+        warnings.warn(
+            "Numba is not availabe, falling back to slower version."
+        )
         ftau = _compute_gaussian_grid_nonumba(x, y, Mr, Msp, tau)
 
     if exponent == "negative":
         Ftau = (1 / Mr) * np.fft.fft(ftau)
     else:
         Ftau = np.fft.ifft(ftau)
-    Ftau = np.concatenate([Ftau[-(gl // 2) :], Ftau[: gl // 2 + gl % 2]])
+    Ftau = np.concatenate([Ftau[-(gl // 2):], Ftau[:gl // 2 + gl % 2]])
 
     return (1 / N) * np.sqrt(np.pi / tau) * np.exp(tau * k ** 2) * Ftau

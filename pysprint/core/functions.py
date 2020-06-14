@@ -118,7 +118,7 @@ def cos_fit6(x, c0, c1, b0, b1, b2, b3, b4, b5, b6):
 _fit_config = {
     1: poly1,
     2: poly2,
-    3: poly3, 
+    3: poly3,
     4: poly4,
     5: poly5
 }

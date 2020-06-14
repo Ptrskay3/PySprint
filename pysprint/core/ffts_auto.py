@@ -1,9 +1,6 @@
-import os
-import contextlib
 import warnings
 
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.signal import find_peaks
 
 
@@ -63,7 +60,8 @@ def predict_fwhm(
 
     peak_position = center / N
 
-    # explicitly prefer higher order windows if the peak is too close to the origin
+    # explicitly prefer higher order windows
+    # if the peak is too close to the origin
 
     if peak_position < 0.2:
         warnings.warn(
@@ -105,9 +103,9 @@ def predict_fwhm(
         val = _ensure_window_at_origin(
             center, window_size, order, peak_center_height, tol=tol
         )[1]
-        # print(f'The window is bigger at the origin than the desired tolerance. Actual: {val:.4e}, Desired: {tol*peak_center_height:.4e}')
         warnings.warn(
-            f"The window is bigger at the origin than the desired tolerance. Actual:{val:.4e}, Desired:{tol*peak_center_height:.4e}"
+            "The window is bigger at the origin than the desired tolerance. "
+            f"Actual:{val:.4e}, Desired:{tol*peak_center_height:.4e}"
         )
         return center, window_size, order + 2
 
@@ -141,11 +139,12 @@ def _run(
     print("Done")
     c, ws, _order = predict_fwhm(x, y, center=a, peak_center_height=b)
     print(
-        f"A {_order} order gaussian window centered at {c:.2f} fs with FWHM {ws:.2f} fs was applied."
+        f"A {_order} order gaussian window centered at "
+        f"{c:.2f} fs with FWHM {ws:.2f} fs was applied."
     )
     ifg.window(at=c, fwhm=ws, window_order=_order, plot=show_graph)
     ifg.apply_window()
-    print(f"Applying FFT...", end="", flush=True)
+    print("Applying FFT...", end="", flush=True)
     ifg.fft()
     print("Done")
     print("Calculating...")

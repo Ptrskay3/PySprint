@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from math import factorial
 
 import numpy as np
@@ -27,7 +26,6 @@ from pysprint.utils import (
 from pysprint.core.functions import _fit_config, _cosfit_config
 
 
-
 __all__ = [
     "min_max_method",
     "spp_method",
@@ -37,8 +35,6 @@ __all__ = [
     "ifft_method",
     "args_comp",
 ]
-
-
 
 
 def min_max_method(
@@ -222,7 +218,6 @@ def spp_method(delays, omegas, ref_point=0, fit_order=4):
 
     _function = _fit_config[fit_order]
 
-
     if _has_lmfit:
         fitmodel = Model(_function)
         pars = fitmodel.make_params(
@@ -241,7 +236,6 @@ def spp_method(delays, omegas, ref_point=0, fit_order=4):
         )
         bf = _function(omegas, *popt)
     return omegas, delays, -dispersion, dispersion_std, bf
-
 
 
 def cff_method(
@@ -488,7 +482,6 @@ def args_comp(x, y, ref_point=0, fit_order=5, show_graph=False):
                 window_title="Phase",
             )
         except UnboundLocalError:
-
 
             plot_phase(
                 x,

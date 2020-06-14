@@ -46,9 +46,7 @@ def savgol(x, y, ref, sam, window=101, order=3):
         except Exception as e:
             print(e)
     else:
-        raise ValueError(
-            f"Order must be lower than window length. Currently window is {window} and order is {order})"
-        )
+        raise ValueError("Order must be lower than window length.")
 
 
 def find_peak(
@@ -62,7 +60,7 @@ def find_peak(
             float(except_around[1])
         except ValueError:
             raise ValueError(
-                f"Invalid except_around arg. Only numeric values are allowed."
+                "Invalid except_around arg. Only numeric values are allowed."
             )
     x, y = _handle_input(x, y, ref, sam)
     maxIndexes, _ = find_peaks(y, prominence=proMax)

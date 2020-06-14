@@ -24,12 +24,16 @@ class FitOptimizer:
             try:
                 self.ref = np.asarray(self.ref)
             except (ValueError, TypeError):
-                pass  # we ignore because it might be optional if y is already normalized
+                pass
+                # we ignore because it might be optional
+                # if y is already normalized
         if not isinstance(self.sam, np.ndarray):
             try:
                 self.sam = np.asarray(self.sam)
             except (ValueError, TypeError):
-                pass  # we ignore because it might be optional if y is already normalized
+                pass
+                # we ignore because it might be optional
+                # if y is already normalized
         if len(self.ref) == 0:
             self._y_norm = self.y
         else:
@@ -85,7 +89,7 @@ class FitOptimizer:
         plt.grid()
         # plt.legend(loc='upper left')
         plt.draw()
-        plt.xlabel("$\Delta\omega\, [PHz]$")
+        plt.xlabel(r"$\Delta\omega\, [PHz]$")
         plt.ylabel("I")
         plt.show()
 
@@ -101,14 +105,14 @@ class FitOptimizer:
             self._lower_bound = 0
         if self._upper_bound > len(self.x):
             self._upper_bound = len(self.x)
-        self._x_curr = self.x[self._lower_bound : self._upper_bound]
-        self._y_curr = self._y_norm[self._lower_bound : self._upper_bound]
+        self._x_curr = self.x[self._lower_bound:self._upper_bound]
+        self._y_curr = self._y_norm[self._lower_bound:self._upper_bound]
 
     def _step_up_func(self):
         """
-		Change the function to fit. Starts with first order
-		and stepping up until max_order.
-		"""
+        Change the function to fit. Starts with first order
+        and stepping up until max_order.
+        """
         if self.curr_order == self.max_order:
             return
         try:
@@ -134,13 +138,13 @@ class FitOptimizer:
             self._new_lower = 0
         if self._new_upper > len(self.x):
             self._new_upper = len(self.x)
-        self._x_curr = self.x[self._new_lower : self._new_upper]
-        self._y_curr = self._y_norm[self._new_lower : self._new_upper]
+        self._x_curr = self.x[self._new_lower:self._new_upper]
+        self._y_curr = self._y_norm[self._new_lower:self._new_upper]
 
     def _finetune(self):
         """
-		Changes the last parameter randomly, we might get lucky..
-		"""
+        Changes the last parameter randomly, we might get lucky..
+        """
         self.p0[-1] = float(np.random.uniform(-1, 1, 1)) * self.p0[-1]
 
     def _fit(self):
@@ -159,8 +163,8 @@ class FitOptimizer:
 
     def _fit_goodness(self):
         """
-		Coeffitient of determination a.k.a. r^2
-		"""
+        Coeffitient of determination a.k.a. r^2
+        """
         residuals = self._y_curr - self.func(self._x_curr, *self.popt)
         ss_res = np.sum(residuals ** 2)
         ss_tot = np.sum((self._y_curr - np.mean(self._y_curr)) ** 2)
@@ -201,7 +205,7 @@ class FitOptimizer:
                 if show_endpoint:
                     self.update_plot()
                 print(
-                    f"""Max tries ({max_tries}) reached.. try another initial params"""
+                    f"""Max tries ({max_tries}) reached.."""
                 )
                 return np.zeros_like(self.popt)
 
@@ -213,6 +217,6 @@ class FitOptimizer:
                 if show_endpoint:
                     self.update_plot()
                 print(
-                    f"""\nMax tries ({max_tries}) reached.. try another initial params"""
+                    f"""\nMax tries ({max_tries}) reached.."""
                 )
                 return np.zeros_like(self.popt)

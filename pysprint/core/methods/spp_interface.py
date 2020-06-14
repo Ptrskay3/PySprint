@@ -146,7 +146,6 @@ class SPPMethod:
         )
         return dispersion, dispersion_std, ""
 
-
     def calculate(self, reference_point, order=2, show_graph=False):
         delays = np.concatenate([_ for _ in self._delay.values()]).ravel()
         positions = np.concatenate(
@@ -169,10 +168,9 @@ class SPPMethod:
 
     @property
     def info(self):
-        self._info = f"Data is recorded from {len(self._delay)} interferograms ({len(self)} availabe in total)"
+        self._info = (f"Progress: {len(self._delay)}/{len(self)}")
         return self._info
 
     @property
     def stats(self):
         raise NotImplementedError
-    

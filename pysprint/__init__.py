@@ -1,7 +1,9 @@
 import os
 import warnings
 
-warnings.filterwarnings("ignore", message="invalid value encountered in sqrt")
+warnings.filterwarnings(
+    "ignore", message="invalid value encountered in sqrt"
+)
 warnings.filterwarnings(
     "ignore", message="divide by zero encountered in true_divide"
 )
@@ -59,11 +61,6 @@ if run_from_notebook():
         ipython = IPython.ipapi.get()
 
     ipython.magic("matplotlib qt")
-
-    # import matplotlib
-    # plt.switch_backend('Qt5Agg')
-    # if matplotlib.get_backend() != 'Qt5Agg':
-    #     matplotlib.use('Qt5Agg')
 
 
 __version__ = "0.11.0"

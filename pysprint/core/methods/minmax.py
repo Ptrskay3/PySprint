@@ -4,7 +4,6 @@ from pysprint.core.bases.dataset import Dataset
 from pysprint.mpl_tools.peak import EditPeak
 from pysprint.utils import (
     _maybe_increase_before_cwt,
-    run_from_ipython,
     calc_envelope,
 )
 from pysprint.core.evaluate import min_max_method
@@ -14,8 +13,8 @@ __all__ = ["MinMaxMethod"]
 
 class MinMaxMethod(Dataset):
     """
-	Basic interface for Minimum-Maximum Method.
-	"""
+    Basic interface for Minimum-Maximum Method.
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -23,26 +22,24 @@ class MinMaxMethod(Dataset):
     # TODO: fix docstring
     def init_edit_session(self, engine="normal", **kwargs):
         """ Function to initialize peak editing on a plot.
-		Right clicks will delete the closest point, left clicks 
-		will add a new point. Just close the window when finished.
-		
-		Parameters:
-		----------
+        Right clicks will delete the closest point, left clicks
+        will add a new point. Just close the window when finished.
 
-		engine: str, default is `'normal'`
-			Must be `'cwt'`, `'normal'` or `'slope'`.
-			Peak detection algorithm to use.
-			
-		**kwargs:
-			pmax, pmin, threshold, except_around, width
+        Parameters:
+        ----------
 
-		Notes:
-		------
+        engine: str, default is `'normal'`
+            Must be `'cwt'`, `'normal'` or `'slope'`.
+            Peak detection algorithm to use.
 
-		Currently this function is disabled when running it from IPython.
-		"""
-        if run_from_ipython():
-            return """It seems you run this code in Jupyter Notebook. Use `pysprint.setup_notebook()` to enable interactive plots."""
+        **kwargs:
+            pmax, pmin, threshold, except_around, width
+
+        Notes:
+        ------
+
+        Currently this function is disabled when running it from IPython.
+        """
         engines = ("cwt", "normal", "slope")
         if engine not in engines:
             raise ValueError(f"Engine must be in {str(engines)}")
@@ -101,49 +98,49 @@ class MinMaxMethod(Dataset):
         # better distribute these points between min and max, just in case
         # the default argrelextrema is definitely not called
         # in `pysprint.core.evaluate.min_max_method`.
-        self.xmin = _editpeak.get_dat[0][: len(_editpeak.get_dat[0]) // 2]
-        self.xmax = _editpeak.get_dat[0][len(_editpeak.get_dat[0]) // 2 :]
+        self.xmin = _editpeak.get_dat[0][:len(_editpeak.get_dat[0]) // 2]
+        self.xmax = _editpeak.get_dat[0][len(_editpeak.get_dat[0]) // 2:]
         print(
-            f"In total {len(_editpeak.get_dat[0])} extremal points were recorded."
+            f"{len(_editpeak.get_dat[0])} extremal points were recorded."
         )
         return _editpeak.get_dat[0]  # we should return None
 
-
     def calculate(self, reference_point, order, show_graph=False):
-        """ 
-		MinMaxMethod's calculate function.
+        """
+        MinMaxMethod's calculate function.
 
-		Parameters:
-		----------
+        Parameters:
+        ----------
 
-		reference_point: float
-			reference point on x axis
+        reference_point: float
+            reference point on x axis
 
-		fit_order: int
-			Polynomial (and maximum dispersion) order to fit. Must be in [1,5].
+        fit_order: int
+            Polynomial (and maximum dispersion) order to fit. Must be in [1,5]
 
-		show_graph: bool
-			shows a the final graph of the spectral phase and fitted curve.
+        show_graph: bool
+            shows a the final graph of the spectral phase and fitted curve.
 
-		Returns:
-		-------
+        Returns:
+        -------
 
-		dispersion: array-like
-			[GD, GDD, TOD, FOD, QOD]
+        dispersion: array-like
+            [GD, GDD, TOD, FOD, QOD]
 
-		dispersion_std: array-like
-			standard deviations due to uncertanity of the fit
-			[GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
+        dispersion_std: array-like
+            standard deviations due to uncertanity of the fit
+            [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
 
-		fit_report: lmfit report
-			if lmfit is available, the fit report
+        fit_report: lmfit report
+            if lmfit is available, the fit report
 
 
-		Notes:
-		------
+        Notes:
+        ------
 
-		Decorated with print_disp, so the results are immediately printed without explicitly saying so.
-		"""
+        Decorated with print_disp, so the results are
+        immediately printed without explicitly saying so.
+        """
         dispersion, dispersion_std, fit_report = min_max_method(
             self.x,
             self.y,

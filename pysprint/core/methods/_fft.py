@@ -14,7 +14,7 @@ from pysprint.core.evaluate import (
     args_comp,
     gaussian_window,
 )
-from pysprint.utils.exceptions import *
+from pysprint.utils.exceptions import FourierWarning
 from pysprint.core.ffts_auto import _run
 from pysprint.core.phase import Phase
 
@@ -23,9 +23,8 @@ __all__ = ["FFTMethod"]
 
 class FFTMethod(Dataset):
     """
-	Basic interface for the Fourier transform method.
-	# FIXME: bug when calling show_graph on calulcate method: it opens up a clean figure.
-	"""
+    Basic interface for the Fourier transform method.
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -42,44 +41,42 @@ class FFTMethod(Dataset):
 
     def shift(self, axis="x"):
         """
-		Equivalent to scipy.fftpack.fftshift, but it's easier to
-		use this function instead, because we don't need to explicitly
-		call the class' x and y attribute.
-		
-		Parameter(s):
-		------------
-		axis: str, default is 'x'
-			either 'x', 'y' or 'both'
-		"""
+        Equivalent to scipy.fftpack.fftshift, but it's easier to
+        use this function instead, because we don't need to explicitly
+        call the class' x and y attribute.
+
+        Parameter(s):
+        ------------
+        axis: str, default is 'x'
+            either 'x', 'y' or 'both'
+        """
         if axis == "x":
             self.x = fftshift(self.x)
         elif axis == "y":
             self.y = fftshift(self.y)
-        elif axis == "both":
+        elif axis == "both" or axis == 'xy' or axis == 'yx':
             self.y = fftshift(self.y)
             self.x = fftshift(self.x)
         else:
-            raise ValueError(
-                f"axis should be either x, y or both, currently {axis} is given."
-            )
+            raise ValueError("axis should be either `x`, `y` or `both`.")
 
     def ifft(
         self, interpolate=True, usenifft=False, eps=1e-12, exponent="positive"
     ):
         """
-		Applies ifft to the dataset.
-		
-		Parameter(s):
-		------------
+        Applies ifft to the dataset.
 
-		interpolate: bool, default is True
-			Whether to apply linear interpolation on the dataset before transforming.
+        Parameter(s):
+        ------------
 
-		usenifft: bool, default is False
-			Whether to use non unifrom fft
+        interpolate: bool, default is True
+            Whether to apply linear interpolation on the dataset
+            before transforming.
 
-		...
-		"""
+        usenifft: bool, default is False
+            Whether to use non unifrom fft
+
+        """
         self._ifft_called_first = True
         if usenifft:
             x_spaced = np.linspace(self.x[0], self.x[-1], len(self.x))
@@ -102,36 +99,38 @@ class FFTMethod(Dataset):
 
     def fft(self):
         """
-		Applies fft to the dataset.
-		If ifft was not called first, inaccurate results might happen. It will be fixed later on.
-		Check calculate function's docstring for more detail.
-		"""
+        Applies fft to the dataset.
+        If ifft was not called first, inaccurate results might happen.
+        It will be fixed later on.
+        Check calculate function's docstring for more detail.
+        """
         if not self._ifft_called_first:
             warnings.warn(
-                "This module is designed to call ifft before fft, so inconsistencies might occur when calling fft first. Consider using numpys fft package with your own logic. This functionality will be added later on.",
-                FourierWarning,
+                "This module is designed to call ifft before fft",
+                FourierWarning
             )
         self.x, self.y = fft_method(self.original_x, self.y)
 
     def window(self, at, fwhm, window_order=6, plot=True):
         """
-		Draws a gaussian window on the plot with the desired parameters.
-		The maximum value is adjusted for the dataset mostly for visibility reasons.
-		You should explicitly call self.show() after this function is set.
+        Draws a gaussian window on the plot with the desired parameters.
+        The maximum value is adjusted for the dataset mostly for
+        visibility reasons. You should explicitly call self.show()
+        after this function is set.
 
-		Parameters:
-		----------
+        Parameters:
+        ----------
 
-		at: float
-			maximum of the gaussian curve
+        at: float
+            maximum of the gaussian curve
 
-		fwhm: float
-			Full width at half maximum of the gaussian
+        fwhm: float
+            Full width at half maximum of the gaussian
 
-		window_order: int, default is 6
-			Order of the gaussian curve.
-			If not even, it's incremented by 1.
-		"""
+        window_order: int, default is 6
+            Order of the gaussian curve.
+            If not even, it's incremented by 1.
+        """
         self.at = at
         self.fwhm = fwhm
         self.window_order = window_order
@@ -144,8 +143,8 @@ class FFTMethod(Dataset):
 
     def apply_window(self):
         """
-		If window function is correctly set, applies changes to the dataset.
-		"""
+        If window function is correctly set, applies changes to the dataset.
+        """
         self.plotwidget.clf()
         self.plotwidget.cla()
         self.plotwidget.close()
@@ -158,45 +157,47 @@ class FFTMethod(Dataset):
         )
 
     def calculate(self, reference_point, order, show_graph=False):
-        """ 
-		FFTMethod's calculate function.
+        """
+        FFTMethod's calculate function.
 
-		Parameters:
-		----------
+        Parameters:
+        ----------
 
-		reference_point: float
-			reference point on x axis
+        reference_point: float
+            reference point on x axis
 
-		fit_order: int
-			Polynomial (and maximum dispersion) order to fit. Must be in [1,5].
+        fit_order: int
+            Polynomial (and maximum dispersion) order to fit. Must be in [1,5].
 
-		show_graph: bool, optional
-			shows a the final graph of the spectral phase and fitted curve.
+        show_graph: bool, optional
+            shows a the final graph of the spectral phase and fitted curve.
 
-		Returns:
-		-------
+        Returns:
+        -------
 
-		dispersion: array-like
-			[GD, GDD, TOD, FOD, QOD]
+        dispersion: array-like
+            [GD, GDD, TOD, FOD, QOD]
 
-		dispersion_std: array-like
-			standard deviations due to uncertanity of the fit
-			[GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
+        dispersion_std: array-like
+            standard deviations due to uncertanity of the fit
+            [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
 
-		fit_report: lmfit report
-			if lmfit is available, the fit report
+        fit_report: lmfit report
+            if lmfit is available, the fit report
 
-		Notes:
-		------
+        Notes:
+        ------
 
-		Decorated with print_disp, so the results are immediately printed without explicitly saying so.
+        Decorated with print_disp, so the results are immediately
+        printed without explicitly saying so.
 
-		Currently the x-axis transformation is sloppy, because we cache the 
-		original x axis and not transforming it	backwards. In addition we need to keep track 
-		of interpolation and zero-padding too. Currently the transforms are correct only if 
-		first ifft was used. For now it's doing okay: giving good results. 
-		For consistency we should still implement that a better way later.
-		"""
+        Currently the x-axis transformation is sloppy, because we cache the
+        original x axis and not transforming it	backwards.
+        In addition we need to keep track of interpolation and
+        zero-padding too. Currently the transforms are correct only if
+        first ifft was used. For now it's doing okay: giving good results.
+        For consistency we should still implement that a better way later.
+        """
         dispersion, dispersion_std, fit_report = args_comp(
             self.x,
             self.y,
