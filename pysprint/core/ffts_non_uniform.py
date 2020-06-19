@@ -121,7 +121,8 @@ def _compute_gaussian_grid_nonumba(x, c, Mr, Msp, tau):
 
 
 def nuifft(x, y, gl, df=1.0, epsilon=1e-12, exponent="positive"):
-    """Non-Uniform (inverse) Fast Fourier Transform to avoid linear
+    """
+    Non-Uniform (inverse) Fast Fourier Transform to avoid linear
     interpolation of interferograms.
 
     Compute the non-uniform FFT of one-dimensional points x with (complex)
