@@ -1,5 +1,4 @@
-sudo: false
-
+os: linux
 
 dist: xenial
 
@@ -15,7 +14,6 @@ python:
 
 env: 
     - version=latest
-    - verison=minimum
     - version=withextras
 
 before_install:
@@ -33,9 +31,6 @@ install:
   - python -m pip install --upgrade pip
   - if [[ $version == withextras ]]; then python -m pip install --upgrade numpy scipy matplotlib pandas lmfit numba ; fi
   - if [[ $version == latest ]]; then python -m pip install --upgrade numpy scipy matplotlib pandas ; fi
-  - if [[ $version == minimum ]]; then pip install -r requirements.txt ; fi
-  # this should be called explicitly to actually get the right numpy version
-  - if [[ $version == minimum ]]; then pip install --upgrade numpy matplotlib ; fi
   - pip install codecov coverage flake8 
   - python setup.py install
   - pip list
