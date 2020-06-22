@@ -3,6 +3,7 @@ This file implements the basic Dataset class.
 """
 import json  # for pretty printing dict
 import warnings
+from inspect import signature
 from textwrap import dedent
 from math import factorial
 
@@ -103,10 +104,33 @@ class Dataset(metaclass=DatasetBase):
 
         self._dispersion_array = None
 
-    def __call__(self, reference_point, order, show_graph):
+    def __call__(self, reference_point, *, order=None, show_graph=None):
         '''Alias for self.calculate.'''
+
         if hasattr(self, "calculate"):
-            self.calculate(reference_point, order, show_graph)
+
+            sig = len(signature(self.calculate).parameters)
+            if sig == 1:
+                if order or show_graph:
+                    warnings.warn('order and show_graph has no effect here.')
+                self.calculate(reference_point)
+            elif sig == 3:
+
+                # set up defaults here
+                if order is None:
+                    order = 3
+                if show_graph is None:
+                    show_graph = False
+
+                self.calculate(
+                    reference_point=reference_point,
+                    order=order,
+                    show_graph=show_graph
+                )
+
+            else:
+                raise ValueError('Unknown function signature.')
+
         else:
             raise NotImplementedError
 
