@@ -1,6 +1,11 @@
 import os
 import warnings
 
+import matplotlib
+import matplotlib.pyplot
+
+matplotlib.pyplot.ion()
+
 warnings.filterwarnings(
     "ignore", message="invalid value encountered in sqrt"
 )
@@ -15,6 +20,8 @@ def run_from_notebook():
     """
     try:
         __IPYTHON__
+        # we must distinguish SPYDER because it automatically sets
+        # up a backend for the user.
         if any("SPYDER" in name for name in os.environ):
             return False
         return True
@@ -37,30 +44,24 @@ def setup_notebook(figsize=(15, 5), backend="Qt5Agg"):
         import IPython.ipapi
 
         ipython = IPython.ipapi.get()
+    try:
+        ipython.magic("matplotlib qt")
+    except:
+        pass
 
-    ipython.magic("matplotlib qt")
-
-    import matplotlib
-
-    plt.switch_backend("Qt5Agg")
-    if matplotlib.get_backend() != "Qt5Agg":
-        matplotlib.use("Qt5Agg")
+    try:
+        plt.switch_backend("Qt5Agg")
+        if matplotlib.get_backend() != "Qt5Agg":
+            matplotlib.use("Qt5Agg")
+    except:
+        warnings.warn(
+            "You should manually set a suitable matplotlib backend, "
+            "e.g. matplotlib.use('Qt5Agg') to enable interactive plots."
+        )
 
 
 if run_from_notebook():
-    from matplotlib import pyplot as plt
-
-    plt.rcParams["figure.figsize"] = [15, 5]
-    try:
-        from IPython import get_ipython
-
-        ipython = get_ipython()
-    except ImportError:
-        import IPython.ipapi
-
-        ipython = IPython.ipapi.get()
-
-    ipython.magic("matplotlib qt")
+    setup_notebook()
 
 
 __version__ = "0.11.0"

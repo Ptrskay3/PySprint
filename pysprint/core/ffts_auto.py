@@ -32,8 +32,10 @@ def find_center(x, y, n_largest=5):
     ind = np.unique(np.concatenate((ind1, ind2)))
 
     peaks = peaks[ind]
-    _x, _y = x[peaks], y[peaks]
-    residx = np.argmax(_x * _y)  # weighted with distance from origin
+    y_prob_density = np.exp((-(x - np.max(x) / 2.5) ** 2) / (1000 * np.max(x)))
+    _x, _y = x[peaks], y_prob_density[peaks]
+    # weighted with the prob density function above from origin
+    residx = np.argmax(_x * _y)
 
     return _x[residx], _y[residx]
 
@@ -43,7 +45,7 @@ def _ensure_window_at_origin(
 ):
     """
     Ensure that the gaussian window of given parameters is
-    not crossing zero.
+    not crossing zero with bigger value than the desired tolerance.
     """
     std = fwhm / (2 * (np.log(2) ** (1 / order)))
     val = np.exp(-((0 - center) ** order) / (std ** order))

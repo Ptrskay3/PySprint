@@ -1,12 +1,16 @@
 import os
 import contextlib
 import warnings
+from copy import copy
 
 import numpy as np
 from scipy.fftpack import fftshift
 
 from pysprint.core.bases.dataset import Dataset
 from pysprint.core.ffts_non_uniform import nuifft
+from pysprint.utils.exceptions import FourierWarning
+from pysprint.core.ffts_auto import _run
+from pysprint.core.phase import Phase
 from pysprint.core.evaluate import (
     fft_method,
     cut_gaussian,
@@ -14,9 +18,7 @@ from pysprint.core.evaluate import (
     args_comp,
     gaussian_window,
 )
-from pysprint.utils.exceptions import FourierWarning
-from pysprint.core.ffts_auto import _run
-from pysprint.core.phase import Phase
+
 
 __all__ = ["FFTMethod"]
 
@@ -39,7 +41,7 @@ class FFTMethod(Dataset):
         self._ifft_called_first = False
         self.phase = None
 
-    def shift(self, axis="x"):
+    def shift(self, axis="x", inplace=True):
         """
         Equivalent to scipy.fftpack.fftshift, but it's easier to
         use this function instead, because we don't need to explicitly
@@ -50,18 +52,24 @@ class FFTMethod(Dataset):
         axis: str, default is 'x'
             either 'x', 'y' or 'both'
         """
-        if axis == "x":
-            self.x = fftshift(self.x)
-        elif axis == "y":
-            self.y = fftshift(self.y)
-        elif axis == "both" or axis == 'xy' or axis == 'yx':
-            self.y = fftshift(self.y)
-            self.x = fftshift(self.x)
+        if inplace:
+            if axis == "x":
+                self.x = fftshift(self.x)
+            elif axis == "y":
+                self.y = fftshift(self.y)
+            elif axis == "both" or axis == 'xy' or axis == 'yx':
+                self.y = fftshift(self.y)
+                self.x = fftshift(self.x)
+            else:
+                raise ValueError("axis should be either `x`, `y` or `both`.")
         else:
-            raise ValueError("axis should be either `x`, `y` or `both`.")
+            obj = copy(self)
+            obj.shift(axis=axis, inplace=True)
+            return obj
 
     def ifft(
-        self, interpolate=True, usenifft=False, eps=1e-12, exponent="positive"
+        self, interpolate=True, usenifft=False, eps=1e-12, exponent="positive",
+        inplace=True
     ):
         """
         Applies ifft to the dataset.
@@ -77,41 +85,57 @@ class FFTMethod(Dataset):
             Whether to use non unifrom fft
 
         """
-        self._ifft_called_first = True
-        if usenifft:
-            x_spaced = np.linspace(self.x[0], self.x[-1], len(self.x))
-            timestep = np.diff(x_spaced)[0]
-            x_axis = np.fft.fftfreq(len(self.x), d=timestep / (2 * np.pi))
-            y_transform = nuifft(
-                self.x,
-                self.y,
-                gl=len(self.x),
-                df=(x_axis[1] - x_axis[0]),
-                epsilon=eps,
-                exponent=exponent,
-            )
-            self.x, self.y = x_axis, np.fft.fftshift(y_transform)
+        if inplace:
+            self._ifft_called_first = True
+            if usenifft:
+                x_spaced = np.linspace(self.x[0], self.x[-1], len(self.x))
+                timestep = np.diff(x_spaced)[0]
+                x_axis = np.fft.fftfreq(len(self.x), d=timestep / (2 * np.pi))
+                y_transform = nuifft(
+                    self.x,
+                    self.y,
+                    gl=len(self.x),
+                    df=(x_axis[1] - x_axis[0]),
+                    epsilon=eps,
+                    exponent=exponent
+                )
+                self.x, self.y = x_axis, np.fft.fftshift(y_transform)
 
+            else:
+                self.x, self.y = ifft_method(
+                    self.x, self.y, interpolate=interpolate
+                )
         else:
-            self.x, self.y = ifft_method(
-                self.x, self.y, interpolate=interpolate
+            obj = copy(self)
+            obj.ifft(
+                interpolate=interpolate,
+                usenifft=usenifft,
+                eps=eps,
+                exponent=exponent,
+                inplace=True
             )
+            return obj
 
-    def fft(self):
+    def fft(self, inplace=True):
         """
         Applies fft to the dataset.
         If ifft was not called first, inaccurate results might happen.
         It will be fixed later on.
         Check calculate function's docstring for more detail.
         """
-        if not self._ifft_called_first:
-            warnings.warn(
-                "This module is designed to call ifft before fft",
-                FourierWarning
-            )
-        self.x, self.y = fft_method(self.original_x, self.y)
+        if inplace:
+            if not self._ifft_called_first:
+                warnings.warn(
+                    "This module is designed to call ifft before fft",
+                    FourierWarning
+                )
+            self.x, self.y = fft_method(self.original_x, self.y)
+        else:
+            obj = copy(self)
+            obj.fft(inplace=True)
+            return obj
 
-    def window(self, at, fwhm, window_order=6, plot=True):
+    def window(self, at, fwhm, window_order=6, plot=True, inplace=True):
         """
         Draws a gaussian window on the plot with the desired parameters.
         The maximum value is adjusted for the dataset mostly for
@@ -131,30 +155,46 @@ class FFTMethod(Dataset):
             Order of the gaussian curve.
             If not even, it's incremented by 1.
         """
-        self.at = at
-        self.fwhm = fwhm
-        self.window_order = window_order
-        gaussian = gaussian_window(
-            self.x, self.at, self.fwhm, self.window_order
-        )
-        self.plotwidget.plot(self.x, gaussian * max(abs(self.y)), "r--")
-        if plot:
-            self.show()
+        if inplace:
+            self.at = at
+            self.fwhm = fwhm
+            self.window_order = window_order
+            gaussian = gaussian_window(
+                self.x, self.at, self.fwhm, self.window_order
+            )
+            self.plotwidget.plot(self.x, gaussian * max(abs(self.y)), "r--")
+            if plot:
+                self.show()
+        else:
+            obj = copy(self)
+            obj.window(
+                at=at,
+                fwhm=fwhm,
+                window_order=window_order,
+                plot=plot,
+                inplace=True
+            )
+            return obj
 
-    def apply_window(self):
+    def apply_window(self, inplace=True):
         """
         If window function is correctly set, applies changes to the dataset.
         """
-        self.plotwidget.clf()
-        self.plotwidget.cla()
-        self.plotwidget.close()
-        self.y = cut_gaussian(
-            self.x,
-            self.y,
-            spike=self.at,
-            fwhm=self.fwhm,
-            win_order=self.window_order,
-        )
+        if inplace:
+            self.plotwidget.clf()
+            self.plotwidget.cla()
+            self.plotwidget.close()
+            self.y = cut_gaussian(
+                self.x,
+                self.y,
+                spike=self.at,
+                fwhm=self.fwhm,
+                win_order=self.window_order,
+            )
+        else:
+            obj = copy(self)
+            obj.apply_window(inplace=True)
+            return obj
 
     def calculate(self, reference_point, order, show_graph=False):
         """

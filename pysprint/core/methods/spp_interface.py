@@ -4,14 +4,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from pysprint.core.bases.dataset import Dataset
+from pysprint.core.bases.dataset_base import DatasetBase
 from pysprint.core.evaluate import spp_method
 from pysprint.utils.exceptions import DatasetError
+from pysprint.utils.misc import print_disp
 
 
 __all__ = ["SPPMethod"]
 
 
-class SPPMethod:
+class SPPMethod(metaclass=DatasetBase):
     def __init__(self, ifg_names, sam_names=None, ref_names=None, **kwargs):
         self.ifg_names = ifg_names
         if sam_names:

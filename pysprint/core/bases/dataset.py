@@ -6,10 +6,7 @@ import warnings
 from inspect import signature
 from textwrap import dedent
 from math import factorial
-
-warnings.filterwarnings(
-    "ignore", message="divide by zero encountered in true_divide"
-)
+from copy import copy, deepcopy
 
 import numpy as np
 import pandas as pd
@@ -130,12 +127,18 @@ class Dataset(metaclass=DatasetBase):
 
             else:
                 raise ValueError('Unknown function signature.')
-
         else:
             raise NotImplementedError
 
     def __len__(self):
         return len(self.x)
+
+    def __eq__(self, other):
+        if hasattr(other, 'y'):
+            return np.all(self.y == other.y)
+        else:
+            return False
+
 
     def phase_plot(self, exclude_GD=False):
         if not np.all(self._dispersion_array):
@@ -186,7 +189,7 @@ class Dataset(metaclass=DatasetBase):
 
     def scale_up(self):
         """If the interferogram is normalized to [0, 1] interval, scale
-        up to [-1, 1] with easy algerbra.. Just in case you need comparison,
+        up to [-1, 1] with easy algebra.. Just in case you need comparison,
         or any other purpose.
         """
         self.y_norm = (self.y_norm - 0.5) * 2
@@ -269,7 +272,7 @@ class Dataset(metaclass=DatasetBase):
         if not silent:
             print(
                 f"The predicted GD is ± {((lowguess + highguess) / 2):.5f} fs"
-                "based on reference point of {reference_point}."
+                f"based on reference point of {reference_point}."
             )
 
     def _safe_cast(self):
@@ -435,7 +438,8 @@ class Dataset(metaclass=DatasetBase):
 
     @property
     def data(self):
-        """ Returns the *current* dataset as `pandas.DataFrame`.
+        """
+        Returns the *current* dataset as `pandas.DataFrame`.
         """
         if self._is_normalized:
             try:
@@ -454,19 +458,39 @@ class Dataset(metaclass=DatasetBase):
             self._data = pd.DataFrame({"x": self.x, "y": self.y})
         return self._data
 
+    #  https://stackoverflow.com/a/15774013/11751294
+    def __copy__(self):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        result.__dict__.update(self.__dict__)
+        return result
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            setattr(result, k, deepcopy(v, memo))
+        return result
+
     @property
     def is_normalized(self):
         """ Retuns whether the dataset is normalized.
         """
         return self._is_normalized
 
-    def chdomain(self):
+    def chdomain(self, inplace=True):
         """Changes from wavelength [nm] to ang. freq. [PHz]
         domain and vica versa."""
-        self.x = (2 * np.pi * C_LIGHT) / self.x
-        self._check_domain()
-        if type(self).__name__ == "FFTMethod":
-            self.original_x = self.x
+        if inplace:
+            self.x = (2 * np.pi * C_LIGHT) / self.x
+            self._check_domain()
+            if hasattr(self, 'original_x'):
+                self.original_x = self.x
+        else:
+            obj = copy(self)
+            obj.chdomain(inplace=True)
+            return obj
 
     def detect_peak_cwt(self, width, floor_thres=0.05):
         x, y, ref, sam = self._safe_cast()
@@ -507,7 +531,7 @@ class Dataset(metaclass=DatasetBase):
             InterpolationWarning,
         )
 
-    def slice(self, start=None, stop=None):
+    def slice(self, start=None, stop=None, inplace=True):
         """Cuts the dataset on x axis in this form: [start, stop]
 
         Parameters:
@@ -530,17 +554,22 @@ class Dataset(metaclass=DatasetBase):
         If arms were given, it will merge them into the `self.y` and
         `self.y_norm` variables.
         """
-        self.x, self.y_norm = cut_data(
-            self.x, self.y, self.ref, self.sam, start=start, stop=stop
-        )
-        self.ref = []
-        self.sam = []
-        self.y = self.y_norm
-        # Just to make sure it's correctly shaped. Later on we might
-        # delete this.
-        if type(self).__name__ == "FFTMethod":
-            self.original_x = self.x
-        self._is_normalized = self._ensure_norm()
+        if inplace:
+            self.x, self.y_norm = cut_data(
+                self.x, self.y, self.ref, self.sam, start=start, stop=stop
+            )
+            self.ref = []
+            self.sam = []
+            self.y = self.y_norm
+            # Just to make sure it's correctly shaped. Later on we might
+            # delete this.
+            if hasattr(self, 'original_x'):
+                self.original_x = self.x
+            self._is_normalized = self._ensure_norm()
+        else:
+            obj = copy(self)
+            obj.slice(start=start, stop=stop, inplace=True)
+            return obj
 
     def convolution(self, window_length, std=20):
         """ Applies a convolution with a gaussian on the dataset
