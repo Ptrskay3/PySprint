@@ -138,7 +138,7 @@ class TestEvaluate(unittest.TestCase):
             d, ds, _ = ifgs.calculate(2.355, 2, show_graph=True)
             np.testing.assert_array_equal(
                 d,
-                [-258.84297727172856, 21.572879102888976, 100426.4054547129, 0, 0],
+                [-258.84297727172856, 21.572879102888976, 100426.4054547129],
             )
             mock_show.assert_called()
 
