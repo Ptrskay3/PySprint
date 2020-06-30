@@ -133,13 +133,6 @@ class Dataset(metaclass=DatasetBase):
     def __len__(self):
         return len(self.x)
 
-    def __eq__(self, other):
-        if hasattr(other, 'y'):
-            return np.all(self.y == other.y)
-        else:
-            return False
-
-
     def phase_plot(self, exclude_GD=False):
         if not np.all(self._dispersion_array):
             raise ValueError(

@@ -43,6 +43,10 @@ class SPPMethod(metaclass=DatasetBase):
         self._delay = {}
         self._positions = {}
 
+    # @classmethod
+    # def from_ifg(cls, ifgseq):
+    #     pass
+
     def __len__(self):
         return len(self.ifg_names)
 
