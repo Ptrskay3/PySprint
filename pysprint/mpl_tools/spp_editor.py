@@ -25,7 +25,9 @@ class SPPEditor:
         self.x_pos, self.y_pos = np.array([]), np.array([])
         (self.basedata,) = self.ax.plot(self.x, self.y)
         (self.points,) = self.ax.plot(self.x_pos, self.y_pos, "ko")
-        self.fig.canvas.mpl_connect("key_press_event", self.key_press_callback)
+        self.fig.canvas.mpl_connect(
+            "key_press_event", self.key_press_callback
+        )
         self.fig.canvas.mpl_connect(
             "button_release_event", self.button_release_callback
         )

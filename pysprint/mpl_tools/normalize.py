@@ -40,8 +40,12 @@ class DraggableEnvelope:
         self.fig.canvas.mpl_connect(
             "button_press_event", self.button_press_callback
         )
-        self.fig.canvas.mpl_connect("key_press_event", self.key_press_callback)
-        self.fig.canvas.mpl_connect("draw_event", self.draw_callback)
+        self.fig.canvas.mpl_connect(
+            "key_press_event", self.key_press_callback
+        )
+        self.fig.canvas.mpl_connect(
+            "draw_event", self.draw_callback
+        )
         self.fig.canvas.mpl_connect(
             "button_release_event", self.button_release_callback
         )
