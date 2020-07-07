@@ -195,7 +195,17 @@ def print_disp(f):
         for i, (label, disp_item, disp_std_item) in enumerate(
             zip(labels, disp, disp_std)
         ):
-            print(f"{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i+1}")
+            try:
+                from IPython.display import display, Math
+                display(
+                    Math(
+                        f"{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i+1}"
+                    )
+                )
+            except ImportError:
+                print(
+                    f"{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i+1}"
+                )
         return disp, disp_std, st
 
     return wrapping

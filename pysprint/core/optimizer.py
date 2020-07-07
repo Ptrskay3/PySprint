@@ -174,7 +174,17 @@ class FitOptimizer:
         labels = ("GD", "GDD", "TOD", "FOD", "QOD")
         params = self.p0[3:]
         for i, (label, param) in enumerate(zip(labels, params)):
-            print(f"{label} = {(params[i]*factorial(i+1)):.5f} fs^{i + 1}")
+            try:
+                from IPython.display import display, Math
+                display(
+                    Math(
+                        f"{label} = {(params[i]*factorial(i+1)):.5f} fs^{i + 1}"
+                    )
+                )
+            except ImportError:
+                print(
+                    f"{label} = {(params[i]*factorial(i+1)):.5f} fs^{i + 1}"
+                )
 
     def run(
         self, r_extend_by, r_threshold, max_tries=5000, show_endpoint=True
