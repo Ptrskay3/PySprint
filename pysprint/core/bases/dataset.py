@@ -660,7 +660,7 @@ class Dataset(metaclass=DatasetBase):
             except Exception:
                 self.plotwidget.plot(self.x, self.y, "r")
         self.plotwidget.grid()
-        self.plotwidget.show()
+        self.plotwidget.show(block=True)
 
     def normalize(self, filename=None, smoothing_level=0):
         """ Normalize the interferogram by finding upper and lower envelope
