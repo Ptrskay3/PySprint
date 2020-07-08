@@ -2,6 +2,7 @@ import sys
 import unittest
 from unittest.mock import patch
 
+import pytest
 import numpy as np
 
 from pysprint import MinMaxMethod
@@ -15,18 +16,18 @@ class TestEvaluate(unittest.TestCase):
     def tearDown(self):
         pass
 
+
+    @pytest.mark.skip(reason="Azure Pipelines fails this test")
     @patch("matplotlib.pyplot.show")
     def test_edit_session(self, mock_show):
-        # ifg = MinMaxMethod(self.x, self.y)
-        # ifg.init_edit_session(engine='cwt')
-        # ifg.init_edit_session(engine='slope')
-        # ifg.init_edit_session(engine='normal')
-        # mock_show.assert_called()
-        # with self.assertRaises(ValueError):
-        # 	ifg.init_edit_session(engine='dfssdfasdf')
-        pass
+        ifg = MinMaxMethod(self.x, self.y)
+        ifg.init_edit_session(engine='cwt')
+        ifg.init_edit_session(engine='slope')
+        ifg.init_edit_session(engine='normal')
+        mock_show.assert_called()
+        with self.assertRaises(ValueError):
+        	ifg.init_edit_session(engine='dfssdfasdf')
 
-        # this does not work on Azure Pipelines.. should be fixed
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ from scipy.optimize import curve_fit
 
 from pysprint.utils import find_nearest
 from pysprint.core.functions import _cosfit_config, cos_fit1
+from pysprint import run_from_notebook
 
 
 class FitOptimizer:
@@ -96,6 +97,10 @@ class FitOptimizer:
     def set_initial_region(self, percent):
         """ Determines the initial region to fit"""
         self._init_set = True
+        if percent < 0 or percent > 100:
+            raise ValueError(
+                "percent must satisfy percent > 0 or percent < 100."
+            )
         _, idx = find_nearest(self.x, 0)
         self._upper_bound = np.floor(idx + (percent / 2) * (len(self.x) + 1))
         self._lower_bound = np.floor(idx - (percent / 2) * (len(self.x) + 1))
@@ -174,14 +179,14 @@ class FitOptimizer:
         labels = ("GD", "GDD", "TOD", "FOD", "QOD")
         params = self.p0[3:]
         for i, (label, param) in enumerate(zip(labels, params)):
-            try:
+            if run_from_notebook():
                 from IPython.display import display, Math
                 display(
                     Math(
                         f"{label} = {(params[i]*factorial(i+1)):.5f} fs^{i + 1}"
                     )
                 )
-            except ImportError:
+            else:
                 print(
                     f"{label} = {(params[i]*factorial(i+1)):.5f} fs^{i + 1}"
                 )

@@ -3,6 +3,7 @@ import collections
 import unittest
 from unittest.mock import patch
 
+import pytest
 import numpy as np
 import pandas as pd
 
@@ -74,13 +75,12 @@ class TestEvaluate(unittest.TestCase):
         after = ifg.x
         np.testing.assert_array_almost_equal(before, after)
 
-    # Fails on azure, should be fixed 
-
-    # @patch('matplotlib.pyplot.show')
-    # def test_normalize(self, mock_show):
-    # 	ifg = Dataset(self.x, self.y)
-    # 	ifg.normalize()
-    # 	mock_show.assert_called()
+    @pytest.mark.skip(reason="Fails on azure, should be fixed ")
+    @patch('matplotlib.pyplot.show')
+    def test_normalize(self, mock_show):
+    	ifg = Dataset(self.x, self.y)
+    	ifg.normalize()
+    	mock_show.assert_called()
 
     @patch("matplotlib.pyplot.show")
     def test_sppeditor(self, mock_show):

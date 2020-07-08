@@ -5,6 +5,8 @@ import numpy as np
 from scipy.interpolate import interp1d
 import scipy.stats as st
 
+from pysprint import run_from_notebook
+
 __all__ = [
     "unpack_lmfit",
     "find_nearest",
@@ -195,14 +197,14 @@ def print_disp(f):
         for i, (label, disp_item, disp_std_item) in enumerate(
             zip(labels, disp, disp_std)
         ):
-            try:
+            if run_from_notebook():
                 from IPython.display import display, Math
                 display(
                     Math(
                         f"{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i+1}"
                     )
                 )
-            except ImportError:
+            else:
                 print(
                     f"{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i+1}"
                 )
