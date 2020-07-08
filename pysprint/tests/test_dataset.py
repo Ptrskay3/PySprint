@@ -98,6 +98,23 @@ class TestEvaluate(unittest.TestCase):
         np.testing.assert_array_equal(delay, np.array([100, 100]))
         np.testing.assert_array_equal(position, positions)
 
+    def test_slicing_inplace(self):
+        ifg = Dataset(self.x, self.y)
+        ifg.slice(400, 700)
+
+        assert np.min(ifg.x) > 399
+        assert np.max(ifg.x) < 701
+
+
+    def test_slicing_non_inplace(self):
+        ifg = Dataset(self.x, self.y)
+        new_ifg = ifg.slice(400, 700, inplace=False)
+
+        assert np.min(new_ifg.x) > 399
+        assert np.max(new_ifg.x) < 701
+
+        assert not np.min(ifg.x) > 399
+        assert not np.max(ifg.x) < 701
 
 if __name__ == "__main__":
     unittest.main()

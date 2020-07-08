@@ -47,9 +47,9 @@ def test_optimizer_from_api(delay, GD, GDD):
     cf = CosFitMethod(*g.data)
     cf.guess_GD(GD + delay)
     cf.guess_GDD(GDD)
-    with patch.object(FitOptimizer, 'update_plot'):
+    with patch.object(FitOptimizer, 'update_plot') as patched_obj:
         cf.optimizer(2, order=2, initial_region_ratio=0.01, extend_by=0.01)
-
+        patched_obj.assert_called()
 
 def test_optimizer_from_api2():
     """
@@ -60,5 +60,23 @@ def test_optimizer_from_api2():
 
     cf = CosFitMethod(*g.data)
     cf.guess_GD(900)
-    with patch.object(FitOptimizer, 'update_plot'):
-        cf.optimizer(2, order=5, initial_region_ratio=0.01, extend_by=0.01)
+    with patch.object(FitOptimizer, 'update_plot') as patched_obj:
+        res = cf.optimizer(2, order=5, initial_region_ratio=0.01, extend_by=0.01)
+        patched_obj.assert_called()
+        np.testing.assert_array_almost_equal(res, [900, 400, 800, 7000, 70000])
+
+
+@pytest.mark.parametrize('delay', list(range(100, 501, 100)))
+def test_lookup(delay):
+    g = Generator(1, 3, 2, delay, GD=0, GDD=500, TOD=800, normalize=True)
+    g.generate_freq()
+    cf = CosFitMethod(*g.data)
+    cf.GD_lookup(2, engine='normal', silent=True)
+    assert (delay*0.95 <= cf.params[3] <= delay*1.05)
+
+def test_lookup2():
+    g = Generator(1, 3, 2, 400, GD=0, GDD=500, normalize=False)
+    g.generate_freq()
+    cf = CosFitMethod(*g.data)
+    cf.GD_lookup(200, engine='normal', silent=True)
+    assert cf.params[3] == 1

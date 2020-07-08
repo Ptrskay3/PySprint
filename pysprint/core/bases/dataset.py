@@ -265,7 +265,7 @@ class Dataset(metaclass=DatasetBase):
         if not silent:
             print(
                 f"The predicted GD is ± {((lowguess + highguess) / 2):.5f} fs"
-                f"based on reference point of {reference_point}."
+                f" based on reference point of {reference_point}."
             )
 
     def _safe_cast(self):
