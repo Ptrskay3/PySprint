@@ -6,6 +6,7 @@ core/__pycache__/
 *.py[cod]
 *$py.class
 mightneed/
+.idea/*
 
 # C extensions
 *.so

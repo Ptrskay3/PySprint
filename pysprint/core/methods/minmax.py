@@ -19,7 +19,6 @@ class MinMaxMethod(Dataset):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    # TODO: fix docstring
     def init_edit_session(self, engine="normal", **kwargs):
         """ Function to initialize peak editing on a plot.
         Right clicks will delete the closest point, left clicks
@@ -94,8 +93,8 @@ class MinMaxMethod(Dataset):
             _editpeak = EditPeak(self.x, self.y_norm, _xm, _ym)
         except ValueError:
             _editpeak = EditPeak(self.x, self.y, _xm, _ym)
-        # automatically propagate these points to the mins and maxes
-        # better distribute these points between min and max, just in case
+        # Automatically propagate these points to the mins and maxes.
+        # Better distribute these points between min and max, just in case
         # the default argrelextrema is definitely not called
         # in `pysprint.core.evaluate.min_max_method`.
         self.xmin = _editpeak.get_dat[0][:len(_editpeak.get_dat[0]) // 2]

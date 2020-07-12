@@ -140,20 +140,22 @@ class Generator(metaclass=DatasetBase):
             You can also specify the save path.
             e.g path='C:/examplefolder'
             """
+        if not name.endswith(".txt"):
+            name += ".txt"
         if path is None:
             np.savetxt(
                 f"{name}.txt",
                 np.transpose([self.x, self.y, self.ref, self.sam]),
                 delimiter=self.delimiter,
             )
-            print(f"Successfully saved as {name}")
+            print(f"Successfully saved as {name}.")
         else:
             np.savetxt(
                 f"{path}/{name}.txt",
                 np.transpose([self.x, self.y, self.ref, self.sam]),
                 delimiter=self.delimiter,
             )
-            print(f"Successfully saved as {name}")
+            print(f"Successfully saved as {name}.")
 
     def _phase(self, j):
         if self.is_wave:

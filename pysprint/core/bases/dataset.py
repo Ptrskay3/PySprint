@@ -26,7 +26,6 @@ from pysprint.core.preprocess import (
 )
 
 from pysprint.utils.exceptions import (
-    NotebookError,
     InterpolationWarning,
     DatasetError,
     PySprintWarning
@@ -421,7 +420,7 @@ class Dataset(metaclass=DatasetBase):
         Normalized: {self._is_normalized}
         Predicted domain: {'wavelength' if self.probably_wavelength else 'frequency'}
         Delay value: {(str(pprint_delay) + ' fs') if np.all(self._delay) else 'Not given'}
-        SPP position(s): {self._positions if np.all(self._positions) else 'Not given'}
+        SPP position(s): {self._positions + ' PHz' if np.all(self._positions) else 'Not given'}
 
         Metadata extracted from file
         ----------------------------
@@ -697,10 +696,6 @@ class Dataset(metaclass=DatasetBase):
             print(f"Successfully saved as {filename}")
 
     def open_SPP_panel(self):
-        if run_from_ipython():
-            raise NotebookError(
-                "To enable interactive plots, use `pysprint.setup_notebook()`."
-            )
         _spp = SPPEditor(self.x, self.y_norm)
         self.delay, self.positions = _spp.get_data()
 
