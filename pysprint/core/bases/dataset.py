@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 from pysprint.core.bases.dataset_base import DatasetBase, C_LIGHT
 from pysprint.mpl_tools.spp_editor import SPPEditor
-from pysprint.utils import MetaData, run_from_ipython, find_nearest
+from pysprint.utils import MetaData, find_nearest
 from pysprint.mpl_tools.normalize import DraggableEnvelope
 
 from pysprint.core.preprocess import (
@@ -191,11 +191,11 @@ class Dataset(metaclass=DatasetBase):
         self, reference_point=2.355, engine="cwt", silent=False, **kwargs
     ):
         """Quick GD lookup: it finds extremal points near the
-        `reference_point` and returns an avarage value of 2*np.pi
+        `reference_point` and returns an average value of 2*np.pi
         divided by distances between consecutive minimal or maximal values.
         Since it's relying on peak detection, the results may be irrelevant
         in some cases. If the parent class is `~pysprint.CosFitMethod`, then
-        it will set the predicted value as inital parameter for fitting.
+        it will set the predicted value as initial parameter for fitting.
         """
 
         # TODO: implement FFT-based engine

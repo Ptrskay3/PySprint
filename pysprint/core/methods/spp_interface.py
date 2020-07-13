@@ -8,7 +8,6 @@ from pysprint.core.bases.dataset_base import DatasetBase
 from pysprint.core.evaluate import spp_method
 from pysprint.utils.exceptions import DatasetError
 
-
 __all__ = ["SPPMethod"]
 
 
@@ -48,6 +47,11 @@ class SPPMethod(metaclass=DatasetBase):
         for ifg in ifg_list:
             if not isinstance(ifg, Dataset):
                 raise TypeError("pysprint.Dataset objects are expected.")
+        if order == 1:
+            raise ValueError(
+                "Order should be greater than 1. Cannot fit constant function to data."
+            )
+
         local_delays = {}
         local_positions = {}
 
@@ -59,12 +63,10 @@ class SPPMethod(metaclass=DatasetBase):
                 )
             local_delays[idx] = delay
             local_positions[idx] = position
-
         delays = np.concatenate([a.ravel() for a in local_delays.values()])
         positions = np.concatenate([a.ravel() for a in local_positions.values()])
-
         x, y, dispersion, dispersion_std, bf = spp_method(
-            delays, positions, ref_point=reference_point, fit_order=order
+            delays, positions, ref_point=reference_point, fit_order=order-1
         )
         if show_graph:
             plt.plot(x, y, "o")
@@ -77,7 +79,6 @@ class SPPMethod(metaclass=DatasetBase):
 
         return dispersion, dispersion_std, bf
 
-
     def __len__(self):
         return len(self.ifg_names)
 
@@ -86,7 +87,7 @@ class SPPMethod(metaclass=DatasetBase):
 
     def __str__(self):
         return (
-            f"{type(self).__name__} object\nInterferogram count : {len(self)}"
+            f"{type(self).__name__}\nInterferogram count : {len(self)}"
         )
 
     def __next__(self):
@@ -172,18 +173,27 @@ class SPPMethod(metaclass=DatasetBase):
 
     @staticmethod
     def calculate_from_raw(omegas, delays, reference_point, order):
+        if order == 1:
+            raise ValueError(
+                "Order should be greater than 1. Cannot fit constant function to data."
+            )
         x, y, dispersion, dispersion_std, bf = spp_method(
-            delays, omegas, ref_point=reference_point, fit_order=order
+            delays, omegas, ref_point=reference_point, fit_order=order-1
         )
         return dispersion, dispersion_std, ""
 
     def calculate(self, reference_point, order=2, show_graph=False):
+        if order == 1:
+            raise ValueError(
+                "Order should be greater than 1. Cannot fit constant function to data."
+            )
         delays = np.concatenate([_ for _ in self._delay.values()]).ravel()
         positions = np.concatenate(
             [_ for _ in self._positions.values()]
         ).ravel()
+
         x, y, dispersion, dispersion_std, bf = spp_method(
-            delays, positions, ref_point=reference_point, fit_order=order
+            delays, positions, ref_point=reference_point, fit_order=order-1
         )
         if show_graph:
             plt.plot(x, y, "o")

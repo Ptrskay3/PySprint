@@ -37,6 +37,7 @@ class FFTMethod(Dataset):
         self.original_x = self.x
         self.at = None
         self.std = None
+        self.fwhm = None
         self.window_order = None
         self._ifft_called_first = False
         self.phase = None

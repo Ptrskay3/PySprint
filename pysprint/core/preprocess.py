@@ -17,6 +17,7 @@ from pysprint.utils import (
     _maybe_increase_before_cwt,
 )
 
+# TODO : all of these methods should be rewritten, they are poor quality.
 
 def cwt(x, y, ref, sam, width, floor_thres=0.1):
     x, y = _handle_input(x, y, ref, sam)

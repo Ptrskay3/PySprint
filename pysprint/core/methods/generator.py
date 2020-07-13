@@ -53,8 +53,9 @@ class Generator(metaclass=DatasetBase):
     def __str__(self):
         return self.__repr__()
 
+    # TODO: PEP8 that horrible line below
     def __repr__(self):
-        return f"""Generator({self.start}, {self.stop}, {self.center}, delay = {self.delay}, GD={self.GD}, GDD={self.GDD}, TOD={self.TOD}, FOD={self.FOD}, QOD={self.QOD}, resolution={self.resolution}, delimiter={self.delimiter}, pulse_width={self.pulse_width}, normalize={self.normalize})"""
+        return f"""Generator({self.start}, {self.stop}, {self.center}, delay={self.delay}, GD={self.GD}, GDD={self.GDD}, TOD={self.TOD}, FOD={self.FOD}, QOD={self.QOD}, resolution={self.resolution}, delimiter='{self.delimiter}', pulse_width={self.pulse_width}, normalize={self.normalize})"""
 
     def _check_norm(self):
         """
@@ -64,7 +65,7 @@ class Generator(metaclass=DatasetBase):
             self._y = (self.y - self.ref - self.sam) / (
                 2 * np.sqrt(self.sam * self.ref)
             )
-
+    # TODO: Maybe intelligently decide the domain in a new function
     def generate_freq(self):
         """
         Use this to generate the spectrogram in ang. frequency domain.
