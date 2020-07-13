@@ -35,6 +35,7 @@ steps:
 
 - script: |
     export DISPLAY=:10
+    npm install gulp
     gulp test
   displayName: 'Test display'
 
