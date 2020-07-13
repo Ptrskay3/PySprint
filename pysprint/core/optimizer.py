@@ -82,10 +82,7 @@ class FitOptimizer:
         plt.plot(self.x, self._y_norm)
         plt.plot(self._x_curr, self._y_curr, "k", label="Affected data")
         plt.plot(
-            self._x_curr,
-            self.func(self._x_curr, *self.popt),
-            "r--",
-            label="Fit",
+            self._x_curr, self.func(self._x_curr, *self.popt), "r--", label="Fit",
         )
         plt.grid()
         # plt.legend(loc='upper left')
@@ -98,9 +95,7 @@ class FitOptimizer:
         """ Determines the initial region to fit"""
         self._init_set = True
         if percent < 0 or percent > 100:
-            raise ValueError(
-                "percent must satisfy percent > 0 or percent < 100."
-            )
+            raise ValueError("percent must satisfy percent > 0 or percent < 100.")
         _, idx = find_nearest(self.x, 0)
         self._upper_bound = np.floor(idx + (percent / 2) * (len(self.x) + 1))
         self._lower_bound = np.floor(idx - (percent / 2) * (len(self.x) + 1))
@@ -110,8 +105,8 @@ class FitOptimizer:
             self._lower_bound = 0
         if self._upper_bound > len(self.x):
             self._upper_bound = len(self.x)
-        self._x_curr = self.x[self._lower_bound:self._upper_bound]
-        self._y_curr = self._y_norm[self._lower_bound:self._upper_bound]
+        self._x_curr = self.x[self._lower_bound : self._upper_bound]
+        self._y_curr = self._y_norm[self._lower_bound : self._upper_bound]
 
     def _step_up_func(self):
         """
@@ -143,8 +138,8 @@ class FitOptimizer:
             self._new_lower = 0
         if self._new_upper > len(self.x):
             self._new_upper = len(self.x)
-        self._x_curr = self.x[self._new_lower:self._new_upper]
-        self._y_curr = self._y_norm[self._new_lower:self._new_upper]
+        self._x_curr = self.x[self._new_lower : self._new_upper]
+        self._y_curr = self._y_norm[self._new_lower : self._new_upper]
 
     def _finetune(self):
         """
@@ -181,19 +176,14 @@ class FitOptimizer:
         for i, (label, param) in enumerate(zip(labels, params)):
             if run_from_notebook():
                 from IPython.display import display, Math
+
                 display(
-                    Math(
-                        f"{label} = {(params[i]*factorial(i+1)):.5f} fs^{i + 1}"
-                    )
+                    Math(f"{label} = {(params[i]*factorial(i+1)):.5f} \\ fs^{i + 1}")
                 )
             else:
-                print(
-                    f"{label} = {(params[i]*factorial(i+1)):.5f} fs^{i + 1}"
-                )
+                print(f"{label} = {(params[i]*factorial(i+1)):.5f} fs^{i + 1}")
 
-    def run(
-        self, r_extend_by, r_threshold, max_tries=5000, show_endpoint=True
-    ):
+    def run(self, r_extend_by, r_threshold, max_tries=5000, show_endpoint=True):
 
         if not self._init_set:
             raise ValueError("Set the initial conditions.")
@@ -214,13 +204,18 @@ class FitOptimizer:
                     # self.figure.savefig(f'{self.counter}.eps')
 
                 self.result_wrapper()
-                print(f"with r^2 = {(self._fit_goodness()):.5f}.")
+                if run_from_notebook():
+                    from IPython.display import display, Math
+
+                    display(Math(f"with \\ R^2 = {(self._fit_goodness()):.5f}."))
+                else:
+                    print(f"with R^2 = {(self._fit_goodness()):.5f}.")
                 return self.popt
             if self.counter == max_tries:
                 if show_endpoint:
                     self.update_plot()
                 print(
-                    f"""Max tries ({max_tries}) reached.."""
+                    f"""Max tries (currently set to {max_tries}) reached without finding a suitable fit."""
                 )
                 return np.zeros_like(self.popt)
 
@@ -232,6 +227,6 @@ class FitOptimizer:
                 if show_endpoint:
                     self.update_plot()
                 print(
-                    f"""\nMax tries ({max_tries}) reached.."""
+                    f"""Max tries (currently set to {max_tries}) reached without finding a suitable fit."""
                 )
                 return np.zeros_like(self.popt)

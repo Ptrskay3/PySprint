@@ -3,7 +3,6 @@ from unittest.mock import patch
 
 import numpy as np
 
-import pysprint
 from pysprint.core.evaluate import spp_method
 from pysprint import SPPMethod
 

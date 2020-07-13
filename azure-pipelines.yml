@@ -6,6 +6,7 @@
 trigger:
 - master
 - NUFFT
+- WFT
 
 pool:
   vmImage: 'ubuntu-latest'

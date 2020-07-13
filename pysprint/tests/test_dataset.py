@@ -78,9 +78,9 @@ class TestEvaluate(unittest.TestCase):
     @pytest.mark.skip(reason="Fails on azure, should be fixed ")
     @patch('matplotlib.pyplot.show')
     def test_normalize(self, mock_show):
-    	ifg = Dataset(self.x, self.y)
-    	ifg.normalize()
-    	mock_show.assert_called()
+        ifg = Dataset(self.x, self.y)
+        ifg.normalize()
+        mock_show.assert_called()
 
     @patch("matplotlib.pyplot.show")
     def test_sppeditor(self, mock_show):
@@ -105,7 +105,6 @@ class TestEvaluate(unittest.TestCase):
         assert np.min(ifg.x) > 399
         assert np.max(ifg.x) < 701
 
-
     def test_slicing_non_inplace(self):
         ifg = Dataset(self.x, self.y)
         new_ifg = ifg.slice(400, 700, inplace=False)
@@ -115,6 +114,7 @@ class TestEvaluate(unittest.TestCase):
 
         assert not np.min(ifg.x) > 399
         assert not np.max(ifg.x) < 701
+
 
 if __name__ == "__main__":
     unittest.main()
