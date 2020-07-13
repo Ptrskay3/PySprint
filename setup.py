@@ -15,7 +15,7 @@ with open("README.md", "r") as fh:
 
 
 MAJOR = 0
-MINOR = 11
+MINOR = 12
 MICRO = 0
 VERSION = f'{MAJOR}.{MINOR}.{MICRO}'
 

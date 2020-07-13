@@ -7,7 +7,6 @@ from pysprint.core.bases.dataset import Dataset
 from pysprint.core.bases.dataset_base import DatasetBase
 from pysprint.core.evaluate import spp_method
 from pysprint.utils.exceptions import DatasetError
-from pysprint.utils.misc import print_disp
 
 
 __all__ = ["SPPMethod"]
@@ -24,6 +23,7 @@ class SPPMethod(metaclass=DatasetBase):
             self.ref_names = ref_names
         else:
             self.ref_names = None
+
         self._validate()
         if self.sam_names:
             if not len(self.ifg_names) == len(self.sam_names):
@@ -43,9 +43,37 @@ class SPPMethod(metaclass=DatasetBase):
         self._delay = {}
         self._positions = {}
 
-    # @classmethod
-    # def from_ifg(cls, ifgseq):
-    #     pass
+    @staticmethod
+    def calculate_from_ifg(ifg_list, reference_point, order, show_graph=False):
+        local_delays = {}
+        local_positions = {}
+
+        for idx, ifg in enumerate(ifg_list):
+            delay, position = ifg.emit()
+            if idx != 0 and delay.flat[0] in np.concatenate([a.ravel() for a in local_delays.values()]):
+                raise ValueError(
+                    f"Duplicated delay values found. Delay {delay.flat[0]} fs is already in dataset."
+                )
+            local_delays[idx] = delay
+            local_positions[idx] = position
+
+        delays = np.concatenate([a.ravel() for a in local_delays.values()])
+        positions = np.concatenate([a.ravel() for a in local_positions.values()])
+
+        x, y, dispersion, dispersion_std, bf = spp_method(
+            delays, positions, ref_point=reference_point, fit_order=order
+        )
+        if show_graph:
+            plt.plot(x, y, "o")
+            try:
+                plt.plot(x, bf, "r--", zorder=1)
+            except Exception as e:
+                print(e)
+            plt.grid()
+            plt.show(block=True)
+
+        return dispersion, dispersion_std, bf
+
 
     def __len__(self):
         return len(self.ifg_names)
@@ -105,25 +133,19 @@ class SPPMethod(metaclass=DatasetBase):
 
     def _validate(self):
         for filename in self.ifg_names:
-            if os.path.exists(filename):
-                pass
-            else:
+            if not os.path.exists(filename):
                 raise FileNotFoundError(
                     f"""File named '{filename}' is not found."""
                 )
         if self.sam_names:
             for sam in self.sam_names:
-                if os.path.exists(sam):
-                    pass
-                else:
+                if not os.path.exists(sam):
                     raise FileNotFoundError(
                         f"""File named '{sam}' is not found."""
                     )
         if self.ref_names:
             for ref in self.ref_names:
-                if os.path.exists(ref):
-                    pass
-                else:
+                if not os.path.exists(ref):
                     raise FileNotFoundError(
                         f"""File named '{ref}' is not found."""
                     )

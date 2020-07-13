@@ -3,7 +3,7 @@ This file implements the basic Dataset class.
 """
 import json  # for pretty printing dict
 import warnings
-from inspect import signature
+from inspect import signature, cleandoc
 from textwrap import dedent
 from math import factorial
 from copy import copy, deepcopy
@@ -411,22 +411,23 @@ class Dataset(metaclass=DatasetBase):
         else:
             pprint_delay = "-"
         string = dedent(
-            f"""
+        f"""
         {type(self).__name__}
 
         Parameters
         ----------
         Datapoints: {len(self.x)}
-        Normalized: {self._is_normalized}
         Predicted domain: {'wavelength' if self.probably_wavelength else 'frequency'}
+        Range: from {np.min(self.x):.2f} to {np.max(self.x):.2f} {'nm' if self.probably_wavelength else 'PHz'}
+        Normalized: {self._is_normalized}
         Delay value: {(str(pprint_delay) + ' fs') if np.all(self._delay) else 'Not given'}
-        SPP position(s): {self._positions + ' PHz' if np.all(self._positions) else 'Not given'}
+        SPP position(s): {str(self._positions) + ' PHz' if np.all(self._positions) else 'Not given'}
 
         Metadata extracted from file
         ----------------------------
         {json.dumps(self.meta, indent=4)}"""
         )
-        return string
+        return cleandoc(string)
 
     @property
     def data(self):
@@ -712,6 +713,6 @@ class Dataset(metaclass=DatasetBase):
             positions = np.asarray(positions)
         if not isinstance(delay, float):
             delay = float(delay)
-        delay = np.ones_like(positions) * delay
-        self._delay = delay
-        self._positions = positions
+        delay = np.array(np.ones_like(positions) * delay)
+        self.delay = delay
+        self.positions = positions
