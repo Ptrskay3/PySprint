@@ -25,7 +25,7 @@ steps:
     versionSpec: '$(python.version)'
   displayName: 'Use Python $(python.version)'
 
-steps:
+
 - script: |
     sudo cp .ci/.azure-pipelines/xvfb.init /etc/init.d/xvfb
     sudo chmod +x /etc/init.d/xvfb
