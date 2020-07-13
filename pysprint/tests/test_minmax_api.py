@@ -37,7 +37,7 @@ class TestEvaluate(unittest.TestCase):
         with self.assertRaises(TypeError):
             ifg.init_edit_session(engine='normal', invalidkwarg=3)
 
-    # @pytest.mark.xfail(reason="Fails on azure as well.")
+    @pytest.mark.xfail(reason="Fails on azure.")
     @patch('matplotlib.pyplot.show')
     def test_edit_session4(self, mock_show):
         ifg = MinMaxMethod(self.x, self.y)
