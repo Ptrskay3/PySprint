@@ -34,12 +34,6 @@ steps:
   displayName: 'Start X Virtual Frame Buffer'
 
 - script: |
-    export DISPLAY=:10
-    npm install gulp
-    gulp test
-  displayName: 'Test display'
-
-- script: |
     python -m pip install --upgrade pip
     pip install -r requirements.txt
     pip install lmfit numba flake8 coverage codecov pytest
