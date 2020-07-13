@@ -25,6 +25,19 @@ steps:
     versionSpec: '$(python.version)'
   displayName: 'Use Python $(python.version)'
 
+steps:
+- script: |
+    sudo cp .ci/.azure-pipelines/xvfb.init /etc/init.d/xvfb
+    sudo chmod +x /etc/init.d/xvfb
+    sudo update-rc.d xvfb defaults
+    sudo service xvfb start
+  displayName: 'Start X Virtual Frame Buffer'
+
+- script: |
+    export DISPLAY=:10
+    gulp test
+  displayName: 'Test display'
+
 - script: |
     python -m pip install --upgrade pip
     pip install -r requirements.txt
