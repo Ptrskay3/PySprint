@@ -54,6 +54,10 @@ def test_collection(construct_ifg_sequence):
     np.testing.assert_almost_equal(-0.00014, disp[4], decimal=5)
 
 
+def test_spp_typeerror():
+    with pytest.raises(TypeError):
+        SPPMethod.calculate_from_ifg([10, 11], reference_point=2, order=2)
+
 def test_duplicate_entries(construct_ifg_sequence):
     """
     Here we test that duplicated delay values (apart from multiple SPP positions)

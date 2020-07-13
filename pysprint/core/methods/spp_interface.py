@@ -45,6 +45,9 @@ class SPPMethod(metaclass=DatasetBase):
 
     @staticmethod
     def calculate_from_ifg(ifg_list, reference_point, order, show_graph=False):
+        for ifg in ifg_list:
+            if not isinstance(ifg, Dataset):
+                raise TypeError("pysprint.Dataset objects are expected.")
         local_delays = {}
         local_positions = {}
 
@@ -52,7 +55,7 @@ class SPPMethod(metaclass=DatasetBase):
             delay, position = ifg.emit()
             if idx != 0 and delay.flat[0] in np.concatenate([a.ravel() for a in local_delays.values()]):
                 raise ValueError(
-                    f"Duplicated delay values found. Delay {delay.flat[0]} fs is already in dataset."
+                    f"Duplicated delay values found. Delay {delay.flat[0]} fs was previously seen."
                 )
             local_delays[idx] = delay
             local_positions[idx] = position
