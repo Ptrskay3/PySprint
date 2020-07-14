@@ -68,3 +68,4 @@ __version__ = "0.12.0"
 __author__ = "Leéh Péter"
 
 from .api import *
+from.utils import print_info
