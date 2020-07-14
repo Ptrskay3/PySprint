@@ -181,7 +181,7 @@ class Dataset(metaclass=DatasetBase):
         elif isinstance(value, np.ndarray) or isinstance(value, Iterable):
             for val in value:
                 if not isinstance(val, numbers.Number):
-                    raise ValueError(f"Numeric values expected, got {type(val)} instead.")
+                    raise ValueError(f"Expected numeric values, got {type(val)} instead.")
                 if val < np.min(self.x) or val > np.max(self.x):
                     raise ValueError(
                         f"Cannot set SPP position to {val} since it's not in the dataset's range."
@@ -421,8 +421,10 @@ class Dataset(metaclass=DatasetBase):
 
     def __repr__(self):
         if isinstance(self._delay, np.ndarray):
-            pprint_delay = self._delay[0]
-        elif isinstance(self._delay, float) or isinstance(self._delay, int):
+            pprint_delay = self._delay.flat[0]
+        elif isinstance(self._delay, Iterable):
+            pprint_delay =  next((_ for _ in self._delay), None)
+        elif isinstance(self._delay, numbers.Number):
             pprint_delay = self._delay
         else:
             pprint_delay = "-"
@@ -670,22 +672,23 @@ class Dataset(metaclass=DatasetBase):
         """
         Mark SPPs on the plot if they are valid.
         """
-        if isinstance(self.positions, float):
+        if isinstance(self.positions, numbers.Number):
             x_closest, idx = find_nearest(self.x, self.positions)
             try:
-                self.plotwidget.plot(x_closest, self.y_norm[idx])
+                self.plotwidget.plot(x_closest, self.y_norm[idx], **kwargs)
             except Exception:  # TODO: handle that exception precisely
-                self.plotwidget.plot(x_closest, self.y[idx])
+                self.plotwidget.plot(x_closest, self.y[idx], **kwargs)
 
-        if isinstance(self.positions, np.ndarray) or isinstance(self.positions, tuple):
+        if isinstance(self.positions, np.ndarray) or isinstance(self.positions, Iterable):
             for i, val in enumerate(self.positions):
                 x_closest, idx = find_nearest(self.x, self.positions[i])
                 try:
-                    self.plotwidget.plot(x_closest, self.y_norm[idx])
+                    self.plotwidget.plot(x_closest, self.y_norm[idx], **kwargs)
                 except Exception:  # TODO: handle that exception precisely
-                    self.plotwidget.plot(x_closest, self.y[idx])
+                    self.plotwidget.plot(x_closest, self.y[idx], **kwargs)
 
 
+    # TODO: Add **kwargs
     def show(self):
         """Draws a graph of the current dataset using matplotlib.
         """
@@ -696,7 +699,7 @@ class Dataset(metaclass=DatasetBase):
                 self.plotwidget.plot(self.x, self.y_norm, "r")
             except Exception:  # TODO: handle that exception precisely
                 self.plotwidget.plot(self.x, self.y, "r")
-        self._plot_SPP_if_valid()
+        self._plot_SPP_if_valid(color="black", marker="o", markersize=10)
         self.plotwidget.grid()
         self.plotwidget.show(block=True)
 
@@ -739,6 +742,10 @@ class Dataset(metaclass=DatasetBase):
         self.delay, self.positions = _spp.get_data()
 
     def emit(self):
+        if self.positions is None:
+            raise ValueError("SPP positions are missing.")
+        if self.delay is None:
+            raise ValueError("Delay value is missing.")
         # validate if it's typed by hand..
         if not isinstance(self._positions, np.ndarray):
             self._positions = np.asarray(self.positions)
@@ -747,8 +754,6 @@ class Dataset(metaclass=DatasetBase):
         return self.delay, self.positions
 
     def set_SPP_data(self, delay, positions):
-        if not isinstance(positions, np.ndarray):
-            positions = np.asarray(positions)
         if not isinstance(delay, float):
             delay = float(delay)
         delay = np.array(np.ones_like(positions) * delay)

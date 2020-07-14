@@ -127,6 +127,7 @@ class Generator(metaclass=DatasetBase):
         self.plotwidget.grid()
         self.plotwidget.show()
 
+    # TODO: rewrite this in a more intelligent matter
     def save(self, name, path=None):
         """
         Saves the generated dataset with numpy.savetxt.

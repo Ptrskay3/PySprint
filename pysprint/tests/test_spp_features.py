@@ -8,31 +8,33 @@ from pysprint.core.bases import Dataset
 
 @pytest.fixture()
 def construct_ifg_sequence():
+    x = np.arange(1000)
+    y = np.sin(x)
 
     # setting multiple SPP
-    d1 = Dataset([1], [2])
+    d1 = Dataset(x, y)
     d1.set_SPP_data(10, [40, 45])
 
     # simple
-    d2 = Dataset([2], [3])
+    d2 = Dataset(x, y)
     d2.set_SPP_data(12, 13)
 
     # setting 3 SPP
-    d3 = Dataset([3], [4])
+    d3 = Dataset(x, y)
     d3.set_SPP_data(14, [14, 500, 43])
 
     # setting SPP directly
-    d4 = Dataset([4, 6], [5, 8])
+    d4 = Dataset(x, y)
     d4.delay = 40
-    d4.positions = [45.8, 54]
+    d4.positions = np.array([45.8, 54])
 
     # handle duplicates
-    d5 = Dataset([4, 6], [5, 8])
+    d5 = Dataset(x, y)
     d5.delay = 40
     d5.positions = [5.8, 40]
 
     # ambiguous positions
-    d6 = Dataset([4, 6], [5, 8])
+    d6 = Dataset(x, y)
     d6.delay = 40
     d6.positions = 45.8, 54
 
