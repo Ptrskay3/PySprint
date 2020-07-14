@@ -116,5 +116,18 @@ class TestEvaluate(unittest.TestCase):
         assert not np.max(ifg.x) < 701
 
 
+@pytest.mark.parametrize('pos', [(1, 2), {4, 5}, [4, 5], np.array([1, 4])])
+def test_SPP_position_setter_valid_options(pos):
+    ifg = Dataset(np.arange(1, 1000, 1), np.sin(np.arange(1, 1000, 1)))
+    ifg.positions = pos
+
+
+@pytest.mark.parametrize('pos', ["string", [1500, 4500], [100, "string"]])
+def test_SPP_position_setter_invalid_options(pos):
+    ifg = Dataset(np.arange(1, 1000, 1), np.sin(np.arange(1, 1000, 1)))
+    with pytest.raises(ValueError):
+        ifg.positions = pos
+
+
 if __name__ == "__main__":
     unittest.main()

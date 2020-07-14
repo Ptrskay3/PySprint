@@ -205,7 +205,7 @@ class SPPMethod(metaclass=DatasetBase):
 
             plt.show(block=True)
 
-        return dispersion, dispersion_std, bf
+        return dispersion, dispersion_std, ""
 
     @property
     def info(self):

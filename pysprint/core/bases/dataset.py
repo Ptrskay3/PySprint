@@ -3,10 +3,12 @@ This file implements the basic Dataset class.
 """
 import json  # for pretty printing dict
 import warnings
+from collections.abc import Iterable
 from inspect import signature, cleandoc
 from textwrap import dedent
 from math import factorial
 from copy import copy, deepcopy
+import numbers
 
 import numpy as np
 import pandas as pd
@@ -170,6 +172,20 @@ class Dataset(metaclass=DatasetBase):
 
     @positions.setter
     def positions(self, value):
+        if isinstance(value, numbers.Number):
+            if value < np.min(self.x) or value > np.max(self.x):
+                raise ValueError(
+                    f"Cannot set SPP position to {value} since it's not in the dataset's range."
+                )
+        # TODO: maybe we don't need to distinguish between np.ndarray and Iterable
+        elif isinstance(value, np.ndarray) or isinstance(value, Iterable):
+            for val in value:
+                if not isinstance(val, numbers.Number):
+                    raise ValueError(f"Numeric values expected, got {type(val)} instead.")
+                if val < np.min(self.x) or val > np.max(self.x):
+                    raise ValueError(
+                        f"Cannot set SPP position to {val} since it's not in the dataset's range."
+                    )
         self._positions = value
 
     def _ensure_norm(self):
@@ -649,6 +665,27 @@ class Dataset(metaclass=DatasetBase):
         )
         return xmax, ymax, xmin, ymin
 
+
+    def _plot_SPP_if_valid(self, **kwargs):
+        """
+        Mark SPPs on the plot if they are valid.
+        """
+        if isinstance(self.positions, float):
+            x_closest, idx = find_nearest(self.x, self.positions)
+            try:
+                self.plotwidget.plot(x_closest, self.y_norm[idx])
+            except Exception:  # TODO: handle that exception precisely
+                self.plotwidget.plot(x_closest, self.y[idx])
+
+        if isinstance(self.positions, np.ndarray) or isinstance(self.positions, tuple):
+            for i, val in enumerate(self.positions):
+                x_closest, idx = find_nearest(self.x, self.positions[i])
+                try:
+                    self.plotwidget.plot(x_closest, self.y_norm[idx])
+                except Exception:  # TODO: handle that exception precisely
+                    self.plotwidget.plot(x_closest, self.y[idx])
+
+
     def show(self):
         """Draws a graph of the current dataset using matplotlib.
         """
@@ -657,8 +694,9 @@ class Dataset(metaclass=DatasetBase):
         else:
             try:
                 self.plotwidget.plot(self.x, self.y_norm, "r")
-            except Exception:
+            except Exception:  # TODO: handle that exception precisely
                 self.plotwidget.plot(self.x, self.y, "r")
+        self._plot_SPP_if_valid()
         self.plotwidget.grid()
         self.plotwidget.show(block=True)
 
