@@ -50,9 +50,9 @@ def setup_notebook(figsize=(15, 5), backend="Qt5Agg"):
         pass
 
     try:
-        plt.switch_backend("Qt5Agg")
-        if matplotlib.get_backend() != "Qt5Agg":
-            matplotlib.use("Qt5Agg")
+        plt.switch_backend(backend)
+        # if matplotlib.get_backend() != "Qt5Agg":
+        #     matplotlib.use("Qt5Agg")
     except:
         warnings.warn(
             "You should manually set a suitable matplotlib backend, "
@@ -68,4 +68,4 @@ __version__ = "0.12.0"
 __author__ = "Leéh Péter"
 
 from .api import *
-from.utils import print_info
+from .utils import print_info
