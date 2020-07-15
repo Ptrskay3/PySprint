@@ -176,7 +176,7 @@ def nuifft(x, y, gl, df=1.0, epsilon=1e-12, exponent="positive"):
         ftau = _compute_gaussian_grid(x, y, Mr, Msp, tau)
     else:
         warnings.warn(
-            "Numba is not availabe, falling back to slower version."
+            "Numba is not available, falling back to slower version."
         )
         ftau = _compute_gaussian_grid_nonumba(x, y, Mr, Msp, tau)
 

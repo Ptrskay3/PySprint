@@ -206,7 +206,7 @@ class FFTMethod(Dataset):
         self.phase = Phase(self.x, y)
         if show_graph:
             self.phase.plot()
-        return self.x, y
+        return self.phase  # FIXME: because of inplace ops. we need to return the phase
 
     def calculate(self, reference_point, order, show_graph=False):
         """
@@ -231,7 +231,7 @@ class FFTMethod(Dataset):
             [GD, GDD, TOD, FOD, QOD]
 
         dispersion_std: array-like
-            standard deviations due to uncertanity of the fit
+            standard deviations due to uncertainty of the fit
             [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
 
         fit_report: lmfit report
@@ -291,7 +291,7 @@ class FFTMethod(Dataset):
                 y = np.unwrap(np.angle(self.y), axis=0)
                 self.phase = Phase(self.x, y)
                 self.phase.plot()
-                return self.x, y
+                return self.phase
             self.calculate(
                 reference_point=reference_point, order=order, show_graph=True
             )
@@ -306,7 +306,7 @@ class FFTMethod(Dataset):
                 y = np.unwrap(np.angle(self.y), axis=0)
                 self.phase = Phase(self.x, y)
                 self.phase.plot()
-                return self.x, y
+                return self.phase
             self.calculate(
                 reference_point=reference_point, order=order, show_graph=True
             )

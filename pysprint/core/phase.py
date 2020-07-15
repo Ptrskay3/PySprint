@@ -16,6 +16,7 @@ except ImportError:
     _has_lmfit = False
 
 from pysprint.core.functions import _fit_config
+from pysprint.core.preprocess import cut_data
 from pysprint.utils import (
     print_disp,
     transform_lmfit_params_to_dispersion,
@@ -43,6 +44,11 @@ class Phase:
             return self.poly.__call__(value)
         raise NotImplementedError(
             "Before calling, a polinomial must be fitted."
+        )
+
+    def slice(self, start=None, stop=None):
+        self.x, self.y = cut_data(
+            self.x, self.y, [], [], start=start, stop=stop
         )
 
     @classmethod
