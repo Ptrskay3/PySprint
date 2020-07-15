@@ -2,13 +2,13 @@ version: "2"
 checks:
   argument-count:
     config:
-      threshold: 14
+      threshold: 8
   complex-logic:
     config:
       threshold: 4
   file-lines:
     config:
-      threshold: 1000
+      threshold: 500
   method-complexity:
     config:
       threshold: 65
@@ -25,24 +25,10 @@ checks:
     config:
       threshold: 4
   similar-code:
-    enabled : false
+    enabled : true
   identical-code:
     enabled: true
     config:
       threshold: 40
 exclude_patterns:
-  - "config/"
-  - "db/"
-  - "dist/"
-  - "features/"
-  - "**/logic.py"
-  - "**/node_modules/"
-  - "script/"
-  - "**/spec/"
-  - "**/test/"
   - "**/tests/"
-  - "Tests/"
-  - "**/vendor/"
-  - "**/*_test.go"
-  - "**/*.d.ts"
-  - "**/ui/*.py"
