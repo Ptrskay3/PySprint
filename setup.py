@@ -33,11 +33,11 @@ setup(
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Education",
         "Intended Audience :: Science/Research",
-        "Topic :: Scientific/Engineering :: Physics"        
+        "Topic :: Scientific/Engineering :: Physics"
     ],
     install_requires=[
         'numpy>=1.16.6',
-        'scipy', 
+        'scipy',
         'matplotlib',
         'pandas'
       ],

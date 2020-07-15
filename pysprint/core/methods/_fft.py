@@ -19,7 +19,6 @@ from pysprint.core.evaluate import (
     gaussian_window,
 )
 
-
 __all__ = ["FFTMethod"]
 
 
@@ -41,6 +40,7 @@ class FFTMethod(Dataset):
         self.window_order = None
         self._ifft_called_first = False
         self.phase = None
+        self.nufft_used = False
 
     def shift(self, axis="x", inplace=True):
         """
@@ -69,8 +69,8 @@ class FFTMethod(Dataset):
             return obj
 
     def ifft(
-        self, interpolate=True, usenifft=False, eps=1e-12, exponent="positive",
-        inplace=True
+            self, interpolate=True, usenifft=False, eps=1e-12, exponent="positive",
+            inplace=True
     ):
         """
         Applies ifft to the dataset.
@@ -86,6 +86,8 @@ class FFTMethod(Dataset):
             Whether to use non unifrom fft
 
         """
+        self.nufft_used = usenifft
+
         if inplace:
             self._ifft_called_first = True
             if usenifft:
@@ -197,6 +199,15 @@ class FFTMethod(Dataset):
             obj.apply_window(inplace=True)
             return obj
 
+    def retrieve_phase(self, show_graph=False):
+        if self.nufft_used:
+            self.shift('y')
+        y = np.unwrap(np.angle(self.y), axis=0)
+        self.phase = Phase(self.x, y)
+        if show_graph:
+            self.phase.plot()
+        return self.x, y
+
     def calculate(self, reference_point, order, show_graph=False):
         """
         FFTMethod's calculate function.
@@ -239,6 +250,9 @@ class FFTMethod(Dataset):
         first ifft was used. For now it's doing okay: giving good results.
         For consistency we should still implement that a better way later.
         """
+        if self.nufft_used:
+            self.shift('y')
+
         dispersion, dispersion_std, fit_report = args_comp(
             self.x,
             self.y,
@@ -250,15 +264,15 @@ class FFTMethod(Dataset):
         return dispersion, dispersion_std, fit_report
 
     def autorun(
-        self,
-        reference_point=None,
-        order=None,
-        *,
-        enable_printing=True,
-        skip_domain_check=False,
-        only_phase=False,
-        show_graph=True,
-        usenifft=False,
+            self,
+            reference_point=None,
+            order=None,
+            *,
+            enable_printing=True,
+            skip_domain_check=False,
+            only_phase=False,
+            show_graph=True,
+            usenifft=False,
     ):
 
         if not reference_point or not order:

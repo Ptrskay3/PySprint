@@ -14,7 +14,7 @@ def test_optimizer1():
     opt = FitOptimizer(x, y, [], [], 50)
 
     with pytest.raises(ValueError):
-        opt.run(r_extend_by=0.1, r_threshold=0.8) 
+        opt.run(r_extend_by=0.1, r_threshold=0.8)
 
 
 @pytest.mark.parametrize("val", [-10, 500])
