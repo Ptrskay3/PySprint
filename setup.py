@@ -12,8 +12,6 @@ except ImportError:
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-
-
 MAJOR = 0
 MINOR = 12
 MICRO = 0
@@ -44,6 +42,6 @@ setup(
         'pandas'
       ],
     extras_require={
-    'optional': ['numba', 'lmfit']
+        'optional': ['numba', 'lmfit', "pytest"]
     }
 )
