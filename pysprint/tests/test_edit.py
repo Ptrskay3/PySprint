@@ -1,9 +1,5 @@
-import os
-import sys
 import unittest
 import numpy as np
-
-sys.path.append("..")
 
 from pysprint.core.preprocess import *
 
@@ -27,7 +23,7 @@ class TestEdit(unittest.TestCase):
     def test_peak(self):
         x, y = np.loadtxt('test_peak.txt', delimiter=",", unpack=True)
         a, b, c, d = find_peak(
-            x, y, [], [], threshold=0.01, proMin=0.5, proMax=0.5
+            x, y, [], [], threshold=0.01, pro_min=0.5, pro_max=0.5
         )
         assert len(a) == len(b)
         assert len(c) == len(d)

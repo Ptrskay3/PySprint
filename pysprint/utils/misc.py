@@ -1,5 +1,5 @@
-from functools import wraps
-from math import factorial
+import os
+from functools import wraps, lru_cache
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -20,7 +20,32 @@ __all__ = [
     "measurement",
     "_maybe_increase_before_cwt",
     "pad_with_trailing_zeros",
+    "mutually_exclusive_args",
+    "lazy_property"
 ]
+
+# https://stackoverflow.com/a/54487188/11751294
+
+
+def mutually_exclusive_args(keyword, *keywords):
+    """"
+    Decorator to restrict the user to specify exactly one of the given parameters.
+    Often used for std and fwhm for Gaussian windows.
+    """
+    keywords = (keyword,) + keywords
+
+    def wrapper(func):
+        @wraps(func)
+        def inner(*args, **kwargs):
+            if sum(k in keywords for k in kwargs) != 1:
+                raise TypeError('You must specify exactly one of {}'.format(' and '.join(keywords)))
+            return func(*args, **kwargs)
+        return inner
+    return wrapper
+
+
+def lazy_property(f):
+    return property(lru_cache()(f))
 
 
 def _maybe_increase_before_cwt(y, tolerance=0.05):
@@ -28,7 +53,7 @@ def _maybe_increase_before_cwt(y, tolerance=0.05):
     value = y.min()
     if value - tolerance >= 0:
         return False
-    if value < 0 and np.abs(value) - tolerance > 0:
+    if value < 0 < np.abs(value) - tolerance:
         return True
     return True
 
@@ -77,7 +102,7 @@ def between(val, except_around):
     else:
         lower = float(min(except_around))
         upper = float(max(except_around))
-    if val <= upper and val >= lower:
+    if upper >= val >= lower:
         return True
     return False
 
@@ -103,6 +128,9 @@ def measurement(array, confidence=0.95, silent=False):
 
     confidence : float, optional
         The desired confidence level. Must be between 0 and 1.
+
+    silent : bool, optional
+        Whether to print results immediately. Default is `False`.
 
     Returns
     -------
@@ -190,7 +218,7 @@ def _handle_input(x, y, ref, sam):
 def print_disp(f):
     @wraps(f)
     def wrapping(*args, **kwargs):
-        disp, disp_std, st = f(*args, **kwargs)
+        disp, disp_std, stri = f(*args, **kwargs)
         labels = ("GD", "GDD", "TOD", "FOD", "QOD", "SOD")
         disp = np.trim_zeros(disp, "b")
         disp_std = disp_std[: len(disp)]
@@ -208,7 +236,7 @@ def print_disp(f):
                 print(
                     f"{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i+1}"
                 )
-        return disp, disp_std, st
+        return disp, disp_std, stri
 
     return wrapping
 

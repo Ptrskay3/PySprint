@@ -1,12 +1,8 @@
 import os
 import sys
-import warnings
 import platform
 import struct
 import importlib
-import distutils
-
-import pysprint
 
 __all__ = ["print_info"]
 
@@ -25,14 +21,14 @@ SUPPORTED_VERSIONS = {
 def get_system_info():
     uname_result = platform.uname()
     return {
-        "python": ".".join(str(i) for i in sys.version_info),
+        "python": ".".join(str(j) for j in sys.version_info),
         "python-bits": struct.calcsize("P") * 8,
         "OS": uname_result.system,
         "OS-release": uname_result.release,
         "Version": uname_result.version,
         "machine": uname_result.machine,
         "processor": uname_result.processor,
-        "byteorder": sys.byteorder,
+        "byteorder": sys.byteorder
     }
 
 
@@ -47,21 +43,21 @@ def import_optional(name):
     try:
         module = importlib.import_module(name)
     except ImportError:
-            return None
+        return None
     return module
 
 
 def get_dep_info():
     deps = [
-    "pysprint",
-    "numpy",
-    "scipy",
-    "matplotlib",
-    "pandas",
-    "pytest",
-    "lmfit",
-    "numba",
-    "IPython"
+        "pysprint",
+        "numpy",
+        "scipy",
+        "matplotlib",
+        "pandas",
+        "pytest",
+        "lmfit",
+        "numba",
+        "IPython"
     ]
     deps.extend(list(SUPPORTED_VERSIONS))
     result = {}
@@ -69,6 +65,7 @@ def get_dep_info():
         mod = import_optional(modname)
         result[modname] = find_version(mod) if mod else None
     return result
+
 
 def print_info():
     sysinfo = get_system_info()
@@ -91,7 +88,7 @@ def print_info():
         ip = None
     spy = any("SPYDER" in name for name in os.environ)
     nm = "IPython"
-    is_spyder = "in Spyder"
+    is_spyder = "Spyder"
     _is_conda = "Conda env"
     is_conda = os.path.exists(os.path.join(sys.prefix, 'conda-meta', 'history'))
     print(f"{_is_conda:<{n + 1}}: {is_conda}")

@@ -39,7 +39,7 @@ class FitOptimizer:
             self._y_norm = self.y
         else:
             self._y_norm = (self.y - self.ref - self.sam) / (
-                2 * np.sqrt(self.sam * self.ref)
+                    2 * np.sqrt(self.sam * self.ref)
             )
         self.reference_point = reference_point
         self.x -= self.reference_point
@@ -105,8 +105,8 @@ class FitOptimizer:
             self._lower_bound = 0
         if self._upper_bound > len(self.x):
             self._upper_bound = len(self.x)
-        self._x_curr = self.x[self._lower_bound : self._upper_bound]
-        self._y_curr = self._y_norm[self._lower_bound : self._upper_bound]
+        self._x_curr = self.x[self._lower_bound: self._upper_bound]
+        self._y_curr = self._y_norm[self._lower_bound: self._upper_bound]
 
     def _step_up_func(self):
         """
@@ -138,8 +138,8 @@ class FitOptimizer:
             self._new_lower = 0
         if self._new_upper > len(self.x):
             self._new_upper = len(self.x)
-        self._x_curr = self.x[self._new_lower : self._new_upper]
-        self._y_curr = self._y_norm[self._new_lower : self._new_upper]
+        self._x_curr = self.x[self._new_lower:self._new_upper]
+        self._y_curr = self._y_norm[self._new_lower:self._new_upper]
 
     def _finetune(self):
         """
@@ -178,10 +178,10 @@ class FitOptimizer:
                 from IPython.display import display, Math
 
                 display(
-                    Math(f"{label} = {(params[i]*factorial(i+1)):.5f} \\ fs^{i + 1}")
+                    Math(f"{label} = {(params[i] * factorial(i + 1)):.5f} \\ fs^{i + 1}")
                 )
             else:
-                print(f"{label} = {(params[i]*factorial(i+1)):.5f} fs^{i + 1}")
+                print(f"{label} = {(params[i] * factorial(i + 1)):.5f} fs^{i + 1}")
 
     def run(self, r_extend_by, r_threshold, max_tries=5000, show_endpoint=True):
 

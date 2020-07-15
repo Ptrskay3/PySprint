@@ -15,7 +15,7 @@ try:
 except ImportError:
     _has_lmfit = False
 
-from pysprint.core.evaluate import _fit_config
+from pysprint.core.functions import _fit_config
 from pysprint.utils import (
     print_disp,
     transform_lmfit_params_to_dispersion,

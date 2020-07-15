@@ -1,13 +1,8 @@
 """
 FIXME: Obviously we need better tests than that..
 """
-import sys
-import os
 import unittest
 import numpy as np
-import scipy
-
-# import matplotlib.pyplot as plt
 
 from pysprint.core import evaluate
 from pysprint.core.preprocess import find_peak
@@ -39,7 +34,7 @@ class TestEvaluate(unittest.TestCase):
         )
         np.testing.assert_almost_equal(disp[0], -0.314159265359)
         with self.assertRaises(ValueError):
-            disp, disp_s, fit = evaluate.min_max_method(
+            evaluate.min_max_method(
                 [],
                 b,
                 [],
@@ -51,7 +46,7 @@ class TestEvaluate(unittest.TestCase):
                 show_graph=False,
             )
         with self.assertRaises(ValueError):
-            disp, disp_s, fit = evaluate.min_max_method(
+            evaluate.min_max_method(
                 [],
                 [],
                 [],
@@ -65,7 +60,7 @@ class TestEvaluate(unittest.TestCase):
         # with self.assertRaises(ValueError):
         # disp, disp_s, fit = evaluate.min_max_method(a, [], [], [], ref_point = 0, maxx=maxs, minx=mins, fit_order=1, show_graph=False)
         with self.assertRaises(ValueError):
-            disp, disp_s, fit = evaluate.min_max_method(
+            evaluate.min_max_method(
                 a,
                 b,
                 [],
@@ -88,7 +83,7 @@ class TestEvaluate(unittest.TestCase):
         # np.testing.assert_array_equal(emp, k)
         a, b, c, d = np.loadtxt('test_arms.txt', delimiter=",", unpack=True)
         maxs, _, mins, _ = find_peak(
-            a, b, c, d, proMax=1, proMin=1, threshold=0.4
+            a, b, c, d, pro_max=1, pro_min=1, threshold=0.4
         )
         d1, d_s1, fit1 = evaluate.min_max_method(
             a,

@@ -34,6 +34,7 @@ __all__ = [
     "cut_gaussian",
     "ifft_method",
     "args_comp",
+    "gaussian_window"
 ]
 
 
@@ -65,8 +66,11 @@ def min_max_method(
     ref_point: float
     the reference point to calculate order
 
-    maxx and minx: array-like, optional
-    the accepted minimal and maximal x values (if you want to manually pass)
+    maxx: array-like, optional
+    the accepted maximal x values (if you want to manually pass)
+
+    minx: array-like, optional
+    the accepted minimal x values (if you want to manually pass)
 
     fit_order: int, optional
     degree of polynomial to fit data [1, 5]
@@ -90,11 +94,11 @@ def min_max_method(
 
     x, y = _handle_input(x, y, ref, sam)
     if maxx is None:
-        maxInd = argrelextrema(y, np.greater)
-        maxx = x[maxInd]
+        max_ind = argrelextrema(y, np.greater)
+        maxx = x[max_ind]
     if minx is None:
-        minInd = argrelextrema(y, np.less)
-        minx = x[minInd]
+        min_ind = argrelextrema(y, np.less)
+        minx = x[min_ind]
 
     _, ref_index = find_nearest(x, ref_point)
 
@@ -179,6 +183,9 @@ def spp_method(delays, omegas, ref_point=0, fit_order=4):
 
     omegas: array-like
     The angular frequency values where SPP's are located
+
+    ref_point: float
+    The reference point in dataset for fitting.
 
     fit_order: int
     order of polynomial to fit the given data
@@ -364,6 +371,9 @@ def cut_gaussian(x, y, spike, fwhm, win_order):
 
     fwhm: float
     Full width at half max
+
+    win_order: int
+    The order of gaussian window. Must be even.
 
     Returns
     -------

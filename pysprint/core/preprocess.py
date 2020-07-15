@@ -19,6 +19,7 @@ from pysprint.utils import (
 
 # TODO : all of these methods should be rewritten, they are poor quality.
 
+
 def cwt(x, y, ref, sam, width, floor_thres=0.1):
     x, y = _handle_input(x, y, ref, sam)
     idx = find_peaks_cwt(y, np.arange(1, width))
@@ -51,7 +52,7 @@ def savgol(x, y, ref, sam, window=101, order=3):
 
 
 def find_peak(
-    x, y, ref, sam, proMax=1, proMin=1, threshold=0.1, except_around=None
+    x, y, ref, sam, pro_max=1, pro_min=1, threshold=0.1, except_around=None
 ):
     if except_around is not None and len(except_around) != 2:
         raise ValueError("Invalid except_around arg. Try [start, stop].")
@@ -64,15 +65,15 @@ def find_peak(
                 "Invalid except_around arg. Only numeric values are allowed."
             )
     x, y = _handle_input(x, y, ref, sam)
-    maxIndexes, _ = find_peaks(y, prominence=proMax)
+    max_indexes, _ = find_peaks(y, prominence=pro_max)
     y_rec = 1 / y
-    minIndexes, _ = find_peaks(y_rec, prominence=proMin)
+    min_indexes, _ = find_peaks(y_rec, prominence=pro_min)
     min_idx = []
     max_idx = []
-    for idx in maxIndexes:
+    for idx in max_indexes:
         if between(x[idx], except_around) or np.abs(y[idx]) > threshold:
             max_idx.append(idx)
-    for idx in minIndexes:
+    for idx in min_indexes:
         if between(x[idx], except_around) or np.abs(y[idx]) > threshold:
             min_idx.append(idx)
 

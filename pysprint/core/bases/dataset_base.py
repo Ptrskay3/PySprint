@@ -2,7 +2,7 @@ import types
 
 from pysprint.utils import print_disp
 
-__all__ = ["DatasetBase"]
+__all__ = ["DatasetBase", "C_LIGHT"]
 
 C_LIGHT = 299.792458
 

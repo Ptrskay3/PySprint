@@ -41,6 +41,8 @@ class SPPMethod(metaclass=DatasetBase):
 
         self._delay = {}
         self._positions = {}
+        self._info = (f"Progress: {len(self._delay)}/{len(self)}")
+
 
     @staticmethod
     def calculate_from_ifg(ifg_list, reference_point, order, show_graph=False):

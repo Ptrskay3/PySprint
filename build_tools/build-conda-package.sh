@@ -5,7 +5,7 @@ array=( 3.6 3.7 )
 
 echo "Building conda package ..."
 cd ~
-conda skeleton pypi --version 0.10.0 $pkg
+conda skeleton pypi --version 0.12.0 $pkg
 cd $pkg
 cd ~
 

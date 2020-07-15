@@ -26,7 +26,6 @@ class TestEvaluate(unittest.TestCase):
         plt.close("all")
         mock_show.assert_called()
 
-
     def test_edit_session2(self):
         ifg = MinMaxMethod(self.x, self.y)
         with self.assertRaises(ValueError):
@@ -44,6 +43,7 @@ class TestEvaluate(unittest.TestCase):
         ifg.init_edit_session()
         plt.close('all')
         mock_show.assert_called()
+
 
 if __name__ == "__main__":
     unittest.main()

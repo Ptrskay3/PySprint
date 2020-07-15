@@ -55,7 +55,7 @@ class Generator(metaclass=DatasetBase):
 
     # TODO: PEP8 that horrible line below
     def __repr__(self):
-        return f"""Generator({self.start}, {self.stop}, {self.center}, delay={self.delay}, GD={self.GD}, GDD={self.GDD}, TOD={self.TOD}, FOD={self.FOD}, QOD={self.QOD}, resolution={self.resolution}, delimiter='{self.delimiter}', pulse_width={self.pulse_width}, normalize={self.normalize})"""
+        return f"Generator({self.start}, {self.stop}, {self.center}, delay={self.delay}, GD={self.GD}, GDD={self.GDD}, TOD={self.TOD}, FOD={self.FOD}, QOD={self.QOD}, resolution={self.resolution}, delimiter='{self.delimiter}', pulse_width={self.pulse_width}, normalize={self.normalize})"
 
     def _check_norm(self):
         """
@@ -65,6 +65,20 @@ class Generator(metaclass=DatasetBase):
             self._y = (self.y - self.ref - self.sam) / (
                 2 * np.sqrt(self.sam * self.ref)
             )
+
+
+    def generate(self, force_wavelength=False):
+        """
+        Intelligently (kind of) decide what domain we generate the dataset on.
+        """
+        if force_wavelength:
+            self.generate_wave()
+        else:
+            if self.stop < 100:
+                self.generate_freq()
+            else:
+                self.generate_wave()
+
     # TODO: Maybe intelligently decide the domain in a new function
     def generate_freq(self):
         """
@@ -109,7 +123,7 @@ class Generator(metaclass=DatasetBase):
             self.chirp,
         )
 
-    def GD_lookup(self, *args, **kwargs):
+    def GD_lookup(self):
         return self.GD + self.delay
 
     def show(self):
@@ -122,12 +136,12 @@ class Generator(metaclass=DatasetBase):
         else:
             try:
                 self.plotwidget.plot(self.x, self._y, "r")
-            except Exception:
+            except Exception: # TODO: better exception case
                 self.plotwidget.plot(self.x, self.y, "r")
         self.plotwidget.grid()
         self.plotwidget.show()
 
-    # TODO: rewrite this in a more intelligent matter
+    # TODO: rewrite this in a more intelligent manner, this is deprecated
     def save(self, name, path=None):
         """
         Saves the generated dataset with numpy.savetxt.
@@ -195,7 +209,7 @@ class Generator(metaclass=DatasetBase):
         self.fig.canvas.set_window_title("Spectrum and phase")
         try:
             self.ax[0].plot(self.x, self._y, "r")
-        except Exception:
+        except Exception:  # TODO : handle that too
             self.ax[0].plot(self.x, self.y, "r")
         try:
             self.ax[1].plot(self.x, self._phase(self.x))

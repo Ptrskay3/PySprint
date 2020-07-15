@@ -1,4 +1,3 @@
-import sys
 import collections
 import unittest
 from unittest.mock import patch
@@ -26,18 +25,18 @@ class TestEvaluate(unittest.TestCase):
 
     def test_prediction(self):
         ifg = Dataset([150, 200], [3, 4])
-        assert ifg.probably_wavelength == True
+        assert ifg.probably_wavelength
         ifg = Dataset([1, 2], [3, 4])
-        assert ifg.probably_wavelength == False
+        assert not ifg.probably_wavelength
 
     def test_dtypes(self):
         ifg = Dataset([15, 4], [3, 4])
         assert type(ifg.x) == np.ndarray
         assert type(ifg.y) == np.ndarray
         with self.assertRaises(DatasetError):
-            ifg = Dataset(["das", 6541], [1, 2])
+            Dataset(["das", 6541], [1, 2])
         with self.assertRaises(DatasetError):
-            ifg = Dataset([2, 6541], ["das", 2])
+            Dataset([2, 6541], ["das", 2])
 
     def test_safe_casting(self):
         ifg = Dataset([15, 4], [3, 4], [14, 54], [45, 51])
@@ -55,7 +54,7 @@ class TestEvaluate(unittest.TestCase):
         ifg = Dataset.parse_raw('test_rawparsing.trt')
         assert issubclass(ifg.meta.__class__, collections.abc.Mapping)
         with self.assertRaises(OSError):
-            ifg = Dataset.parse_raw(546)
+            Dataset.parse_raw(546)
 
     def test_data(self):
         ifg = Dataset(self.x, self.y)

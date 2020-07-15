@@ -153,7 +153,7 @@ class CosFitMethod(Dataset):
             ss_res = np.sum(residuals ** 2)
             ss_tot = np.sum((self.y_norm - np.mean(self.y_norm)) ** 2)
             print("r^2 = " + str(1 - (ss_res / ss_tot)))
-        except Exception:
+        except Exception: # TODO: handle that blank exception
             pass
         if self.fit is not None:
             self.plotwidget.plot(

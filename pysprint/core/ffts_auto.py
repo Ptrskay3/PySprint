@@ -115,7 +115,6 @@ def predict_fwhm(
 def _run(
     ifg,
     skip_domain_check=False,
-    only_phase=False,
     show_graph=True,
     usenifft=False,
 ):

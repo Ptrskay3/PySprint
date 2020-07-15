@@ -33,7 +33,6 @@ from pysprint.utils.exceptions import (
     PySprintWarning
 )
 
-
 __all__ = ["Dataset"]
 
 
@@ -84,7 +83,7 @@ class Dataset(metaclass=DatasetBase):
 
         else:
             self.y_norm = (self.y - self.ref - self.sam) / (
-                2 * np.sqrt(self.sam * self.ref)
+                    2 * np.sqrt(self.sam * self.ref)
             )
             self._is_normalized = True
 
@@ -103,7 +102,9 @@ class Dataset(metaclass=DatasetBase):
         self._dispersion_array = None
 
     def __call__(self, reference_point, *, order=None, show_graph=None):
-        '''Alias for self.calculate.'''
+        '''
+        Alias for self.calculate.
+        '''
 
         if hasattr(self, "calculate"):
 
@@ -204,7 +205,7 @@ class Dataset(metaclass=DatasetBase):
         self.y = (self.y - 0.5) * 2
 
     def GD_lookup(
-        self, reference_point=2.355, engine="cwt", silent=False, **kwargs
+            self, reference_point=2.355, engine="cwt", silent=False, **kwargs
     ):
         """Quick GD lookup: it finds extremal points near the
         `reference_point` and returns an average value of 2*np.pi
@@ -318,14 +319,14 @@ class Dataset(metaclass=DatasetBase):
 
     @classmethod
     def parse_raw(
-        cls,
-        basefile,
-        ref=None,
-        sam=None,
-        skiprows=8,
-        decimal=",",
-        sep=";",
-        meta_len=5,
+            cls,
+            basefile,
+            ref=None,
+            sam=None,
+            skiprows=8,
+            decimal=",",
+            sep=";",
+            meta_len=5,
     ):
         """Dataset object alternative constructor.
         Helps to load in data just by giving the filenames in
@@ -423,13 +424,13 @@ class Dataset(metaclass=DatasetBase):
         if isinstance(self._delay, np.ndarray):
             pprint_delay = self._delay.flat[0]
         elif isinstance(self._delay, Iterable):
-            pprint_delay =  next((_ for _ in self._delay), None)
+            pprint_delay = next((_ for _ in self._delay), None)
         elif isinstance(self._delay, numbers.Number):
             pprint_delay = self._delay
         else:
             pprint_delay = "-"
         string = dedent(
-        f"""
+            f"""
         {type(self).__name__}
 
         Parameters
@@ -612,7 +613,7 @@ class Dataset(metaclass=DatasetBase):
         )
 
     def detect_peak(
-        self, pmax=0.1, pmin=0.1, threshold=0.1, except_around=None
+            self, pmax=0.1, pmin=0.1, threshold=0.1, except_around=None
     ):
         """Basic algorithm to find extremal points in data
         using ``scipy.signal.find_peaks``.
@@ -660,13 +661,12 @@ class Dataset(metaclass=DatasetBase):
             y,
             ref,
             sam,
-            proMax=pmax,
-            proMin=pmin,
+            pro_max=pmax,
+            pro_min=pmin,
             threshold=threshold,
             except_around=except_around,
         )
         return xmax, ymax, xmin, ymin
-
 
     def _plot_SPP_if_valid(self, **kwargs):
         """
@@ -676,7 +676,7 @@ class Dataset(metaclass=DatasetBase):
             x_closest, idx = find_nearest(self.x, self.positions)
             try:
                 self.plotwidget.plot(x_closest, self.y_norm[idx], **kwargs)
-            except Exception:  # TODO: handle that exception precisely
+            except Exception:  # TODO: handle that exception precisely, maybe ValueError?
                 self.plotwidget.plot(x_closest, self.y[idx], **kwargs)
 
         if isinstance(self.positions, np.ndarray) or isinstance(self.positions, Iterable):
@@ -684,9 +684,8 @@ class Dataset(metaclass=DatasetBase):
                 x_closest, idx = find_nearest(self.x, self.positions[i])
                 try:
                     self.plotwidget.plot(x_closest, self.y_norm[idx], **kwargs)
-                except Exception:  # TODO: handle that exception precisely
+                except Exception:  # TODO: handle that exception precisely, maybe ValueError?
                     self.plotwidget.plot(x_closest, self.y[idx], **kwargs)
-
 
     # TODO: Add **kwargs
     def show(self):
@@ -697,7 +696,7 @@ class Dataset(metaclass=DatasetBase):
         else:
             try:
                 self.plotwidget.plot(self.x, self.y_norm, "r")
-            except Exception:  # TODO: handle that exception precisely
+            except Exception:  # TODO: handle that exception precisely, maybe ValueError?
                 self.plotwidget.plot(self.x, self.y, "r")
         self._plot_SPP_if_valid(color="black", marker="o", markersize=10)
         self.plotwidget.grid()

@@ -30,7 +30,7 @@ class TestFFTAuto(unittest.TestCase):
 
         x_peak, _ = find_center(x, y, n_largest=4)
 
-        assert 1495 < x_peak and x_peak < 1505
+        assert 1495 < x_peak < 1505
 
     def test_find_center2(self):
         g = Generator(1, 4, 3, 100)
@@ -43,7 +43,7 @@ class TestFFTAuto(unittest.TestCase):
 
         x_peak, _ = find_center(x, y, n_largest=4)
 
-        assert 95 < x_peak and x_peak < 105
+        assert 95 < x_peak < 105
 
     def test_find_center3(self):
         g = Generator(1, 4, 3, 7000)
@@ -56,7 +56,7 @@ class TestFFTAuto(unittest.TestCase):
 
         x_peak, _ = find_center(x, y, n_largest=4)
 
-        assert 6950 < x_peak and x_peak < 7050
+        assert 6950 < x_peak < 7050
 
     def test_window1(self):
         is_fine, val = _ensure_window_at_origin(0, 200, 4, 10, tol=1e-3)

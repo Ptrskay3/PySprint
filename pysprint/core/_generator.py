@@ -53,8 +53,8 @@ def generatorFreq(
     lam = np.arange(lamstart, lamend + resolution, resolution)
     omega = (2 * np.pi * C_LIGHT) / lam
     relom = omega - omega0
-    i1 = np.exp(-((relom) ** 2) / (window))
-    i2 = np.exp(-((relom) ** 2) / (window))
+    i1 = np.exp(-(relom ** 2) / window)
+    i2 = np.exp(-(relom ** 2) / window)
     i = (
         i1
         + i2
@@ -93,8 +93,8 @@ def generatorWave(
     lam = np.arange(start, stop + resolution, resolution)
     omega = (2 * np.pi * C_LIGHT) / lam
     relom = omega - omega0
-    i1 = np.exp(-((relom) ** 2) / (window))
-    i2 = np.exp(-((relom) ** 2) / (window))
+    i1 = np.exp(-(relom ** 2) / window)
+    i2 = np.exp(-(relom ** 2) / window)
     i = (
         i1
         + i2

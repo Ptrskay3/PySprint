@@ -41,11 +41,11 @@ class TestMisc(unittest.TestCase):
 
     def test_input_handling4(self):
         with self.assertRaises(ValueError):
-            x, y = _handle_input(self.x, [], [], [])
+            _handle_input(self.x, [], [], [])
 
     def test_input_handling5(self):
         with self.assertRaises(ValueError):
-            x, y = _handle_input([], self.y, [], [])
+            _handle_input([], self.y, [], [])
 
     @pytest.mark.skip(reason="IPython.display treats this another way")
     def test_pprint(self):

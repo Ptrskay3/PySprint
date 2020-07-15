@@ -6,6 +6,7 @@ import numpy as np
 from pysprint.core.optimizer import FitOptimizer
 from pysprint import Generator, CosFitMethod
 
+
 def test_optimizer1():
     x = np.arange(100)
     y = np.sin(x)
@@ -24,6 +25,7 @@ def test_optimizer2(val):
     opt = FitOptimizer(x, y, [], [], 50)
     with pytest.raises(ValueError):
         opt.set_initial_region(val)
+
 
 def test_optimizer3():
     x = np.arange(100)
@@ -51,6 +53,7 @@ def test_optimizer_from_api(delay, GD, GDD):
         cf.optimizer(2, order=2, initial_region_ratio=0.01, extend_by=0.01)
         patched_obj.assert_called()
 
+
 def test_optimizer_from_api2():
     """
     Here we test that granting only GD value will yield correct results.
@@ -73,6 +76,7 @@ def test_lookup(delay):
     cf = CosFitMethod(*g.data)
     cf.GD_lookup(2, engine='normal', silent=True)
     assert (delay*0.95 <= cf.params[3] <= delay*1.05)
+
 
 def test_lookup2():
     g = Generator(1, 3, 2, 400, GD=0, GDD=500, normalize=False)
