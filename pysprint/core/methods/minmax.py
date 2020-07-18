@@ -13,31 +13,29 @@ __all__ = ["MinMaxMethod"]
 
 class MinMaxMethod(Dataset):
     """
-    Basic interface for Minimum-Maximum Method.
+    Interface for Minimum-Maximum Method.
     """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def init_edit_session(self, engine="normal", **kwargs):
-        """ Function to initialize peak editing on a plot.
-        Right clicks will delete the closest point, left clicks
-        will add a new point. Just close the window when finished.
+        """
+        Function to initialize peak editing on a plot.
+        Right clicks (`d` key later) will delete the closest point,
+        left clicks(`i` key later) will add a new point. Just close
+        the window when finished.
 
         Parameters:
         ----------
 
-        engine: str, default is `'normal'`
-            Must be `'cwt'`, `'normal'` or `'slope'`.
+        engine : str
+            Must be 'cwt', 'normal' or 'slope'.
             Peak detection algorithm to use.
+            Default is normal.
 
         **kwargs:
             pmax, pmin, threshold, except_around, width
-
-        Notes:
-        ------
-
-        Currently this function is disabled when running it from IPython.
         """
         engines = ("cwt", "normal", "slope")
         if engine not in engines:
@@ -108,35 +106,33 @@ class MinMaxMethod(Dataset):
         """
         MinMaxMethod's calculate function.
 
-        Parameters:
+        Parameters
         ----------
-
-        reference_point: float
+        reference_point : float
             reference point on x axis
 
-        fit_order: int
-            Polynomial (and maximum dispersion) order to fit. Must be in [1,5]
+        order : int
+            Polynomial (and maximum dispersion) order to fit. Must be in [1, 5].
 
-        show_graph: bool
-            shows a the final graph of the spectral phase and fitted curve.
+        show_graph: bool, optional
+            Shows a the final graph of the spectral phase and fitted curve.
+            Default is False.
 
-        Returns:
+        Returns
         -------
-
         dispersion: array-like
             [GD, GDD, TOD, FOD, QOD]
 
         dispersion_std: array-like
-            standard deviations due to uncertanity of the fit
+            Standard deviations due to uncertainty of the fit.
+            They are only calculated if lmfit is installed.
             [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
 
-        fit_report: lmfit report
-            if lmfit is available, the fit report
-
+        fit_report: string
+            lmfit report if installed, else empty string.
 
         Notes:
         ------
-
         Decorated with print_disp, so the results are
         immediately printed without explicitly saying so.
         """

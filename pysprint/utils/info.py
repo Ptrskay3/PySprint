@@ -72,11 +72,11 @@ def print_info():
     deps = get_dep_info()
     n = max(len(x) for x in deps)
     print("\nPYSPRINT ANALYSIS TOOL")
-    print("\n  SYSTEM INFORMATION")
+    print("\n        SYSTEM")
     print("----------------------")
     for k, v in sysinfo.items():
         print(f"{k:<{n + 1}}: {v}")
-    print("\n    DEPENDENCY INFO")
+    print("\n      DEPENDENCY")
     print("----------------------")
     for k, v in deps.items():
         print(f"{k:<{n + 1}}: {v}")

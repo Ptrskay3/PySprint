@@ -312,6 +312,7 @@ class FFTMethod(Dataset):
 
         show_graph : bool, optional
             Shows a the final graph of the spectral phase and fitted curve.
+            Default is False.
 
         Returns:
         -------

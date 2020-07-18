@@ -829,6 +829,7 @@ class Dataset(metaclass=DatasetBase):
     def open_SPP_panel(self):
         """
         Opens the interactive matplotlib editor for SPP data.
+        Use `i` button to add a new point, use `d` key to delete one.
         """
         _spp = SPPEditor(self.x, self.y_norm)
         self.delay, self.positions = _spp.get_data()

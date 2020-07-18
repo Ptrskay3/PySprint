@@ -12,6 +12,9 @@ __all__ = ["SPPMethod"]
 
 
 class SPPMethod(metaclass=DatasetBase):
+    """
+    Interface for Stationary Phase Point Method.
+    """
     def __init__(self, ifg_names, sam_names=None, ref_names=None, **kwargs):
         self.ifg_names = ifg_names
         if sam_names:
@@ -46,6 +49,41 @@ class SPPMethod(metaclass=DatasetBase):
 
     @staticmethod
     def calculate_from_ifg(ifg_list, reference_point, order, show_graph=False):
+        """
+        Collect SPP data from a list of `pysprint.Dataset` or child objects
+        and evaluate them.
+
+        Parameters
+        ----------
+        ifg_list : list
+            The list containing the interferograms. All member should be
+            `pysprint.Dataset` or child class type, otherwise TypeError is raised.
+
+        reference_point : float
+            The reference point on the x axis.
+
+        order : int
+            Maximum dispersion order to look for. Must be in [2, 5].
+
+        show_graph : bool, optional
+            Shows a the final graph of the spectral phase and fitted curve.
+            Default is False.
+
+        Returns
+        -------
+        dispersion : array-like
+            The dispersion coefficients in the form of:
+            [GD, GDD, TOD, FOD, QOD]
+
+        dispersion_std : array-like
+            Standard deviations due to uncertainty of the fit.
+            It is only calculated if lmfit is installed. The form is:
+            [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
+
+        fit_report : str
+            If lmfit is available returns the fit report, else returns an
+            empty string.
+        """
         for ifg in ifg_list:
             if not isinstance(ifg, Dataset):
                 raise TypeError("pysprint.Dataset objects are expected.")
@@ -175,6 +213,38 @@ class SPPMethod(metaclass=DatasetBase):
 
     @staticmethod
     def calculate_from_raw(omegas, delays, reference_point, order):
+        """
+        Calculate the dispersion from matching pairs of delays and SPP positions.
+
+        Parameters
+        ----------
+        omegas : np.ndarray
+            The SPP positions.
+
+        delays : np.ndarray
+            The delay values in fs.
+
+        reference_point : float
+            The reference point on the x axis.
+
+        order : int
+            Maximum dispersion order to look for. Must be in [2, 5].
+
+        Returns
+        -------
+        dispersion : array-like
+            The dispersion coefficients in the form of:
+            [GD, GDD, TOD, FOD, QOD]
+
+        dispersion_std : array-like
+            Standard deviations due to uncertainty of the fit.
+            It is only calculated if lmfit is installed. The form is:
+            [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
+
+        fit_report : str
+            If lmfit is available returns the fit report, else returns an
+            empty string.
+        """
         if order == 1:
             raise ValueError(
                 "Order should be greater than 1. Cannot fit constant function to data."
@@ -185,6 +255,38 @@ class SPPMethod(metaclass=DatasetBase):
         return dispersion, dispersion_std, ""
 
     def calculate(self, reference_point, order=2, show_graph=False):
+        """
+        This function should be used after setting the SPP data in
+        the interactive matplotlib editor.
+
+        Parameters
+        ----------
+        reference_point : float
+            The reference point on the x axis.
+
+        order : int, optional
+            Maximum dispersion order to look for. Must be in [2, 5].
+            Default is 2.
+
+        show_graph : bool, optional
+            Shows a the final graph of the spectral phase and fitted curve.
+            Default is False.
+
+        Returns
+        -------
+        dispersion : array-like
+            The dispersion coefficients in the form of:
+            [GD, GDD, TOD, FOD, QOD]
+
+        dispersion_std : array-like
+            Standard deviations due to uncertainty of the fit.
+            It is only calculated if lmfit is installed. The form is:
+            [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
+
+        fit_report : str
+            If lmfit is available returns the fit report, else returns an
+            empty string.
+        """
         if order == 1:
             raise ValueError(
                 "Order should be greater than 1. Cannot fit constant function to data."
