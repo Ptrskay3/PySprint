@@ -38,20 +38,20 @@ class FFTMethod(Dataset):
         self.std = None
         self.fwhm = None
         self.window_order = None
-        self._ifft_called_first = False
         self.phase = None
+        self._ifft_called_first = False
         self.nufft_used = False
 
-    def shift(self, axis="x", inplace=True):
+    def shift(self, axis, inplace=True):
         """
-        Equivalent to scipy.fftpack.fftshift, but it's easier to
+        Equivalent to `scipy.fftpack.fftshift`, but it's easier to
         use this function instead, because we don't need to explicitly
         call the class' x and y attribute.
 
-        Parameter(s):
-        ------------
-        axis: str, default is 'x'
-            either 'x', 'y' or 'both'
+        Parameters
+        ----------
+        axis : str
+            either 'x', 'y', 'both', 'xy' or 'yx'.
         """
         if inplace:
             if axis == "x":
@@ -73,18 +73,61 @@ class FFTMethod(Dataset):
             inplace=True
     ):
         """
-        Applies ifft to the dataset.
+        Applies inverse Fast Fourier Transfrom to the dataset.
 
-        Parameter(s):
-        ------------
+        Parameters
+        ----------
 
-        interpolate: bool, default is True
+        interpolate : bool, default is True -- WILL BE REMOVED
             Whether to apply linear interpolation on the dataset
             before transforming.
 
-        usenifft: bool, default is False
-            Whether to use non unifrom fft
+        usenifft : bool, optional
+            Whether to use non uniform fft. It uses the algorithm
+            described in the references. This means the interferogram
+            will *not* be linearly interpolated. Default is False.
 
+        eps : float, optional
+            The desired approximate error for the non uniform FFT result. Must be
+            in range 1E-33 < eps < 1E-1, though be aware that the errors are
+            only well calibrated near the range 1E-12 ~ 1E-6. Default is 1E-12.
+
+        exponent : str, optional
+            if 'negative', compute the transform with a negative exponent.
+            if 'positive', compute the transform with a positive exponent.
+            Default is `positive`.
+
+        inplace : bool, optional
+            Whether to apply the operation on the dataset in an "inplace" manner.
+            This means if inplace is True it will apply the changes directly on
+            the current dataset and returns None. If inplace is False, it will
+            leave the current object untouched, but returns a copy of it, and
+            the operation will be performed on the copy. It's useful when
+            chaining operations on a dataset.
+
+        Notes
+        -----
+
+        The basic scheme is ifft -> windowing -> fft, so you should call
+        these functions in this order. Otherwise the transforms may be
+        inconsistent.
+
+        If numba is not installed the non uniform FTT is approximately
+        5x times slower, but still remains comparable to `np.fft.ifft`.
+
+        References
+        ----------
+
+        [1] Dutt A., Rokhlin V. : Fast Fourier Transforms for Nonequispaced Data II,
+            Applied and Computational Harmonic Analysis
+            Volume 2, Issue 1, January 1995, Pages 85-100
+            (1995)
+
+        [2] Greengard, Leslie & Lee, June-Yub.: Accelerating the
+            Nonuniform Fast Fourier Transform,
+            Society for Industrial and Applied Mathematics.
+            46. 443-454. 10.1137/S003614450343200X.
+            (2004)
         """
         self.nufft_used = usenifft
 
@@ -123,8 +166,17 @@ class FFTMethod(Dataset):
         """
         Applies fft to the dataset.
         If ifft was not called first, inaccurate results might happen.
-        It will be fixed later on.
-        Check calculate function's docstring for more detail.
+
+        Parameters
+        ----------
+
+        inplace : bool, optional
+            Whether to apply the operation on the dataset in an "inplace" manner.
+            This means if inplace is True it will apply the changes directly on
+            the current dataset and returns None. If inplace is False, it will
+            leave the current object untouched, but returns a copy of it, and
+            the operation will be performed on the copy. It's useful when
+            chaining operations on a dataset.
         """
         if inplace:
             if not self._ifft_called_first:
@@ -141,22 +193,34 @@ class FFTMethod(Dataset):
     def window(self, at, fwhm, window_order=6, plot=True, inplace=True):
         """
         Draws a gaussian window on the plot with the desired parameters.
-        The maximum value is adjusted for the dataset mostly for
-        visibility reasons. You should explicitly call self.show()
-        after this function is set.
+        The maximum value is adjusted for the dataset's maximum value,
+        mostly for visibility.
 
         Parameters:
         ----------
 
-        at: float
-            maximum of the gaussian curve
+        at : float
+            The maximum of the gaussian curve.
 
-        fwhm: float
+        fwhm : float
             Full width at half maximum of the gaussian
 
-        window_order: int, default is 6
+        window_order : int, optional
             Order of the gaussian curve.
             If not even, it's incremented by 1.
+            Default is 6.
+
+        plot : bool, optional
+            Whether to immediately show the window with the data.
+            Default is `True`.
+
+        inplace : bool, optional
+            Whether to apply the operation on the dataset in an "inplace" manner.
+            This means if inplace is True it will apply the changes directly on
+            the current dataset and returns None. If inplace is False, it will
+            leave the current object untouched, but returns a copy of it, and
+            the operation will be performed on the copy. It's useful when
+            chaining operations on a dataset.
         """
         if inplace:
             self.at = at
@@ -181,7 +245,15 @@ class FFTMethod(Dataset):
 
     def apply_window(self, inplace=True):
         """
-        If window function is correctly set, applies changes to the dataset.
+        If window function is set, applies window on the dataset.
+
+        inplace : bool, optional
+            Whether to apply the operation on the dataset in an "inplace" manner.
+            This means if inplace is True it will apply the changes directly on
+            the current dataset and returns None. If inplace is False, it will
+            leave the current object untouched, but returns a copy of it, and
+            the operation will be performed on the copy. It's useful when
+            chaining operations on a dataset.
         """
         if inplace:
             self.plotwidget.clf()
@@ -200,6 +272,21 @@ class FFTMethod(Dataset):
             return obj
 
     def retrieve_phase(self, show_graph=False):
+        """
+        Retrieve *only the phase* after the transforms. This will
+        unwrap the angles and constructs a pysprint.core.phase.Phase object.
+
+        Parameters
+        ----------
+
+        show_graph : bool, optional
+            If True, show the phase immediately.
+
+        Returns
+        -------
+        phase : pysprint.core.phase.Phase
+            The phase object. See its docstring for more info.
+        """
         if self.nufft_used:
             self.shift('y')
         y = np.unwrap(np.angle(self.y), axis=0)
@@ -210,32 +297,37 @@ class FFTMethod(Dataset):
 
     def calculate(self, reference_point, order, show_graph=False):
         """
-        FFTMethod's calculate function.
+        FFTMethod's calculate function. It will unwrap the phase by changing
+        deltas between values to 2*pi complement. After that, fit a curve to
+        determine dispersion coefficients.
 
         Parameters:
         ----------
 
-        reference_point: float
-            reference point on x axis
+        reference_point : float
+            The reference point on the x axis.
 
-        fit_order: int
-            Polynomial (and maximum dispersion) order to fit. Must be in [1,5].
+        order : int
+            Polynomial (and maximum dispersion) order to fit. Must be in [1, 5].
 
-        show_graph: bool, optional
-            shows a the final graph of the spectral phase and fitted curve.
+        show_graph : bool, optional
+            Shows a the final graph of the spectral phase and fitted curve.
 
         Returns:
         -------
 
-        dispersion: array-like
+        dispersion : array-like
+            The dispersion coefficients in the form of:
             [GD, GDD, TOD, FOD, QOD]
 
-        dispersion_std: array-like
-            standard deviations due to uncertainty of the fit
+        dispersion_std : array-like
+            Standard deviations due to uncertainty of the fit.
+            It is only calculated if lmfit is installed. The form is:
             [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
 
-        fit_report: lmfit report
-            if lmfit is available, the fit report
+        fit_report : str
+            If lmfit is available returns the fit report, else returns an
+            empty string.
 
         Notes:
         ------
@@ -243,6 +335,7 @@ class FFTMethod(Dataset):
         Decorated with print_disp, so the results are immediately
         printed without explicitly saying so.
 
+        Developer commentary:
         Currently the x-axis transformation is sloppy, because we cache the
         original x axis and not transforming it	backwards.
         In addition we need to keep track of interpolation and
@@ -274,7 +367,69 @@ class FFTMethod(Dataset):
             show_graph=True,
             usenifft=False,
     ):
+        """
+        Automatically run the Fourier Transfrom based evaluation on the dataset.
+        It's not as reliable as I want it to be, so use it carefully. I'm working
+        on making it as competent and useful as possible.
 
+        Parameters
+        ----------
+
+        reference_point : float, optional
+            The reference point on the x axis. If not given, only_phase mode
+            will be activated. Default is None.
+
+        order : int, optional
+            Polynomial (and maximum dispersion) order to fit. Must be in [1, 5].
+            If not given, only_phase mode will be activated. Default is None.
+
+        only_phase : bool, optional
+            If True, activate the only_phase mode, which will retrieve the phase
+            without fitting a curve, and return a `pysprint.core.Phase.phase` object.
+            Default is False (also not giving enough information for curve fitting
+            will automatically activate it).
+
+        enable_printing : bool, optional
+            If True enable printing the detailed results. Default is True.
+
+        skip_domain_check : bool, optional
+            If True skip the interferogram domain check and force the algorithm
+            to perform actions without changing domain. If False, check for potential
+            wrong domains and change for an appropriate one. Default is False.
+
+        show_graph : bool, optional
+            If True show the graph with the phase and the fitted curve, if there is any.
+            Default is True.
+
+        usenifft : bool, optional
+            If True use the Non Uniform Fast Fourier Transform algorithm. For more details
+            see `help(pysprint.FFTMethod.ifft)`. Default is False.
+
+        eps : float, optional < -- WILL BE ADDED IN NEXT VERSION
+            The desired approximate error for the non uniform FFT result. Must be
+            in range 1E-33 < eps < 1E-1, though be aware that the errors are
+            only well calibrated near the range 1E-12 ~ 1E-6. Default is 1E-12.
+
+        exponent : str, optional < -- WILL BE ADDED IN NEXT VERSION
+            Used for Non Uniform Fast Fourier Transform.
+            If 'negative', compute the transform with a negative exponent.
+            If 'positive', compute the transform with a positive exponent.
+            Default is `positive`.
+
+        References
+        ----------
+
+        [1] Dutt A., Rokhlin V. : Fast Fourier Transforms for Nonequispaced Data II,
+            Applied and Computational Harmonic Analysis
+            Volume 2, Issue 1, January 1995, Pages 85-100
+            (1995)
+
+        [2] Greengard, Leslie & Lee, June-Yub.: Accelerating the
+            Nonuniform Fast Fourier Transform,
+            Society for Industrial and Applied Mathematics.
+            46. 443-454. 10.1137/S003614450343200X.
+            (2004)
+        """
         if not reference_point or not order:
             only_phase = True
 

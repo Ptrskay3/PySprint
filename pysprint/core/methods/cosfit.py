@@ -30,43 +30,43 @@ class CosFitMethod(Dataset):
 
     def adjust_offset(self, value):
         """
-        Initial guess for offset
+        Initial guess for offset.
         """
         self.params[0] = value
 
     def adjust_amplitude(self, value):
         """
-        Initial guess for amplitude
+        Initial guess for amplitude.
         """
         self.params[1] = value
 
     def guess_GD(self, value):
         """
-        Initial guess for GD in fs
+        Initial guess for GD in fs.
         """
         self.params[3] = value
 
     def guess_GDD(self, value):
         """
-        Initial guess for GDD in fs^2
+        Initial guess for GDD in fs^2.
         """
         self.params[4] = value / 2
 
     def guess_TOD(self, value):
         """
-        Initial guess for TOD in fs^3
+        Initial guess for TOD in fs^3.
         """
         self.params[5] = value / 6
 
     def guess_FOD(self, value):
         """
-        Initial guess for FOD in fs^4
+        Initial guess for FOD in fs^4.
         """
         self.params[6] = value / 24
 
     def guess_QOD(self, value):
         """
-        Initial guess for QOD in fs^5
+        Initial guess for QOD in fs^5.
         """
         self.params[7] = value / 120
 
@@ -78,18 +78,18 @@ class CosFitMethod(Dataset):
         Parameters:
         ----------
 
-        order: int
-            maximum order of dispersion to look for. Must be in [1, 5]
+        order : int
+            Maximum order of dispersion to look for. Must be in [1, 5].
         """
         if order > 5 or order < 1:
             print(
-                "Order should be an in integer from [1,5]"
+                "Order should be an in integer from [1, 5]."
             )
         try:
             int(order)
         except ValueError:
             print(
-                "Order should be an in integer from [1,5]"
+                "Order should be an in integer from [1, 5]."
             )
         order = 6 - order
         for i in range(1, order):
@@ -99,24 +99,23 @@ class CosFitMethod(Dataset):
         """
         Cosine fit's calculate function.
 
-        Parameters:
+        Parameters
         ----------
         reference_point: float
-            reference point on x axis
+            Reference point on x axis.
 
-        Returns:
+        Returns
         -------
-
         dispersion: array-like
             [GD, GDD, TOD, FOD, QOD]
 
         dispersion_std: array-like
-            standard deviations due to uncertanity of the fit
+            Standard deviations due to uncertainty of the fit.
+            They are only calculated if lmfit is installed.
             [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
 
-        fit_report: lmfit report
-            WILL BE IMPLEMENTED
-
+        fit_report: string
+            Not implemented yet. It returns an empty string for the time being.
 
         Notes:
         ------
@@ -139,12 +138,12 @@ class CosFitMethod(Dataset):
         return (
             dispersion,
             [0, 0, 0, 0, 0],
-            "Fit report for CFF not supported yet.",
+            "",
         )
 
     def plot_result(self):
         """
-        If the fitting happened, draws the fitted curve on the original
+        If the curve fitting is done, draws the fitted curve on the original
         dataset. Also prints the coeffitient of determination of the
         fit (a.k.a. r^2).
         """
@@ -176,7 +175,44 @@ class CosFitMethod(Dataset):
     ):
         """
         Cosine fit optimizer. It's based on adding new terms to fit
-        function successively until we reach the max_order.
+        function successively until we reach the maximum order.
+
+        Parameters
+        ----------
+
+        reference_point : float
+            The reference point on the x axis.
+
+        order : int, optional
+            Polynomial (and maximum dispersion) order to fit. Must be in [1, 5].
+            Default is 3.
+
+        initial_region_ratio : float, optional
+            The initial region in portion of the length of the dataset
+            (0.1 will mean 10%, and so on..). Note that the bigger
+            resolution the interferogram is, the lower it should be set.
+            Default is 0.1. It should not be set too low, because too small
+            initial region can result in failure.
+
+        extend_by : float, optional
+            The coefficient determining how quickly the region of fit is
+            growing. The bigger resolution the interferogram is (or in general
+            the higher the dispersion is), the lower it should be set.
+            Default is 0.1.
+
+        coef_threshold: float, optional
+            The desired R^2 threshold which determines when to expand the region
+            of fitting. It's often enough to leave it as is, however if you decide to
+            change it, it is highly advised not to set a higher value than 0.7.
+            Default is 0.3.
+
+        max_tries : int, optional
+            The maximum number of tries to fit a curve before failing.
+            Default is 5000.
+
+        show_endpoint : bool, optional
+            If True show the fitting results when finished.
+            Default is True.
 
         Notes
         -----

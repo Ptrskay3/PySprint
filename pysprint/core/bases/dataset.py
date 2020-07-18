@@ -5,6 +5,7 @@ import json  # for pretty printing dict
 import warnings
 from collections.abc import Iterable
 from inspect import signature, cleandoc
+from contextlib import suppress
 from textwrap import dedent
 from math import factorial
 from copy import copy, deepcopy
@@ -102,9 +103,9 @@ class Dataset(metaclass=DatasetBase):
         self._dispersion_array = None
 
     def __call__(self, reference_point, *, order=None, show_graph=None):
-        '''
+        """
         Alias for self.calculate.
-        '''
+        """
 
         if hasattr(self, "calculate"):
 
@@ -135,7 +136,18 @@ class Dataset(metaclass=DatasetBase):
     def __len__(self):
         return len(self.x)
 
+    #  TODO : The plot must be formatted.
     def phase_plot(self, exclude_GD=False):
+        """
+        Plot the phase if the dispersion is already calculated.
+
+        Parameters
+        ----------
+
+        exclude_GD : bool
+            Whether to exclude the GD part of the polynomial.
+            Default is `False`.
+        """
         if not np.all(self._dispersion_array):
             raise ValueError(
                 "Dispersion must be calculated before plotting the phase."
@@ -190,6 +202,10 @@ class Dataset(metaclass=DatasetBase):
         self._positions = value
 
     def _ensure_norm(self):
+        """
+        Ensure the interferogram is normalized and only a little part
+        which is outlying from the [-1, 1] interval (because of noise).
+        """
         idx = np.where((self.y_norm > 2))
         val = len(idx[0]) / len(self.y_norm)
         if val > 0.015:  # this is a custom threshold, which often works..
@@ -197,7 +213,8 @@ class Dataset(metaclass=DatasetBase):
         return True
 
     def scale_up(self):
-        """If the interferogram is normalized to [0, 1] interval, scale
+        """
+        If the interferogram is normalized to [0, 1] interval, scale
         up to [-1, 1] with easy algebra.. Just in case you need comparison,
         or any other purpose.
         """
@@ -207,15 +224,46 @@ class Dataset(metaclass=DatasetBase):
     def GD_lookup(
             self, reference_point=2.355, engine="cwt", silent=False, **kwargs
     ):
-        """Quick GD lookup: it finds extremal points near the
+        """
+        Quick GD lookup: it finds extremal points near the
         `reference_point` and returns an average value of 2*np.pi
         divided by distances between consecutive minimal or maximal values.
         Since it's relying on peak detection, the results may be irrelevant
         in some cases. If the parent class is `~pysprint.CosFitMethod`, then
         it will set the predicted value as initial parameter for fitting.
+
+        Parameters
+        ----------
+
+        reference_point : float
+            The reference point for the algorithm.
+
+        engine : str
+            The backend to use. Must be "cwt", "normal" or "fft".
+            "cwt" will use `scipy.signal.find_peaks_cwt` function to
+            detect peaks, "normal" will use `scipy.signal.find_peaks`
+            to detect peaks. The "fft" engine uses Fourier-transform and
+            looks for the outer peak to guess delay value. It's not
+            reliable when working with low delay values.
+
+        silent : bool
+            Whether to print the results immediately. Default in `False`.
+
+        **kwargs
+            Additional keyword arguments to pass for peak detection
+            algorithms. These are:
+                pmin, pmax, threshold, width, floor_thres, etc..
+            Most of them are described in the `find_peaks` and
+            `find_peaks_cwt` docs.
         """
 
         # TODO: implement FFT-based engine
+
+        if engine == "fft":
+            warnings.warn(
+                "FFT based engine is not implemented yet, falling back to 'cwt'."
+            )
+            engine = "cwt"
 
         if engine not in ("cwt", "normal"):
             raise ValueError("Engine must be `cwt` or `normal`.")
@@ -285,8 +333,10 @@ class Dataset(metaclass=DatasetBase):
             )
 
     def _safe_cast(self):
-        """Return a copy of key attributes in order to prevent
-        inplace modification."""
+        """
+        Return a copy of key attributes in order to prevent
+        inplace modification.
+        """
         x, y, ref, sam = (
             np.copy(self.x),
             np.copy(self.y),
@@ -304,18 +354,20 @@ class Dataset(metaclass=DatasetBase):
 
     @staticmethod
     def freq2wave(value):
-        """Switches values between angular frequency and wavelength.
-        """
+        """Switches values between angular frequency and wavelength."""
         return Dataset._dispatch(value)
 
     def _check_domain(self):
-        """Checks the domain of data just by looking at x axis' minimal value.
+        """
+        Checks the domain of data just by looking at x axis' minimal value.
         Units are obviously not added yet, we work in nm and PHz...
         """
         if min(self.x) > 50:
             self.probably_wavelength = True
         else:
             self.probably_wavelength = False
+
+    # TODO : Make a better metadata parser.
 
     @classmethod
     def parse_raw(
@@ -328,7 +380,8 @@ class Dataset(metaclass=DatasetBase):
             sep=";",
             meta_len=5,
     ):
-        """Dataset object alternative constructor.
+        """
+        Dataset object alternative constructor.
         Helps to load in data just by giving the filenames in
         the target directory.
 
@@ -487,13 +540,25 @@ class Dataset(metaclass=DatasetBase):
 
     @property
     def is_normalized(self):
-        """ Retuns whether the dataset is normalized.
-        """
+        """Retuns whether the dataset is normalized."""
         return self._is_normalized
 
     def chdomain(self, inplace=True):
-        """Changes from wavelength [nm] to ang. freq. [PHz]
-        domain and vica versa."""
+        """
+        Changes from wavelength [nm] to ang. freq. [PHz]
+        domain and vica versa.
+
+        Parameters
+        ----------
+
+        inplace : bool
+            Whether to apply the operation on the dataset in an "inplace" manner.
+            This means if inplace is True it will apply the changes directly on
+            the current dataset and returns None. If inplace is False, it will
+            leave the current object untouched, but returns a copy of it, and
+            the operation will be performed on the copy. It's useful when
+            chaining operations on a dataset.
+        """
         if inplace:
             self.x = (2 * np.pi * C_LIGHT) / self.x
             self._check_domain()
@@ -512,15 +577,16 @@ class Dataset(metaclass=DatasetBase):
         return xmax, ymax, xmin, ymin
 
     def savgol_fil(self, window=5, order=3):
-        """ Applies Savitzky-Golay filter on the dataset.
+        """
+        Applies Savitzky-Golay filter on the dataset.
 
         Parameters:
         ----------
-        window: `int`
+        window: int
             Length of the convolutional window for the filter.
             Default is `10`.
 
-        order: `int`
+        order: int
             Degree of polynomial to fit after the convolution.
             If not odd, it's incremented by 1. Must be lower than window.
             Usually it's a good idea to stay with a low degree, e.g 3 or 5.
@@ -544,27 +610,37 @@ class Dataset(metaclass=DatasetBase):
         )
 
     def slice(self, start=None, stop=None, inplace=True):
-        """Cuts the dataset on x axis in this form: [start, stop]
+        """
+        Cuts the dataset on x axis.
 
         Parameters:
         ----------
-        start: `float`
+        start : float
             start value of cutting interval
             Not giving a value will keep the dataset's original minimum value.
             Note that giving `None` will leave original minimum untouched too.
             Default is `None`.
 
-        stop: `float`
+        stop : float
             stop value of cutting interval
             Not giving a value will keep the dataset's original maximum value.
             Note that giving `None` will leave original maximum untouched too.
             Default is `None`.
 
+        inplace : bool
+            Whether to apply the operation on the dataset in an "inplace" manner.
+            This means if inplace is True it will apply the changes directly on
+            the current dataset and returns None. If inplace is False, it will
+            leave the current object untouched, but returns a copy of it, and
+            the operation will be performed on the copy. It's useful when
+            chaining operations on a dataset.
+
         Notes:
         ------
 
         If arms were given, it will merge them into the `self.y` and
-        `self.y_norm` variables.
+        `self.y_norm` variables. After this operation, the arms' spectra
+        cannot be retrieved.
         """
         if inplace:
             self.x, self.y_norm = cut_data(
@@ -584,16 +660,23 @@ class Dataset(metaclass=DatasetBase):
             return obj
 
     def convolution(self, window_length, std=20):
-        """ Applies a convolution with a gaussian on the dataset
+        """
+        Applies a convolution with a gaussian on the dataset.
 
         Parameters:
         ----------
-        window_length: `int`
+        window_length: int
             Length of the gaussian window.
 
-        std: `float`
-            Standard deviation of the gaussian
+        std: float
+            Standard deviation of the gaussian window.
             Default is `20`.
+
+
+        Returns
+        -------
+
+        None
 
         Notes:
         ------
@@ -615,28 +698,29 @@ class Dataset(metaclass=DatasetBase):
     def detect_peak(
             self, pmax=0.1, pmin=0.1, threshold=0.1, except_around=None
     ):
-        """Basic algorithm to find extremal points in data
+        """
+        Basic algorithm to find extremal points in data
         using ``scipy.signal.find_peaks``.
 
         Parameters:
         ----------
 
-        pmax: `float`
+        pmax : float
             Prominence of maximum points.
             The lower it is, the more peaks will be found.
             Default is `0.1`.
 
-        pmin: float
+        pmin : float
             Prominence of minimum points.
             The lower it is, the more peaks will be found.
             Default is `0.1`.
 
-        threshold: `float`
+        threshold : float
             Sets the minimum distance (measured on y axis) required for a
             point to be accepted as extremal.
             Default is 0.
 
-        except_around: interval (array or tuple),
+        except_around : interval (array or tuple),
             Overwrites the threshold to be 0 at the given interval.
             format is `(lower, higher)` or `[lower, higher]`.
             Default is None.
@@ -689,7 +773,8 @@ class Dataset(metaclass=DatasetBase):
 
     # TODO: Add **kwargs
     def show(self):
-        """Draws a graph of the current dataset using matplotlib.
+        """
+        Draws a graph of the current dataset using matplotlib.
         """
         if np.iscomplexobj(self.y):
             self.plotwidget.plot(self.x, np.abs(self.y))
@@ -703,16 +788,21 @@ class Dataset(metaclass=DatasetBase):
         self.plotwidget.show(block=True)
 
     def normalize(self, filename=None, smoothing_level=0):
-        """ Normalize the interferogram by finding upper and lower envelope
-            on an interactive matplotlib editor.
+        """
+        Normalize the interferogram by finding upper and lower envelope
+        on an interactive matplotlib editor.
 
         Parameters
         ----------
 
-        filename: `str`
+        filename : `str`
             Save the normalized interferogram named by filename in the
             working directory. If not given it will not be saved.
             Default None.
+
+        smoothing_level : int
+            The smoothing level used on the dataset before finding the
+            envelopes. It applies Savitzky-Golay filter under the hood.
 
         Returns
         -------
@@ -737,10 +827,26 @@ class Dataset(metaclass=DatasetBase):
             print(f"Successfully saved as {filename}")
 
     def open_SPP_panel(self):
+        """
+        Opens the interactive matplotlib editor for SPP data.
+        """
         _spp = SPPEditor(self.x, self.y_norm)
         self.delay, self.positions = _spp.get_data()
 
     def emit(self):
+        """
+        Emit the current SPP data.
+
+        Returns
+        -------
+
+        delay : np.ndarray
+        The delay value for the current dataset, shaped exactly like
+        positions.
+
+        positions : np.ndarray
+        The given SPP positions.
+        """
         if self.positions is None:
             raise ValueError("SPP positions are missing.")
         if self.delay is None:
@@ -752,9 +858,42 @@ class Dataset(metaclass=DatasetBase):
             self.delay = np.ones_like(self.positions) * self.delay
         return self.delay, self.positions
 
-    def set_SPP_data(self, delay, positions):
+    def set_SPP_data(self, delay, positions, force=False):
+        """
+        Set the SPP data (delay and SPP positions) for the dataset
+
+        Parameters
+        ----------
+
+        delay : float
+            The delay value that belongs to the current interferogram.
+            Must be given in `fs` units.
+
+        positions : float or iterable
+            The SPP positions that belong to the current interferogram.
+            Must be float or sequence of floats (tuple, list, np.ndarray, etc.)
+
+        force : bool, optional
+            Can be used to set specific SPP positions which are outside of
+            the dataset's range. Note that in most cases you should avoid using
+            this option. Default is `False`.
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        Every position given must be in the current dataset's range, otherwise
+        `ValueError` is raised. Be careful to change domain to frequency before
+        feeding values into this function.
+        """
         if not isinstance(delay, float):
             delay = float(delay)
         delay = np.array(np.ones_like(positions) * delay)
         self.delay = delay
-        self.positions = positions
+        if force:
+            with suppress(ValueError):
+                self._positions = positions
+        else:
+            self.positions = positions
