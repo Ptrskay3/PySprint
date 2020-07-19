@@ -44,9 +44,7 @@ except ImportError:
 
 def _grid_params(gl, eps):
     if eps <= 1e-33 or eps >= 1e-1:
-        raise ValueError(
-            f"eps = {eps:.0e}, but it must satisfy " "1e-33 < eps < 1e-1."
-        )
+        raise ValueError(f"eps = {eps:.0e}, but it must satisfy " "1e-33 < eps < 1e-1.")
 
     ratio = 2 if eps > 1e-11 else 3
     Msp = int(-np.log(eps) / (np.pi * (ratio - 1) / (ratio - 0.5)) + 0.5)
@@ -175,9 +173,7 @@ def nuifft(x, y, gl, df=1.0, epsilon=1e-12, exponent="positive"):
     if _has_numba:
         ftau = _compute_gaussian_grid(x, y, Mr, Msp, tau)
     else:
-        warnings.warn(
-            "Numba is not available, falling back to slower version."
-        )
+        warnings.warn("Numba is not available, falling back to slower version.")
         ftau = _compute_gaussian_grid_nonumba(x, y, Mr, Msp, tau)
 
     if exponent == "negative":

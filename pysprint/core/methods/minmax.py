@@ -46,10 +46,7 @@ class MinMaxMethod(Dataset):
             threshold = kwargs.pop("threshold", 0.1)
             except_around = kwargs.pop("except_around", None)
             _x, _y, _xx, _yy = self.detect_peak(
-                pmax=pmax,
-                pmin=pmin,
-                threshold=threshold,
-                except_around=except_around,
+                pmax=pmax, pmin=pmin, threshold=threshold, except_around=except_around,
             )
 
             # just for validation purposes
@@ -97,9 +94,7 @@ class MinMaxMethod(Dataset):
         # in `pysprint.core.evaluate.min_max_method`.
         self.xmin = _editpeak.get_dat[0][:len(_editpeak.get_dat[0]) // 2]
         self.xmax = _editpeak.get_dat[0][len(_editpeak.get_dat[0]) // 2:]
-        print(
-            f"{len(_editpeak.get_dat[0])} extremal points were recorded."
-        )
+        print(f"{len(_editpeak.get_dat[0])} extremal points were recorded.")
         return _editpeak.get_dat[0]  # we should return None
 
     def calculate(self, reference_point, order, show_graph=False):

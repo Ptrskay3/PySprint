@@ -32,7 +32,7 @@ def find_center(x, y, n_largest=5):
     ind = np.unique(np.concatenate((ind1, ind2)))
 
     peaks = peaks[ind]
-    y_prob_density = np.exp((-(x - np.max(x) / 2.5) ** 2) / (1000 * np.max(x)))
+    y_prob_density = np.exp((-((x - np.max(x) / 2.5) ** 2)) / (1000 * np.max(x)))
     _x, _y = x[peaks], y_prob_density[peaks]
     # weighted with the prob density function above from origin
     residx = np.argmax(_x * _y)
@@ -40,9 +40,7 @@ def find_center(x, y, n_largest=5):
     return _x[residx], _y[residx]
 
 
-def _ensure_window_at_origin(
-    center, fwhm, order, peak_center_height, tol=1e-3
-):
+def _ensure_window_at_origin(center, fwhm, order, peak_center_height, tol=1e-3):
     """
     Ensure that the gaussian window of given parameters is
     not crossing zero with bigger value than the desired tolerance.
@@ -52,9 +50,7 @@ def _ensure_window_at_origin(
     return val < peak_center_height * tol, val
 
 
-def predict_fwhm(
-    x, y, center, peak_center_height, prefer_high_order=True, tol=1e-3
-):
+def predict_fwhm(x, y, center, peak_center_height, prefer_high_order=True, tol=1e-3):
     if np.iscomplexobj(y):
         y = np.abs(y)
 
@@ -113,10 +109,7 @@ def predict_fwhm(
 
 
 def _run(
-    ifg,
-    skip_domain_check=False,
-    show_graph=True,
-    usenifft=False,
+    ifg, skip_domain_check=False, show_graph=True, usenifft=False,
 ):
     print("Interferogram received.")
     if ifg.probably_wavelength is True and not skip_domain_check:

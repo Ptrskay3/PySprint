@@ -82,15 +82,11 @@ class CosFitMethod(Dataset):
             Maximum order of dispersion to look for. Must be in [1, 5].
         """
         if order > 5 or order < 1:
-            print(
-                "Order should be an in integer from [1, 5]."
-            )
+            print("Order should be an in integer from [1, 5].")
         try:
             int(order)
         except ValueError:
-            print(
-                "Order should be an in integer from [1, 5]."
-            )
+            print("Order should be an in integer from [1, 5].")
         order = 6 - order
         for i in range(1, order):
             self.params[-i] = 0
@@ -152,12 +148,10 @@ class CosFitMethod(Dataset):
             ss_res = np.sum(residuals ** 2)
             ss_tot = np.sum((self.y_norm - np.mean(self.y_norm)) ** 2)
             print("r^2 = " + str(1 - (ss_res / ss_tot)))
-        except Exception: # TODO: handle that blank exception
+        except Exception:  # TODO: handle that blank exception
             pass
         if self.fit is not None:
-            self.plotwidget.plot(
-                self.x, self.fit, "k--", label="fit", zorder=99
-            )
+            self.plotwidget.plot(self.x, self.fit, "k--", label="fit", zorder=99)
             self.plotwidget.legend()
             self.show()
         else:
@@ -276,10 +270,7 @@ class CosFitMethod(Dataset):
             QOD=self.params[7],
         )  # we can pass it higher params safely, they are ignored.
         disp = self.f.run(
-            extend_by,
-            coef_threshold,
-            max_tries=max_tries,
-            show_endpoint=show_endpoint,
+            extend_by, coef_threshold, max_tries=max_tries, show_endpoint=show_endpoint,
         )
         disp = disp[3:]
         retval = [disp[i] * factorial(i + 1) for i in range(len(disp))]

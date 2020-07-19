@@ -15,9 +15,7 @@ class TestNuifft(TestCase):
 
     def test_nuifft(self):
         dft = nuifft(self.x, self.y, self.gl, exponent="positive")
-        fft = nuifft(
-            self.x, self.y, self.gl, exponent="positive", epsilon=self.eps
-        )
+        fft = nuifft(self.x, self.y, self.gl, exponent="positive", epsilon=self.eps)
         np.testing.assert_allclose(dft, fft, rtol=self.eps ** 0.95)
 
         dft = nuifft(self.x, self.y.real, self.gl, exponent="positive")

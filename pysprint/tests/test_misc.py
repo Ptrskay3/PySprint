@@ -20,9 +20,7 @@ class TestMisc(unittest.TestCase):
         self.ref = np.ones_like(self.x)
         self.sam = np.ones_like(self.x)
 
-        self._y = (self.y - self.sam - self.ref) / (
-            2 * np.sqrt(self.sam * self.ref)
-        )
+        self._y = (self.y - self.sam - self.ref) / (2 * np.sqrt(self.sam * self.ref))
 
     def test_input_handling1(self):
         x, y = _handle_input(self.x, self.y, [], [])
@@ -73,10 +71,7 @@ GDD = 1.00000 ± 1.00000 fs^2"""
             sys.stdout = saved_stdout
 
     def test_fourier_interpol(self):
-        _x = np.geomspace(10, 1000)
-        x, _ = fourier_interpolate(
-            np.geomspace(10, 1000), np.geomspace(10, 1000)
-        )
+        x, _ = fourier_interpolate(np.geomspace(10, 1000), np.geomspace(10, 1000))
         np.testing.assert_array_equal(x, np.linspace(10, 1000))
 
     def test_padding(self):

@@ -20,6 +20,7 @@ class InterpolationWarning(PySprintWarning):
     This warning is raised when a function applies linear
     interpolation on the data.
     """
+
     pass
 
 
@@ -29,6 +30,7 @@ class FourierWarning(PySprintWarning):
     Later on it will be improved.
     For more details see help(pysprint.FFTMethod.calculate)
     """
+
     pass
 
 
@@ -37,6 +39,7 @@ class DatasetError(Exception):
     This error is raised when invalid type of data encountered
     when initializing a dataset or inherited object.
     """
+
     pass
 
 

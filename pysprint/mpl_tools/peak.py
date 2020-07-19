@@ -105,9 +105,7 @@ class EditPeak(object):
             return
         if self.my_select_button.toggled:
             if event.button is MouseButton.RIGHT:
-                ix, iy, idx = get_closest(
-                    ix, iy, self.x_extremal, self.y_extremal
-                )
+                ix, iy, idx = get_closest(ix, iy, self.x_extremal, self.y_extremal)
                 self.x_extremal = np.delete(self.x_extremal, idx)
                 self.y_extremal = np.delete(self.y_extremal, idx)
             elif event.button is MouseButton.LEFT:
@@ -120,9 +118,7 @@ class EditPeak(object):
 
     def press(self):
         """Usual function to connect matplotlib.."""
-        self.cid = self.figure.canvas.mpl_connect(
-            "button_press_event", self.on_clicked
-        )
+        self.cid = self.figure.canvas.mpl_connect("button_press_event", self.on_clicked)
 
     def release(self):
         """ On release functionality. It's never called but we will

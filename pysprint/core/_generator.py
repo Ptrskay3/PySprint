@@ -60,8 +60,7 @@ def generatorFreq(
         + i2
         + 2
         * np.cos(
-            _disp(relom, GD=GD, GDD=GDD, TOD=TOD, FOD=FOD, QOD=QOD)
-            + (omega * delay)
+            _disp(relom, GD=GD, GDD=GDD, TOD=TOD, FOD=FOD, QOD=QOD) + (omega * delay)
         )
         * np.sqrt(i1 * i2)
     )
@@ -101,8 +100,7 @@ def generatorWave(
         + 2
         * np.sqrt(i1 * i2)
         * np.cos(
-            _disp(relom, GD=GD, GDD=GDD, TOD=TOD, FOD=FOD, QOD=QOD)
-            + (omega * delay)
+            _disp(relom, GD=GD, GDD=GDD, TOD=TOD, FOD=FOD, QOD=QOD) + (omega * delay)
         )
     )
     if includeArms:

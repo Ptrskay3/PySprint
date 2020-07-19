@@ -31,7 +31,7 @@ from pysprint.core.preprocess import (
 from pysprint.utils.exceptions import (
     InterpolationWarning,
     DatasetError,
-    PySprintWarning
+    PySprintWarning,
 )
 
 __all__ = ["Dataset"]
@@ -84,7 +84,7 @@ class Dataset(metaclass=DatasetBase):
 
         else:
             self.y_norm = (self.y - self.ref - self.sam) / (
-                    2 * np.sqrt(self.sam * self.ref)
+                2 * np.sqrt(self.sam * self.ref)
             )
             self._is_normalized = True
 
@@ -112,7 +112,7 @@ class Dataset(metaclass=DatasetBase):
             sig = len(signature(self.calculate).parameters)
             if sig == 1:
                 if order or show_graph:
-                    warnings.warn('order and show_graph has no effect here.')
+                    warnings.warn("order and show_graph has no effect here.")
                 self.calculate(reference_point)
             elif sig == 3:
 
@@ -123,13 +123,11 @@ class Dataset(metaclass=DatasetBase):
                     show_graph = False
 
                 self.calculate(
-                    reference_point=reference_point,
-                    order=order,
-                    show_graph=show_graph
+                    reference_point=reference_point, order=order, show_graph=show_graph
                 )
 
             else:
-                raise ValueError('Unknown function signature.')
+                raise ValueError("Unknown function signature.")
         else:
             raise NotImplementedError
 
@@ -149,9 +147,7 @@ class Dataset(metaclass=DatasetBase):
             Default is `False`.
         """
         if not np.all(self._dispersion_array):
-            raise ValueError(
-                "Dispersion must be calculated before plotting the phase."
-            )
+            raise ValueError("Dispersion must be calculated before plotting the phase.")
 
         coefs = np.array(
             [
@@ -194,7 +190,9 @@ class Dataset(metaclass=DatasetBase):
         elif isinstance(value, np.ndarray) or isinstance(value, Iterable):
             for val in value:
                 if not isinstance(val, numbers.Number):
-                    raise ValueError(f"Expected numeric values, got {type(val)} instead.")
+                    raise ValueError(
+                        f"Expected numeric values, got {type(val)} instead."
+                    )
                 if val < np.min(self.x) or val > np.max(self.x):
                     raise ValueError(
                         f"Cannot set SPP position to {val} since it's not in the dataset's range."
@@ -221,9 +219,7 @@ class Dataset(metaclass=DatasetBase):
         self.y_norm = (self.y_norm - 0.5) * 2
         self.y = (self.y - 0.5) * 2
 
-    def GD_lookup(
-            self, reference_point=2.355, engine="cwt", silent=False, **kwargs
-    ):
+    def GD_lookup(self, reference_point=2.355, engine="cwt", silent=False, **kwargs):
         """
         Quick GD lookup: it finds extremal points near the
         `reference_point` and returns an average value of 2*np.pi
@@ -311,9 +307,7 @@ class Dataset(metaclass=DatasetBase):
             return
         try:
             m_truncated = np.delete(x_max, m_idx1)
-            m_second_closest_val, _ = find_nearest(
-                m_truncated, reference_point
-            )
+            m_second_closest_val, _ = find_nearest(m_truncated, reference_point)
         except IndexError:
             if not silent:
                 print("Prediction failed.\nSkipping.. ")
@@ -371,14 +365,7 @@ class Dataset(metaclass=DatasetBase):
 
     @classmethod
     def parse_raw(
-            cls,
-            basefile,
-            ref=None,
-            sam=None,
-            skiprows=8,
-            decimal=",",
-            sep=";",
-            meta_len=5,
+        cls, basefile, ref=None, sam=None, skiprows=8, decimal=",", sep=";", meta_len=5,
     ):
         """
         Dataset object alternative constructor.
@@ -423,7 +410,7 @@ class Dataset(metaclass=DatasetBase):
                 f"Skiprows is currently {skiprows}, but"
                 " meta information is set to {meta_len}"
                 " lines. This implies that either one is probably wrong.",
-                PySprintWarning
+                PySprintWarning,
             )
             meta_len = skiprows
 
@@ -465,9 +452,7 @@ class Dataset(metaclass=DatasetBase):
                 usecols=[0, 1],
                 names=["x", "y"],
             )
-            return cls(
-                df["x"].values, df["y"].values, r["y"].values, s["y"].values
-            )
+            return cls(df["x"].values, df["y"].values, r["y"].values, s["y"].values)
         return cls(df["x"].values, df["y"].values)
 
     def __str__(self):
@@ -562,7 +547,7 @@ class Dataset(metaclass=DatasetBase):
         if inplace:
             self.x = (2 * np.pi * C_LIGHT) / self.x
             self._check_domain()
-            if hasattr(self, 'original_x'):
+            if hasattr(self, "original_x"):
                 self.original_x = self.x
         else:
             obj = copy(self)
@@ -605,8 +590,7 @@ class Dataset(metaclass=DatasetBase):
         self.ref = []
         self.sam = []
         warnings.warn(
-            "Linear interpolation have been applied to data.",
-            InterpolationWarning,
+            "Linear interpolation have been applied to data.", InterpolationWarning,
         )
 
     def slice(self, start=None, stop=None, inplace=True):
@@ -651,7 +635,7 @@ class Dataset(metaclass=DatasetBase):
             self.y = self.y_norm
             # Just to make sure it's correctly shaped. Later on we might
             # delete this.
-            if hasattr(self, 'original_x'):
+            if hasattr(self, "original_x"):
                 self.original_x = self.x
             self._is_normalized = self._ensure_norm()
         else:
@@ -691,13 +675,10 @@ class Dataset(metaclass=DatasetBase):
         self.sam = []
         self.y = self.y_norm
         warnings.warn(
-            "Linear interpolation have been applied to data.",
-            InterpolationWarning,
+            "Linear interpolation have been applied to data.", InterpolationWarning,
         )
 
-    def detect_peak(
-            self, pmax=0.1, pmin=0.1, threshold=0.1, except_around=None
-    ):
+    def detect_peak(self, pmax=0.1, pmin=0.1, threshold=0.1, except_around=None):
         """
         Basic algorithm to find extremal points in data
         using ``scipy.signal.find_peaks``.
@@ -763,7 +744,9 @@ class Dataset(metaclass=DatasetBase):
             except Exception:  # TODO: handle that exception precisely, maybe ValueError?
                 self.plotwidget.plot(x_closest, self.y[idx], **kwargs)
 
-        if isinstance(self.positions, np.ndarray) or isinstance(self.positions, Iterable):
+        if isinstance(self.positions, np.ndarray) or isinstance(
+            self.positions, Iterable
+        ):
             for i, val in enumerate(self.positions):
                 x_closest, idx = find_nearest(self.x, self.positions[i])
                 try:

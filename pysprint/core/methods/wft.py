@@ -49,10 +49,12 @@ class WFTMethod(FFTMethod):
         super().__init__(*args, **kwargs)
         self.window_seq = {}
 
-    @mutually_exclusive_args('std', 'fwhm')
+    @mutually_exclusive_args("std", "fwhm")
     def add_window(self, center, std=None, fwhm=None, order=2, **kwargs):
         if std:
-            window = Window.from_std(self.x, center=center, std=std, order=order, **kwargs)
+            window = Window.from_std(
+                self.x, center=center, std=std, order=order, **kwargs
+            )
         else:
             window = Window(self.x, center=center, fwhm=fwhm, order=order, **kwargs)
         self.window_seq[center] = window
@@ -62,7 +64,9 @@ class WFTMethod(FFTMethod):
         return self.window_seq
 
     @mutually_exclusive_args("std", "fwhm")
-    def add_window_arange(self, start, stop, step, std=None, fwhm=None, order=2, **kwargs):
+    def add_window_arange(
+        self, start, stop, step, std=None, fwhm=None, order=2, **kwargs
+    ):
         """
         Build a window sequence of given parameters to apply on ifg.
         Works similar to numpy.arange.
@@ -75,7 +79,9 @@ class WFTMethod(FFTMethod):
                 self.add_window(center=cent, fwhm=fwhm, order=order, **kwargs)
 
     @mutually_exclusive_args("std", "fwhm")
-    def add_window_linspace(self, start, stop, num, std=None, fwhm=None, order=2, **kwargs):
+    def add_window_linspace(
+        self, start, stop, num, std=None, fwhm=None, order=2, **kwargs
+    ):
         """
         Build a window sequence of given parameters to apply on ifg.
         Works similar to numpy.linspace.
@@ -88,7 +94,9 @@ class WFTMethod(FFTMethod):
                 self.add_window(center=cent, fwhm=fwhm, order=order, **kwargs)
 
     @mutually_exclusive_args("std", "fwhm")
-    def add_window_geomspace(self, start, stop, num, std=None, fwhm=None, order=2, **kwargs):
+    def add_window_geomspace(
+        self, start, stop, num, std=None, fwhm=None, order=2, **kwargs
+    ):
         """
         Build a window sequence of given parameters to apply on ifg.
         Works similar to numpy.geomspace.
@@ -109,12 +117,16 @@ class WFTMethod(FFTMethod):
         for _, val in self.window_seq.items():
             val.plot(ax=ax)
 
+    # TODO : Rewrite this accordingly
+    def calculate(self, reference_point, order, show_graph=False):
+        super().calculate(reference_point, order, show_graph)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
     w = WFTMethod(np.arange(100), np.arange(100))
-    w.add_window_linspace(20, 70, 100, fwhm=40)
+    w.add_window_linspace(20, 70, 100, fwhm=40, std=50)
     w.view_windows()
     plt.legend()
     plt.show(block=True)

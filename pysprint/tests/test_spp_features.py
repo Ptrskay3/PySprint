@@ -60,6 +60,7 @@ def test_spp_typeerror():
     with pytest.raises(TypeError):
         SPPMethod.calculate_from_ifg([10, 11], reference_point=2, order=2)
 
+
 def test_duplicate_entries(construct_ifg_sequence):
     """
     Here we test that duplicated delay values (apart from multiple SPP positions)
@@ -67,9 +68,7 @@ def test_duplicate_entries(construct_ifg_sequence):
     """
     d1, d2, d3, d4, d5, d6 = construct_ifg_sequence
     with pytest.raises(ValueError):
-        SPPMethod.calculate_from_ifg(
-            [d1, d2, d3, d4, d5], reference_point=2, order=4
-        )
+        SPPMethod.calculate_from_ifg([d1, d2, d3, d4, d5], reference_point=2, order=4)
 
 
 def test_ambiguous_positions(construct_ifg_sequence):

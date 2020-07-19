@@ -26,9 +26,7 @@ def transform_cf_params_to_dispersion(popt, drop_first=True, dof=0):
     return _disp, np.zeros(5)
 
 
-def transform_lmfit_params_to_dispersion(
-    popt, popt_std, drop_first=True, dof=1
-):
+def transform_lmfit_params_to_dispersion(popt, popt_std, drop_first=True, dof=1):
     if drop_first:
         popt, popt_std = popt[1:], popt_std[1:]
 
@@ -72,11 +70,7 @@ def plot_phase(
             pass
         else:
             plt.plot(
-                x,
-                bf_fallback,
-                c=fit_color,
-                linestyle="dashed",
-                label="Best fit",
+                x, bf_fallback, c=fit_color, linestyle="dashed", label="Best fit",
             )
     if show_labels:
         plt.legend()

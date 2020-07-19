@@ -20,28 +20,28 @@ class TestEvaluate(unittest.TestCase):
     @patch("matplotlib.pyplot.show")
     def test_edit_session(self, mock_show):
         ifg = MinMaxMethod(self.x, self.y)
-        ifg.init_edit_session(engine='cwt')
-        ifg.init_edit_session(engine='slope')
-        ifg.init_edit_session(engine='normal')
+        ifg.init_edit_session(engine="cwt")
+        ifg.init_edit_session(engine="slope")
+        ifg.init_edit_session(engine="normal")
         plt.close("all")
         mock_show.assert_called()
 
     def test_edit_session2(self):
         ifg = MinMaxMethod(self.x, self.y)
         with self.assertRaises(ValueError):
-            ifg.init_edit_session(engine='dfssdfasdf')
+            ifg.init_edit_session(engine="dfssdfasdf")
 
     def test_edit_session3(self):
         ifg = MinMaxMethod(self.x, self.y)
         with self.assertRaises(TypeError):
-            ifg.init_edit_session(engine='normal', invalidkwarg=3)
+            ifg.init_edit_session(engine="normal", invalidkwarg=3)
 
     @pytest.mark.xfail(reason="Fails on azure.")
-    @patch('matplotlib.pyplot.show')
+    @patch("matplotlib.pyplot.show")
     def test_edit_session4(self, mock_show):
         ifg = MinMaxMethod(self.x, self.y)
         ifg.init_edit_session()
-        plt.close('all')
+        plt.close("all")
         mock_show.assert_called()
 
 

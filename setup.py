@@ -15,7 +15,7 @@ with open("README.md", "r") as fh:
 MAJOR = 0
 MINOR = 12
 MICRO = 0
-VERSION = f'{MAJOR}.{MINOR}.{MICRO}'
+VERSION = f"{MAJOR}.{MINOR}.{MICRO}"
 
 setup(
     name="pysprint",
@@ -33,15 +33,8 @@ setup(
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Education",
         "Intended Audience :: Science/Research",
-        "Topic :: Scientific/Engineering :: Physics"
+        "Topic :: Scientific/Engineering :: Physics",
     ],
-    install_requires=[
-        'numpy>=1.16.6',
-        'scipy',
-        'matplotlib',
-        'pandas'
-      ],
-    extras_require={
-        'optional': ['numba', 'lmfit', "pytest"]
-    }
+    install_requires=["numpy>=1.16.6", "scipy", "matplotlib", "pandas"],
+    extras_require={"optional": ["numba", "lmfit", "pytest"]},
 )

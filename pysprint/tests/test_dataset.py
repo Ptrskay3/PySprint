@@ -51,7 +51,7 @@ class TestEvaluate(unittest.TestCase):
         np.testing.assert_array_equal(sam, ifg.sam)
 
     def test_rawparsing(self):
-        ifg = Dataset.parse_raw('test_rawparsing.trt')
+        ifg = Dataset.parse_raw("test_rawparsing.trt")
         assert issubclass(ifg.meta.__class__, collections.abc.Mapping)
         with self.assertRaises(OSError):
             Dataset.parse_raw(546)
@@ -75,7 +75,7 @@ class TestEvaluate(unittest.TestCase):
         np.testing.assert_array_almost_equal(before, after)
 
     @pytest.mark.skip(reason="Fails on azure, should be fixed ")
-    @patch('matplotlib.pyplot.show')
+    @patch("matplotlib.pyplot.show")
     def test_normalize(self, mock_show):
         ifg = Dataset(self.x, self.y)
         ifg.normalize()
@@ -115,13 +115,13 @@ class TestEvaluate(unittest.TestCase):
         assert not np.max(ifg.x) < 701
 
 
-@pytest.mark.parametrize('pos', [(1, 2), {4, 5}, [4, 5], np.array([1, 4])])
+@pytest.mark.parametrize("pos", [(1, 2), {4, 5}, [4, 5], np.array([1, 4])])
 def test_SPP_position_setter_valid_options(pos):
     ifg = Dataset(np.arange(1, 1000, 1), np.sin(np.arange(1, 1000, 1)))
     ifg.positions = pos
 
 
-@pytest.mark.parametrize('pos', ["string", [1500, 4500], [100, "string"]])
+@pytest.mark.parametrize("pos", ["string", [1500, 4500], [100, "string"]])
 def test_SPP_position_setter_invalid_options(pos):
     ifg = Dataset(np.arange(1, 1000, 1), np.sin(np.arange(1, 1000, 1)))
     with pytest.raises(ValueError):

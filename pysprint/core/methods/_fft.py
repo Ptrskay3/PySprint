@@ -58,7 +58,7 @@ class FFTMethod(Dataset):
                 self.x = fftshift(self.x)
             elif axis == "y":
                 self.y = fftshift(self.y)
-            elif axis == "both" or axis == 'xy' or axis == 'yx':
+            elif axis == "both" or axis == "xy" or axis == "yx":
                 self.y = fftshift(self.y)
                 self.x = fftshift(self.x)
             else:
@@ -69,8 +69,12 @@ class FFTMethod(Dataset):
             return obj
 
     def ifft(
-            self, interpolate=True, usenifft=False, eps=1e-12, exponent="positive",
-            inplace=True
+        self,
+        interpolate=True,
+        usenifft=False,
+        eps=1e-12,
+        exponent="positive",
+        inplace=True,
     ):
         """
         Applies inverse Fast Fourier Transfrom to the dataset.
@@ -143,14 +147,12 @@ class FFTMethod(Dataset):
                     gl=len(self.x),
                     df=(x_axis[1] - x_axis[0]),
                     epsilon=eps,
-                    exponent=exponent
+                    exponent=exponent,
                 )
                 self.x, self.y = x_axis, np.fft.fftshift(y_transform)
 
             else:
-                self.x, self.y = ifft_method(
-                    self.x, self.y, interpolate=interpolate
-                )
+                self.x, self.y = ifft_method(self.x, self.y, interpolate=interpolate)
         else:
             obj = copy(self)
             obj.ifft(
@@ -158,7 +160,7 @@ class FFTMethod(Dataset):
                 usenifft=usenifft,
                 eps=eps,
                 exponent=exponent,
-                inplace=True
+                inplace=True,
             )
             return obj
 
@@ -181,8 +183,7 @@ class FFTMethod(Dataset):
         if inplace:
             if not self._ifft_called_first:
                 warnings.warn(
-                    "This module is designed to call ifft before fft",
-                    FourierWarning
+                    "This module is designed to call ifft before fft", FourierWarning
                 )
             self.x, self.y = fft_method(self.original_x, self.y)
         else:
@@ -226,20 +227,14 @@ class FFTMethod(Dataset):
             self.at = at
             self.fwhm = fwhm
             self.window_order = window_order
-            gaussian = gaussian_window(
-                self.x, self.at, self.fwhm, self.window_order
-            )
+            gaussian = gaussian_window(self.x, self.at, self.fwhm, self.window_order)
             self.plotwidget.plot(self.x, gaussian * max(abs(self.y)), "r--")
             if plot:
                 self.show()
         else:
             obj = copy(self)
             obj.window(
-                at=at,
-                fwhm=fwhm,
-                window_order=window_order,
-                plot=plot,
-                inplace=True
+                at=at, fwhm=fwhm, window_order=window_order, plot=plot, inplace=True
             )
             return obj
 
@@ -288,7 +283,7 @@ class FFTMethod(Dataset):
             The phase object. See its docstring for more info.
         """
         if self.nufft_used:
-            self.shift('y')
+            self.shift("y")
         y = np.unwrap(np.angle(self.y), axis=0)
         self.phase = Phase(self.x, y)
         if show_graph:
@@ -345,7 +340,7 @@ class FFTMethod(Dataset):
         For consistency we should still implement that a better way later.
         """
         if self.nufft_used:
-            self.shift('y')
+            self.shift("y")
 
         dispersion, dispersion_std, fit_report = args_comp(
             self.x,
@@ -358,15 +353,15 @@ class FFTMethod(Dataset):
         return dispersion, dispersion_std, fit_report
 
     def autorun(
-            self,
-            reference_point=None,
-            order=None,
-            *,
-            enable_printing=True,
-            skip_domain_check=False,
-            only_phase=False,
-            show_graph=True,
-            usenifft=False,
+        self,
+        reference_point=None,
+        order=None,
+        *,
+        enable_printing=True,
+        skip_domain_check=False,
+        only_phase=False,
+        show_graph=True,
+        usenifft=False,
     ):
         """
         Automatically run the Fourier Transfrom based evaluation on the dataset.

@@ -6,12 +6,8 @@ import matplotlib.pyplot
 
 matplotlib.pyplot.ion()
 
-warnings.filterwarnings(
-    "ignore", message="invalid value encountered in sqrt"
-)
-warnings.filterwarnings(
-    "ignore", message="divide by zero encountered in true_divide"
-)
+warnings.filterwarnings("ignore", message="invalid value encountered in sqrt")
+warnings.filterwarnings("ignore", message="divide by zero encountered in true_divide")
 
 
 def run_from_notebook():

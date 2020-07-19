@@ -34,20 +34,12 @@ __all__ = [
     "cut_gaussian",
     "ifft_method",
     "args_comp",
-    "gaussian_window"
+    "gaussian_window",
 ]
 
 
 def min_max_method(
-    x,
-    y,
-    ref,
-    sam,
-    ref_point,
-    maxx=None,
-    minx=None,
-    fit_order=5,
-    show_graph=False,
+    x, y, ref, sam, ref_point, maxx=None, minx=None, fit_order=5, show_graph=False,
 ):
     """Calculates the dispersion with minimum-maximum method
 
@@ -105,12 +97,8 @@ def min_max_method(
     max_freq = x[ref_index] - maxx
     min_freq = x[ref_index] - minx
 
-    neg_freq = np.sort(
-        np.append(max_freq[max_freq < 0], min_freq[min_freq < 0])
-    )[::-1]
-    pos_freq = np.sort(
-        np.append(max_freq[max_freq > 0], min_freq[min_freq > 0])
-    )
+    neg_freq = np.sort(np.append(max_freq[max_freq < 0], min_freq[min_freq < 0]))[::-1]
+    pos_freq = np.sort(np.append(max_freq[max_freq > 0], min_freq[min_freq > 0]))
 
     if len(neg_freq) == 0 and len(pos_freq) == 0:
         raise ValueError("No extremal points found.")
@@ -130,9 +118,7 @@ def min_max_method(
 
     if _has_lmfit:
         fitmodel = Model(_function)
-        pars = fitmodel.make_params(
-            **{f"b{i}": 1 for i in range(fit_order + 1)}
-        )
+        pars = fitmodel.make_params(**{f"b{i}": 1 for i in range(fit_order + 1)})
         result = fitmodel.fit(full_y, x=full_x, params=pars)
     else:
         popt, pcov = curve_fit(_function, full_x, full_y, maxfev=8000)
@@ -146,9 +132,7 @@ def min_max_method(
         dispersion, dispersion_std = transform_cf_params_to_dispersion(
             popt, drop_first=True
         )
-        fit_report = (
-            "To display detailed results," " you must have `lmfit` installed."
-        )
+        fit_report = "To display detailed results," " you must have `lmfit` installed."
     if show_graph:
         try:
             plot_phase(
@@ -215,9 +199,7 @@ def spp_method(delays, omegas, ref_point=0, fit_order=4):
     delays = np.asarray(delays).astype(np.float64)
 
     if not len(delays) == len(omegas):
-        raise ValueError(
-            f"data shapes are different: {delays.shape} & {omegas.shape}"
-        )
+        raise ValueError(f"data shapes are different: {delays.shape} & {omegas.shape}")
 
     idx = np.argsort(omegas)
     omegas, delays = omegas[idx], delays[idx]
@@ -227,9 +209,7 @@ def spp_method(delays, omegas, ref_point=0, fit_order=4):
 
     if _has_lmfit:
         fitmodel = Model(_function)
-        pars = fitmodel.make_params(
-            **{f"b{i}": 1 for i in range(fit_order + 1)}
-        )
+        pars = fitmodel.make_params(**{f"b{i}": 1 for i in range(fit_order + 1)})
         result = fitmodel.fit(delays, x=omegas, params=pars)
 
         dispersion, dispersion_std = transform_lmfit_params_to_dispersion(
@@ -245,9 +225,7 @@ def spp_method(delays, omegas, ref_point=0, fit_order=4):
     return omegas, delays, -dispersion, dispersion_std, bf
 
 
-def cff_method(
-    x, y, ref, sam, ref_point=0, p0=[1, 1, 1, 1, 1, 1, 1, 1], maxtries=8000
-):
+def cff_method(x, y, ref, sam, ref_point=0, p0=[1, 1, 1, 1, 1, 1, 1, 1], maxtries=8000):
     """
     Phase modulated cosine function fit method.
 
@@ -463,9 +441,7 @@ def args_comp(x, y, ref_point=0, fit_order=5, show_graph=False):
 
     if _has_lmfit:
         fitmodel = Model(_function)
-        pars = fitmodel.make_params(
-            **{f"b{i}": 1 for i in range(fit_order + 1)}
-        )
+        pars = fitmodel.make_params(**{f"b{i}": 1 for i in range(fit_order + 1)})
         result = fitmodel.fit(y, x=x, params=pars)
     else:
         popt, pcov = curve_fit(_function, x, y, maxfev=8000)
@@ -479,9 +455,7 @@ def args_comp(x, y, ref_point=0, fit_order=5, show_graph=False):
         dispersion, dispersion_std = transform_cf_params_to_dispersion(
             popt, drop_first=True, dof=1
         )
-        fit_report = (
-            "To display detailed results," " you must have `lmfit` installed."
-        )
+        fit_report = "To display detailed results," " you must have `lmfit` installed."
     if show_graph:
         try:
             plot_phase(

@@ -30,6 +30,7 @@ class Phase:
     A class that represents a phase obtained from various
     methods.
     """
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -42,14 +43,10 @@ class Phase:
     def __call__(self, value):
         if self.poly:
             return self.poly.__call__(value)
-        raise NotImplementedError(
-            "Before calling, a polinomial must be fitted."
-        )
+        raise NotImplementedError("Before calling, a polinomial must be fitted.")
 
     def slice(self, start=None, stop=None):
-        self.x, self.y = cut_data(
-            self.x, self.y, [], [], start=start, stop=stop
-        )
+        self.x, self.y = cut_data(self.x, self.y, [], [], start=start, stop=stop)
 
     @classmethod
     def from_disperion_array(cls, dispersion_array, domain=None):
@@ -76,9 +73,7 @@ class Phase:
     def __str__(self):
         if self.poly is not None:
             return self.poly.__str__()
-        raise NotImplementedError(
-            "Before calling, a polynomial must be fitted."
-        )
+        raise NotImplementedError("Before calling, a polynomial must be fitted.")
 
     def plot(self, ax=None, **kwargs):
         if ax is None:
@@ -108,9 +103,7 @@ class Phase:
             if _has_lmfit:
 
                 fitmodel = Model(_function)
-                pars = fitmodel.make_params(
-                    **{f"b{i}": 1 for i in range(order + 1)}
-                )
+                pars = fitmodel.make_params(**{f"b{i}": 1 for i in range(order + 1)})
                 result = fitmodel.fit(y, x=x, params=pars)
             else:
                 popt, pcov = curve_fit(_function, x, y, maxfev=8000)
@@ -126,14 +119,12 @@ class Phase:
                     popt, drop_first=True, dof=1
                 )
                 fit_report = (
-                    "To display detailed results,"
-                    " you must have `lmfit` installed."
+                    "To display detailed results," " you must have `lmfit` installed."
                 )
 
                 self.fitted_curve = _function(x, *popt)
 
             return dispersion, dispersion_std, fit_report
-
 
     @property
     def order(self):

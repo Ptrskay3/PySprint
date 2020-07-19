@@ -13,9 +13,7 @@ from pysprint.core.ffts_auto import (
 
 class TestFFTAuto(unittest.TestCase):
     def test_find_roi(self):
-        x, y = find_roi(
-            np.linspace(-10, 10, 10000), np.linspace(-10, 10, 10000)
-        )
+        x, y = find_roi(np.linspace(-10, 10, 10000), np.linspace(-10, 10, 10000))
         np.testing.assert_almost_equal(min(x), 0, decimal=2)
         np.testing.assert_almost_equal(min(y), 0, decimal=2)
 

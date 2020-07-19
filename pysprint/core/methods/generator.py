@@ -66,7 +66,6 @@ class Generator(metaclass=DatasetBase):
                 2 * np.sqrt(self.sam * self.ref)
             )
 
-
     def generate(self, force_wavelength=False):
         """
         Intelligently (kind of) decide what domain we generate the dataset on.
@@ -136,7 +135,7 @@ class Generator(metaclass=DatasetBase):
         else:
             try:
                 self.plotwidget.plot(self.x, self._y, "r")
-            except Exception: # TODO: better exception case
+            except Exception:  # TODO: better exception case
                 self.plotwidget.plot(self.x, self.y, "r")
         self.plotwidget.grid()
         self.plotwidget.show()
@@ -175,18 +174,14 @@ class Generator(metaclass=DatasetBase):
 
     def _phase(self, j):
         if self.is_wave:
-            lam = np.arange(
-                self.start, self.stop + self.resolution, self.resolution
-            )
+            lam = np.arange(self.start, self.stop + self.resolution, self.resolution)
             omega = (2 * np.pi * C_LIGHT) / lam
             omega0 = (2 * np.pi * C_LIGHT) / self.center
             j = omega - omega0
         else:
             lamend = (2 * np.pi * C_LIGHT) / self.start
             lamstart = (2 * np.pi * C_LIGHT) / self.stop
-            lam = np.arange(
-                lamstart, lamend + self.resolution, self.resolution
-            )
+            lam = np.arange(lamstart, lamend + self.resolution, self.resolution)
             omega = (2 * np.pi * C_LIGHT) / lam
             j = omega - self.center
         return (

@@ -14,7 +14,7 @@ SUPPORTED_VERSIONS = {
     "lmfit": "1.0.1",
     "numba": "0.46.0",
     "IPython": "7.12.0",
-    "pytest": "5.0.1"
+    "pytest": "5.0.1",
 }
 
 
@@ -28,7 +28,7 @@ def get_system_info():
         "Version": uname_result.version,
         "machine": uname_result.machine,
         "processor": uname_result.processor,
-        "byteorder": sys.byteorder
+        "byteorder": sys.byteorder,
     }
 
 
@@ -57,7 +57,7 @@ def get_dep_info():
         "pytest",
         "lmfit",
         "numba",
-        "IPython"
+        "IPython",
     ]
     deps.extend(list(SUPPORTED_VERSIONS))
     result = {}
@@ -86,11 +86,11 @@ def print_info():
         ip = __IPYTHON__
     except NameError:
         ip = None
-    spy = any("SPYDER" in name for name in os.environ)
     nm = "IPython"
-    is_spyder = "Spyder"
+    is_spyder = any("SPYDER" in name for name in os.environ)
+    _is_spyder = "Spyder"
+    is_conda = os.path.exists(os.path.join(sys.prefix, "conda-meta", "history"))
     _is_conda = "Conda env"
-    is_conda = os.path.exists(os.path.join(sys.prefix, 'conda-meta', 'history'))
     print(f"{_is_conda:<{n + 1}}: {is_conda}")
     print(f"{nm:<{n + 1}}: {ip}")
-    print(f"{is_spyder:<{n + 1}}: {spy}")
+    print(f"{_is_spyder:<{n + 1}}: {is_spyder}")

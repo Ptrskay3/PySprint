@@ -15,8 +15,7 @@ def correct_sign(x, flip_increasing=True):
     decreasing = group_consecutives(decreasing_idx)
     if not (len(increasing) == 1 and len(decreasing) == 1):
         raise ValueError(
-            "Values could not be split into two "
-            "strictly monotonic parts safely."
+            "Values could not be split into two " "strictly monotonic parts safely."
         )
     if flip_increasing:
         x[increasing_idx[0][0]] *= -1

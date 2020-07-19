@@ -22,54 +22,22 @@ class TestEvaluate(unittest.TestCase):
         mins = [10, 30, 50, 70, 90]
         maxs = [20, 40, 60, 80, 100]
         disp, disp_s, fit = evaluate.min_max_method(
-            a,
-            b,
-            [],
-            [],
-            0,
-            maxx=maxs,
-            minx=mins,
-            fit_order=1,
-            show_graph=False,
+            a, b, [], [], 0, maxx=maxs, minx=mins, fit_order=1, show_graph=False,
         )
         np.testing.assert_almost_equal(disp[0], -0.314159265359)
         with self.assertRaises(ValueError):
             evaluate.min_max_method(
-                [],
-                b,
-                [],
-                [],
-                0,
-                maxx=maxs,
-                minx=mins,
-                fit_order=1,
-                show_graph=False,
+                [], b, [], [], 0, maxx=maxs, minx=mins, fit_order=1, show_graph=False,
             )
         with self.assertRaises(ValueError):
             evaluate.min_max_method(
-                [],
-                [],
-                [],
-                [],
-                0,
-                maxx=maxs,
-                minx=mins,
-                fit_order=1,
-                show_graph=False,
+                [], [], [], [], 0, maxx=maxs, minx=mins, fit_order=1, show_graph=False,
             )
         # with self.assertRaises(ValueError):
         # disp, disp_s, fit = evaluate.min_max_method(a, [], [], [], ref_point = 0, maxx=maxs, minx=mins, fit_order=1, show_graph=False)
         with self.assertRaises(ValueError):
             evaluate.min_max_method(
-                a,
-                b,
-                [],
-                [],
-                0,
-                maxx=maxs,
-                minx=mins,
-                fit_order=6,
-                show_graph=False,
+                a, b, [], [], 0, maxx=maxs, minx=mins, fit_order=6, show_graph=False,
             )
         # with self.assertRaises(np.core._exceptions.UFuncTypeError):
         # disp, disp_s, fit = evaluate.min_max_method(a, b, [], [], ref_point = 0, maxx='a', minx=mins, fit_order=1, show_graph=False)
@@ -81,10 +49,8 @@ class TestEvaluate(unittest.TestCase):
         # j,k = evaluate.min_max_method(np.arange(100), np.arange(100), [], [], ref_point = 10, fit_order = 1, show_graph=False)
         # np.testing.assert_array_equal(emp, j)
         # np.testing.assert_array_equal(emp, k)
-        a, b, c, d = np.loadtxt('test_arms.txt', delimiter=",", unpack=True)
-        maxs, _, mins, _ = find_peak(
-            a, b, c, d, pro_max=1, pro_min=1, threshold=0.4
-        )
+        a, b, c, d = np.loadtxt("test_arms.txt", delimiter=",", unpack=True)
+        maxs, _, mins, _ = find_peak(a, b, c, d, pro_max=1, pro_min=1, threshold=0.4)
         d1, d_s1, fit1 = evaluate.min_max_method(
             a,
             b,
@@ -188,9 +154,7 @@ class TestEvaluate(unittest.TestCase):
         np.testing.assert_array_almost_equal(d, [1500.01, 1999.79], decimal=2)
 
     def test_ffts_advanced1(self):
-        g = Generator(
-            2, 2.8, 2.4, delay=1500, GD=200, pulse_width=25, resolution=0.01
-        )
+        g = Generator(2, 2.8, 2.4, delay=1500, GD=200, pulse_width=25, resolution=0.01)
         g.generate_freq()
         a, b = g.data
         f = FFTMethod(a, b)
@@ -213,9 +177,7 @@ class TestEvaluate(unittest.TestCase):
         f.apply_window()
         f.fft()
         d, _, _ = f.calculate(order=3, reference_point=2.4)
-        np.testing.assert_array_almost_equal(
-            d, [1500.03, 0.03, 39996.60], decimal=2
-        )
+        np.testing.assert_array_almost_equal(d, [1500.03, 0.03, 39996.60], decimal=2)
 
     def test_ffts_advanced4(self):
         g = Generator(
@@ -242,13 +204,7 @@ class TestEvaluate(unittest.TestCase):
 
     def test_ffts_advanced5(self):
         g = Generator(
-            2,
-            2.8,
-            2.4,
-            delay=1500,
-            QOD=900000,
-            pulse_width=25,
-            resolution=0.01,
+            2, 2.8, 2.4, delay=1500, QOD=900000, pulse_width=25, resolution=0.01,
         )
         g.generate_freq()
         a, b = g.data
@@ -263,14 +219,12 @@ class TestEvaluate(unittest.TestCase):
         )
 
     def test_windowing(self):
-        a, b = np.loadtxt('test_window.txt', unpack=True, delimiter=",")
+        a, b = np.loadtxt("test_window.txt", unpack=True, delimiter=",")
         y_data = evaluate.cut_gaussian(a, b, 2.5, 0.2, 6)
         assert len(b) == len(y_data)
         np.testing.assert_almost_equal(y_data[0], 0)
         np.testing.assert_almost_equal(y_data[-1], 0)
-        np.testing.assert_almost_equal(
-            np.median(y_data), np.median(b), decimal=2
-        )
+        np.testing.assert_almost_equal(np.median(y_data), np.median(b), decimal=2)
 
     def test_spp(self):
         pass

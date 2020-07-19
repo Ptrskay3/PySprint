@@ -21,7 +21,7 @@ __all__ = [
     "_maybe_increase_before_cwt",
     "pad_with_trailing_zeros",
     "mutually_exclusive_args",
-    "lazy_property"
+    "lazy_property",
 ]
 
 # https://stackoverflow.com/a/54487188/11751294
@@ -38,9 +38,13 @@ def mutually_exclusive_args(keyword, *keywords):
         @wraps(func)
         def inner(*args, **kwargs):
             if sum(k in keywords for k in kwargs) != 1:
-                raise TypeError('You must specify exactly one of {}'.format(' and '.join(keywords)))
+                raise TypeError(
+                    "You must specify exactly one of {}".format(" and ".join(keywords))
+                )
             return func(*args, **kwargs)
+
         return inner
+
     return wrapper
 
 
@@ -161,9 +165,7 @@ def measurement(array, confidence=0.95, silent=False):
 
     """
     mean = np.mean(array)
-    conf = st.t.interval(
-        confidence, len(array) - 1, loc=mean, scale=st.sem(array)
-    )
+    conf = st.t.interval(confidence, len(array) - 1, loc=mean, scale=st.sem(array))
     if not silent:
         print(f"{mean:5f} ± {(mean-conf[0]):5f}")
     return mean, conf
@@ -227,15 +229,12 @@ def print_disp(f):
         ):
             if run_from_notebook():
                 from IPython.display import display, Math
+
                 display(
-                    Math(
-                        f"{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i+1}"
-                    )
+                    Math(f"{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i+1}")
                 )
             else:
-                print(
-                    f"{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i+1}"
-                )
+                print(f"{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i+1}")
         return disp, disp_std, stri
 
     return wrapping

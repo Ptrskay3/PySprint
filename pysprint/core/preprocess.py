@@ -36,14 +36,10 @@ def savgol(x, y, ref, sam, window=101, order=3):
     if window > order:
         try:
             if window % 2 == 1:
-                fil = savgol_filter(
-                    yint, window_length=window, polyorder=order
-                )
+                fil = savgol_filter(yint, window_length=window, polyorder=order)
                 return xint, fil
             else:
-                fil = savgol_filter(
-                    yint, window_length=window + 1, polyorder=order
-                )
+                fil = savgol_filter(yint, window_length=window + 1, polyorder=order)
                 return xint, fil
         except Exception as e:
             print(e)
@@ -51,9 +47,7 @@ def savgol(x, y, ref, sam, window=101, order=3):
         raise ValueError("Order must be lower than window length.")
 
 
-def find_peak(
-    x, y, ref, sam, pro_max=1, pro_min=1, threshold=0.1, except_around=None
-):
+def find_peak(x, y, ref, sam, pro_max=1, pro_min=1, threshold=0.1, except_around=None):
     if except_around is not None and len(except_around) != 2:
         raise ValueError("Invalid except_around arg. Try [start, stop].")
     if except_around is not None:
@@ -77,9 +71,7 @@ def find_peak(
         if between(x[idx], except_around) or np.abs(y[idx]) > threshold:
             min_idx.append(idx)
 
-    if len(x[max_idx]) != len(y[max_idx]) or len(x[min_idx]) != len(
-        y[min_idx]
-    ):
+    if len(x[max_idx]) != len(y[max_idx]) or len(x[min_idx]) != len(y[min_idx]):
         raise ValueError("Something went wrong, try to cut the edges of data.")
 
     return x[max_idx], y[max_idx], x[min_idx], y[min_idx]

@@ -15,6 +15,7 @@ class SPPMethod(metaclass=DatasetBase):
     """
     Interface for Stationary Phase Point Method.
     """
+
     def __init__(self, ifg_names, sam_names=None, ref_names=None, **kwargs):
         self.ifg_names = ifg_names
         if sam_names:
@@ -44,8 +45,7 @@ class SPPMethod(metaclass=DatasetBase):
 
         self._delay = {}
         self._positions = {}
-        self._info = (f"Progress: {len(self._delay)}/{len(self)}")
-
+        self._info = f"Progress: {len(self._delay)}/{len(self)}"
 
     @staticmethod
     def calculate_from_ifg(ifg_list, reference_point, order, show_graph=False):
@@ -97,7 +97,9 @@ class SPPMethod(metaclass=DatasetBase):
 
         for idx, ifg in enumerate(ifg_list):
             delay, position = ifg.emit()
-            if idx != 0 and delay.flat[0] in np.concatenate([a.ravel() for a in local_delays.values()]):
+            if idx != 0 and delay.flat[0] in np.concatenate(
+                [a.ravel() for a in local_delays.values()]
+            ):
                 raise ValueError(
                     f"Duplicated delay values found. Delay {delay.flat[0]} fs was previously seen."
                 )
@@ -106,7 +108,7 @@ class SPPMethod(metaclass=DatasetBase):
         delays = np.concatenate([a.ravel() for a in local_delays.values()])
         positions = np.concatenate([a.ravel() for a in local_positions.values()])
         x, y, dispersion, dispersion_std, bf = spp_method(
-            delays, positions, ref_point=reference_point, fit_order=order-1
+            delays, positions, ref_point=reference_point, fit_order=order - 1
         )
         if show_graph:
             plt.plot(x, y, "o")
@@ -126,9 +128,7 @@ class SPPMethod(metaclass=DatasetBase):
         return self
 
     def __str__(self):
-        return (
-            f"{type(self).__name__}\nInterferogram count : {len(self)}"
-        )
+        return f"{type(self).__name__}\nInterferogram count : {len(self)}"
 
     def __next__(self):
         if self.idx < len(self):
@@ -178,21 +178,15 @@ class SPPMethod(metaclass=DatasetBase):
     def _validate(self):
         for filename in self.ifg_names:
             if not os.path.exists(filename):
-                raise FileNotFoundError(
-                    f"""File named '{filename}' is not found."""
-                )
+                raise FileNotFoundError(f"""File named '{filename}' is not found.""")
         if self.sam_names:
             for sam in self.sam_names:
                 if not os.path.exists(sam):
-                    raise FileNotFoundError(
-                        f"""File named '{sam}' is not found."""
-                    )
+                    raise FileNotFoundError(f"""File named '{sam}' is not found.""")
         if self.ref_names:
             for ref in self.ref_names:
                 if not os.path.exists(ref):
-                    raise FileNotFoundError(
-                        f"""File named '{ref}' is not found."""
-                    )
+                    raise FileNotFoundError(f"""File named '{ref}' is not found.""")
 
     def listen(self, delay, position):
         self._delay[self.idx] = delay
@@ -202,13 +196,9 @@ class SPPMethod(metaclass=DatasetBase):
         if not filename.endswith(".txt"):
             filename += ".txt"
         delay = np.concatenate([_ for _ in self._delay.values()]).ravel()
-        position = np.concatenate(
-            [_ for _ in self._positions.values()]
-        ).ravel()
+        position = np.concatenate([_ for _ in self._positions.values()]).ravel()
         np.savetxt(
-            f"{filename}",
-            np.transpose(np.array([position, delay])),
-            delimiter=",",
+            f"{filename}", np.transpose(np.array([position, delay])), delimiter=",",
         )
 
     @staticmethod
@@ -250,7 +240,7 @@ class SPPMethod(metaclass=DatasetBase):
                 "Order should be greater than 1. Cannot fit constant function to data."
             )
         x, y, dispersion, dispersion_std, bf = spp_method(
-            delays, omegas, ref_point=reference_point, fit_order=order-1
+            delays, omegas, ref_point=reference_point, fit_order=order - 1
         )
         return dispersion, dispersion_std, ""
 
@@ -292,12 +282,10 @@ class SPPMethod(metaclass=DatasetBase):
                 "Order should be greater than 1. Cannot fit constant function to data."
             )
         delays = np.concatenate([_ for _ in self._delay.values()]).ravel()
-        positions = np.concatenate(
-            [_ for _ in self._positions.values()]
-        ).ravel()
+        positions = np.concatenate([_ for _ in self._positions.values()]).ravel()
 
         x, y, dispersion, dispersion_std, bf = spp_method(
-            delays, positions, ref_point=reference_point, fit_order=order-1
+            delays, positions, ref_point=reference_point, fit_order=order - 1
         )
         if show_graph:
             plt.plot(x, y, "o")
@@ -313,7 +301,7 @@ class SPPMethod(metaclass=DatasetBase):
 
     @property
     def info(self):
-        self._info = (f"Progress: {len(self._delay)}/{len(self)}")
+        self._info = f"Progress: {len(self._delay)}/{len(self)}"
         return self._info
 
     @property
