@@ -1,6 +1,6 @@
 import unittest
 from unittest import TestCase
-from pysprint.core.ffts_non_uniform import nuifft
+from pysprint.core.nufft import nuifft
 
 import numpy as np
 

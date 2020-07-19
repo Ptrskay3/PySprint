@@ -89,6 +89,14 @@ class Phase:
 
     @print_disp
     def fit(self, reference_point, order):
+        return self._fit(reference_point=reference_point, order=order)
+
+    def _fit(self, reference_point, order):
+        """
+        This is meant to be used privately, when the print_disp
+        is handled by another function. The `fit` method is for
+        public use.
+        """
         if self.is_coeff or self.is_dispersion_array:
             warnings.warn("No need to fit another curve.")
             return

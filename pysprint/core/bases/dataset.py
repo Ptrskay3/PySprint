@@ -89,7 +89,7 @@ class Dataset(metaclass=DatasetBase):
             )
             self._is_normalized = True
 
-        self.plotwidget = plt
+        self.plotwidget = plt # TODO : Rewrite plotting
         self.xmin = None
         self.xmax = None
         self.probably_wavelength = None

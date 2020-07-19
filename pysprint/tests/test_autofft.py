@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 from pysprint import FFTMethod, Generator
-from pysprint.core.ffts_auto import (
+from pysprint.core.fft_tools import (
     find_roi,
     find_center,
     _ensure_window_at_origin,

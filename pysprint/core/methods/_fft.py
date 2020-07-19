@@ -7,9 +7,9 @@ import numpy as np
 from scipy.fftpack import fftshift
 
 from pysprint.core.bases.dataset import Dataset
-from pysprint.core.ffts_non_uniform import nuifft
+from pysprint.core.nufft import nuifft
 from pysprint.utils.exceptions import FourierWarning
-from pysprint.core.ffts_auto import _run
+from pysprint.core.fft_tools import _run
 from pysprint.core.phase import Phase
 from pysprint.core.evaluate import (
     fft_method,

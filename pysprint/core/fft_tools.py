@@ -35,7 +35,14 @@ def find_center(x, y, n_largest=5):
     y_prob_density = np.exp((-((x - np.max(x) / 2.5) ** 2)) / (1000 * np.max(x)))
     _x, _y = x[peaks], y_prob_density[peaks]
     # weighted with the prob density function above from origin
-    residx = np.argmax(_x * _y)
+    try:
+        residx = np.argmax(_x * _y)
+    except ValueError as err:
+        msg = ValueError(
+            "Probably you need to set bigger window FWHM. "
+            "After IFFT, the center of the peak could not be determined."
+        )
+        raise msg from err
 
     return _x[residx], _y[residx]
 
