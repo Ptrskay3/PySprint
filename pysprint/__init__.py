@@ -1,36 +1,18 @@
-import os
 import warnings
 
-import matplotlib
-import matplotlib.pyplot
+import matplotlib # noqa
+import matplotlib.pyplot as plt
 
-matplotlib.pyplot.ion()
+from pysprint.utils.misc import run_from_ipython
+
+plt.ion()
 
 warnings.filterwarnings("ignore", message="invalid value encountered in sqrt")
 warnings.filterwarnings("ignore", message="divide by zero encountered in true_divide")
 
 
-def run_from_notebook():
-    """
-    Detect explicitly if code is run inside Jupyter.
-    """
-    try:
-        __IPYTHON__
-        # we must distinguish SPYDER because it automatically sets
-        # up a backend for the user.
-        if any("SPYDER" in name for name in os.environ):
-            return False
-        return True
-    except NameError:
-        return False
-
-
 # setting up the IPython notebook
-
-
 def setup_notebook(figsize=(15, 5), backend="Qt5Agg"):
-    from matplotlib import pyplot as plt
-
     plt.rcParams["figure.figsize"] = figsize
     try:
         from IPython import get_ipython
@@ -42,21 +24,21 @@ def setup_notebook(figsize=(15, 5), backend="Qt5Agg"):
         ipython = IPython.ipapi.get()
     try:
         ipython.magic("matplotlib qt")
-    except:
+    except AttributeError:
+        pass
+    else:
         pass
 
     try:
         plt.switch_backend(backend)
-        # if matplotlib.get_backend() != "Qt5Agg":
-        #     matplotlib.use("Qt5Agg")
-    except:
+    except AttributeError:
         warnings.warn(
             "You should manually set a suitable matplotlib backend, "
             "e.g. matplotlib.use('Qt5Agg') to enable interactive plots."
         )
 
 
-if run_from_notebook():
+if run_from_ipython():
     setup_notebook()
 
 

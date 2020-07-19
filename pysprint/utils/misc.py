@@ -5,7 +5,6 @@ import numpy as np
 from scipy.interpolate import interp1d
 import scipy.stats as st
 
-from pysprint import run_from_notebook
 
 __all__ = [
     "unpack_lmfit",
@@ -227,7 +226,7 @@ def print_disp(f):
         for i, (label, disp_item, disp_std_item) in enumerate(
             zip(labels, disp, disp_std)
         ):
-            if run_from_notebook():
+            if run_from_ipython():
                 from IPython.display import display, Math
 
                 display(

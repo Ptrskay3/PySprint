@@ -4,9 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
-from pysprint.utils import find_nearest
+from pysprint.utils import find_nearest, run_from_ipython
 from pysprint.core.functions import _cosfit_config, cos_fit1
-from pysprint import run_from_notebook
 
 
 class FitOptimizer:
@@ -174,7 +173,7 @@ class FitOptimizer:
         labels = ("GD", "GDD", "TOD", "FOD", "QOD")
         params = self.p0[3:]
         for i, (label, param) in enumerate(zip(labels, params)):
-            if run_from_notebook():
+            if run_from_ipython():
                 from IPython.display import display, Math
 
                 display(
@@ -206,7 +205,7 @@ class FitOptimizer:
                     # self.figure.savefig(f'{self.counter}.eps')
 
                 self.result_wrapper()
-                if run_from_notebook():
+                if run_from_ipython():
                     from IPython.display import display, Math
 
                     display(Math(f"with \\ R^2 = {(self._fit_goodness()):.5f}."))

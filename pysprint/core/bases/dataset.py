@@ -4,12 +4,13 @@ This file implements the basic Dataset class.
 import json  # for pretty printing dict
 import warnings
 from collections.abc import Iterable
-from inspect import signature, cleandoc
+from inspect import signature
 from contextlib import suppress
 from textwrap import dedent
 from math import factorial
 from copy import copy, deepcopy
 import numbers
+import re
 
 import numpy as np
 import pandas as pd
@@ -84,7 +85,7 @@ class Dataset(metaclass=DatasetBase):
 
         else:
             self.y_norm = (self.y - self.ref - self.sam) / (
-                2 * np.sqrt(self.sam * self.ref)
+                    2 * np.sqrt(self.sam * self.ref)
             )
             self._is_normalized = True
 
@@ -133,6 +134,9 @@ class Dataset(metaclass=DatasetBase):
 
     def __len__(self):
         return len(self.x)
+
+    def chrange(self):
+        pass
 
     #  TODO : The plot must be formatted.
     def phase_plot(self, exclude_GD=False):
@@ -365,7 +369,7 @@ class Dataset(metaclass=DatasetBase):
 
     @classmethod
     def parse_raw(
-        cls, basefile, ref=None, sam=None, skiprows=8, decimal=",", sep=";", meta_len=5,
+            cls, basefile, ref=None, sam=None, skiprows=8, decimal=",", sep=";", meta_len=5,
     ):
         """
         Dataset object alternative constructor.
@@ -424,7 +428,7 @@ class Dataset(metaclass=DatasetBase):
                 cls.meta = {"comment": comm}
             try:
                 for info in additional:
-                    cls.meta[info[0]] = info[1]
+                    cls.meta[info[0]] = info[1].strip()
             except IndexError:
                 cls.meta["unparsed"] = str(list(additional))
         df = pd.read_csv(
@@ -470,7 +474,7 @@ class Dataset(metaclass=DatasetBase):
         string = dedent(
             f"""
         {type(self).__name__}
-
+        ----------
         Parameters
         ----------
         Datapoints: {len(self.x)}
@@ -479,12 +483,12 @@ class Dataset(metaclass=DatasetBase):
         Normalized: {self._is_normalized}
         Delay value: {(str(pprint_delay) + ' fs') if np.all(self._delay) else 'Not given'}
         SPP position(s): {str(self._positions) + ' PHz' if np.all(self._positions) else 'Not given'}
-
+        ----------------------------
         Metadata extracted from file
         ----------------------------
         {json.dumps(self.meta, indent=4)}"""
         )
-        return cleandoc(string)
+        return re.sub('^\s+', '', string, flags=re.MULTILINE)
 
     @property
     def data(self):
@@ -745,7 +749,7 @@ class Dataset(metaclass=DatasetBase):
                 self.plotwidget.plot(x_closest, self.y[idx], **kwargs)
 
         if isinstance(self.positions, np.ndarray) or isinstance(
-            self.positions, Iterable
+                self.positions, Iterable
         ):
             for i, val in enumerate(self.positions):
                 x_closest, idx = find_nearest(self.x, self.positions[i])
