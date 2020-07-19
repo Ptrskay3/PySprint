@@ -79,11 +79,15 @@ class Phase:
         if ax is None:
             ax = plt
         if not self.is_dispersion_array or not self.is_coeff:
-            ax.plot(self.x, self.y, **kwargs)
+            # we need to sort them because plots become messy
+            # if we keep it unsorted
+            idx = np.argsort(self.x)
+            x, y = self.x[idx], self.y[idx]
+            ax.plot(x, y, **kwargs)
             if self.fitted_curve is not None:
-                ax.plot(self.x, self.fitted_curve, "r--")
+                ax.plot(x, self.fitted_curve[idx], "r--")
         else:
-            ax.plot(self.x, self.poly(self.x), **kwargs)
+            ax.plot(x, self.poly(x)[idx], **kwargs)
         plt.grid()
         plt.show()
 

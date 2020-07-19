@@ -17,7 +17,7 @@ def find_roi(x, y):
     return x[idx], y[idx]
 
 
-def find_center(x, y, n_largest=5):
+def find_center(x, y, n_largest=5, return_multiple=None):
 
     peaks, props = find_peaks(y, prominence=0.001, height=np.max(y) / 100)
 
@@ -43,6 +43,16 @@ def find_center(x, y, n_largest=5):
             "After IFFT, the center of the peak could not be determined."
         )
         raise msg from err
+
+    if return_multiple:
+        try:
+            N = int(return_multiple)
+        except ValueError as err:
+            raise ValueError("Must be int") from err
+        _x, _y = x[peaks], y_prob_density[peaks]
+        if len(_x) > N:
+            N = len(_x)
+        return _x[:N], _y[:N]
 
     return _x[residx], _y[residx]
 

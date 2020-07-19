@@ -1,4 +1,5 @@
 import warnings
+from contextlib import contextmanager
 
 import numpy as np
 import matplotlib.pyplot as plt # noqa
@@ -17,12 +18,11 @@ class Window:
     windows.
     """
 
-    def __init__(self, x, center, fwhm, order=2, **kwargs):
+    def __init__(self, x, center, fwhm, order=2):
         self.x = x
         self.center = center
         self.fwhm = fwhm
         self.order = order
-        self.mpl_style = kwargs
 
     @lazy_property
     def y(self):
@@ -33,7 +33,10 @@ class Window:
         _fwhm = std * 2 * np.log(2) ** (1 / order)
         return cls(x, center, _fwhm, order)
 
-    def plot(self, ax=None, zorder=90):
+    def __repr__(self):
+        return f"Window(center={self.center:.5f}, fwhm={self.fwhm}, order={self.order})"
+
+    def plot(self, ax=None, scalefactor=1, zorder=90, **kwargs):
         """
         Plot the window.
 
@@ -45,7 +48,7 @@ class Window:
         """
         if ax is None:
             ax = plt
-        ax.plot(self.x, self.y, zorder=zorder, **self.mpl_style)
+        ax.plot(self.x, self.y * scalefactor, zorder=zorder, **kwargs)
 
 
 class WFTMethod(FFTMethod):
@@ -55,7 +58,8 @@ class WFTMethod(FFTMethod):
         super().__init__(*args, **kwargs)
         self.window_seq = {}
         self.found_centers = {}
-        self.phase = None
+        self.GD = None
+        self.cachedlen = 0
 
     @mutually_exclusive_args("std", "fwhm")
     def add_window(self, center, std=None, fwhm=None, order=2, **kwargs):
@@ -70,6 +74,10 @@ class WFTMethod(FFTMethod):
     @property
     def windows(self):
         return self.window_seq
+
+    @property
+    def centers(self):
+        return self.window_seq.keys()
 
     @mutually_exclusive_args("std", "fwhm")
     def add_window_arange(
@@ -116,24 +124,24 @@ class WFTMethod(FFTMethod):
             else:
                 self.add_window(center=cent, fwhm=fwhm, order=order, **kwargs)
 
-    def view_windows(self, ax=None, maxsize=80):
+    #  TODO : scale them up for visibility
+    def view_windows(self, ax=None, maxsize=80, **kwargs):
         """
         Gives a rough view of the different windows along with the ifg.
         """
-        # TODO: check for too crowded image later and warn user.
-        # Maybe just display a sample that case?
         winlen = len(self.window_seq)
         ratio = winlen % maxsize
         if winlen > maxsize:
             warnings.warn(
-                "Too crowded image, displaying only a sequence", PySprintWarning
+                "Image seems crowded, displaying only a sequence of the given windows",
+                PySprintWarning
             )
             for i, (_, val) in enumerate(self.window_seq.items()):
                 if i % ratio == 0:
-                    val.plot(ax=ax)
+                    val.plot(ax=ax, scalefactor=np.max(self.y)*.75, **kwargs)
         else:
             for _, val in self.window_seq.items():
-                val.plot(ax=ax)
+                val.plot(ax=ax, scalefactor=np.max(self.y)*.75, **kwargs)
         self.show()
 
     def remove_all_windows(self):
@@ -147,35 +155,40 @@ class WFTMethod(FFTMethod):
             )
         self.window_seq.pop(center, None)
 
-    # TODO : Rewrite this accordingly
+    # TODO : Add parameter to describe how many peaks are are looking for..
     def calculate(
             self, reference_point, order, show_graph=False, silent=False, force_recalculate=False
     ):
+        if self.cachedlen != len(self.window_seq):
+            force_recalculate = True
         if force_recalculate:
             self.found_centers.clear()
             self.retrieve_GD(silent=silent)
-        if self.phase is None:
+        if self.GD is None:
             self.retrieve_GD(silent=silent)
 
-        d, ds, fr = self.phase._fit(
+        self.cachedlen = len(self.window_seq)
+
+        d, ds, fr = self.GD._fit(
             reference_point=reference_point, order=order - 1
         )
         if show_graph:
-            self.phase.plot()
+            self.GD.plot()
 
         delay = np.fromiter(self.found_centers.keys(), dtype=float)
         val, _ = find_nearest(delay, reference_point)
         GD_val = self.found_centers[val]
-        d = np.insert(d, 0, GD_val)
-        ds = np.insert(ds, 0, 0)
+        d = np.insert(d, 0, GD_val)  # manually insert the GD value
+        ds = np.insert(ds, 0, 0)     # because we obtain the GD curve this way.
         return d, ds, fr
 
     def retrieve_GD(self, silent):
         self._apply_window_sequence(silent=silent)
+        self._clean_centers()
         delay = np.fromiter(self.found_centers.keys(), dtype=float)
         omega = np.fromiter(self.found_centers.values(), dtype=float)
-        self.phase = Phase(delay, omega)
-        return self.phase
+        self.GD = Phase(delay, omega)
+        return self.GD
 
     def _predict_ideal_window_fwhm(self):
         pass
@@ -188,9 +201,25 @@ class WFTMethod(FFTMethod):
             _obj.y *= _window.y
             _obj.ifft()
             x, y = find_roi(_obj.x, _obj.y)
-            centx, _ = find_center(x, y)
-            self.found_centers[_center] = centx
+            try:
+                centx, _ = find_center(x, y)
+                self.found_centers[_center] = centx
+            except ValueError:
+                self.found_centers[_center] = None
             currlen = len(self.found_centers)
             if not silent:
                 if idx % 10 == 0:
                     print(f"Progress:{currlen}/{winlen}")
+
+    def _clean_centers(self, silent=False):
+        dct = {k: v for k, v in self.found_centers.items() if v is not None}
+        self.found_centers = dct
+        winlen = len(self.window_seq)
+        usefullen = len(self.found_centers)
+
+        if not silent:
+            if winlen != usefullen:
+                print(
+                    f"\nIn total {winlen-usefullen} out of {winlen} datapoints "
+                    f"were thrown away due to ambiguous peak positions."
+                    )
