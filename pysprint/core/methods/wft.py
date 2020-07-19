@@ -1,3 +1,4 @@
+import sys
 import warnings
 
 import numpy as np
@@ -137,7 +138,7 @@ class WFTMethod(FFTMethod):
         ratio = winlen % maxsize
         if winlen > maxsize:
             warnings.warn(
-                "Image seems crowded, displaying only a sequence of the given windows",
+                "Image seems crowded, displaying only a sequence of the given windows.",
                 PySprintWarning
             )
             for i, (_, val) in enumerate(self.window_seq.items()):
@@ -212,8 +213,10 @@ class WFTMethod(FFTMethod):
                 self.found_centers[_center] = None
             currlen = len(self.found_centers)
             if not silent:
-                if idx % 10 == 0:
-                    print(f"Progress:{currlen}/{winlen}")
+                sys.stdout.write('\r')
+                j = (idx + 1) / winlen
+                sys.stdout.write("Progress : [%-30s] %d%%" % ('='*int(30*j), 100*j))
+                sys.stdout.flush()
 
     def _clean_centers(self, silent=False):
         dct = {k: v for k, v in self.found_centers.items() if v is not None}
