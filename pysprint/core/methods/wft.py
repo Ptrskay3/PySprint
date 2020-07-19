@@ -1,5 +1,4 @@
 import warnings
-from contextlib import contextmanager
 
 import numpy as np
 import matplotlib.pyplot as plt # noqa
@@ -15,7 +14,7 @@ from pysprint.utils.misc import mutually_exclusive_args, lazy_property, find_nea
 class Window:
     """
     Basic class that implements functionality related to Gaussian
-    windows.
+    windows with caching the y values.
     """
 
     def __init__(self, x, center, fwhm, order=2):
@@ -63,6 +62,11 @@ class WFTMethod(FFTMethod):
 
     @mutually_exclusive_args("std", "fwhm")
     def add_window(self, center, std=None, fwhm=None, order=2, **kwargs):
+        if not np.min(self.x) <= center <= np.max(self.x):
+            raise ValueError(
+                f"Cannot add window at {center}, because "
+                f"it is out of the dataset's range (from {np.min(self.x):.3f} to {np.max(self.x):.3f})."
+            )
         if std:
             window = Window.from_std(
                 self.x, center=center, std=std, order=order, **kwargs
@@ -155,7 +159,7 @@ class WFTMethod(FFTMethod):
             )
         self.window_seq.pop(center, None)
 
-    # TODO : Add parameter to describe how many peaks are are looking for..
+    # TODO : Add parameter to describe how many peaks we are looking for..
     def calculate(
             self, reference_point, order, show_graph=False, silent=False, force_recalculate=False
     ):
@@ -223,3 +227,20 @@ class WFTMethod(FFTMethod):
                     f"\nIn total {winlen-usefullen} out of {winlen} datapoints "
                     f"were thrown away due to ambiguous peak positions."
                     )
+
+    def _prepare_element(self, center):
+        if center not in self.window_seq.keys():
+            raise ValueError(
+                f"Window with center {center} cannot be found."
+            )
+        _x, _y, _, _ = self._safe_cast()
+        _obj = FFTMethod(_x, _y)
+        _obj.y *= self.window_seq[center].y
+        _obj.ifft()
+        x, y = find_roi(_obj.x, _obj.y)
+        try:
+            xx, yy = find_center(x, y)
+            _obj.plotwidget.plot(xx, yy, markersize=10, marker="*")
+        except ValueError:
+            pass
+        _obj.show()

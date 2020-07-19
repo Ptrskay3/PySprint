@@ -33,10 +33,10 @@ def find_center(x, y, n_largest=5, return_multiple=None):
 
     peaks = peaks[ind]
     y_prob_density = np.exp((-((x - np.max(x) / 2.5) ** 2)) / (1000 * np.max(x)))
-    _x, _y = x[peaks], y_prob_density[peaks]
+    _x, _y, _y_ = x[peaks], y_prob_density[peaks], y[peaks]
     # weighted with the prob density function above from origin
     try:
-        residx = np.argmax(_x * _y)
+        residx = np.argmax(_x * _y * _y_)
     except ValueError as err:
         msg = ValueError(
             "Probably you need to set bigger window FWHM. "
@@ -54,7 +54,7 @@ def find_center(x, y, n_largest=5, return_multiple=None):
             N = len(_x)
         return _x[:N], _y[:N]
 
-    return _x[residx], _y[residx]
+    return _x[residx], _y_[residx]
 
 
 def _ensure_window_at_origin(center, fwhm, order, peak_center_height, tol=1e-3):
