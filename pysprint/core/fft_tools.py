@@ -48,11 +48,13 @@ def find_center(x, y, n_largest=5, return_multiple=None):
         try:
             N = int(return_multiple)
         except ValueError as err:
-            raise ValueError("Must be int") from err
-        _x, _y = x[peaks], y_prob_density[peaks]
-        if len(_x) > N:
-            N = len(_x)
-        return _x[:N], _y[:N]
+            raise ValueError("Must return integer number of peaks.") from err
+        xval, yval = x[peaks], y[peaks]
+        if len(xval) < N:
+            N = len(xval)
+        idx_ = np.argsort(xval)
+        retx, rety = xval[idx_], yval[idx_]
+        return retx[:N], rety[:N]
 
     return _x[residx], _y_[residx]
 

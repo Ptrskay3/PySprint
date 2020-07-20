@@ -58,6 +58,8 @@ class WFTMethod(FFTMethod):
         super().__init__(*args, **kwargs)
         self.window_seq = {}
         self.found_centers = {}
+        self.secondary_centers = {}
+        self.tertiary_centers = {}
         self.GD = None
         self.cachedlen = 0
         self.X_cont = np.array([])
@@ -65,8 +67,9 @@ class WFTMethod(FFTMethod):
         self.Z_cont = np.array([])
         self.fastmath = True
 
+
     @mutually_exclusive_args("std", "fwhm")
-    def add_window(self, center, std=None, fwhm=None, order=2, **kwargs):
+    def add_window(self, center, std=None, fwhm=None, order=2):
         if not np.min(self.x) <= center <= np.max(self.x):
             raise ValueError(
                 f"Cannot add window at {center}, because "
@@ -74,10 +77,10 @@ class WFTMethod(FFTMethod):
             )
         if std:
             window = Window.from_std(
-                self.x, center=center, std=std, order=order, **kwargs
+                self.x, center=center, std=std, order=order
             )
         else:
-            window = Window(self.x, center=center, fwhm=fwhm, order=order, **kwargs)
+            window = Window(self.x, center=center, fwhm=fwhm, order=order)
         self.window_seq[center] = window
 
     @property
@@ -90,7 +93,7 @@ class WFTMethod(FFTMethod):
 
     @mutually_exclusive_args("std", "fwhm")
     def add_window_arange(
-        self, start, stop, step, std=None, fwhm=None, order=2, **kwargs
+        self, start, stop, step, std=None, fwhm=None, order=2
     ):
         """
         Build a window sequence of given parameters to apply on ifg.
@@ -99,13 +102,13 @@ class WFTMethod(FFTMethod):
         arr = np.arange(start, stop, step)
         for cent in arr:
             if std:
-                self.add_window(center=cent, std=std, order=order, **kwargs)
+                self.add_window(center=cent, std=std, order=order)
             else:
-                self.add_window(center=cent, fwhm=fwhm, order=order, **kwargs)
+                self.add_window(center=cent, fwhm=fwhm, order=order)
 
     @mutually_exclusive_args("std", "fwhm")
     def add_window_linspace(
-        self, start, stop, num, std=None, fwhm=None, order=2, **kwargs
+        self, start, stop, num, std=None, fwhm=None, order=2
     ):
         """
         Build a window sequence of given parameters to apply on ifg.
@@ -114,9 +117,9 @@ class WFTMethod(FFTMethod):
         arr = np.linspace(start, stop, num)
         for cent in arr:
             if std:
-                self.add_window(center=cent, std=std, order=order, **kwargs)
+                self.add_window(center=cent, std=std, order=order)
             else:
-                self.add_window(center=cent, fwhm=fwhm, order=order, **kwargs)
+                self.add_window(center=cent, fwhm=fwhm, order=order)
 
     @mutually_exclusive_args("std", "fwhm")
     def add_window_geomspace(
@@ -129,9 +132,9 @@ class WFTMethod(FFTMethod):
         arr = np.geomspace(start, stop, num)
         for cent in arr:
             if std:
-                self.add_window(center=cent, std=std, order=order, **kwargs)
+                self.add_window(center=cent, std=std, order=order)
             else:
-                self.add_window(center=cent, fwhm=fwhm, order=order, **kwargs)
+                self.add_window(center=cent, fwhm=fwhm, order=order)
 
     #  TODO : scale them up for visibility
     def view_windows(self, ax=None, maxsize=80, **kwargs):
@@ -168,6 +171,8 @@ class WFTMethod(FFTMethod):
     def calculate(
             self, reference_point, order, show_graph=False, silent=False, force_recalculate=False, fastmath=True
     ):
+        if len(self.window_seq) == 0:
+            raise ValueError("Before calculating a window sequence must be set.")
 
         if self.cachedlen != len(self.window_seq) or fastmath != self.fastmath:
             force_recalculate = True
@@ -179,6 +184,9 @@ class WFTMethod(FFTMethod):
             self.retrieve_GD(silent=silent, fastmath=fastmath)
 
         self.cachedlen = len(self.window_seq)
+
+        if order == 1:
+            raise ValueError("Cannot fit constant function to data. Order must be in [2, 5].")
 
         d, ds, fr = self.GD._fit(
             reference_point=reference_point, order=order - 1
@@ -204,7 +212,7 @@ class WFTMethod(FFTMethod):
     def _predict_ideal_window_fwhm(self):
         pass
 
-    def _apply_window_sequence(self, silent=False, fastmath=True):
+    def _apply_window_sequence(self, silent=False, fastmath=True, errors="ignore"):
         winlen = len(self.window_seq)
         for idx, (_center, _window) in enumerate(self.window_seq.items()):
             _x, _y, _, _ = self._safe_cast()
@@ -218,8 +226,11 @@ class WFTMethod(FFTMethod):
             try:
                 centx, _ = find_center(x, y)
                 self.found_centers[_center] = centx
-            except ValueError:
-                self.found_centers[_center] = None
+            except ValueError as err:
+                if errors == "ignore":
+                    self.found_centers[_center] = None
+                else:
+                    raise err
             if not silent:
                 sys.stdout.write('\r')
                 j = (idx + 1) / winlen
@@ -239,6 +250,7 @@ class WFTMethod(FFTMethod):
                     f"were thrown away due to ambiguous peak positions."
                     )
 
+    # TODO : Integrate this into _apply_window_sequence and add matplotlib dispatcher
     def _prepare_element(self, center):
         if center not in self.window_seq.keys():
             raise ValueError(
@@ -256,30 +268,28 @@ class WFTMethod(FFTMethod):
             pass
         _obj.show()
 
-    def heatmap(self, levels=None):
+    def heatmap(self, levels=None, cmap="viridis", figsize=(10, 10)):
         if self.GD is None:
-            raise ValueError
+            raise ValueError("Must calculate first.")
 
         if self.fastmath:
             raise ValueError(
                 "You need to recalculate with `fastmath=False` to plot the heatmap."
             )
+
         self.X_cont = np.fromiter(self.window_seq.keys(), dtype=float)
-        print(self.Z_cont.shape)
         self.Z_cont = np.reshape(self.Z_cont, (-1, len(self.X_cont)), order="F")
-        print(self.Z_cont.shape)
         if levels is None:
             levels = np.linspace(0, 0.02, 50)
         else:
-            assert isinstance(levels, np.ndarray)
-        plt.figure(figsize=(10, 10))
-        plt.contourf(self.X_cont, self.Y_cont, self.Z_cont, levels=levels)
+            if not isinstance(levels, np.ndarray):
+                raise ValueError("Expected np.ndarray as levels.")
+        plt.figure(figsize=figsize)
+        plt.contourf(self.X_cont, self.Y_cont, self.Z_cont, levels=levels, cmap=cmap, extend="both")
         plt.colorbar()
         plt.plot(*self.GD.data, color='red', label='detected ridge')
-        plt.xlabel('Window position [PHz]')
+        plt.xlabel('Window center [PHz]')
         plt.ylabel('Delay [fs]')
         plt.ylim(None, 1.5 * np.max(self.GD.data[1]))
         plt.legend()
         plt.show(block=True)
-
-
