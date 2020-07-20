@@ -95,6 +95,7 @@ class Phase:
     def fit(self, reference_point, order):
         return self._fit(reference_point=reference_point, order=order)
 
+
     def _fit(self, reference_point, order):
         """
         This is meant to be used privately, when the print_disp

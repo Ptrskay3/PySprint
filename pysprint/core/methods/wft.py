@@ -60,6 +60,10 @@ class WFTMethod(FFTMethod):
         self.found_centers = {}
         self.GD = None
         self.cachedlen = 0
+        self.X_cont = np.array([])
+        self.Y_cont = np.array([])
+        self.Z_cont = np.array([])
+        self.fastmath = True
 
     @mutually_exclusive_args("std", "fwhm")
     def add_window(self, center, std=None, fwhm=None, order=2, **kwargs):
@@ -162,15 +166,17 @@ class WFTMethod(FFTMethod):
 
     # TODO : Add parameter to describe how many peaks we are looking for..
     def calculate(
-            self, reference_point, order, show_graph=False, silent=False, force_recalculate=False
+            self, reference_point, order, show_graph=False, silent=False, force_recalculate=False, fastmath=True
     ):
-        if self.cachedlen != len(self.window_seq):
+
+        if self.cachedlen != len(self.window_seq) or fastmath != self.fastmath:
             force_recalculate = True
+        self.fastmath = fastmath
         if force_recalculate:
             self.found_centers.clear()
-            self.retrieve_GD(silent=silent)
+            self.retrieve_GD(silent=silent, fastmath=fastmath)
         if self.GD is None:
-            self.retrieve_GD(silent=silent)
+            self.retrieve_GD(silent=silent, fastmath=fastmath)
 
         self.cachedlen = len(self.window_seq)
 
@@ -187,8 +193,8 @@ class WFTMethod(FFTMethod):
         ds = np.insert(ds, 0, 0)     # because we obtain the GD curve this way.
         return d, ds, fr
 
-    def retrieve_GD(self, silent):
-        self._apply_window_sequence(silent=silent)
+    def retrieve_GD(self, silent, fastmath=True):
+        self._apply_window_sequence(silent=silent, fastmath=fastmath)
         self._clean_centers()
         delay = np.fromiter(self.found_centers.keys(), dtype=float)
         omega = np.fromiter(self.found_centers.values(), dtype=float)
@@ -198,7 +204,7 @@ class WFTMethod(FFTMethod):
     def _predict_ideal_window_fwhm(self):
         pass
 
-    def _apply_window_sequence(self, silent=False):
+    def _apply_window_sequence(self, silent=False, fastmath=True):
         winlen = len(self.window_seq)
         for idx, (_center, _window) in enumerate(self.window_seq.items()):
             _x, _y, _, _ = self._safe_cast()
@@ -206,12 +212,14 @@ class WFTMethod(FFTMethod):
             _obj.y *= _window.y
             _obj.ifft()
             x, y = find_roi(_obj.x, _obj.y)
+            if not fastmath:
+                self.Y_cont = np.array(x)
+                self.Z_cont = np.append(self.Z_cont, y)
             try:
                 centx, _ = find_center(x, y)
                 self.found_centers[_center] = centx
             except ValueError:
                 self.found_centers[_center] = None
-            currlen = len(self.found_centers)
             if not silent:
                 sys.stdout.write('\r')
                 j = (idx + 1) / winlen
@@ -247,3 +255,31 @@ class WFTMethod(FFTMethod):
         except ValueError:
             pass
         _obj.show()
+
+    def heatmap(self, levels=None):
+        if self.GD is None:
+            raise ValueError
+
+        if self.fastmath:
+            raise ValueError(
+                "You need to recalculate with `fastmath=False` to plot the heatmap."
+            )
+        self.X_cont = np.fromiter(self.window_seq.keys(), dtype=float)
+        print(self.Z_cont.shape)
+        self.Z_cont = np.reshape(self.Z_cont, (-1, len(self.X_cont)), order="F")
+        print(self.Z_cont.shape)
+        if levels is None:
+            levels = np.linspace(0, 0.02, 50)
+        else:
+            assert isinstance(levels, np.ndarray)
+        plt.figure(figsize=(10, 10))
+        plt.contourf(self.X_cont, self.Y_cont, self.Z_cont, levels=levels)
+        plt.colorbar()
+        plt.plot(*self.GD.data, color='red', label='detected ridge')
+        plt.xlabel('Window position [PHz]')
+        plt.ylabel('Delay [fs]')
+        plt.ylim(None, 1.5 * np.max(self.GD.data[1]))
+        plt.legend()
+        plt.show(block=True)
+
+
