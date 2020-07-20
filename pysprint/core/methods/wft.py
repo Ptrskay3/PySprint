@@ -67,7 +67,6 @@ class WFTMethod(FFTMethod):
         self.Z_cont = np.array([])
         self.fastmath = True
 
-
     @mutually_exclusive_args("std", "fwhm")
     def add_window(self, center, std=None, fwhm=None, order=2):
         if not np.min(self.x) <= center <= np.max(self.x):
@@ -123,7 +122,7 @@ class WFTMethod(FFTMethod):
 
     @mutually_exclusive_args("std", "fwhm")
     def add_window_geomspace(
-        self, start, stop, num, std=None, fwhm=None, order=2, **kwargs
+        self, start, stop, num, std=None, fwhm=None, order=2
     ):
         """
         Build a window sequence of given parameters to apply on ifg.
@@ -169,7 +168,13 @@ class WFTMethod(FFTMethod):
 
     # TODO : Add parameter to describe how many peaks we are looking for..
     def calculate(
-            self, reference_point, order, show_graph=False, silent=False, force_recalculate=False, fastmath=True
+            self,
+            reference_point,
+            order,
+            show_graph=False,
+            silent=False,
+            force_recalculate=False,
+            fastmath=True
     ):
         if len(self.window_seq) == 0:
             raise ValueError("Before calculating a window sequence must be set.")
@@ -214,6 +219,7 @@ class WFTMethod(FFTMethod):
 
     def _apply_window_sequence(self, silent=False, fastmath=True, errors="ignore"):
         winlen = len(self.window_seq)
+        self.Z_cont = np.array([])
         for idx, (_center, _window) in enumerate(self.window_seq.items()):
             _x, _y, _, _ = self._safe_cast()
             _obj = FFTMethod(_x, _y)
@@ -287,7 +293,14 @@ class WFTMethod(FFTMethod):
         plt.figure(figsize=figsize)
         plt.contourf(self.X_cont, self.Y_cont, self.Z_cont, levels=levels, cmap=cmap, extend="both")
         plt.colorbar()
-        plt.plot(*self.GD.data, color='red', label='detected ridge')
+        plt.plot(*self.GD.data, color='red', label='detected ridge #1')
+
+        if self.secondary_centers:
+            pass  # TODO : Plot if exists
+
+        if self.tertiary_centers:
+            pass  # TODO : Plot if exists
+
         plt.xlabel('Window center [PHz]')
         plt.ylabel('Delay [fs]')
         plt.ylim(None, 1.5 * np.max(self.GD.data[1]))
