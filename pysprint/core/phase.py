@@ -21,7 +21,7 @@ from pysprint.utils import (
     print_disp,
     transform_lmfit_params_to_dispersion,
     transform_cf_params_to_dispersion,
-    unpack_lmfit,
+    unpack_lmfit, find_nearest,
 )
 
 
@@ -31,7 +31,7 @@ class Phase:
     methods.
     """
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, GD_mode=False):
         self.x = x
         self.y = y
         self.poly = None
@@ -39,6 +39,7 @@ class Phase:
         self.is_dispersion_array = False
         self.is_coeff = False
         self.fitorder = None
+        self.GD_mode = GD_mode
 
     def __call__(self, value):
         if self.poly:
@@ -106,6 +107,8 @@ class Phase:
             warnings.warn("No need to fit another curve.")
             return
         else:
+            if self.GD_mode:
+                order -= 1
             self.fitorder = order
 
             _function = _fit_config[order]
@@ -137,6 +140,12 @@ class Phase:
 
                 self.fitted_curve = _function(x, *popt)
 
+            if self.GD_mode:
+                _, idx = find_nearest(self.x, reference_point)
+
+                dispersion = np.insert(dispersion, 0, self.y[idx])
+                dispersion_std = np.insert(dispersion_std, 0, 0)
+
             return dispersion, dispersion_std, fit_report
 
     @property
@@ -146,6 +155,10 @@ class Phase:
         else:
             self._order = self.fitorder
         return self._order
+
+    @property
+    def dispersion_order(self):
+        return self.fitorder + 1 if self.GD_mode else self.fitorder
 
     @property
     def data(self):
