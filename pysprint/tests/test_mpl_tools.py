@@ -3,15 +3,21 @@ from unittest import mock
 
 import pytest
 import numpy as np
+from matplotlib import rcParams
 
 from pysprint.mpl_tools.peak import EditPeak
+from pysprint.mpl_tools.spp_editor import SPPEditor
+from pysprint.mpl_tools.normalize import DraggableEnvelope
+
+
+rcParams['figure.max_open_warning'] = 30
 
 def mock_event(xdata, ydata, button, key, fig, canvas, inaxes=True):
-
     event = mock.Mock()
     event.button = button
     event.key = key
     event.xdata, event.ydata = xdata, ydata
+    event.x, event.y = xdata, ydata
     event.inaxes = inaxes
     event.fig = fig
     event.canvas = canvas
@@ -96,3 +102,132 @@ def test_lock(mock_show):
 def test_inconsistent_length():
     with pytest.raises(ValueError):
         EditPeak(range(500), range(500), x_extremal=[1], y_extremal=[2, 3])
+
+
+@pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
+@mock.patch("matplotlib.pyplot.show")
+def test_normalize_btn_release(mock_show):
+    x = np.linspace(0, 6, 10000)
+    y = np.cos(x)
+    obj = DraggableEnvelope(x, y, mode="u")
+    #mck = mock_event(xdata=50, ydata=50, button=1, key=1, fig=obj.fig, canvas=obj.fig.canvas, inaxes=None)
+    assert obj._ind == None
+    y_transform = obj.get_data()
+    np.testing.assert_allclose(y_transform[100:9900], np.ones(9800), atol=1, rtol=1)
+    mock_show.assert_called()
+
+
+@pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
+@mock.patch("matplotlib.pyplot.show")
+def test_normalize_keypress_cb(mock_show):
+    x = np.linspace(0, 6, 1000)
+    y = np.cos(x)
+    obj = DraggableEnvelope(x, y, mode="u")
+    mck = mock_event(xdata=50, ydata=50, button="d", key="d", fig=obj.fig, canvas=obj.fig.canvas, inaxes=True)
+    obj.key_press_callback(event=mck)
+    mock_show.assert_called()
+
+
+@pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
+@mock.patch("matplotlib.pyplot.show")
+def test_normalize_keypress_cb2(mock_show):
+    x = np.linspace(0, 6, 1000)
+    y = np.cos(x)
+    obj = DraggableEnvelope(x, y, mode="l")
+    mck = mock_event(xdata=50, ydata=50, button="i", key="i", fig=obj.fig, canvas=obj.fig.canvas, inaxes=True)
+    obj.key_press_callback(event=mck)
+    mock_show.assert_called()
+
+
+@pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
+@mock.patch("matplotlib.pyplot.show")
+def test_normalize_keypress_cb2(mock_show):
+    x = np.linspace(0, 6, 1000)
+    y = np.cos(x)
+    with pytest.raises(ValueError):
+        DraggableEnvelope(x, y, mode="invalid")
+
+
+@pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
+@mock.patch("matplotlib.pyplot.show")
+def test_normalize_keypress_cb2(mock_show):
+    x = np.linspace(0, 6, 1000)
+    y = np.cos(x)
+    obj = DraggableEnvelope(x, y, mode="l")
+    mck = mock_event(xdata=432, ydata=432, button="i", key="i", fig=obj.fig, canvas=obj.fig.canvas, inaxes=True)
+    obj.get_ind_under_point(event=mck)
+    assert obj._ind is None
+    mock_show.assert_called()
+
+
+@pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
+@mock.patch("matplotlib.pyplot.show")
+def test_normalize_motion_notify_cb(mock_show):
+    x = np.linspace(0, 6, 1000)
+    y = np.cos(x)
+    obj = DraggableEnvelope(x, y, mode="l")
+    mck = mock_event(xdata=5, ydata=0.5, button="i", key="i", fig=obj.fig, canvas=obj.fig.canvas, inaxes=True)
+    obj.motion_notify_callback(event=mck)
+    mock_show.assert_called()
+
+
+@pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
+@mock.patch("matplotlib.pyplot.show")
+def test_sppeditor_submit(mock_show):
+    x = np.linspace(0, 6, 1000)
+    y = np.cos(x)
+    obj = SPPEditor(x, y)
+    obj.submit("dsa50.dsa4")
+    assert obj.delay == 50.4
+
+
+@pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
+@mock.patch("matplotlib.pyplot.show")
+def test_sppeditor_btn_release(mock_show):
+    x = np.linspace(0, 6, 10000)
+    y = np.cos(x)
+    obj = SPPEditor(x, y)
+    mck = mock_event(xdata=50, ydata=50, button=1, key=1, fig=obj.fig, canvas=obj.fig.canvas, inaxes=None)
+    obj.button_release_callback(event=mck)
+    assert obj._ind == None
+    mock_show.assert_called()
+
+
+@pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
+@mock.patch("matplotlib.pyplot.show")
+def test_sppeditor_get_ind(mock_show):
+    x = np.linspace(0, 6, 10000)
+    y = np.cos(x)
+    obj = SPPEditor(x, y)
+    mck = mock_event(xdata=50, ydata=50, button=1, key=1, fig=obj.fig, canvas=obj.fig.canvas, inaxes=None)
+    obj.get_ind_under_point(event=mck)
+    assert obj._ind == None
+    mock_show.assert_called()
+
+
+@pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
+@mock.patch("matplotlib.pyplot.show")
+def test_sppeditor_keypress_cb(mock_show):
+    x = np.linspace(0, 6, 10000)
+    y = np.cos(x)
+    obj = SPPEditor(x, y)
+    mck = mock_event(xdata=2, ydata=0, button="i", key="i", fig=obj.fig, canvas=obj.fig.canvas, inaxes=obj.ax)
+    obj.key_press_callback(event=mck)
+    np.testing.assert_array_equal(obj.x_pos, np.array([2]))
+    np.testing.assert_array_equal(obj.y_pos, np.array([0]))
+    mock_show.assert_called()
+
+
+@pytest.mark.skip(reason="Index can't be set..")
+@mock.patch("matplotlib.pyplot.show")
+def test_sppeditor_keypress_cb2(mock_show):
+    x = np.linspace(0, 6, 10000)
+    y = np.cos(x)
+    obj = SPPEditor(x, y)
+    obj.x_pos = np.array([1, 2])
+    obj.y_pos = np.array([1, 2])
+    mck = mock_event(xdata=1, ydata=1, button="d", key="d", fig=obj.fig, canvas=obj.fig.canvas, inaxes=obj.ax)
+    obj.key_press_callback(event=mck)
+    np.testing.assert_array_equal(obj.x_pos, np.array([2]))
+    np.testing.assert_array_equal(obj.y_pos, np.array([2]))
+    mock_show.assert_called()

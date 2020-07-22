@@ -24,14 +24,17 @@ PySprint provides an interface for Spectrally resolved interferometry in Python.
 * ✓ Minimum-maximum method
 * ✓ Phase modulated cosine function fit method
 * ✓ Fourier method
+* ✓ Windowed Fourier transform method
 * ✓ Stationary phase point method
 
 ### There's many more to work on..
-* Windowed Fourier transform method
-* Automated SPP detection
+* SPP detection
+* WFT ridge detection improvement
 * Better SPP interface: make the constructor accept `~pysprint.Dataset` objects.
 * Improve file parsing
 * Clean up utils, evaluate methods, preprocess methods
+* Clean up plot utilities
+* Integrate `~pysprint.core.phase.Phase` into methods.
 * Write understandable and consistent docstrings
 
 This is a work-in-progress version of the package.
