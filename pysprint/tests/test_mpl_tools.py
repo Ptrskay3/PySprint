@@ -1,10 +1,8 @@
 import os
 from unittest import mock
-from contextlib import contextmanager
 
 import pytest
 import numpy as np
-import matplotlib.pyplot as plt
 
 from pysprint.mpl_tools.peak import EditPeak
 
@@ -22,24 +20,6 @@ def mock_event(xdata, ydata, button, key, fig, canvas, inaxes=True):
 
     return event
 
-import contextlib
-
-@contextmanager
-def temporal_setattr(obj, attr, new_value):
-    replaced = False
-    old_value = None
-    if hasattr(obj, attr):
-        if attr in obj.__dict__:
-            replaced = True
-        if replaced:
-            old_value = getattr(obj, attr)
-    setattr(obj, attr, new_value)
-    yield replaced, old_value
-    if not replaced:
-        delattr(obj, attr)
-    else:
-        setattr(obj, attr, old_value)
-
 
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
@@ -54,6 +34,7 @@ def test_insert(mock_show):
     np.testing.assert_array_equal(b, np.array([4, 5, 50]))
     mock_show.assert_called()
 
+
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_delete(mock_show):
@@ -66,6 +47,7 @@ def test_delete(mock_show):
     np.testing.assert_array_equal(a, np.array([4]))
     np.testing.assert_array_equal(b, np.array([4]))
     mock_show.assert_called()
+
 
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
@@ -80,6 +62,7 @@ def test_not_inaxes(mock_show):
     np.testing.assert_array_equal(b, yy)
     mock_show.assert_called()
 
+
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_lock(mock_show):
@@ -93,3 +76,23 @@ def test_lock(mock_show):
     np.testing.assert_array_equal(a, xx)
     np.testing.assert_array_equal(b, yy)
     mock_show.assert_called()
+
+
+@pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
+@mock.patch("matplotlib.pyplot.show")
+def test_lock(mock_show):
+    x, y = np.arange(100), np.arange(100)
+    xx, yy = np.array([4, 5]), np.array([4, 5])
+    obj = EditPeak(x, y, x_extremal=xx, y_extremal=yy)
+    obj.release()
+    mck = mock_event(xdata=50, ydata=50, button="d", key="d", fig=obj.figure, canvas=obj.figure.canvas, inaxes=None)
+    obj.on_clicked(event=mck)
+    a, b = obj.get_dat
+    np.testing.assert_array_equal(a, xx)
+    np.testing.assert_array_equal(b, yy)
+    mock_show.assert_called()
+
+
+def test_inconsistent_length():
+    with pytest.raises(ValueError):
+        EditPeak(range(500), range(500), x_extremal=[1], y_extremal=[2, 3])
