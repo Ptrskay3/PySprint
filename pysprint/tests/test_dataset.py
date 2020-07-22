@@ -1,3 +1,4 @@
+import os
 import collections
 import unittest
 from unittest.mock import patch
@@ -74,7 +75,7 @@ class TestEvaluate(unittest.TestCase):
         after = ifg.x
         np.testing.assert_array_almost_equal(before, after)
 
-    @pytest.mark.skip(reason="Fails on azure, should be fixed ")
+    @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Fails on Azure")
     @patch("matplotlib.pyplot.show")
     def test_normalize(self, mock_show):
         ifg = Dataset(self.x, self.y)

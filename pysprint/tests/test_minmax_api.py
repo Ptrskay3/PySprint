@@ -1,3 +1,4 @@
+import os
 import unittest
 from unittest.mock import patch
 
@@ -16,7 +17,7 @@ class TestEvaluate(unittest.TestCase):
     def tearDown(self):
         pass
 
-    @pytest.mark.xfail(reason="Azure Pipelines fails this test")
+    @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure Pipelines fails this.")
     @patch("matplotlib.pyplot.show")
     def test_edit_session(self, mock_show):
         ifg = MinMaxMethod(self.x, self.y)
@@ -36,7 +37,7 @@ class TestEvaluate(unittest.TestCase):
         with self.assertRaises(TypeError):
             ifg.init_edit_session(engine="normal", invalidkwarg=3)
 
-    @pytest.mark.xfail(reason="Fails on azure.")
+    @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Fails on azure.")
     @patch("matplotlib.pyplot.show")
     def test_edit_session4(self, mock_show):
         ifg = MinMaxMethod(self.x, self.y)
