@@ -1,7 +1,9 @@
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
+import pysprint
 from pysprint import FFTMethod, Generator
 from pysprint.core.fft_tools import (
     find_roi,
@@ -90,6 +92,16 @@ class TestFFTAuto(unittest.TestCase):
         )
         assert cent > 1000
         assert win_size > 2000
+
+    @patch("matplotlib.pyplot.show")
+    def test_autorun(self, mck):
+        g = Generator(1, 4, 3, 1000)
+        g.generate()
+
+        f = FFTMethod(*g.data)
+        phase = f.autorun(enable_printing=True)
+        assert isinstance(phase, pysprint.core.phase.Phase)
+        mck.assert_called()
 
 
 if __name__ == "__main__":

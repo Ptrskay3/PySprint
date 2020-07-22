@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 
 from unittest.mock import patch
@@ -23,3 +24,32 @@ def test_plots(mck):
     phase = Phase(x, y)
     phase.plot()
     mck.assert_called()
+
+
+def test_errorplot():
+    x = np.arange(100)
+    y = np.arange(100)
+
+    phase = Phase(x, y)
+    phase.fit(2, 2)
+    phase.errorplot()
+    phase.errorplot(percent=True)
+
+def test_errorplot2():
+    x = np.arange(100)
+    y = np.arange(100)
+
+    phase = Phase(x, y)
+    with pytest.raises(ValueError):
+        phase.errors
+    with pytest.raises(ValueError):
+        phase.errorplot()
+
+def constructor1():
+    Phase.from_coeff([1, 2, 3, 4])
+    Phase.from_coeff([1, 2, 3, 4], domain=np.arange(5611))
+
+
+def constructor2():
+    Phase.from_disperion_array([1, 2, 3, 4])
+    Phase.from_disperion_array([1, 2, 3, 4], domain=np.arange(5611))
