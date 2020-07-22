@@ -128,6 +128,13 @@ def test_SPP_position_setter_invalid_options(pos):
     with pytest.raises(ValueError):
         ifg.positions = pos
 
+@patch("matplotlib.pyplot.show")
+def test_phase_plot(m):
+    fg = Dataset(np.arange(1, 1000, 1), np.sin(np.arange(1, 1000, 1)))
+    fg._dispersion_array = np.array([1, 2, 3, 4, 5])
+    fg.phase_plot()
+    m.assert_called()
+
 
 if __name__ == "__main__":
     unittest.main()
