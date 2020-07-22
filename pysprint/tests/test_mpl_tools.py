@@ -266,9 +266,13 @@ def test_sppeditor_keypress_cb2(mock_show):
     x = np.linspace(0, 6, 10000)
     y = np.cos(x)
     obj = SPPEditor(x, y)
-    obj.x_pos = np.array([1, 2])
-    obj.y_pos = np.array([1, 2])
-    mck = mock_event(xdata=xpix, ydata=ypix, button="d", key="d", fig=obj.fig, canvas=obj.fig.canvas, inaxes=obj.ax)
+    obj.epsilon = 10000
+    obj.x_pos = np.array([1, 2, 3])
+    obj.y_pos = np.array([1, 2, 3])
+
+    xy_pixels = obj.ax.transData.transform([2, 2])
+    xpix, ypix = xy_pixels
+    mck = mock_event(xdata=xpix, ydata=ypix, button="d", key="d", fig=obj.fig, canvas=obj.fig.canvas, inaxes=True)
     obj.key_press_callback(event=mck)
     np.testing.assert_array_equal(obj.x_pos, np.array([2]))
     np.testing.assert_array_equal(obj.y_pos, np.array([2]))
