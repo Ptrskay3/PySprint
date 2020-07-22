@@ -227,7 +227,8 @@ class WFTMethod(FFTMethod):
             _obj.ifft()
             x, y = find_roi(_obj.x, _obj.y)
             if not fastmath:
-                self.Y_cont = np.array(x)
+                if self.Y_cont.size == 0:  # prevent allocating it in every iteration
+                    self.Y_cont = np.array(x)
                 self.Z_cont = np.append(self.Z_cont, y)
             try:
                 centx, _ = find_center(x, y)
@@ -256,6 +257,22 @@ class WFTMethod(FFTMethod):
                     f"were thrown away due to ambiguous peak positions."
                     )
 
+    def errorplot(self, *args, **kwargs):
+        try:
+            getattr(self.GD, "errorplot", None)(*args, **kwargs)
+        except TypeError:
+            raise ValueError("Must calculate before plotting errors.")
+
+    @property
+    def get_GD(self):
+        if self.GD is not None:
+            return self.GD
+        raise ValueError("Must calculate GD first.")
+
+    @property
+    def errors(self):
+        return getattr(self.GD, "errors", None)
+
     # TODO : Integrate this into _apply_window_sequence and add matplotlib dispatcher
     def _prepare_element(self, center):
         if center not in self.window_seq.keys():
@@ -274,7 +291,12 @@ class WFTMethod(FFTMethod):
             pass
         _obj.show()
 
-    def heatmap(self, levels=None, cmap="viridis", figsize=(10, 10)):
+    def _construct_heatmap_data(self):
+        self.X_cont = np.fromiter(self.window_seq.keys(), dtype=float)
+        if not (self.Y_cont.size, self.X_cont.size) == self.Z_cont.shape:
+            self.Z_cont = np.reshape(self.Z_cont, (-1, len(self.X_cont)), order="F")
+
+    def heatmap(self, plot=True, levels=None, cmap="viridis", figsize=(10, 10)):
         if self.GD is None:
             raise ValueError("Must calculate first.")
 
@@ -283,8 +305,10 @@ class WFTMethod(FFTMethod):
                 "You need to recalculate with `fastmath=False` to plot the heatmap."
             )
 
-        self.X_cont = np.fromiter(self.window_seq.keys(), dtype=float)
-        self.Z_cont = np.reshape(self.Z_cont, (-1, len(self.X_cont)), order="F")
+        # Only construct if we need to..
+        if not (self.Y_cont.size, self.X_cont.size) == self.Z_cont.shape:
+            self._construct_heatmap_data()
+
         if levels is None:
             levels = np.linspace(0, 0.02, 50)
         else:
@@ -293,7 +317,7 @@ class WFTMethod(FFTMethod):
         plt.figure(figsize=figsize)
         plt.contourf(self.X_cont, self.Y_cont, self.Z_cont, levels=levels, cmap=cmap, extend="both")
         plt.colorbar()
-        plt.plot(*self.GD.data, color='red', label='detected ridge #1')
+        plt.plot(*self.GD.data, color='red', label='detected ridge')
 
         if self.secondary_centers:
             pass  # TODO : Plot if exists
@@ -306,3 +330,26 @@ class WFTMethod(FFTMethod):
         plt.ylim(None, 1.5 * np.max(self.GD.data[1]))
         plt.legend()
         plt.show(block=True)
+
+    def get_heatmap_data(self):
+        """
+        Return the data which was used to create the heatmap.
+
+        Returns
+        -------
+
+        X_cont : np.ndarray
+            The window centers with shape (n,).
+
+        Y_cont : np.ndarray
+            The time axis calculated from the IFFT of the dataset with shape (m,).
+
+        Z_cont : np.ndarray
+            2D array with shape (m, n) containing the depth information.
+        """
+        if all([self.Y_cont.size != 0, self.Z_cont.size != 0]):
+            self._construct_heatmap_data()
+        else:
+            raise ValueError("Must calculate with `fastmath=False` before trying to access the heatmap data.")
+
+        return self.X_cont, self.Y_cont, self.Z_cont

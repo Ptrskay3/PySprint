@@ -52,6 +52,14 @@ class FFTMethod(Dataset):
         ----------
         axis : str
             either 'x', 'y', 'both', 'xy' or 'yx'.
+
+        inplace : bool, optional
+            Whether to apply the operation on the dataset in an "inplace" manner.
+            This means if inplace is True it will apply the changes directly on
+            the current dataset and returns None. If inplace is False, it will
+            leave the current object untouched, but returns a copy of it, and
+            the operation will be performed on the copy. It's useful when
+            chaining operations on a dataset.
         """
         if inplace:
             if axis == "x":
@@ -401,17 +409,6 @@ class FFTMethod(Dataset):
             If True use the Non Uniform Fast Fourier Transform algorithm. For more details
             see `help(pysprint.FFTMethod.ifft)`. Default is False.
 
-        eps : float, optional < -- WILL BE ADDED IN NEXT VERSION
-            The desired approximate error for the non uniform FFT result. Must be
-            in range 1E-33 < eps < 1E-1, though be aware that the errors are
-            only well calibrated near the range 1E-12 ~ 1E-6. Default is 1E-12.
-
-        exponent : str, optional < -- WILL BE ADDED IN NEXT VERSION
-            Used for Non Uniform Fast Fourier Transform.
-            If 'negative', compute the transform with a negative exponent.
-            If 'positive', compute the transform with a positive exponent.
-            Default is `positive`.
-
         References
         ----------
 
@@ -461,3 +458,19 @@ class FFTMethod(Dataset):
             self.calculate(
                 reference_point=reference_point, order=order, show_graph=True
             )
+
+    def errorplot(self, *args, **kwargs):
+        try:
+            getattr(self.phase, "errorplot", None)(*args, **kwargs)
+        except TypeError:
+            raise ValueError("Must calculate before plotting errors.")
+
+    @property
+    def get_phase(self):
+        if self.phase is not None:
+            return self.phase
+        raise ValueError("Must calculate phase first.")
+
+    @property
+    def errors(self):
+        return getattr(self.phase, "errors", None)

@@ -148,6 +148,27 @@ class Phase:
 
             return dispersion, dispersion_std, fit_report
 
+    def errorplot(self, ax=None, percent=False, **kwargs):
+        if ax is None:
+            ax = plt
+        idx = np.argsort(self.x)
+        x, y = self.x[idx], self.y[idx]
+        if self.fitted_curve is not None:
+            if percent:
+                ax.plot(x, np.abs((y - self.fitted_curve[idx]) / y) * 100, **kwargs)
+            else:
+                ax.plot(x, y - self.fitted_curve[idx], **kwargs)
+            ax.title("Errors")
+            ax.grid()
+        else:
+            raise ValueError("Must fit a curve before requesting errors.")
+
+    @property
+    def errors(self):
+        if self.fitted_curve is not None:
+            return self.y - self.fitted_curve
+        raise ValueError("Must fit a curve before requesting errors.")
+
     @property
     def order(self):
         if self.is_coeff or self.is_dispersion_array:
