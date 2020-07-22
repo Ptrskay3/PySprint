@@ -150,13 +150,43 @@ def test_normalize_keypress_cb2(mock_show):
 
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
+def test_normalize_button_press_cb(mock_show):
+    x = np.linspace(0, 6, 1000)
+    y = np.cos(x)
+    obj = DraggableEnvelope(x, y, mode="l")
+    mck = mock_event(xdata=50, ydata=50, button="i", key="i", fig=obj.fig, canvas=obj.fig.canvas, inaxes=None)
+    obj.button_press_callback(event=mck)
+    mock_show.assert_called()
+
+
+@pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
+@mock.patch("matplotlib.pyplot.show")
+def test_normalize_k_press_cb2(mock_show):
+    x = np.linspace(0, 6, 1000)
+    y = np.cos(x)
+    obj = DraggableEnvelope(x, y, mode="l")
+    obj.epsilon = 1000000
+    obj.x_env = np.array([56, 5])
+    obj.y_env = np.array([60, 0.5])
+    xy_pixels = obj.ax.transData.transform([5, 0.5])
+    xpix, ypix = xy_pixels
+    mck = mock_event(xdata=xpix, ydata=ypix, button="d", key="d", fig=obj.fig, canvas=obj.fig.canvas, inaxes=obj.ax)
+    obj.key_press_callback(event=mck)
+    assert 5 not in obj.x_env
+    assert 0.5 not in obj.y_env
+    mock_show.assert_called()
+
+
+@pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
+@mock.patch("matplotlib.pyplot.show")
 def test_normalize_keypress_cb2(mock_show):
     x = np.linspace(0, 6, 1000)
     y = np.cos(x)
     obj = DraggableEnvelope(x, y, mode="l")
-    mck = mock_event(xdata=432, ydata=432, button="i", key="i", fig=obj.fig, canvas=obj.fig.canvas, inaxes=True)
-    obj.get_ind_under_point(event=mck)
-    assert obj._ind is None
+    mck = mock_event(xdata=2, ydata=0.5, button="i", key="i", fig=obj.fig, canvas=obj.fig.canvas, inaxes=True)
+    obj.key_press_callback(event=mck)
+    assert 2 in obj.x_env
+    assert 0.5 in obj.y_env
     mock_show.assert_called()
 
 
@@ -166,7 +196,7 @@ def test_normalize_motion_notify_cb(mock_show):
     x = np.linspace(0, 6, 1000)
     y = np.cos(x)
     obj = DraggableEnvelope(x, y, mode="l")
-    mck = mock_event(xdata=5, ydata=0.5, button="i", key="i", fig=obj.fig, canvas=obj.fig.canvas, inaxes=True)
+    mck = mock_event(xdata=5, ydata=0.5, button="i", key="i", fig=obj.fig, canvas=obj.fig.canvas, inaxes=obj.ax)
     obj.motion_notify_callback(event=mck)
     mock_show.assert_called()
 
@@ -178,6 +208,15 @@ def test_sppeditor_submit(mock_show):
     y = np.cos(x)
     obj = SPPEditor(x, y)
     obj.submit("dsa50.dsa4")
+    assert obj.delay == 50.4
+
+@pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
+@mock.patch("matplotlib.pyplot.show")
+def test_sppeditor_text_change(mock_show):
+    x = np.linspace(0, 6, 1000)
+    y = np.cos(x)
+    obj = SPPEditor(x, y)
+    obj.text_change("dsa50.dsa4")
     assert obj.delay == 50.4
 
 
@@ -199,9 +238,10 @@ def test_sppeditor_get_ind(mock_show):
     x = np.linspace(0, 6, 10000)
     y = np.cos(x)
     obj = SPPEditor(x, y)
-    mck = mock_event(xdata=50, ydata=50, button=1, key=1, fig=obj.fig, canvas=obj.fig.canvas, inaxes=None)
+    obj.x_pos = np.array([1, 2])
+    obj.y_pos = np.array([1, 2])
+    mck = mock_event(xdata=1.5, ydata=1.3, button=1, key=1, fig=obj.fig, canvas=obj.fig.canvas, inaxes=obj.ax)
     obj.get_ind_under_point(event=mck)
-    assert obj._ind == None
     mock_show.assert_called()
 
 
@@ -211,10 +251,12 @@ def test_sppeditor_keypress_cb(mock_show):
     x = np.linspace(0, 6, 10000)
     y = np.cos(x)
     obj = SPPEditor(x, y)
+    obj.x_pos = np.array([1, 2])
+    obj.y_pos = np.array([1, 2])
     mck = mock_event(xdata=2, ydata=0, button="i", key="i", fig=obj.fig, canvas=obj.fig.canvas, inaxes=obj.ax)
     obj.key_press_callback(event=mck)
-    np.testing.assert_array_equal(obj.x_pos, np.array([2]))
-    np.testing.assert_array_equal(obj.y_pos, np.array([0]))
+    np.testing.assert_array_equal(obj.x_pos, np.array([1, 2, 2]))
+    np.testing.assert_array_equal(obj.y_pos, np.array([1, 2, 0]))
     mock_show.assert_called()
 
 
@@ -226,7 +268,7 @@ def test_sppeditor_keypress_cb2(mock_show):
     obj = SPPEditor(x, y)
     obj.x_pos = np.array([1, 2])
     obj.y_pos = np.array([1, 2])
-    mck = mock_event(xdata=1, ydata=1, button="d", key="d", fig=obj.fig, canvas=obj.fig.canvas, inaxes=obj.ax)
+    mck = mock_event(xdata=xpix, ydata=ypix, button="d", key="d", fig=obj.fig, canvas=obj.fig.canvas, inaxes=obj.ax)
     obj.key_press_callback(event=mck)
     np.testing.assert_array_equal(obj.x_pos, np.array([2]))
     np.testing.assert_array_equal(obj.y_pos, np.array([2]))
