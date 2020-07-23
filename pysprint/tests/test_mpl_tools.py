@@ -12,6 +12,7 @@ from pysprint.mpl_tools.normalize import DraggableEnvelope
 
 rcParams['figure.max_open_warning'] = 30
 
+
 def mock_event(xdata, ydata, button, key, fig, canvas, inaxes=True):
     event = mock.Mock()
     event.button = button
@@ -86,7 +87,7 @@ def test_lock(mock_show):
 
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
-def test_lock(mock_show):
+def test_lock2(mock_show):
     x, y = np.arange(100), np.arange(100)
     xx, yy = np.array([4, 5]), np.array([4, 5])
     obj = EditPeak(x, y, x_extremal=xx, y_extremal=yy)
@@ -110,8 +111,7 @@ def test_normalize_btn_release(mock_show):
     x = np.linspace(0, 6, 10000)
     y = np.cos(x)
     obj = DraggableEnvelope(x, y, mode="u")
-    #mck = mock_event(xdata=50, ydata=50, button=1, key=1, fig=obj.fig, canvas=obj.fig.canvas, inaxes=None)
-    assert obj._ind == None
+    assert obj._ind is None
     y_transform = obj.get_data()
     np.testing.assert_allclose(y_transform[100:9900], np.ones(9800), atol=1, rtol=1)
     mock_show.assert_called()
@@ -141,7 +141,7 @@ def test_normalize_keypress_cb2(mock_show):
 
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
-def test_normalize_keypress_cb2(mock_show):
+def test_normalize_keypress_cb3(mock_show):
     x = np.linspace(0, 6, 1000)
     y = np.cos(x)
     with pytest.raises(ValueError):
@@ -179,7 +179,7 @@ def test_normalize_k_press_cb2(mock_show):
 
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
-def test_normalize_keypress_cb2(mock_show):
+def test_normalize_keypress_cb4(mock_show):
     x = np.linspace(0, 6, 1000)
     y = np.cos(x)
     obj = DraggableEnvelope(x, y, mode="l")
@@ -210,6 +210,7 @@ def test_sppeditor_submit(mock_show):
     obj.submit("dsa50.dsa4")
     assert obj.delay == 50.4
 
+
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_sppeditor_text_change(mock_show):
@@ -228,7 +229,7 @@ def test_sppeditor_btn_release(mock_show):
     obj = SPPEditor(x, y)
     mck = mock_event(xdata=50, ydata=50, button=1, key=1, fig=obj.fig, canvas=obj.fig.canvas, inaxes=None)
     obj.button_release_callback(event=mck)
-    assert obj._ind == None
+    assert obj._ind is None
     mock_show.assert_called()
 
 

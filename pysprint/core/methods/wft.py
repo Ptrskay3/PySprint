@@ -2,7 +2,7 @@ import sys
 import warnings
 
 import numpy as np
-import matplotlib.pyplot as plt # noqa
+import matplotlib.pyplot as plt
 
 from pysprint.core.phase import Phase
 from pysprint.utils import PySprintWarning
@@ -149,10 +149,10 @@ class WFTMethod(FFTMethod):
             )
             for i, (_, val) in enumerate(self.window_seq.items()):
                 if i % ratio == 0:
-                    val.plot(ax=ax, scalefactor=np.max(self.y)*.75, **kwargs)
+                    val.plot(ax=ax, scalefactor=np.max(self.y) * .75, **kwargs)
         else:
             for _, val in self.window_seq.items():
-                val.plot(ax=ax, scalefactor=np.max(self.y)*.75, **kwargs)
+                val.plot(ax=ax, scalefactor=np.max(self.y) * .75, **kwargs)
         self.show()
 
     def remove_all_windows(self):
@@ -206,7 +206,7 @@ class WFTMethod(FFTMethod):
         ds = np.insert(ds, 0, 0)     # because we obtain the GD curve this way.
         return d, ds, fr
 
-    def retrieve_GD(self, silent, fastmath=True):
+    def retrieve_GD(self, silent=False, fastmath=True):
         self._apply_window_sequence(silent=silent, fastmath=fastmath)
         self._clean_centers()
         delay = np.fromiter(self.found_centers.keys(), dtype=float)
@@ -241,7 +241,7 @@ class WFTMethod(FFTMethod):
             if not silent:
                 sys.stdout.write('\r')
                 j = (idx + 1) / winlen
-                sys.stdout.write("Progress : [%-30s] %d%%" % ('='*int(30*j), 100*j))
+                sys.stdout.write("Progress : [%-30s] %d%%" % ('=' * int(30 * j), 100 * j))
                 sys.stdout.flush()
 
     def _clean_centers(self, silent=False):
@@ -255,7 +255,7 @@ class WFTMethod(FFTMethod):
                 print(
                     f"\nIn total {winlen-usefullen} out of {winlen} datapoints "
                     f"were thrown away due to ambiguous peak positions."
-                    )
+                )
 
     def errorplot(self, *args, **kwargs):
         try:
@@ -286,7 +286,7 @@ class WFTMethod(FFTMethod):
         x, y = find_roi(_obj.x, _obj.y)
         try:
             xx, yy = find_center(x, y)
-            _obj.plotwidget.plot(xx, yy, markersize=10, marker="*")
+            _obj.plt.plot(xx, yy, markersize=10, marker="*")
         except ValueError:
             pass
         _obj.show()
@@ -296,7 +296,7 @@ class WFTMethod(FFTMethod):
         if not (self.Y_cont.size, self.X_cont.size) == self.Z_cont.shape:
             self.Z_cont = np.reshape(self.Z_cont, (-1, len(self.X_cont)), order="F")
 
-    def heatmap(self, plot=True, levels=None, cmap="viridis", figsize=(10, 10)):
+    def heatmap(self, levels=None, cmap="viridis", figsize=(10, 10)):
         if self.GD is None:
             raise ValueError("Must calculate first.")
 

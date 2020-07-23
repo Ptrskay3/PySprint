@@ -236,7 +236,7 @@ class FFTMethod(Dataset):
             self.fwhm = fwhm
             self.window_order = window_order
             gaussian = gaussian_window(self.x, self.at, self.fwhm, self.window_order)
-            self.plotwidget.plot(self.x, gaussian * max(abs(self.y)), "r--")
+            self.plt.plot(self.x, gaussian * max(abs(self.y)), "r--")
             if plot:
                 self.show()
         else:
@@ -259,9 +259,9 @@ class FFTMethod(Dataset):
             chaining operations on a dataset.
         """
         if inplace:
-            self.plotwidget.clf()
-            self.plotwidget.cla()
-            self.plotwidget.close()
+            self.plt.clf()
+            self.plt.cla()
+            self.plt.close()
             self.y = cut_gaussian(
                 self.x,
                 self.y,
@@ -274,16 +274,10 @@ class FFTMethod(Dataset):
             obj.apply_window(inplace=True)
             return obj
 
-    def retrieve_phase(self, show_graph=False):
+    def retrieve_phase(self):
         """
         Retrieve *only the phase* after the transforms. This will
         unwrap the angles and constructs a pysprint.core.phase.Phase object.
-
-        Parameters
-        ----------
-
-        show_graph : bool, optional
-            If True, show the phase immediately.
 
         Returns
         -------
@@ -294,9 +288,7 @@ class FFTMethod(Dataset):
             self.shift("y")
         y = np.unwrap(np.angle(self.y), axis=0)
         self.phase = Phase(self.x, y)
-        if show_graph:
-            self.phase.plot()
-        return self.phase  # FIXME: because of inplace ops. we need to return the phase
+        return self.phase  # because of inplace ops. we need to return the phase
 
     def calculate(self, reference_point, order, show_graph=False):
         """
@@ -347,18 +339,15 @@ class FFTMethod(Dataset):
         first ifft was used. For now it's doing okay: giving good results.
         For consistency we should still implement that a better way later.
         """
-        if self.nufft_used:
-            self.shift("y")
-
-        dispersion, dispersion_std, fit_report = args_comp(
-            self.x,
-            self.y,
-            ref_point=reference_point,
-            fit_order=order,
-            show_graph=show_graph,
+        self.retrieve_phase()
+        dispersion, dispersion_std, fit_report = self.phase._fit(
+            reference_point=reference_point, order=order
         )
+        if show_graph:
+            self.phase.plot()
+
         self._dispersion_array = dispersion
-        return dispersion, dispersion_std, fit_report
+        return -dispersion, dispersion_std, fit_report
 
     def autorun(
         self,
@@ -469,7 +458,7 @@ class FFTMethod(Dataset):
     def get_phase(self):
         if self.phase is not None:
             return self.phase
-        raise ValueError("Must calculate phase first.")
+        raise ValueError("Must retrieve the phase first.")
 
     @property
     def errors(self):

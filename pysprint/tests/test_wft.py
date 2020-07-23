@@ -4,6 +4,7 @@ import numpy as np
 
 from pysprint import Generator, WFTMethod
 
+
 @patch('matplotlib.pyplot.show')
 def test_basic(mck):
     g = Generator(
@@ -30,5 +31,3 @@ def test_basic(mck):
 
     f.heatmap()
     mck.assert_called()
-
-

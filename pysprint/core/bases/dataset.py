@@ -89,7 +89,7 @@ class Dataset(metaclass=DatasetBase):
             )
             self._is_normalized = True
 
-        self.plotwidget = plt # TODO : Rewrite plotting
+        self.plt = plt  # TODO : Rewrite plotting
         self.xmin = None
         self.xmax = None
         self.probably_wavelength = None
@@ -102,6 +102,8 @@ class Dataset(metaclass=DatasetBase):
         self._positions = None
 
         self._dispersion_array = None
+
+
 
     def __call__(self, reference_point, *, order=None, show_graph=None):
         """
@@ -165,11 +167,11 @@ class Dataset(metaclass=DatasetBase):
 
         phase_poly = np.poly1d(coefs[::-1], r=False)
 
-        self.plotwidget.plot(self.x, phase_poly(self.x))
-        self.plotwidget.grid()
-        self.plotwidget.ylabel(r"$\Phi\, [rad]$")
-        self.plotwidget.xlabel(r"$\omega \,[PHz]$")
-        self.plotwidget.show()
+        self.plt.plot(self.x, phase_poly(self.x))
+        self.plt.grid()
+        self.plt.ylabel(r"$\Phi\, [rad]$")
+        self.plt.xlabel(r"$\omega \,[PHz]$")
+        self.plt.show()
 
     @property
     def delay(self):
@@ -737,16 +739,18 @@ class Dataset(metaclass=DatasetBase):
         )
         return xmax, ymax, xmin, ymin
 
-    def _plot_SPP_if_valid(self, **kwargs):
+    def _plot_SPP_if_valid(self, ax=None, **kwargs):
         """
         Mark SPPs on the plot if they are valid.
         """
+        if ax is None:
+            ax = self.plt
         if isinstance(self.positions, numbers.Number):
             x_closest, idx = find_nearest(self.x, self.positions)
             try:
-                self.plotwidget.plot(x_closest, self.y_norm[idx], **kwargs)
-            except Exception:  # TODO: handle that exception precisely, maybe ValueError?
-                self.plotwidget.plot(x_closest, self.y[idx], **kwargs)
+                ax.plot(x_closest, self.y_norm[idx], **kwargs)
+            except (ValueError, TypeError):
+                ax.plot(x_closest, self.y[idx], **kwargs)
 
         if isinstance(self.positions, np.ndarray) or isinstance(
                 self.positions, Iterable
@@ -754,25 +758,51 @@ class Dataset(metaclass=DatasetBase):
             for i, val in enumerate(self.positions):
                 x_closest, idx = find_nearest(self.x, self.positions[i])
                 try:
-                    self.plotwidget.plot(x_closest, self.y_norm[idx], **kwargs)
-                except Exception:  # TODO: handle that exception precisely, maybe ValueError?
-                    self.plotwidget.plot(x_closest, self.y[idx], **kwargs)
+                    ax.plot(x_closest, self.y_norm[idx], **kwargs)
+                except (ValueError, TypeError):
+                    ax.plot(x_closest, self.y[idx], **kwargs)
 
-    # TODO: Add **kwargs
-    def show(self):
+    def show(self, ax=None, grid=True, title=None, legend=False, xlim=None, ylim=None, **kwargs):
         """
         Draws a graph of the current dataset using matplotlib.
         """
+
+        datacolor = kwargs.pop("color", "red")
+        xlabel = "$\lambda\,[nm]$" if self.probably_wavelength else "$\omega\,[PHz]$"
+
+        if ax is None:
+            ax = self.plt
+            self.plt.ylabel("I")
+            self.plt.xlabel(xlabel)
+            if xlim:
+                self.plt.xlim(xlim)
+            if ylim:
+                self.plt.ylim(ylim)
+            if title:
+                self.plt.title(title)
+        else:
+            ax.set(ylabel="I")
+            ax.set(xlabel=xlabel)
+            if xlim:
+                ax.set(xlim=xlim)
+            if ylim:
+                ax.set(ylim=ylim)
+            if title:
+                ax.set(title=title)
+
         if np.iscomplexobj(self.y):
-            self.plotwidget.plot(self.x, np.abs(self.y))
+            ax.plot(self.x, np.abs(self.y), color=datacolor, **kwargs)
         else:
             try:
-                self.plotwidget.plot(self.x, self.y_norm, "r")
-            except Exception:  # TODO: handle that exception precisely, maybe ValueError?
-                self.plotwidget.plot(self.x, self.y, "r")
-        self._plot_SPP_if_valid(color="black", marker="o", markersize=10)
-        self.plotwidget.grid()
-        self.plotwidget.show(block=True)
+                ax.plot(self.x, self.y_norm, color=datacolor, **kwargs)
+            except (ValueError, TypeError):
+                ax.plot(self.x, self.y, color=datacolor, **kwargs)
+        self._plot_SPP_if_valid(ax=ax, color="black", marker="o", markersize=10, label="SPP")
+        if grid:
+            ax.grid()
+        if legend:
+            ax.legend()
+        self.plt.show(block=True)
 
     def normalize(self, filename=None, smoothing_level=0):
         """
@@ -805,7 +835,7 @@ class Dataset(metaclass=DatasetBase):
         self.y = y_final
         self.y_norm = y_final
         self._is_normalized = True
-        self.plotwidget.title("Final")
+        self.plt.title("Final")
         self.show()
         if filename:
             if not filename.endswith(".txt"):

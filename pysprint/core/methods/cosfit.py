@@ -151,8 +151,8 @@ class CosFitMethod(Dataset):
         except Exception:  # TODO: handle that blank exception
             pass
         if self.fit is not None:
-            self.plotwidget.plot(self.x, self.fit, "k--", label="fit", zorder=99)
-            self.plotwidget.legend()
+            self.plt.plot(self.x, self.fit, "k--", label="fit", zorder=99)
+            self.plt.legend()
             self.show()
         else:
             self.show()

@@ -35,6 +35,7 @@ def test_errorplot():
     phase.errorplot()
     phase.errorplot(percent=True)
 
+
 def test_errorplot2():
     x = np.arange(100)
     y = np.arange(100)
@@ -44,6 +45,7 @@ def test_errorplot2():
         phase.errors
     with pytest.raises(ValueError):
         phase.errorplot()
+
 
 def constructor1():
     Phase.from_coeff([1, 2, 3, 4])
