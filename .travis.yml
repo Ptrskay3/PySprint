@@ -1,48 +1,50 @@
 os: linux
-
 dist: xenial
-
 services:
-  - xvfb
-
+- xvfb
 language: python
-
 python:
-    - 3.6
-    - 3.7
-    - 3.8
-
-env: 
-    - version=latest
-    - version=withextras
-
+- 3.6
+- 3.7
+- 3.8
+env:
+- version=latest
+- version=withextras
 before_install:
-  - "export PYTHONPATH=$PYTHONPATH:$(pwd)"
-  - python -m pip install --upgrade setuptools
-
-
+- export PYTHONPATH=$PYTHONPATH:$(pwd)
+- python -m pip install --upgrade setuptools
 addons:
   apt:
     packages:
     - libxkbcommon-x11-0
-
-
 install:
-  - python -m pip install --upgrade pip
-  - if [[ $version == withextras ]]; then python -m pip install --upgrade numpy scipy matplotlib pandas lmfit numba ; fi
-  - if [[ $version == latest ]]; then python -m pip install --upgrade numpy scipy matplotlib pandas ; fi
-  - pip install codecov coverage flake8 
-  - python setup.py install
-  - pip list
-
+- python -m pip install --upgrade pip
+- if [[ $version == withextras ]]; then python -m pip install --upgrade numpy scipy
+  matplotlib pandas lmfit numba ; fi
+- if [[ $version == latest ]]; then python -m pip install --upgrade numpy scipy matplotlib
+  pandas ; fi
+- pip install codecov coverage flake8
+- python setup.py install
+- pip list
 before_script:
-  # stop upon syntax errors or undefined names
-  - flake8 pysprint/ --count --select=E9,F63,F72,F82 --show-source --statistics
-
+- flake8 pysprint/ --count --select=E9,F63,F72,F82 --show-source --statistics
 script:
-  - cd pysprint/tests
-  - coverage run --source=pysprint -m pytest
-  - coverage report -m
-
+- cd pysprint/tests
+- coverage run --source=pysprint -m pytest
+- coverage report -m
 after_success:
-  - codecov
+- codecov
+
+before_deploy:
+  - echo "DEPLOYING TO PYPI.."
+deploy:
+  provider: pypi
+  username: "__token__"
+  password:
+    secure: Iq4AIzY+TfLPMrhOgEXrlOvBUkGehbDfzqYYGbvumWp0JrJlCYfrF9RepJ3PFelatGrsRuVDcr4UBVC8USCPH1QfFoOPYXk/tI2EmrwcRfkECp8yTrnuyfztG7KYQi6F6TtiQsZAbGY21L5j23x/OXxgH1B/v1ZZhW2oMiGZC/aT7Jr6VfLBdk3jKsU1WGz9YD4/EaleFLdjKxu1rJf7FmC7rmGKLLBhL8/FwO/KTGvL1XOSBi5KJDT28yj6N/JSqqprdC6GVuy81HpRI/+K7RuEPWtMMkHsEi5DE1zlC1DkWMWH+moCG2qqzwungENC/334vMW70pbtjgV2wDSXDwv3QfwgXM/xGBysVboNXT42QRu8wWe2YFWEAtV1qQKXHE5bfTi+swQSclXIkw4aSBiw+ZHtMA2MyN3Bxej4rhQh+BVVAFnpf0FMqs0PI8ztgbsNtdAMrSwhAxhkLXNuaGY7fSE6A0Ovs2u7iU+S53Tj9ulZYTn1fdRb0r2fQdbWLGJiYHNotwoCIeP8r6cMG0/6qy5cKo25cHewUwlWybJZVPZUJwsWThIxzBmtfjpzdQnyXLuJTu28VwIujbunSNcnlJILTFzQht33i/dDd6uEJLzvuoRXpDPNbNSkeAWMTb47YoDQFhmEc8sBs4ZGLldwYBfvxrFaLLqg01W0NWE=
+  on:
+    tags: true
+    branch: deploy
+  distributions: "sdist bdist_wheel"
+  skip_existing: true
+  skip_cleanup: false
