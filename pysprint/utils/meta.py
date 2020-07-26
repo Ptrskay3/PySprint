@@ -4,7 +4,9 @@ from copy import deepcopy
 
 __all__ = ["MetaData"]
 
-
+# This class is adapted from AstroPy licensed under
+# the BSD 3-Clause "New" or "Revised" License.
+# source: https://github.com/astropy/astropy/blob/master/astropy/utils/metadata.py
 class MetaData:
     """
     A class to store additional meta property.

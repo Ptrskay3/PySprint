@@ -158,6 +158,16 @@ class WFTMethod(FFTMethod):
     def remove_all_windows(self):
         self.window_seq.clear()
 
+    def reset_state(self):
+        self.remove_all_windows()
+        self.found_centers.clear()
+        self.X_cont = np.array([])
+        self.Y_cont = np.array([])
+        self.Z_cont = np.array([])
+        self.GD = None
+        self.cachedlen = 0
+        self.fastmath = True
+
     def remove_window_at(self, center):
         if center not in self.window_seq.keys():
             raise ValueError(
@@ -219,7 +229,17 @@ class WFTMethod(FFTMethod):
 
     def _apply_window_sequence(self, silent=False, fastmath=True, errors="ignore"):
         winlen = len(self.window_seq)
-        self.Z_cont = np.array([])
+
+        if not fastmath:
+            # here we setup the shape for the Z array
+            _x, _y, _, _ = self._safe_cast()
+            _obj = FFTMethod(_x, _y)
+            _obj.ifft()
+            x, y = find_roi(_obj.x, _obj.y)
+            yshape = y.size
+            xshape = len(self.window_seq)
+            self.Z_cont = np.empty(shape=(yshape, xshape))
+
         for idx, (_center, _window) in enumerate(self.window_seq.items()):
             _x, _y, _, _ = self._safe_cast()
             _obj = FFTMethod(_x, _y)
@@ -229,7 +249,7 @@ class WFTMethod(FFTMethod):
             if not fastmath:
                 if self.Y_cont.size == 0:  # prevent allocating it in every iteration
                     self.Y_cont = np.array(x)
-                self.Z_cont = np.append(self.Z_cont, y)
+                self.Z_cont[:, idx] = y
             try:
                 centx, _ = find_center(x, y)
                 self.found_centers[_center] = centx
@@ -293,8 +313,9 @@ class WFTMethod(FFTMethod):
 
     def _construct_heatmap_data(self):
         self.X_cont = np.fromiter(self.window_seq.keys(), dtype=float)
-        if not (self.Y_cont.size, self.X_cont.size) == self.Z_cont.shape:
-            self.Z_cont = np.reshape(self.Z_cont, (-1, len(self.X_cont)), order="F")
+        # self.Z_cont = self.Z_cont.T
+        # if not (self.Y_cont.size, self.X_cont.size) == self.Z_cont.shape:
+        #     self.Z_cont = np.reshape(self.Z_cont, (-1, len(self.X_cont)), order="F")
 
     def heatmap(self, levels=None, cmap="viridis", figsize=(10, 10)):
         if self.GD is None:
@@ -308,9 +329,8 @@ class WFTMethod(FFTMethod):
         # Only construct if we need to..
         if not (self.Y_cont.size, self.X_cont.size) == self.Z_cont.shape:
             self._construct_heatmap_data()
-
         if levels is None:
-            levels = np.linspace(0, 0.02, 50)
+            levels = np.linspace(0, 0.02, 30)
         else:
             if not isinstance(levels, np.ndarray):
                 raise ValueError("Expected np.ndarray as levels.")
