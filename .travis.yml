@@ -28,17 +28,17 @@ addons:
     - libxkbcommon-x11-0
 
 install:
-  # CONDA ENV
-  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-  # we can get only the 3.x because we don't care about Python 2.x versions..
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  - conda config --add channels conda-forge
-  - conda config --add channels ptrskay
-  - conda info -a
+#  # CONDA ENV
+#  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+#  # we can get only the 3.x because we don't care about Python 2.x versions..
+#  - bash miniconda.sh -b -p $HOME/miniconda
+#  - export PATH="$HOME/miniconda/bin:$PATH"
+#  - hash -r
+#  - conda config --set always_yes yes --set changeps1 no
+#  - conda update -q conda
+#  - conda config --add channels conda-forge
+#  - conda config --add channels ptrskay
+#  - conda info -a
 
   # REGULAR ENV
   - python -m pip install --upgrade pip
