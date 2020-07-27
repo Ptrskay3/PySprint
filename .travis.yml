@@ -3,14 +3,14 @@ os: linux
 dist: xenial
 
 services:
-- xvfb
+  - xvfb
 
 language: python
 
 python:
-- 3.6
-- 3.7
-- 3.8
+  - 3.6
+  - 3.7
+  - 3.8
 
 addons:
   apt:
@@ -36,12 +36,12 @@ install:
   - python setup.py install
 
 before_script:
-- flake8 pysprint/ --count --select=E9,F63,F72,F82 --show-source --statistics
+  - flake8 pysprint/ --count --select=E9,F63,F72,F82 --show-source --statistics
 
 script:
-- cd pysprint/tests
-- coverage run --source=pysprint -m pytest
-- coverage report -m
+  - cd pysprint/tests
+  - coverage run --source=pysprint -m pytest
+  - coverage report -m
 
 after_success:
 - codecov
@@ -62,5 +62,4 @@ deploy:
   skip_existing: true
 
  after_deploy:
-   - echo "DEPLOYING ON CONDA"
    - conda install conda-build && conda install anaconda-client && bash .ci/conda_upload.sh
