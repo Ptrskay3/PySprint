@@ -1,0 +1,28 @@
+name: pysprint-dev
+channels:
+  - conda-forge
+dependencies:
+  # required
+  - numpy>=1.15,<1.19.0
+  - python=3
+  - matplotlib
+  - pandas
+  - scipy
+  - numba>=0.46.0
+  - lmfit
+
+  # Strictly speaking this is not neseccary, but better safe than sorry
+  - cython>=0.29.16
+  - ipython>=7.11.1
+  - ipykernel
+  - ipywidgets
+  - nbformat
+  - notebook>=5.7.5
+  - pip
+
+  # code checks
+  - black
+  - flake8
+  - pytest>=5.0.1
+  - codecov
+  - coverage

@@ -28,27 +28,21 @@ addons:
     - libxkbcommon-x11-0
 
 install:
-#  # CONDA ENV
-#  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-#  # we can get only the 3.x because we don't care about Python 2.x versions..
-#  - bash miniconda.sh -b -p $HOME/miniconda
-#  - export PATH="$HOME/miniconda/bin:$PATH"
-#  - hash -r
-#  - conda config --set always_yes yes --set changeps1 no
-#  - conda update -q conda
-#  - conda config --add channels conda-forge
-#  - conda config --add channels ptrskay
-#  - conda info -a
+  # CONDA ENV
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  # we can get only the 3.x because we don't care about Python 2.x versions..
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda config --add channels conda-forge
+  - conda config --add channels ptrskay
+  - conda info -a
 
-  # REGULAR ENV
-  - python -m pip install --upgrade pip
-  - if [[ $version == withextras ]]; then python -m pip install --upgrade numpy scipy
-    matplotlib pandas lmfit numba ; fi
-  - if [[ $version == latest ]]; then python -m pip install --upgrade numpy scipy matplotlib
-    pandas ; fi
-  - pip install codecov coverage flake8
-  - python setup.py install
-  - pip list
+  - conda env create -f environment.yml python==$TRAVIS_PYTHON_VERSION
+  - conda activate pysprint-dev
+  - pip install -e .
 
 before_script:
 - flake8 pysprint/ --count --select=E9,F63,F72,F82 --show-source --statistics
@@ -76,6 +70,6 @@ deploy:
   distributions: "sdist bdist_wheel"
   skip_existing: true
 
-# after_deploy:
-  ## conda_upload.sh is based on PYPI, so it must be called here.
-  #- test $TRAVIS_BRANCH = "master" && conda install conda-build && conda install anaconda-client && bash conda/conda_upload.sh
+ after_deploy:
+   - echo "DEPLOYING ON CONDA"
+   - conda install conda-build && conda install anaconda-client && bash .ci/conda_upload.sh
