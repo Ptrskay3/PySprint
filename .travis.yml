@@ -35,6 +35,7 @@ before_install:
 install:
   - conda env create -f environment.yml python==$TRAVIS_PYTHON_VERSION
   - activate pysprint-dev
+  - conda install flake8 codecov pytest coverage
   - python setup.py install
 
 before_script:
