@@ -15,10 +15,6 @@ python:
 - 3.7
 - 3.8
 
-env:
-- version=latest
-- version=withextras
-
 addons:
   apt:
     packages:
