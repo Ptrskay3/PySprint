@@ -34,7 +34,7 @@ before_install:
 
 install:
   - conda env create -f environment.yml python==$TRAVIS_PYTHON_VERSION
-  - conda activate pysprint-dev
+  - activate pysprint-dev
   - python setup.py install
 
 before_script:
@@ -63,5 +63,7 @@ deploy:
   distributions: "sdist bdist_wheel"
   skip_existing: true
 
-# after_deploy:
-#   - conda install conda-build && conda install anaconda-client && bash .ci/conda_upload.sh
+ after_deploy:
+  - conda install conda-build
+  - conda install anaconda-client
+  - bash .ci/conda_upload.sh
