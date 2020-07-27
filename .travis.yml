@@ -17,7 +17,7 @@ addons:
     packages:
     - libxkbcommon-x11-0
 
-install:
+before_install:
   # CONDA ENV
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
   # we can get only the 3.x
@@ -30,6 +30,7 @@ install:
   - conda config --add channels ptrskay
   - conda info -a
 
+install:
   - conda env create -f environment.yml python==$TRAVIS_PYTHON_VERSION
   - conda activate pysprint-dev
   - python setup.py install
