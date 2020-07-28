@@ -1,10 +1,12 @@
 from unittest.mock import patch
 
+import pytest
 import numpy as np
 
 from pysprint import Generator, WFTMethod
 
 
+@pytest.mark.slow
 @patch('matplotlib.pyplot.show')
 def test_basic(mck):
     g = Generator(

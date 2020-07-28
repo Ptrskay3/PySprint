@@ -103,8 +103,6 @@ class Dataset(metaclass=DatasetBase):
 
         self._dispersion_array = None
 
-
-
     def __call__(self, reference_point, *, order=None, show_graph=None):
         """
         Alias for self.calculate.
