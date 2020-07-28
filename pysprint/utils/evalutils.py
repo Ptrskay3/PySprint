@@ -43,6 +43,7 @@ def transform_lmfit_params_to_dispersion(popt, popt_std, drop_first=True, dof=1)
     return _disp, _disp_std
 
 
+# DEPRECATE THIS
 def plot_phase(
     x,
     y,
