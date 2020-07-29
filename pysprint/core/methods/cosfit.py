@@ -153,8 +153,10 @@ class CosFitMethod(Dataset):
         if self.fit is not None:
             self.plt.plot(self.x, self.fit, "k--", label="fit", zorder=99)
             self.plt.legend()
+            self.plot()
             self.show()
         else:
+            self.plot()
             self.show()
 
     def optimizer(

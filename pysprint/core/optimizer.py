@@ -52,13 +52,6 @@ class FitOptimizer:
         self.rest = None
         self.figure = plt.figure()
 
-    def __del__(self):
-        self.reference_point = 0
-        self.x = None
-        self.y = None
-        self.ref = None
-        self.sam = None
-
     def set_final_guess(self, GD, GDD=None, TOD=None, FOD=None, QOD=None):
         self.p0[3] = GD
         self.rest = []

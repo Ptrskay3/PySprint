@@ -1,6 +1,7 @@
+import numpy as np
 from matplotlib import rcParams
 from matplotlib import pyplot as plt
-import numpy as np
+
 from pysprint.utils import calc_envelope
 from pysprint.mpl_tools.peak import SelectButton
 

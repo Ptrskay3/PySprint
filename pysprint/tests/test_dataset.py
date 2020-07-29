@@ -137,5 +137,19 @@ def test_phase_plot(m):
     m.assert_called()
 
 
+@pytest.mark.parametrize("to", ["ghz", "thz"])
+def test_chrange_basic(to):
+    fg = Dataset(np.arange(1, 1000, 1), np.sin(np.arange(1, 1000, 1)))
+    fg.chrange(current_unit="PHz", target_unit=to)
+    if to == "thz":
+        np.testing.assert_array_almost_equal(np.min(fg.x), 1000)
+    elif to == "ghz":
+        np.testing.assert_array_almost_equal(np.min(fg.x), 1000000)
+
+def test_chrange_errors():
+    fg = Dataset(np.arange(1, 1000, 1), np.sin(np.arange(1, 1000, 1)))
+    with pytest.raises(ValueError):
+        fg.chrange(current_unit="PHz", target_unit="undefined")
+
 if __name__ == "__main__":
     unittest.main()

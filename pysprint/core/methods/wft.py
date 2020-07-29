@@ -153,6 +153,7 @@ class WFTMethod(FFTMethod):
         else:
             for _, val in self.window_seq.items():
                 val.plot(ax=ax, scalefactor=np.max(self.y) * .75, **kwargs)
+        self.plot()
         self.show()
 
     def remove_all_windows(self):
@@ -309,6 +310,7 @@ class WFTMethod(FFTMethod):
             _obj.plt.plot(xx, yy, markersize=10, marker="*")
         except ValueError:
             pass
+        _obj.plot()
         _obj.show()
 
     def _construct_heatmap_data(self):

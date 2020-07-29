@@ -238,6 +238,7 @@ class FFTMethod(Dataset):
             gaussian = gaussian_window(self.x, self.at, self.fwhm, self.window_order)
             self.plt.plot(self.x, gaussian * max(abs(self.y)), "r--")
             if plot:
+                self.plot()
                 self.show()
         else:
             obj = copy(self)

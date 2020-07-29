@@ -10,5 +10,5 @@ conda build .
 find $CONDA_BLD_PATH/ -name *.tar.bz2 | while read file
 do
     echo $file
-    anaconda -t $CONDA_UPLOAD_TOKEN upload -u $USER -l nightly $file --force
+    anaconda -t $CONDA_UPLOAD_TOKEN upload -u $USER $file --force
 done

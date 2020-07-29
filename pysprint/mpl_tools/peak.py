@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.backend_bases import MouseButton
 
 # ---------------------------MONKEY PATCH-------------------------------------
 import matplotlib.cbook as cbook
@@ -74,7 +73,7 @@ class EditPeak(object):
         plt.ion()
         matplotlib.rcParams["toolbar"] = "toolmanager"
 
-        self.figure = plt.figure()
+        self.figure, self.ax = plt.subplots()
         self.cid = None
         self.x = x
         self.y = y
@@ -84,10 +83,10 @@ class EditPeak(object):
         if not len(self.x_extremal) == len(self.y_extremal):
             raise ValueError("Data shapes are different")
         self.press()
-        (self.lins,) = plt.plot(
+        (self.lins,) = self.ax.plot(
             self.x_extremal, self.y_extremal, "ko", markersize=6, zorder=99
         )
-        plt.grid(alpha=0.7)
+        self.ax.grid(alpha=0.7)
         # adding the button to navigation toolbar
         tm = self.figure.canvas.manager.toolmanager
         tm.add_tool("Toggle recording", SelectButton)
@@ -95,7 +94,7 @@ class EditPeak(object):
             tm.get_tool("Toggle recording"), "toolgroup"
         )
         self.my_select_button = tm.get_tool("Toggle recording")
-
+        plt.sca(self.ax)
         plt.show(block=True)
 
     def on_clicked(self, event):
@@ -118,7 +117,7 @@ class EditPeak(object):
 
     def press(self):
         """Usual function to connect matplotlib.."""
-        self.cid = self.figure.canvas.mpl_connect("button_press_event", self.on_clicked)
+        self.cid = self.figure.canvas.mpl_connect("key_press_event", self.on_clicked)
         # FIXME : Maybe this is key press event?
 
     def release(self):

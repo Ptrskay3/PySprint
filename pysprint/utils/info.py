@@ -1,3 +1,8 @@
+"""
+This code is mostly adapted from pandas/pandas/util/_print_versions.py.
+pandas is licensed under the BSD 3-Clause "New" or "Revised" License.
+See at: pandas.pydata.org
+"""
 import os
 import sys
 import platform

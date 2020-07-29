@@ -1,25 +1,28 @@
 """
-This file implements the basic Dataset class.
+This file implements the Dataset class with all the functionality
+that an interferogram should have in general.
 """
-import json  # for pretty printing dict
 import warnings
+import numbers
+import re
+
 from collections.abc import Iterable
-from inspect import signature
+from copy import copy, deepcopy
 from contextlib import suppress
 from textwrap import dedent
 from math import factorial
-from copy import copy, deepcopy
-import numbers
-import re
+from inspect import signature
+import json  # for pretty printing dict
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
 from pysprint.core.bases.dataset_base import DatasetBase, C_LIGHT
+from pysprint.core.bases.apply import DatasetApply
 from pysprint.mpl_tools.spp_editor import SPPEditor
-from pysprint.utils import MetaData, find_nearest
 from pysprint.mpl_tools.normalize import DraggableEnvelope
+from pysprint.utils import MetaData, find_nearest
 
 from pysprint.core.preprocess import (
     savgol,
@@ -39,7 +42,7 @@ __all__ = ["Dataset"]
 
 
 class Dataset(metaclass=DatasetBase):
-    """Base class for the evaluating methods."""
+    """Base class for the all evaluating methods."""
 
     meta = MetaData("""Additional info about the dataset""", copy=False)
 
@@ -79,7 +82,13 @@ class Dataset(metaclass=DatasetBase):
             except ValueError:
                 pass  # just ignore invalid arms
 
-        if len(self.ref) == 0:
+        if len([x for x in (self.ref, self.sam) if len(x) != 0]) == 1:
+            warnings.warn(
+                "Reference and sample arm should be passed together or neither one.",
+                PySprintWarning
+            )
+
+        if len(self.ref) == 0 or len(self.sam) == 0:
             self.y_norm = self.y
             self._is_normalized = self._ensure_norm()
 
@@ -89,10 +98,11 @@ class Dataset(metaclass=DatasetBase):
             )
             self._is_normalized = True
 
-        self.plt = plt  # TODO : Rewrite plotting
+        self.plt = plt
         self.xmin = None
         self.xmax = None
         self.probably_wavelength = None
+        self.unit = None
         self._check_domain()
 
         if meta is not None:
@@ -135,8 +145,52 @@ class Dataset(metaclass=DatasetBase):
     def __len__(self):
         return len(self.x)
 
-    def chrange(self):
-        pass
+    def chrange(self, current_unit, target_unit="phz", inplace=True):
+        if inplace:
+            current_unit, target_unit = current_unit.lower(), target_unit.lower()
+            conversions = {
+                "um": {"um": 1, "nm": 1000, "pm": 1E6, "fm": 1E9},
+                "nm": {"um": 1/1000, "nm": 1, "pm": 1000, "fm": 1E6},
+                "pm": {"um": 1/1E6, "nm": 1/1000, "pm": 1, "fm": 1000},
+                "fm": {"um": 1/1E9, "nm": 1/1E6, "pm": 1/1000, "fm": 1},
+                "phz": {"phz": 1, "thz": 1000, "ghz": 1E6},
+                "thz": {"phz": 1/1000, "thz": 1, "ghz": 1000},
+                "ghz": {"phz": 1/1E6, "thz": 1/1000, "ghz": 1}
+            }
+            try:
+                ratio = float(conversions[current_unit][target_unit])
+            except KeyError as error:
+                raise ValueError("Units are not compatible") from error
+            self.x = (self.x * ratio)
+            self.unit = self._render_unit(target_unit)
+        else:
+            obj = copy(self)
+            obj.chrange(
+                current_unit=current_unit, target_unit=target_unit, inplace=True
+            )
+            return obj
+
+    @staticmethod
+    def _render_unit(unit, mpl=False):
+        unit = unit.lower()
+        charmap = {
+            "um": ("\mu m", "um"),
+            "nm": ("$nm$", "nm"),
+            "pm": ("$pm$", "pm"),
+            "fm": ("$fm$", "fm"),
+            "phz": ("$PHz$", "PHz"),
+            "thz": ("$THz$", "THz"),
+            "ghz": ("$GHz$", "GHz")
+        }
+        if mpl:
+            return charmap[unit][0]
+        return charmap[unit][1]
+
+    def transform(self, func, axis=None, args=None, kwargs=None):
+        operation = DatasetApply(
+            obj=self, func=func, axis=axis, args=args, kwargs=kwargs
+        )
+        operation.perform()
 
     #  TODO : The plot must be formatted.
     def phase_plot(self, exclude_GD=False):
@@ -223,7 +277,7 @@ class Dataset(metaclass=DatasetBase):
         self.y_norm = (self.y_norm - 0.5) * 2
         self.y = (self.y - 0.5) * 2
 
-    def GD_lookup(self, reference_point=2.355, engine="cwt", silent=False, **kwargs):
+    def GD_lookup(self, reference_point, engine="cwt", silent=False, **kwargs):
         """
         Quick GD lookup: it finds extremal points near the
         `reference_point` and returns an average value of 2*np.pi
@@ -362,10 +416,14 @@ class Dataset(metaclass=DatasetBase):
         """
         if min(self.x) > 50:
             self.probably_wavelength = True
+            self.unit = "nm"
         else:
             self.probably_wavelength = False
+            self.unit = "PHz"
 
     # TODO : Make a better metadata parser.
+    def _parse_meta(self, meta_len):
+        pass
 
     @classmethod
     def parse_raw(
@@ -471,6 +529,7 @@ class Dataset(metaclass=DatasetBase):
             pprint_delay = self._delay
         else:
             pprint_delay = "-"
+        _unit = self._render_unit(self.unit)
         string = dedent(
             f"""
         {type(self).__name__}
@@ -479,7 +538,7 @@ class Dataset(metaclass=DatasetBase):
         ----------
         Datapoints: {len(self.x)}
         Predicted domain: {'wavelength' if self.probably_wavelength else 'frequency'}
-        Range: from {np.min(self.x):.2f} to {np.max(self.x):.2f} {'nm' if self.probably_wavelength else 'PHz'}
+        Range: from {np.min(self.x):.3f} to {np.max(self.x):.3f} {_unit}
         Normalized: {self._is_normalized}
         Delay value: {(str(pprint_delay) + ' fs') if np.all(self._delay) else 'Not given'}
         SPP position(s): {str(self._positions) + ' PHz' if np.all(self._positions) else 'Not given'}
@@ -760,13 +819,10 @@ class Dataset(metaclass=DatasetBase):
                 except (ValueError, TypeError):
                     ax.plot(x_closest, self.y[idx], **kwargs)
 
-    def show(self, ax=None, grid=True, title=None, legend=False, xlim=None, ylim=None, **kwargs):
-        """
-        Draws a graph of the current dataset using matplotlib.
-        """
-
+    def plot(self, ax=None, title=None, xlim=None, ylim=None, **kwargs):
         datacolor = kwargs.pop("color", "red")
-        xlabel = "$\lambda\,[nm]$" if self.probably_wavelength else "$\omega\,[PHz]$"
+        _unit = self._render_unit(self.unit, mpl=True)
+        xlabel = f"$\lambda\,[{_unit}]$" if self.probably_wavelength else f"$\omega\,[{_unit}]$"
 
         if ax is None:
             ax = self.plt
@@ -796,10 +852,12 @@ class Dataset(metaclass=DatasetBase):
             except (ValueError, TypeError):
                 ax.plot(self.x, self.y, color=datacolor, **kwargs)
         self._plot_SPP_if_valid(ax=ax, color="black", marker="o", markersize=10, label="SPP")
-        if grid:
-            ax.grid()
-        if legend:
-            ax.legend()
+
+
+    def show(self):
+        """
+        Draws a graph of the current dataset using matplotlib.
+        """
         self.plt.show(block=True)
 
     def normalize(self, filename=None, smoothing_level=0):
@@ -834,6 +892,7 @@ class Dataset(metaclass=DatasetBase):
         self.y_norm = y_final
         self._is_normalized = True
         self.plt.title("Final")
+        self.plot()
         self.show()
         if filename:
             if not filename.endswith(".txt"):
