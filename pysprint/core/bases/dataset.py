@@ -175,12 +175,12 @@ class Dataset(metaclass=DatasetBase):
         unit = unit.lower()
         charmap = {
             "um": ("\mu m", "um"),
-            "nm": ("$nm$", "nm"),
-            "pm": ("$pm$", "pm"),
-            "fm": ("$fm$", "fm"),
-            "phz": ("$PHz$", "PHz"),
-            "thz": ("$THz$", "THz"),
-            "ghz": ("$GHz$", "GHz")
+            "nm": ("nm", "nm"),
+            "pm": ("pm", "pm"),
+            "fm": ("fm", "fm"),
+            "phz": ("PHz", "PHz"),
+            "thz": ("THz", "THz"),
+            "ghz": ("GHz", "GHz")
         }
         if mpl:
             return charmap[unit][0]
@@ -244,7 +244,7 @@ class Dataset(metaclass=DatasetBase):
                 raise ValueError(
                     f"Cannot set SPP position to {value} since it's not in the dataset's range."
                 )
-        # TODO: maybe we don't need to distinguish between np.ndarray and Iterable
+        # FIXME: maybe we don't need to distinguish between np.ndarray and Iterable
         elif isinstance(value, np.ndarray) or isinstance(value, Iterable):
             for val in value:
                 if not isinstance(val, numbers.Number):

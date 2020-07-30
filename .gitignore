@@ -9,6 +9,7 @@ core/__pycache__/
 # Local files
 mightneed/
 .idea/*
+doc/.ipynb_checkpoints/*
 
 # C extensions
 *.so

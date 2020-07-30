@@ -232,7 +232,8 @@ class WFTMethod(FFTMethod):
         winlen = len(self.window_seq)
 
         if not fastmath:
-            # here we setup the shape for the Z array
+            # here we setup the shape for the Z array because
+            # it is much faster than using np.append in every iteration
             _x, _y, _, _ = self._safe_cast()
             _obj = FFTMethod(_x, _y)
             _obj.ifft()

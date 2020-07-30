@@ -28,6 +28,7 @@ before_install:
   - conda config --add channels conda-forge
   - conda config --add channels ptrskay
   - conda info -a
+  - python --version
 
 install:
   - conda env create -f environment.yml python==$TRAVIS_PYTHON_VERSION
