@@ -352,21 +352,21 @@ class Dataset(metaclass=DatasetBase):
         try:
             closest_val, idx1 = find_nearest(x_min, reference_point)
             m_closest_val, m_idx1 = find_nearest(x_max, reference_point)
-        except ValueError:
+        except (ValueError, IndexError):
             if not silent:
                 print("Prediction failed.\nSkipping.. ")
             return
         try:
             truncated = np.delete(x_min, idx1)
             second_closest_val, _ = find_nearest(truncated, reference_point)
-        except IndexError:
+        except (IndexError, ValueError):
             if not silent:
                 print("Prediction failed.\nSkipping.. ")
             return
         try:
             m_truncated = np.delete(x_max, m_idx1)
             m_second_closest_val, _ = find_nearest(m_truncated, reference_point)
-        except IndexError:
+        except (IndexError, ValueError):
             if not silent:
                 print("Prediction failed.\nSkipping.. ")
             return

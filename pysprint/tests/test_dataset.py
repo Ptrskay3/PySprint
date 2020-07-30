@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 from pysprint import Dataset
-from pysprint.utils.exceptions import DatasetError
+from pysprint.utils.exceptions import DatasetError, PySprintWarning, InterpolationWarning
 
 
 class TestEvaluate(unittest.TestCase):
@@ -105,7 +105,7 @@ class TestEvaluate(unittest.TestCase):
         assert np.min(ifg.x) > 399
         assert np.max(ifg.x) < 701
 
-    def test_slicing_non_inplace(self):
+    def test_slicing_noinplace(self):
         ifg = Dataset(self.x, self.y)
         new_ifg = ifg.slice(400, 700, inplace=False)
 
@@ -114,6 +114,14 @@ class TestEvaluate(unittest.TestCase):
 
         assert not np.min(ifg.x) > 399
         assert not np.max(ifg.x) < 701
+
+    def test_chdomain_noinplace(self):
+        ifg = Dataset(self.x, self.y)
+        before = ifg.x
+        f = ifg.chdomain(inplace=False)
+        g = f.chdomain(inplace=False)
+        after = g.x
+        np.testing.assert_array_almost_equal(before, after)
 
 
 @pytest.mark.parametrize("pos", [(1, 2), {4, 5}, [4, 5], np.array([1, 4])])
@@ -127,6 +135,12 @@ def test_SPP_position_setter_invalid_options(pos):
     ifg = Dataset(np.arange(1, 1000, 1), np.sin(np.arange(1, 1000, 1)))
     with pytest.raises(ValueError):
         ifg.positions = pos
+
+
+def test_SPP_position_setter_invalid_single():
+    ifg = Dataset(np.arange(1, 1000, 1), np.sin(np.arange(1, 1000, 1)))
+    with pytest.raises(ValueError):
+        ifg.positions = -2000
 
 
 @patch("matplotlib.pyplot.show")
@@ -145,6 +159,17 @@ def test_chrange_basic(to):
         np.testing.assert_array_almost_equal(np.min(fg.x), 1000)
     elif to == "ghz":
         np.testing.assert_array_almost_equal(np.min(fg.x), 1000000)
+
+
+@pytest.mark.parametrize("to", ["ghz", "thz"])
+def test_chrange_basic_noninplace(to):
+    fg = Dataset(np.arange(1, 1000, 1), np.sin(np.arange(1, 1000, 1)))
+    ifg = fg.chrange(current_unit="PHz", target_unit=to, inplace=False)
+    if to == "thz":
+        np.testing.assert_array_almost_equal(np.min(ifg.x), 1000)
+    elif to == "ghz":
+        np.testing.assert_array_almost_equal(np.min(ifg.x), 1000000)
+    np.testing.assert_array_equal(fg.x, np.arange(1, 1000, 1))
 
 
 def test_chrange_errors():
@@ -224,9 +249,8 @@ def test_blank_repr_3():
         '{}'
     ]
     x_ = np.linspace(0, 1, 199)
-    y_ = np.linspace(0, 1, 199)
 
-    d = Dataset(x_, y_)
+    d = Dataset(x_, x_)
     d.delay = 100
     d.positions = 0.5
     string = d.__repr__().split("\n")
@@ -235,16 +259,71 @@ def test_blank_repr_3():
 
 def test_raw_repr():
     string = [
-     'Dataset', '----------', 'Parameters', '----------', 'Datapoints: 2633', 'Predicted domain: wavelength',
-     'Range: from 360.500 to 1200.250 nm', 'Normalized: False', 'Delay value: Not given',
-     'SPP position(s): Not given', '----------------------------', 'Metadata extracted from file',
-     '----------------------------', '{', '"comment": "m_ifg 8,740",', '"Integration time": "2,00 ms",',
-     '"Average": "1 scans",', '"Nr of pixels used for smoothing": "0",',
-     '"Data measured with spectrometer name": "1107006U1"', '}'
+        'Dataset', '----------', 'Parameters', '----------', 'Datapoints: 2633', 'Predicted domain: wavelength',
+        'Range: from 360.500 to 1200.250 nm', 'Normalized: False', 'Delay value: Not given',
+        'SPP position(s): Not given', '----------------------------', 'Metadata extracted from file',
+        '----------------------------', '{', '"comment": "m_ifg 8,740",', '"Integration time": "2,00 ms",',
+        '"Average": "1 scans",', '"Nr of pixels used for smoothing": "0",',
+        '"Data measured with spectrometer name": "1107006U1"', '}'
     ]
 
     ifg = Dataset.parse_raw("test_rawparsing.trt")
     assert ifg.__repr__().split("\n") == string
+
+
+def test_arm_warning():
+    with pytest.warns(PySprintWarning):
+        Dataset([2], [3], [4])
+
+
+def test_scale_up():
+    x_ = np.linspace(0, 1, 199)
+
+    d = Dataset(x_, x_)
+    d.scale_up()
+
+    np.testing.assert_array_almost_equal(d.y, 2 * (x_ - 0.5))
+    np.testing.assert_array_almost_equal(d.y_norm, 2 * (x_ - 0.5))
+
+
+def test_GD_lookup():
+    x_ = np.linspace(0, 1, 199)
+    d = Dataset(x_, x_)
+    with pytest.warns(UserWarning):
+        d.GD_lookup(2, engine="fft")
+
+
+@pytest.mark.parametrize("val", [-1, 1, 200])
+def test_wave2freq(val):
+    before = val
+    after = Dataset.wave2freq(Dataset.freq2wave(val))
+    assert before == after
+
+
+def test_wave2freq():
+    with pytest.raises(ZeroDivisionError):
+        Dataset.wave2freq(Dataset.freq2wave(0))
+
+
+def test_is_normalized():
+    x_ = np.linspace(0, 1, 199)
+    d = Dataset(x_, x_)
+    assert d.is_normalized
+
+
+def test_is_not_normalized():
+    x_ = np.linspace(0, 10, 199)
+    d = Dataset(x_, x_)
+    assert not d.is_normalized
+
+
+@pytest.mark.parametrize("func", ["savgol_fil", "convolution"])
+def test_specfuncs(func):
+    x_ = np.linspace(0, 1, 199)
+    d = Dataset(x_, x_)
+    with pytest.warns(InterpolationWarning):
+        getattr(d, func)(5, 3)
+    np.testing.assert_array_equal(d.y, d.y_norm)
 
 
 if __name__ == "__main__":
