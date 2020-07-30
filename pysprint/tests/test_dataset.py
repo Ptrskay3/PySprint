@@ -146,10 +146,106 @@ def test_chrange_basic(to):
     elif to == "ghz":
         np.testing.assert_array_almost_equal(np.min(fg.x), 1000000)
 
+
 def test_chrange_errors():
     fg = Dataset(np.arange(1, 1000, 1), np.sin(np.arange(1, 1000, 1)))
     with pytest.raises(ValueError):
         fg.chrange(current_unit="PHz", target_unit="undefined")
+
+
+def test_blank_repr():
+    expected = [
+        "Dataset",
+        '----------',
+        'Parameters',
+        '----------',
+        'Datapoints: 200',
+        'Predicted domain: frequency',
+        'Range: from 0.000 to 199.000 PHz',
+        'Normalized: True',
+        'Delay value: Not given',
+        'SPP position(s): Not given',
+        '----------------------------',
+        'Metadata extracted from file',
+        '----------------------------',
+        '{}'
+    ]
+    x_ = np.arange(200)
+    y_ = np.linspace(0, 1, 199)
+
+    d = Dataset(x_, y_)
+
+    string = d.__repr__().split("\n")
+    assert string == expected
+
+
+def test_blank_repr_2():
+    expected = [
+        "Dataset",
+        '----------',
+        'Parameters',
+        '----------',
+        'Datapoints: 200',
+        'Predicted domain: frequency',
+        'Range: from 0.000 to 199.000 PHz',
+        'Normalized: True',
+        'Delay value: 100 fs',
+        'SPP position(s): Not given',
+        '----------------------------',
+        'Metadata extracted from file',
+        '----------------------------',
+        '{}'
+    ]
+    x_ = np.arange(200)
+    y_ = np.linspace(0, 1, 199)
+
+    d = Dataset(x_, y_)
+    d.delay = 100
+
+    string = d.__repr__().split("\n")
+    assert string == expected
+
+
+def test_blank_repr_3():
+    expected = [
+        "Dataset",
+        '----------',
+        'Parameters',
+        '----------',
+        'Datapoints: 199',
+        'Predicted domain: frequency',
+        'Range: from 0.000 to 1.000 PHz',
+        'Normalized: True',
+        'Delay value: 100 fs',
+        'SPP position(s): 0.5 PHz',
+        '----------------------------',
+        'Metadata extracted from file',
+        '----------------------------',
+        '{}'
+    ]
+    x_ = np.linspace(0, 1, 199)
+    y_ = np.linspace(0, 1, 199)
+
+    d = Dataset(x_, y_)
+    d.delay = 100
+    d.positions = 0.5
+    string = d.__repr__().split("\n")
+    assert string == expected
+
+
+def test_raw_repr():
+    string = [
+     'Dataset', '----------', 'Parameters', '----------', 'Datapoints: 2633', 'Predicted domain: wavelength',
+     'Range: from 360.500 to 1200.250 nm', 'Normalized: False', 'Delay value: Not given',
+     'SPP position(s): Not given', '----------------------------', 'Metadata extracted from file',
+     '----------------------------', '{', '"comment": "m_ifg 8,740",', '"Integration time": "2,00 ms",',
+     '"Average": "1 scans",', '"Nr of pixels used for smoothing": "0",',
+     '"Data measured with spectrometer name": "1107006U1"', '}'
+    ]
+
+    ifg = Dataset.parse_raw("test_rawparsing.trt")
+    assert ifg.__repr__().split("\n") == string
+
 
 if __name__ == "__main__":
     unittest.main()

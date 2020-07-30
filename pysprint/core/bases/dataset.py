@@ -483,12 +483,12 @@ class Dataset(metaclass=DatasetBase):
                 for _ in range(1, meta_len)
             )
             if meta_len != 0:
-                cls.meta = {"comment": comm}
+                _meta = {"comment": comm}
             try:
                 for info in additional:
-                    cls.meta[info[0]] = info[1].strip()
+                    _meta[info[0]] = info[1].strip()
             except IndexError:
-                cls.meta["unparsed"] = str(list(additional))
+                _meta["unparsed"] = str(list(additional))
         df = pd.read_csv(
             basefile,
             skiprows=skiprows,
@@ -514,8 +514,8 @@ class Dataset(metaclass=DatasetBase):
                 usecols=[0, 1],
                 names=["x", "y"],
             )
-            return cls(df["x"].values, df["y"].values, r["y"].values, s["y"].values)
-        return cls(df["x"].values, df["y"].values)
+            return cls(df["x"].values, df["y"].values, r["y"].values, s["y"].values, meta=_meta)
+        return cls(df["x"].values, df["y"].values, meta=_meta)
 
     def __str__(self):
         return self.__repr__()
