@@ -52,7 +52,9 @@ class TestEvaluate(unittest.TestCase):
         np.testing.assert_array_equal(sam, ifg.sam)
 
     def test_rawparsing(self):
-        ifg = Dataset.parse_raw("test_rawparsing.trt")
+        ifg = Dataset.parse_raw(
+            "test_rawparsing.trt", skiprows=8, meta_len=5, decimal=",", sep=";"
+        )
         assert issubclass(ifg.meta.__class__, collections.abc.Mapping)
         with self.assertRaises(OSError):
             Dataset.parse_raw(546)
@@ -184,9 +186,9 @@ def test_blank_repr():
         '----------',
         'Parameters',
         '----------',
-        'Datapoints: 200',
+        'Datapoints: 199',
         'Predicted domain: frequency',
-        'Range: from 0.000 to 199.000 PHz',
+        'Range: from 1.000 to 199.000 PHz',
         'Normalized: True',
         'Delay value: Not given',
         'SPP position(s): Not given',
@@ -198,7 +200,7 @@ def test_blank_repr():
     x_ = np.arange(200)
     y_ = np.linspace(0, 1, 199)
 
-    d = Dataset(x_, y_)
+    d = Dataset(x_, y_, errors='force')
 
     string = d.__repr__().split("\n")
     assert string == expected
@@ -210,9 +212,9 @@ def test_blank_repr_2():
         '----------',
         'Parameters',
         '----------',
-        'Datapoints: 200',
+        'Datapoints: 199',
         'Predicted domain: frequency',
-        'Range: from 0.000 to 199.000 PHz',
+        'Range: from 1.000 to 199.000 PHz',
         'Normalized: True',
         'Delay value: 100 fs',
         'SPP position(s): Not given',
@@ -224,7 +226,7 @@ def test_blank_repr_2():
     x_ = np.arange(200)
     y_ = np.linspace(0, 1, 199)
 
-    d = Dataset(x_, y_)
+    d = Dataset(x_, y_, errors='force')
     d.delay = 100
 
     string = d.__repr__().split("\n")
@@ -259,15 +261,34 @@ def test_blank_repr_3():
 
 def test_raw_repr():
     string = [
-        'Dataset', '----------', 'Parameters', '----------', 'Datapoints: 2633', 'Predicted domain: wavelength',
-        'Range: from 360.500 to 1200.250 nm', 'Normalized: False', 'Delay value: Not given',
-        'SPP position(s): Not given', '----------------------------', 'Metadata extracted from file',
-        '----------------------------', '{', '"comment": "m_ifg 8,740",', '"Integration time": "2,00 ms",',
-        '"Average": "1 scans",', '"Nr of pixels used for smoothing": "0",',
-        '"Data measured with spectrometer name": "1107006U1"', '}'
+        'Dataset',
+        '----------',
+        'Parameters',
+        '----------',
+        'Datapoints: 2633',
+        'Predicted domain: wavelength',
+        'Range: from 360.500 to 1200.250 nm',
+        'Normalized: False',
+        'Delay value: Not given',
+        'SPP position(s): Not given',
+        '----------------------------',
+        'Metadata extracted from file',
+        '----------------------------',
+        "{",
+        '    "Average": "1 scans",',
+        '    "Data measured with spectrometer name": "1107006U1",',
+        '    "Integration time": "2,00 ms",',
+        '    "Nr of pixels used for smoothing": "0",',
+        '    "comment": "m_ifg 8,740",',
+        '    "unparsed": [',
+        '        [',
+        '            "Timestamp [10 microsec ticks]256373440"',
+        '        ]',
+        '    ]',
+        '}'
     ]
 
-    ifg = Dataset.parse_raw("test_rawparsing.trt")
+    ifg = Dataset.parse_raw("test_rawparsing.trt", skiprows=8, meta_len=5, decimal=",", sep=";")
     assert ifg.__repr__().split("\n") == string
 
 
@@ -300,7 +321,7 @@ def test_wave2freq(val):
     assert before == after
 
 
-def test_wave2freq():
+def test_freq2wave():
     with pytest.raises(ZeroDivisionError):
         Dataset.wave2freq(Dataset.freq2wave(0))
 

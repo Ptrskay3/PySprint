@@ -7,7 +7,7 @@ import numbers
 import re
 
 from collections.abc import Iterable
-from copy import copy, deepcopy
+from copy import copy
 from contextlib import suppress
 from textwrap import dedent
 from math import factorial
@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 
 from pysprint.core.bases.dataset_base import DatasetBase, C_LIGHT
 from pysprint.core.bases.apply import DatasetApply
+from pysprint.core.io.parser import _parse_raw
 from pysprint.mpl_tools.spp_editor import SPPEditor
 from pysprint.mpl_tools.normalize import DraggableEnvelope
 from pysprint.utils import MetaData, find_nearest
@@ -46,9 +47,12 @@ class Dataset(metaclass=DatasetBase):
 
     meta = MetaData("""Additional info about the dataset""", copy=False)
 
-    def __init__(self, x, y, ref=None, sam=None, meta=None):
+    def __init__(self, x, y, ref=None, sam=None, meta=None, errors="raise"):
 
         super().__init__()
+
+        if errors not in ("raise", "force"):
+            raise ValueError("errors must be `raise` or `force`.")
 
         self.x = x
         self.y = y
@@ -82,6 +86,17 @@ class Dataset(metaclass=DatasetBase):
             except ValueError:
                 pass  # just ignore invalid arms
 
+        if not len(self.x) == len(self.y):
+            if errors == 'raise':
+                raise ValueError(
+                    f"Mismatching data shapes with {self.x.shape} and {self.y.shape}."
+                )
+            else:
+                truncated_shape = min(len(self.x), len(self.y))
+                # probably we've cut down the first half, that's why we index it
+                # this way
+                self.x, self.y = self.x[-truncated_shape:], self.y[-truncated_shape:]
+
         if len([x for x in (self.ref, self.sam) if len(x) != 0]) == 1:
             warnings.warn(
                 "Reference and sample arm should be passed together or neither one.",
@@ -93,6 +108,17 @@ class Dataset(metaclass=DatasetBase):
             self._is_normalized = self._ensure_norm()
 
         else:
+            if not np.all([len(self.sam) == len(self.x), len(self.ref) == len(self.x)]):
+                if errors == 'raise':
+                    raise ValueError(
+                        f"Mismatching data shapes with {self.x.shape}, "
+                        f"{self.ref.shape} and {self.sam.shape}."
+                    )
+                else:
+                    truncated_shape = min(len(self.x), len(self.ref), len(self.sam), len(self.y))
+                    # same as above..
+                    self.ref, self.sam = self.ref[-truncated_shape:], self.sam[-truncated_shape:]
+
             self.y_norm = (self.y - self.ref - self.sam) / (
                     2 * np.sqrt(self.sam * self.ref)
             )
@@ -150,12 +176,12 @@ class Dataset(metaclass=DatasetBase):
             current_unit, target_unit = current_unit.lower(), target_unit.lower()
             conversions = {
                 "um": {"um": 1, "nm": 1000, "pm": 1E6, "fm": 1E9},
-                "nm": {"um": 1/1000, "nm": 1, "pm": 1000, "fm": 1E6},
-                "pm": {"um": 1/1E6, "nm": 1/1000, "pm": 1, "fm": 1000},
-                "fm": {"um": 1/1E9, "nm": 1/1E6, "pm": 1/1000, "fm": 1},
+                "nm": {"um": 1 / 1000, "nm": 1, "pm": 1000, "fm": 1E6},
+                "pm": {"um": 1 / 1E6, "nm": 1 / 1000, "pm": 1, "fm": 1000},
+                "fm": {"um": 1 / 1E9, "nm": 1 / 1E6, "pm": 1 / 1000, "fm": 1},
                 "phz": {"phz": 1, "thz": 1000, "ghz": 1E6},
-                "thz": {"phz": 1/1000, "thz": 1, "ghz": 1000},
-                "ghz": {"phz": 1/1E6, "thz": 1/1000, "ghz": 1}
+                "thz": {"phz": 1 / 1000, "thz": 1, "ghz": 1000},
+                "ghz": {"phz": 1 / 1E6, "thz": 1 / 1000, "ghz": 1}
             }
             try:
                 ratio = float(conversions[current_unit][target_unit])
@@ -174,7 +200,7 @@ class Dataset(metaclass=DatasetBase):
     def _render_unit(unit, mpl=False):
         unit = unit.lower()
         charmap = {
-            "um": ("\mu m", "um"),
+            "um": (r"\mu m", "um"),
             "nm": ("nm", "nm"),
             "pm": ("pm", "pm"),
             "fm": ("fm", "fm"),
@@ -414,12 +440,20 @@ class Dataset(metaclass=DatasetBase):
         Checks the domain of data just by looking at x axis' minimal value.
         Units are obviously not added yet, we work in nm and PHz...
         """
-        if min(self.x) > 50:
-            self.probably_wavelength = True
-            self.unit = "nm"
-        else:
-            self.probably_wavelength = False
-            self.unit = "PHz"
+        try:
+            if min(self.x) > 50:
+                self.probably_wavelength = True
+                self.unit = "nm"
+            else:
+                self.probably_wavelength = False
+                self.unit = "PHz"
+        # this is the first function to fail if the user sets up
+        # wrong values.
+        except TypeError as error:
+            msg = ValueError(
+                "The file could not be parsed properly."
+            )
+            raise msg from error
 
     # TODO : Make a better metadata parser.
     def _parse_meta(self, meta_len):
@@ -427,7 +461,23 @@ class Dataset(metaclass=DatasetBase):
 
     @classmethod
     def parse_raw(
-            cls, basefile, ref=None, sam=None, skiprows=8, decimal=",", sep=";", meta_len=5,
+        cls,
+        filename,
+        ref=None,
+        sam=None,
+        skiprows=0,
+        decimal=".",
+        sep=None,
+        delimiter=None,
+        comment=None,
+        usecols=None,
+        names=None,
+        swapaxes=False,
+        na_values=None,
+        skip_blank_lines=True,
+        keep_default_na=False,
+        meta_len=0,
+        errors="raise"
     ):
         """
         Dataset object alternative constructor.
@@ -436,7 +486,7 @@ class Dataset(metaclass=DatasetBase):
 
         Parameters:
         ----------
-        basefile: `str`
+        filename: `str`
             base interferogram
             file generated by the spectrometer
 
@@ -449,73 +499,84 @@ class Dataset(metaclass=DatasetBase):
             file generated by the spectrometer
 
         skiprows: `int`, optional
-            Skip rows at the top of the file. Default is `8`.
-
-        sep: `str`, optional
-            The delimiter in the original interferogram file.
-            Default is `;`.
+            Skip rows at the top of the file. Default is `0`.
 
         decimal: `str`, optional
             Character recognized as decimal separator in the original dataset.
             Often `,` for European data.
+            Default is `.`.
+
+        sep: `str`, optional
+            The delimiter in the original interferogram file.
             Default is `,`.
+
+        delimiter: `str`, optional
+            The delimiter in the original interferogram file.
+            This is preferred over the `sep` argument if both given.
+            Default is `,`.
+
+        comment: `str`, optional
+            Indicates remainder of line should not be parsed. If found at the beginning
+            of a line, the line will be ignored altogether. This parameter must be a
+            single character. Default is `'#'`.
+
+        usecols: list-like or callable, optional
+            If there a multiple columns in the file, use only a subset of columns.
+            Default is [0, 1], which will use the first two columns.
+
+        names: array-like, optional
+            List of column names to use. Default is ['x', 'y']. Column marked
+            with `x` (`y`) will be treated as the x (y) axis. Combined with the
+            usecols argument it's possible to select data from a large number of
+            columns.
+
+        swapaxes: bool, optional
+            Whether to swap x and y values in every parsed file. Default is False.
+
+        na_values: scalar, str, list-like, or dict, optional
+            Additional strings to recognize as NA/NaN. If dict passed, specific
+            per-column NA values. By default the following values are interpreted as
+            NaN: ‘’, ‘#N/A’, ‘#N/A N/A’, ‘#NA’, ‘-1.#IND’,
+            ‘-1.#QNAN’, ‘-NaN’, ‘-nan’, ‘1.#IND’, ‘1.#QNAN’,
+            ‘<NA>’, ‘N/A’, ‘NA’, ‘NULL’, ‘NaN’, ‘n/a’, ‘nan’, ‘null’.
+
+        skip_blank_lines: bool
+            If True, skip over blank lines rather than interpreting as NaN values.
+            Default is True.
+
+        keep_default_na: bool
+            Whether or not to include the default NaN values when parsing the data.
+            Depending on whether na_values is passed in, the behavior changes. Default
+            is False. More information available at:
+            https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html
 
         meta_len: `int`, optional
             The first `n` lines in the original file containing the meta
             information about the dataset. It is parsed to be dict-like.
             If the parsing fails, a new entry will be created in the
             dictionary with key `unparsed`.
-            Default is `5`.
+            Default is `1`.
         """
-        if skiprows < meta_len:
-            warnings.warn(
-                f"Skiprows is currently {skiprows}, but"
-                " meta information is set to {meta_len}"
-                " lines. This implies that either one is probably wrong.",
-                PySprintWarning,
-            )
-            meta_len = skiprows
 
-        with open(basefile) as file:
-            comm = next(file).strip("\n").split("-")[-1].lstrip(" ")
-            additional = (
-                next(file).strip("\n").strip("\x00").split(":")
-                for _ in range(1, meta_len)
-            )
-            if meta_len != 0:
-                _meta = {"comment": comm}
-            try:
-                for info in additional:
-                    _meta[info[0]] = info[1].strip()
-            except IndexError:
-                _meta["unparsed"] = str(list(additional))
-        df = pd.read_csv(
-            basefile,
+        parsed = _parse_raw(
+            filename=filename,
+            ref=ref,
+            sam=sam,
             skiprows=skiprows,
-            sep=sep,
             decimal=decimal,
-            usecols=[0, 1],
-            names=["x", "y"],
+            sep=sep,
+            delimiter=delimiter,
+            comment=comment,
+            usecols=usecols,
+            names=names,
+            swapaxes=swapaxes,
+            na_values=na_values,
+            skip_blank_lines=skip_blank_lines,
+            keep_default_na=keep_default_na,
+            meta_len=meta_len
         )
-        if ref is not None and sam is not None:
-            r = pd.read_csv(
-                ref,
-                skiprows=skiprows,
-                sep=sep,
-                decimal=decimal,
-                usecols=[0, 1],
-                names=["x", "y"],
-            )
-            s = pd.read_csv(
-                sam,
-                skiprows=skiprows,
-                sep=sep,
-                decimal=decimal,
-                usecols=[0, 1],
-                names=["x", "y"],
-            )
-            return cls(df["x"].values, df["y"].values, r["y"].values, s["y"].values, meta=_meta)
-        return cls(df["x"].values, df["y"].values, meta=_meta)
+
+        return cls(**parsed, errors=errors)
 
     def __str__(self):
         return self.__repr__()
@@ -545,9 +606,11 @@ class Dataset(metaclass=DatasetBase):
         ----------------------------
         Metadata extracted from file
         ----------------------------
-        {json.dumps(self.meta, indent=4)}"""
+        """
         )
-        return re.sub('^\s+', '', string, flags=re.MULTILINE)
+        string = re.sub('^\s+', '', string, flags=re.MULTILINE)
+        string += json.dumps(self.meta, indent=4, sort_keys=True)
+        return string
 
     @property
     def data(self):
@@ -576,14 +639,6 @@ class Dataset(metaclass=DatasetBase):
         cls = self.__class__
         result = cls.__new__(cls)
         result.__dict__.update(self.__dict__)
-        return result
-
-    def __deepcopy__(self, memo):
-        cls = self.__class__
-        result = cls.__new__(cls)
-        memo[id(self)] = result
-        for k, v in self.__dict__.items():
-            setattr(result, k, deepcopy(v, memo))
         return result
 
     @property
@@ -852,7 +907,6 @@ class Dataset(metaclass=DatasetBase):
             except (ValueError, TypeError):
                 ax.plot(self.x, self.y, color=datacolor, **kwargs)
         self._plot_SPP_if_valid(ax=ax, color="black", marker="o", markersize=10, label="SPP")
-
 
     def show(self):
         """

@@ -28,7 +28,7 @@ class DatasetApply:
         elif self.axis == "y" or self.axis == 1:
             self.target = "y"
         else:
-            raise ValueError(f"Axis must be 'x', 'y', '0' or '1'.")
+            raise ValueError("Axis must be 'x', 'y', '0' or '1'.")
         self.shape = len(getattr(self.obj, self.target))
 
     def perform(self):

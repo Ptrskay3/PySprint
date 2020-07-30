@@ -9,9 +9,9 @@ from pysprint.core.methods.generator import Generator
 @pytest.fixture()
 def setup_ifg():
     x = np.linspace(-1, 8, 1000)
-    y = np.sin(x)*np.cos(x)
+    y = np.sin(x) * np.cos(x)
     noarm = Dataset(x, y)
-    arm = Dataset(x, y, y-1, y-2)
+    arm = Dataset(x, y, y - 1, y - 2)
     return noarm, arm
 
 
@@ -19,6 +19,7 @@ def test_axis(setup_ifg):
     a, _ = setup_ifg
     with pytest.raises(ValueError):
         a.transform(None, axis="dsa")
+
 
 def test_apply_selffunc_noarm(setup_ifg):
     a, _ = setup_ifg
@@ -29,10 +30,11 @@ def test_apply_selffunc_noarm(setup_ifg):
 
     np.testing.assert_array_almost_equal(before, after)
 
+
 def test_apply_selffunc_special_axis_arg():
 
     x = np.linspace(-1, 8, 1000)
-    y = np.sin(x)*np.cos(x)
+    y = np.sin(x) * np.cos(x)
     f = FFTMethod(x, y)
     before = f.x
     f.transform("shift", axis="x")
@@ -64,17 +66,17 @@ def test_apply_functype(setup_ifg):
     a, _ = setup_ifg
 
     def f(y, n, k=3):
-        if y > n and y < k:
+        if n < y < k:
             return 1
         else:
             return 0
 
-    a.transform(f, args=(0,), kwargs={"k":0.5}, axis=1)
+    a.transform(f, args=(0,), kwargs={"k": 0.5}, axis=1)
     assert np.all(a.y[np.where(a.y > 0)][0] == 1)
     assert np.all(a.y[np.where(a.y < 0.5)][0] == 0)
 
 
-def test_apply_functype(setup_ifg):
+def test_apply_functype2(setup_ifg):
     _, a = setup_ifg
 
     def f(y, n, k=3):
@@ -83,7 +85,7 @@ def test_apply_functype(setup_ifg):
         else:
             return 0
 
-    a.transform(f, args=(0,), kwargs={"k":0.5}, axis=1)
+    a.transform(f, args=(0,), kwargs={"k": 0.5}, axis=1)
     assert np.all(a.y[np.where(a.y > 0)][0] == 1)
     assert np.all(a.y[np.where(a.y < 0.5)][0] == 0)
 

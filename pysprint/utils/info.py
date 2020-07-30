@@ -95,7 +95,7 @@ def print_info():
     is_spyder = any("SPYDER" in name for name in os.environ)
     _is_spyder = "Spyder"
     is_conda = os.path.exists(os.path.join(sys.prefix, "conda-meta", "history"))
-    _is_conda = "Conda env"
+    _is_conda = "Conda-env"
     print(f"{_is_conda:<{n + 1}}: {is_conda}")
     print(f"{nm:<{n + 1}}: {ip}")
     print(f"{_is_spyder:<{n + 1}}: {is_spyder}")

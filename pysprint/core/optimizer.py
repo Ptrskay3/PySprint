@@ -34,7 +34,7 @@ class FitOptimizer:
                 pass
                 # we ignore because it might be optional
                 # if y is already normalized
-        if len(self.ref) == 0:
+        if len(self.ref) == 0 or len(self.sam):
             self._y_norm = self.y
         else:
             self._y_norm = (self.y - self.ref - self.sam) / (
