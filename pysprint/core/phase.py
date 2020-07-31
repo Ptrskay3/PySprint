@@ -147,9 +147,18 @@ class Phase:
 
             return dispersion, dispersion_std, fit_report
 
-    def errorplot(self, ax=None, percent=False, **kwargs):
+    def errorplot(self, ax=None, percent=False, title="Errors", **kwargs):
         if ax is None:
             ax = plt
+            plt.xlabel("$\omega\, [PHz]$")
+            if percent:
+                plt.ylabel("%")
+            ax.title(title)
+        else:
+            ax.set(xlabel="$\omega\, [PHz]$", title=title)
+            if percent:
+                ax.set(ylabel="%")
+
         idx = np.argsort(self.x)
         x, y = self.x[idx], self.y[idx]
         if self.fitted_curve is not None:
@@ -157,7 +166,7 @@ class Phase:
                 ax.plot(x, np.abs((y - self.fitted_curve[idx]) / y) * 100, **kwargs)
             else:
                 ax.plot(x, y - self.fitted_curve[idx], **kwargs)
-            ax.title("Errors")
+
             ax.grid()
         else:
             raise ValueError("Must fit a curve before requesting errors.")

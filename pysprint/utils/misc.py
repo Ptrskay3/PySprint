@@ -38,7 +38,7 @@ def mutually_exclusive_args(keyword, *keywords):
         def inner(*args, **kwargs):
             if sum(k in keywords for k in kwargs) != 1:
                 raise TypeError(
-                    "You must specify exactly one of {}".format(" and ".join(keywords))
+                    "You must specify exactly one of {}.".format(" and ".join(keywords))
                 )
             return func(*args, **kwargs)
 

@@ -102,5 +102,4 @@ class DatasetApply:
             if not self.shape % len(val) == 0:
                 raise ValueError("Cannot broadcast safely to the desired shape.")
             else:
-                print("broadcasted")
                 return np.repeat(val, (self.shape % len(val)))

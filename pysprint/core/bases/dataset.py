@@ -556,6 +556,13 @@ class Dataset(metaclass=DatasetBase):
             If the parsing fails, a new entry will be created in the
             dictionary with key `unparsed`.
             Default is `1`.
+
+        errors: string, optional
+            Determines the way how mismatching sized datacolumns behave.
+            The default is `raise`, and it will raise on any error.
+            If set to `force`, it will truncate every array to have the
+            same shape as the shortest column. It truncates from
+            the top of the file.
         """
 
         parsed = _parse_raw(

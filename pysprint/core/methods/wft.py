@@ -45,6 +45,16 @@ class Window:
 
         ax : axis
             The axis to plot on. If not given, plot on the last axis.
+
+        scalefactor : float, optional
+            Number describing how much a given should be scaled up ONLY
+            for visibility.
+
+        zorder : float, optional
+            The drawing order of artists is determined by their zorder attribute, which is
+            a floating point number. Artists with higher zorder are drawn on top. You can
+            change the order for individual artists by setting their zorder. The default
+            value depends on the type of the Artist.
         """
         if ax is None:
             ax = plt
@@ -153,8 +163,7 @@ class WFTMethod(FFTMethod):
         else:
             for _, val in self.window_seq.items():
                 val.plot(ax=ax, scalefactor=np.max(self.y) * .75, **kwargs)
-        self.plot()
-        self.show()
+        self.plot(ax=ax)
 
     def remove_all_windows(self):
         self.window_seq.clear()
@@ -171,11 +180,17 @@ class WFTMethod(FFTMethod):
 
     def remove_window_at(self, center):
         if center not in self.window_seq.keys():
+            c = find_nearest(
+                np.fromiter(self.window_seq.keys(), dtype=float), center
+            )
             raise ValueError(
-                f"Cannot remove window with center {center}, "
-                f"because it cannot be found."
+                f"There is no window with center {center}. "
+                f"Did you mean {c[0]}?"
             )
         self.window_seq.pop(center, None)
+
+    def remove_window_interval(self, start, stop):
+        pass
 
     # TODO : Add parameter to describe how many peaks we are looking for..
     def calculate(
@@ -316,11 +331,8 @@ class WFTMethod(FFTMethod):
 
     def _construct_heatmap_data(self):
         self.X_cont = np.fromiter(self.window_seq.keys(), dtype=float)
-        # self.Z_cont = self.Z_cont.T
-        # if not (self.Y_cont.size, self.X_cont.size) == self.Z_cont.shape:
-        #     self.Z_cont = np.reshape(self.Z_cont, (-1, len(self.X_cont)), order="F")
 
-    def heatmap(self, levels=None, cmap="viridis", figsize=(10, 10)):
+    def heatmap(self, ax=None, levels=None, cmap="viridis", include_ridge=True):
         if self.GD is None:
             raise ValueError("Must calculate first.")
 
@@ -328,7 +340,6 @@ class WFTMethod(FFTMethod):
             raise ValueError(
                 "You need to recalculate with `fastmath=False` to plot the heatmap."
             )
-
         # Only construct if we need to..
         if not (self.Y_cont.size, self.X_cont.size) == self.Z_cont.shape:
             self._construct_heatmap_data()
@@ -337,22 +348,31 @@ class WFTMethod(FFTMethod):
         else:
             if not isinstance(levels, np.ndarray):
                 raise ValueError("Expected np.ndarray as levels.")
-        plt.figure(figsize=figsize)
-        plt.contourf(self.X_cont, self.Y_cont, self.Z_cont, levels=levels, cmap=cmap, extend="both")
-        plt.colorbar()
-        plt.plot(*self.GD.data, color='red', label='detected ridge')
-
-        if self.secondary_centers:
-            pass  # TODO : Plot if exists
-
-        if self.tertiary_centers:
-            pass  # TODO : Plot if exists
-
-        plt.xlabel('Window center [PHz]')
-        plt.ylabel('Delay [fs]')
-        plt.ylim(None, 1.5 * np.max(self.GD.data[1]))
-        plt.legend()
-        plt.show(block=True)
+        if ax is None:
+            cs = plt.contourf(
+                self.X_cont, self.Y_cont, self.Z_cont, levels=levels, cmap=cmap, extend="both"
+            )
+        else:
+            cs = ax.contourf(
+                self.X_cont, self.Y_cont, self.Z_cont, levels=levels, cmap=cmap, extend="both"
+            )
+        if include_ridge:
+            if ax is None:
+                plt.plot(*self.GD.data, color='red', label='detected ridge')
+            else:
+                ax.plot(*self.GD.data, color='red', label='detected ridge')
+            plt.legend()
+        if ax is None:
+            plt.xlabel('Window center [PHz]')
+            plt.ylabel('Delay [fs]')
+            plt.ylim(None, 1.5 * np.max(self.GD.data[1]))
+        else:
+            ax.set_autoscalex_on(False)
+            ax.set(
+                xlabel="Window center [PHz]",
+                ylabel="Delay [fs]",
+                ylim=(None, 1.5 * np.max(self.GD.data[1]))
+            )
 
     def get_heatmap_data(self):
         """

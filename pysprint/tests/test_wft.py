@@ -32,4 +32,5 @@ def test_basic(mck):
     np.testing.assert_array_almost_equal(d, [3000.19708, 399.94187, 3998.03310, 3991.45904, 49894.99719], decimal=4)
 
     f.heatmap()
+    f.show()
     mck.assert_called()
