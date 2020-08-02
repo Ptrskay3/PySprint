@@ -37,8 +37,8 @@ def test_apply_selffunc_special_axis_arg():
     y = np.sin(x) * np.cos(x)
     f = FFTMethod(x, y)
     before = f.x
-    f.transform("shift", axis="x")
-    f.transform("shift", axis="x")
+    f.transform("shift", axis=0)
+    f.transform("shift", axis=0)
     after = f.x
     np.testing.assert_array_almost_equal(before, after)
 

@@ -1,10 +1,11 @@
 import os
+import re
+from copy import copy
 from functools import wraps, lru_cache
 
 import numpy as np
 from scipy.interpolate import interp1d
 import scipy.stats as st
-
 
 __all__ = [
     "unpack_lmfit",
@@ -21,11 +22,76 @@ __all__ = [
     "pad_with_trailing_zeros",
     "mutually_exclusive_args",
     "lazy_property",
+    "inplacify"
 ]
 
+_inplace_doc = """\n\tinplace : bool, optional
+            Whether to apply the operation on the dataset in an "inplace" manner.
+            This means if inplace is True it will apply the changes directly on
+            the current dataset and returns None. If inplace is False, it will
+            leave the current object untouched, but returns a copy of it, and
+            the operation will be performed on the copy. It's useful when
+            chaining operations on a dataset.\n\n\t"""
+
+
+def _has_parameter_section(method):
+    try:
+        return "Parameters" in method.__doc__
+    except TypeError:
+        return False
+
+
+def update_doc(method, doc):
+    if _has_parameter_section(method):
+        newdoc = _build_doc(method, doc)
+        method.__doc__ = newdoc
+    else:
+        newdoc = """\n\tParameters
+        ----------\n\tinplace : bool, optional
+            Whether to apply the operation on the dataset in an "inplace" manner.
+            This means if inplace is True it will apply the changes directly on
+            the current dataset and returns None. If inplace is False, it will
+            leave the current object untouched, but returns a copy of it, and
+            the operation will be performed on the copy. It's useful when
+            chaining operations on a dataset.\n\n\t"""
+
+        nodoc_head = (f"Docstring automatically created for {method.__name__}. "
+                      "Parameter list may not be complete.\n")
+        if method.__doc__ is not None:
+            method.__doc__ += newdoc
+        else:
+            method.__doc__ = nodoc_head + newdoc
+        return
+
+
+def _build_doc(method, param):
+    patt = r"(\w+(?=\s*[-]{4,}[^/]))"  # finding sections
+    splitted_doc = re.split(patt, method.__doc__)
+    try:
+        target = splitted_doc.index("Parameters") + 1
+    except ValueError:
+        return method.__doc__
+
+    splitted_doc[target] = splitted_doc[target].rstrip() + param
+
+    return ''.join(_ for _ in splitted_doc if _ is not None)
+
+
+def inplacify(method):
+    update_doc(method, _inplace_doc)
+
+    @wraps(method)
+    def wrapper(self, *args, **kwds):
+        inplace = kwds.pop("inplace", True)
+        if inplace:
+            method(self, *args, **kwds)
+        else:
+            return method(copy(self), *args, **kwds)
+
+    return wrapper
+
+
 # https://stackoverflow.com/a/54487188/11751294
-
-
 def mutually_exclusive_args(keyword, *keywords):
     """"
     Decorator to restrict the user to specify exactly one of the given parameters.
@@ -144,7 +210,7 @@ def measurement(array, confidence=0.95, silent=False):
     conf: tuple-like (interval)
         The confidence interval
 
-    Example(s)
+    Examples
     ---------
     >>> import numpy as np
     >>> from pysprint.utils import measurement
@@ -161,12 +227,11 @@ def measurement(array, confidence=0.95, silent=False):
 
     I decided to print the results immediately, because people often don't use
     it for further code. Of course, they are also returned if needed.
-
     """
     mean = np.mean(array)
     conf = st.t.interval(confidence, len(array) - 1, loc=mean, scale=st.sem(array))
     if not silent:
-        print(f"{mean:5f} ± {(mean-conf[0]):5f}")
+        print(f"{mean:5f} ± {(mean - conf[0]):5f}")
     return mean, conf
 
 
@@ -224,16 +289,16 @@ def print_disp(f):
         disp = np.trim_zeros(disp, "b")
         disp_std = disp_std[: len(disp)]
         for i, (label, disp_item, disp_std_item) in enumerate(
-            zip(labels, disp, disp_std)
+                zip(labels, disp, disp_std)
         ):
             if run_from_ipython():
                 from IPython.display import display, Math
 
                 display(
-                    Math(f"{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i+1}")
+                    Math(f"{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i + 1}")
                 )
             else:
-                print(f"{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i+1}")
+                print(f"{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i + 1}")
         return disp, disp_std, stri
 
     return wrapping

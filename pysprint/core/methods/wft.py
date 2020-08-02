@@ -200,7 +200,8 @@ class WFTMethod(FFTMethod):
             show_graph=False,
             silent=False,
             force_recalculate=False,
-            fastmath=True
+            fastmath=True,
+            usenifft=False
     ):
         if len(self.window_seq) == 0:
             raise ValueError("Before calculating a window sequence must be set.")
@@ -210,9 +211,9 @@ class WFTMethod(FFTMethod):
         self.fastmath = fastmath
         if force_recalculate:
             self.found_centers.clear()
-            self.retrieve_GD(silent=silent, fastmath=fastmath)
+            self.retrieve_GD(silent=silent, fastmath=fastmath, usenifft=usenifft)
         if self.GD is None:
-            self.retrieve_GD(silent=silent, fastmath=fastmath)
+            self.retrieve_GD(silent=silent, fastmath=fastmath, usenifft=usenifft)
 
         self.cachedlen = len(self.window_seq)
 
@@ -232,8 +233,9 @@ class WFTMethod(FFTMethod):
         ds = np.insert(ds, 0, 0)     # because we obtain the GD curve this way.
         return d, ds, fr
 
-    def retrieve_GD(self, silent=False, fastmath=True):
-        self._apply_window_sequence(silent=silent, fastmath=fastmath)
+    def retrieve_GD(self, silent=False, fastmath=True, usenifft=False):
+        self.fastmath = fastmath
+        self._apply_window_sequence(silent=silent, fastmath=fastmath, usenifft=usenifft)
         self._clean_centers()
         delay = np.fromiter(self.found_centers.keys(), dtype=float)
         omega = np.fromiter(self.found_centers.values(), dtype=float)
@@ -243,7 +245,9 @@ class WFTMethod(FFTMethod):
     def _predict_ideal_window_fwhm(self):
         pass
 
-    def _apply_window_sequence(self, silent=False, fastmath=True, errors="ignore"):
+    def _apply_window_sequence(
+            self, silent=False, fastmath=True, usenifft=False, errors="ignore"
+    ):
         winlen = len(self.window_seq)
 
         if not fastmath:
@@ -251,7 +255,7 @@ class WFTMethod(FFTMethod):
             # it is much faster than using np.append in every iteration
             _x, _y, _, _ = self._safe_cast()
             _obj = FFTMethod(_x, _y)
-            _obj.ifft()
+            _obj.ifft(usenifft=usenifft)
             x, y = find_roi(_obj.x, _obj.y)
             yshape = y.size
             xshape = len(self.window_seq)
@@ -261,7 +265,7 @@ class WFTMethod(FFTMethod):
             _x, _y, _, _ = self._safe_cast()
             _obj = FFTMethod(_x, _y)
             _obj.y *= _window.y
-            _obj.ifft()
+            _obj.ifft(usenifft=usenifft)
             x, y = find_roi(_obj.x, _obj.y)
             if not fastmath:
                 if self.Y_cont.size == 0:  # prevent allocating it in every iteration

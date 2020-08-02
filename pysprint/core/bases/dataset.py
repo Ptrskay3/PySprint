@@ -7,7 +7,6 @@ import numbers
 import re
 
 from collections.abc import Iterable
-from copy import copy
 from contextlib import suppress
 from textwrap import dedent
 from math import factorial
@@ -23,7 +22,7 @@ from pysprint.core.bases.apply import DatasetApply
 from pysprint.core.io.parser import _parse_raw
 from pysprint.mpl_tools.spp_editor import SPPEditor
 from pysprint.mpl_tools.normalize import DraggableEnvelope
-from pysprint.utils import MetaData, find_nearest
+from pysprint.utils import MetaData, find_nearest, inplacify
 
 from pysprint.core.preprocess import (
     savgol,
@@ -171,30 +170,25 @@ class Dataset(metaclass=DatasetBase):
     def __len__(self):
         return len(self.x)
 
-    def chrange(self, current_unit, target_unit="phz", inplace=True):
-        if inplace:
-            current_unit, target_unit = current_unit.lower(), target_unit.lower()
-            conversions = {
-                "um": {"um": 1, "nm": 1000, "pm": 1E6, "fm": 1E9},
-                "nm": {"um": 1 / 1000, "nm": 1, "pm": 1000, "fm": 1E6},
-                "pm": {"um": 1 / 1E6, "nm": 1 / 1000, "pm": 1, "fm": 1000},
-                "fm": {"um": 1 / 1E9, "nm": 1 / 1E6, "pm": 1 / 1000, "fm": 1},
-                "phz": {"phz": 1, "thz": 1000, "ghz": 1E6},
-                "thz": {"phz": 1 / 1000, "thz": 1, "ghz": 1000},
-                "ghz": {"phz": 1 / 1E6, "thz": 1 / 1000, "ghz": 1}
-            }
-            try:
-                ratio = float(conversions[current_unit][target_unit])
-            except KeyError as error:
-                raise ValueError("Units are not compatible") from error
-            self.x = (self.x * ratio)
-            self.unit = self._render_unit(target_unit)
-        else:
-            obj = copy(self)
-            obj.chrange(
-                current_unit=current_unit, target_unit=target_unit, inplace=True
-            )
-            return obj
+    @inplacify
+    def chrange(self, current_unit, target_unit="phz"):
+        current_unit, target_unit = current_unit.lower(), target_unit.lower()
+        conversions = {
+            "um": {"um": 1, "nm": 1000, "pm": 1E6, "fm": 1E9},
+            "nm": {"um": 1 / 1000, "nm": 1, "pm": 1000, "fm": 1E6},
+            "pm": {"um": 1 / 1E6, "nm": 1 / 1000, "pm": 1, "fm": 1000},
+            "fm": {"um": 1 / 1E9, "nm": 1 / 1E6, "pm": 1 / 1000, "fm": 1},
+            "phz": {"phz": 1, "thz": 1000, "ghz": 1E6},
+            "thz": {"phz": 1 / 1000, "thz": 1, "ghz": 1000},
+            "ghz": {"phz": 1 / 1E6, "thz": 1 / 1000, "ghz": 1}
+        }
+        try:
+            ratio = float(conversions[current_unit][target_unit])
+        except KeyError as error:
+            raise ValueError("Units are not compatible") from error
+        self.x = (self.x * ratio)
+        self.unit = self._render_unit(target_unit)
+        return self
 
     @staticmethod
     def _render_unit(unit, mpl=False):
@@ -212,11 +206,13 @@ class Dataset(metaclass=DatasetBase):
             return charmap[unit][0]
         return charmap[unit][1]
 
+    @inplacify
     def transform(self, func, axis=None, args=None, kwargs=None):
         operation = DatasetApply(
             obj=self, func=func, axis=axis, args=args, kwargs=kwargs
         )
         operation.perform()
+        return self
 
     #  TODO : The plot must be formatted.
     def phase_plot(self, exclude_GD=False):
@@ -447,6 +443,7 @@ class Dataset(metaclass=DatasetBase):
             else:
                 self.probably_wavelength = False
                 self.unit = "PHz"
+
         # this is the first function to fail if the user sets up
         # wrong values.
         except TypeError as error:
@@ -454,10 +451,6 @@ class Dataset(metaclass=DatasetBase):
                 "The file could not be parsed properly."
             )
             raise msg from error
-
-    # TODO : Make a better metadata parser.
-    def _parse_meta(self, meta_len):
-        pass
 
     @classmethod
     def parse_raw(
@@ -653,31 +646,17 @@ class Dataset(metaclass=DatasetBase):
         """Retuns whether the dataset is normalized."""
         return self._is_normalized
 
-    def chdomain(self, inplace=True):
+    @inplacify
+    def chdomain(self):
         """
         Changes from wavelength [nm] to ang. freq. [PHz]
         domain and vica versa.
-
-        Parameters
-        ----------
-
-        inplace : bool
-            Whether to apply the operation on the dataset in an "inplace" manner.
-            This means if inplace is True it will apply the changes directly on
-            the current dataset and returns None. If inplace is False, it will
-            leave the current object untouched, but returns a copy of it, and
-            the operation will be performed on the copy. It's useful when
-            chaining operations on a dataset.
         """
-        if inplace:
-            self.x = (2 * np.pi * C_LIGHT) / self.x
-            self._check_domain()
-            if hasattr(self, "original_x"):
-                self.original_x = self.x
-        else:
-            obj = copy(self)
-            obj.chdomain(inplace=True)
-            return obj
+        self.x = (2 * np.pi * C_LIGHT) / self.x
+        self._check_domain()
+        if hasattr(self, "original_x"):
+            self.original_x = self.x
+        return self
 
     def detect_peak_cwt(self, width, floor_thres=0.05):
         x, y, ref, sam = self._safe_cast()
@@ -702,7 +681,7 @@ class Dataset(metaclass=DatasetBase):
             Usually it's a good idea to stay with a low degree, e.g 3 or 5.
             Default is 3.
 
-        Notes:
+        Notes
         ------
         If arms were given, it will merge them into the `self.y` and
         `self.y_norm` variables. Also applies a linear interpolation o
@@ -718,73 +697,58 @@ class Dataset(metaclass=DatasetBase):
             "Linear interpolation have been applied to data.", InterpolationWarning,
         )
 
-    def slice(self, start=None, stop=None, inplace=True):
+    @inplacify
+    def slice(self, start=None, stop=None):
         """
         Cuts the dataset on x axis.
 
-        Parameters:
+        Parameters
         ----------
         start : float
             start value of cutting interval
             Not giving a value will keep the dataset's original minimum value.
             Note that giving `None` will leave original minimum untouched too.
             Default is `None`.
-
         stop : float
             stop value of cutting interval
             Not giving a value will keep the dataset's original maximum value.
             Note that giving `None` will leave original maximum untouched too.
             Default is `None`.
 
-        inplace : bool
-            Whether to apply the operation on the dataset in an "inplace" manner.
-            This means if inplace is True it will apply the changes directly on
-            the current dataset and returns None. If inplace is False, it will
-            leave the current object untouched, but returns a copy of it, and
-            the operation will be performed on the copy. It's useful when
-            chaining operations on a dataset.
-
-        Notes:
+        Notes
         ------
 
         If arms were given, it will merge them into the `self.y` and
         `self.y_norm` variables. After this operation, the arms' spectra
         cannot be retrieved.
         """
-        if inplace:
-            self.x, self.y_norm = cut_data(
-                self.x, self.y, self.ref, self.sam, start=start, stop=stop
-            )
-            self.ref = []
-            self.sam = []
-            self.y = self.y_norm
-            # Just to make sure it's correctly shaped. Later on we might
-            # delete this.
-            if hasattr(self, "original_x"):
-                self.original_x = self.x
-            self._is_normalized = self._ensure_norm()
-        else:
-            obj = copy(self)
-            obj.slice(start=start, stop=stop, inplace=True)
-            return obj
+        self.x, self.y_norm = cut_data(
+            self.x, self.y, self.ref, self.sam, start=start, stop=stop
+        )
+        self.ref = []
+        self.sam = []
+        self.y = self.y_norm
+        # Just to make sure it's correctly shaped. Later on we might
+        # delete this.
+        if hasattr(self, "original_x"):
+            self.original_x = self.x
+        self._is_normalized = self._ensure_norm()
+        return self
 
     def convolution(self, window_length, std=20):
         """
         Applies a convolution with a gaussian on the dataset.
 
-        Parameters:
+        Parameters
         ----------
         window_length: int
             Length of the gaussian window.
-
         std: float
             Standard deviation of the gaussian window.
             Default is `20`.
 
-
         Returns
         -------
-
         None
 
         Notes:
@@ -808,7 +772,7 @@ class Dataset(metaclass=DatasetBase):
         Basic algorithm to find extremal points in data
         using ``scipy.signal.find_peaks``.
 
-        Parameters:
+        Parameters
         ----------
 
         pmax : float
@@ -831,7 +795,7 @@ class Dataset(metaclass=DatasetBase):
             format is `(lower, higher)` or `[lower, higher]`.
             Default is None.
 
-        Returns:
+        Returns
         -------
         xmax: `array-like`
             x coordinates of the maximums
@@ -921,6 +885,7 @@ class Dataset(metaclass=DatasetBase):
         """
         self.plt.show(block=True)
 
+    @inplacify
     def normalize(self, filename=None, smoothing_level=0):
         """
         Normalize the interferogram by finding upper and lower envelope
@@ -960,6 +925,7 @@ class Dataset(metaclass=DatasetBase):
                 filename += ".txt"
             np.savetxt(filename, np.transpose([self.x, self.y]), delimiter=",")
             print(f"Successfully saved as {filename}")
+        return self
 
     def open_SPP_panel(self):
         """
@@ -1000,15 +966,12 @@ class Dataset(metaclass=DatasetBase):
 
         Parameters
         ----------
-
         delay : float
             The delay value that belongs to the current interferogram.
             Must be given in `fs` units.
-
         positions : float or iterable
             The SPP positions that belong to the current interferogram.
             Must be float or sequence of floats (tuple, list, np.ndarray, etc.)
-
         force : bool, optional
             Can be used to set specific SPP positions which are outside of
             the dataset's range. Note that in most cases you should avoid using

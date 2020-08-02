@@ -21,7 +21,9 @@ from pysprint.utils import (
     print_disp,
     transform_lmfit_params_to_dispersion,
     transform_cf_params_to_dispersion,
-    unpack_lmfit, find_nearest,
+    unpack_lmfit,
+    find_nearest,
+    inplacify
 )
 
 
@@ -46,8 +48,10 @@ class Phase:
             return self.poly.__call__(value)
         raise NotImplementedError("Before calling, a polinomial must be fitted.")
 
+    @inplacify
     def slice(self, start=None, stop=None):
         self.x, self.y = cut_data(self.x, self.y, [], [], start=start, stop=stop)
+        return self
 
     @classmethod
     def from_disperion_array(cls, dispersion_array, domain=None):
@@ -87,8 +91,9 @@ class Phase:
             ax.plot(x, y, **kwargs)
             if self.fitted_curve is not None:
                 ax.plot(x, self.fitted_curve[idx], "r--")
-        else:
-            ax.plot(x, self.poly(x)[idx], **kwargs)
+            else:
+                # ax.plot(x, self.poly(x)[idx], **kwargs)
+                pass
         plt.grid()
         plt.show()
 

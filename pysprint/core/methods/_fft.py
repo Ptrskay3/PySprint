@@ -1,15 +1,15 @@
 import os
 import contextlib
 import warnings
-from copy import copy
 
 import numpy as np
 from scipy.fftpack import fftshift
-import pandas as pd
-import matplotlib.pyplot as plt
+# import pandas as pd
+# import matplotlib.pyplot as plt
 
 from pysprint.core.bases.dataset import Dataset
 from pysprint.core.nufft import nuifft
+from pysprint.utils import inplacify
 from pysprint.utils.exceptions import FourierWarning
 from pysprint.core.fft_tools import _run
 from pysprint.core.phase import Phase
@@ -44,7 +44,8 @@ class FFTMethod(Dataset):
         self._ifft_called_first = False
         self.nufft_used = False
 
-    def shift(self, axis, inplace=True):
+    @inplacify
+    def shift(self, axis="x"):
         """
         Equivalent to `scipy.fftpack.fftshift`, but it's easier to
         use this function instead, because we don't need to explicitly
@@ -54,37 +55,25 @@ class FFTMethod(Dataset):
         ----------
         axis : str
             either 'x', 'y', 'both', 'xy' or 'yx'.
-
-        inplace : bool, optional
-            Whether to apply the operation on the dataset in an "inplace" manner.
-            This means if inplace is True it will apply the changes directly on
-            the current dataset and returns None. If inplace is False, it will
-            leave the current object untouched, but returns a copy of it, and
-            the operation will be performed on the copy. It's useful when
-            chaining operations on a dataset.
         """
-        if inplace:
-            if axis == "x":
-                self.x = fftshift(self.x)
-            elif axis == "y":
-                self.y = fftshift(self.y)
-            elif axis == "both" or axis == "xy" or axis == "yx":
-                self.y = fftshift(self.y)
-                self.x = fftshift(self.x)
-            else:
-                raise ValueError("axis should be either `x`, `y` or `both`.")
+        if axis == "x":
+            self.x = fftshift(self.x)
+        elif axis == "y":
+            self.y = fftshift(self.y)
+        elif axis == "both" or axis == "xy" or axis == "yx":
+            self.y = fftshift(self.y)
+            self.x = fftshift(self.x)
         else:
-            obj = copy(self)
-            obj.shift(axis=axis, inplace=True)
-            return obj
+            raise ValueError("axis should be either `x`, `y` or `both`.")
+        return self
 
+    @inplacify
     def ifft(
         self,
         interpolate=True,
         usenifft=False,
         eps=1e-12,
         exponent="positive",
-        inplace=True,
     ):
         """
         Applies inverse Fast Fourier Transfrom to the dataset.
@@ -95,29 +84,18 @@ class FFTMethod(Dataset):
         interpolate : bool, default is True -- WILL BE REMOVED
             Whether to apply linear interpolation on the dataset
             before transforming.
-
         usenifft : bool, optional
             Whether to use non uniform fft. It uses the algorithm
             described in the references. This means the interferogram
             will *not* be linearly interpolated. Default is False.
-
         eps : float, optional
             The desired approximate error for the non uniform FFT result. Must be
             in range 1E-33 < eps < 1E-1, though be aware that the errors are
             only well calibrated near the range 1E-12 ~ 1E-6. Default is 1E-12.
-
         exponent : str, optional
             if 'negative', compute the transform with a negative exponent.
             if 'positive', compute the transform with a positive exponent.
             Default is `positive`.
-
-        inplace : bool, optional
-            Whether to apply the operation on the dataset in an "inplace" manner.
-            This means if inplace is True it will apply the changes directly on
-            the current dataset and returns None. If inplace is False, it will
-            leave the current object untouched, but returns a copy of it, and
-            the operation will be performed on the copy. It's useful when
-            chaining operations on a dataset.
 
         Notes
         -----
@@ -144,64 +122,40 @@ class FFTMethod(Dataset):
             (2004)
         """
         self.nufft_used = usenifft
-
-        if inplace:
-            self._ifft_called_first = True
-            if usenifft:
-                x_spaced = np.linspace(self.x[0], self.x[-1], len(self.x))
-                timestep = np.diff(x_spaced)[0]
-                x_axis = np.fft.fftfreq(len(self.x), d=timestep / (2 * np.pi))
-                y_transform = nuifft(
-                    self.x,
-                    self.y,
-                    gl=len(self.x),
-                    df=(x_axis[1] - x_axis[0]),
-                    epsilon=eps,
-                    exponent=exponent,
-                )
-                self.x, self.y = x_axis, np.fft.fftshift(y_transform)
-
-            else:
-                self.x, self.y = ifft_method(self.x, self.y, interpolate=interpolate)
-        else:
-            obj = copy(self)
-            obj.ifft(
-                interpolate=interpolate,
-                usenifft=usenifft,
-                eps=eps,
+        self._ifft_called_first = True
+        if usenifft:
+            x_spaced = np.linspace(self.x[0], self.x[-1], len(self.x))
+            timestep = np.diff(x_spaced)[0]
+            x_axis = np.fft.fftfreq(len(self.x), d=timestep / (2 * np.pi))
+            y_transform = nuifft(
+                self.x,
+                self.y,
+                gl=len(self.x),
+                df=(x_axis[1] - x_axis[0]),
+                epsilon=eps,
                 exponent=exponent,
-                inplace=True,
             )
-            return obj
+            self.x, self.y = x_axis, np.fft.fftshift(y_transform)
 
-    def fft(self, inplace=True):
+        else:
+            self.x, self.y = ifft_method(self.x, self.y, interpolate=interpolate)
+        return self
+
+    @inplacify
+    def fft(self):
         """
         Applies fft to the dataset.
         If ifft was not called first, inaccurate results might happen.
-
-        Parameters
-        ----------
-
-        inplace : bool, optional
-            Whether to apply the operation on the dataset in an "inplace" manner.
-            This means if inplace is True it will apply the changes directly on
-            the current dataset and returns None. If inplace is False, it will
-            leave the current object untouched, but returns a copy of it, and
-            the operation will be performed on the copy. It's useful when
-            chaining operations on a dataset.
         """
-        if inplace:
-            if not self._ifft_called_first:
-                warnings.warn(
-                    "This module is designed to call ifft before fft", FourierWarning
-                )
-            self.x, self.y = fft_method(self.original_x, self.y)
-        else:
-            obj = copy(self)
-            obj.fft(inplace=True)
-            return obj
+        if not self._ifft_called_first:
+            warnings.warn(
+                "This module is designed to call ifft before fft", FourierWarning
+            )
+        self.x, self.y = fft_method(self.original_x, self.y)
+        return self
 
-    def window(self, at, fwhm, window_order=6, plot=True, inplace=True):
+    @inplacify
+    def window(self, at, fwhm, window_order=6, plot=True):
         """
         Draws a gaussian window on the plot with the desired parameters.
         The maximum value is adjusted for the dataset's maximum value,
@@ -212,70 +166,44 @@ class FFTMethod(Dataset):
 
         at : float
             The maximum of the gaussian curve.
-
         fwhm : float
             Full width at half maximum of the gaussian
-
         window_order : int, optional
             Order of the gaussian curve.
             If not even, it's incremented by 1.
             Default is 6.
-
         plot : bool, optional
             Whether to immediately show the window with the data.
             Default is `True`.
 
-        inplace : bool, optional
-            Whether to apply the operation on the dataset in an "inplace" manner.
-            This means if inplace is True it will apply the changes directly on
-            the current dataset and returns None. If inplace is False, it will
-            leave the current object untouched, but returns a copy of it, and
-            the operation will be performed on the copy. It's useful when
-            chaining operations on a dataset.
         """
-        if inplace:
-            self.at = at
-            self.fwhm = fwhm
-            self.window_order = window_order
-            gaussian = gaussian_window(self.x, self.at, self.fwhm, self.window_order)
-            self.plt.plot(self.x, gaussian * max(abs(self.y)), "r--")
-            if plot:
-                self.plot()
-                self.show()
-        else:
-            obj = copy(self)
-            obj.window(
-                at=at, fwhm=fwhm, window_order=window_order, plot=plot, inplace=True
-            )
-            return obj
+        self.at = at
+        self.fwhm = fwhm
+        self.window_order = window_order
+        gaussian = gaussian_window(self.x, self.at, self.fwhm, self.window_order)
+        self.plt.plot(self.x, gaussian * max(abs(self.y)), "r--")
+        if plot:
+            self.plot()
+            self.show()
+        return self
 
-    def apply_window(self, inplace=True):
+    @inplacify
+    def apply_window(self):
         """
         If window function is set, applies window on the dataset.
-
-        inplace : bool, optional
-            Whether to apply the operation on the dataset in an "inplace" manner.
-            This means if inplace is True it will apply the changes directly on
-            the current dataset and returns None. If inplace is False, it will
-            leave the current object untouched, but returns a copy of it, and
-            the operation will be performed on the copy. It's useful when
-            chaining operations on a dataset.
         """
-        if inplace:
-            self.plt.clf()
-            self.plt.cla()
-            self.plt.close()
-            self.y = cut_gaussian(
-                self.x,
-                self.y,
-                spike=self.at,
-                fwhm=self.fwhm,
-                win_order=self.window_order,
-            )
-        else:
-            obj = copy(self)
-            obj.apply_window(inplace=True)
-            return obj
+        self.plt.clf()
+        self.plt.cla()
+        self.plt.close()
+        self.y = cut_gaussian(
+            self.x,
+            self.y,
+            spike=self.at,
+            fwhm=self.fwhm,
+            win_order=self.window_order,
+        )
+        return self
+
 
     def retrieve_phase(self):
         """
