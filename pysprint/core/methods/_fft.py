@@ -1,13 +1,15 @@
 import os
 import contextlib
 import warnings
+import logging
 
 import numpy as np
 from scipy.fftpack import fftshift
-# import pandas as pd
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+import pandas as pd
 
 from pysprint.core.bases.dataset import Dataset
+from pysprint.core.bases.algorithms import longest_common_subsequence
 from pysprint.core.nufft import nuifft
 from pysprint.utils import inplacify
 from pysprint.utils.exceptions import FourierWarning
@@ -22,6 +24,10 @@ from pysprint.core.evaluate import (
 )
 
 __all__ = ["FFTMethod"]
+
+logger = logging.getLogger(__name__)
+FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+logging.basicConfig(format=FORMAT)
 
 
 class FFTMethod(Dataset):
@@ -379,83 +385,53 @@ class FFTMethod(Dataset):
                 reference_point=reference_point, order=order, show_graph=True
             )
 
-    # PULSE SHAPE RECONSTRUCTION WILL BE ADDED SOON
+    def get_pulse_shape_from_array(
+            self, x_sample, y_sample, truncate=True, tol=None
+    ):
+        if self.phase is None:
+            raise ValueError("Must calculate phase first.")
+        if not len(y_sample) == len(x_sample):
+            raise ValueError("Missmatching shapes.")
 
-    # @staticmethod
-    # def longest_common_subseq(x1, x2, y1, y2, tol=1E-2):
-    #     idx1 = np.argsort(x1)
-    #     x1, y1 = x1[idx1], y1[idx1]
-    #     idx2 = np.argsort(x2)
-    #     x2, y2 = x2[idx2], y2[idx2]
-    #
-    #     idx1 = (np.abs(x1[:, None] - x2) <= tol).any(axis=1)
-    #     idx2 = (np.abs(x2[:, None] - x1) <= tol).any(axis=1)
-    #     return x1[idx1], x2[idx2], y1[idx1], y2[idx2]
-    #
-    # def get_pulse_shape_from_array(self, sample_x, sample_y, truncate=True, show_graph=False):
-    #     tol = 1E-1
-    #     if self.phase is None:
-    #         raise ValueError("Must calculate phase first.")
-    #     if not len(sample_y) == len(sample_x):
-    #         raise ValueError("Missmatching shapes.")
-    #
-    #         # quick check if we're able to broadcast
-    #     sample_y = np.asarray(sample_y, dtype=float)
-    #     if len(sample_y) != len(self.phase.data[0]):
-    #         if truncate:
-    #             x_sample, x_phase, y_sample, y_phase = self.longest_common_subseq(
-    #                 sample_x, self.phase.data[0], sample_y, self.phase.data[1], tol=tol
-    #             )
-    #         else:
-    #             raise ValueError(
-    #                 f"Shapes differ with {len(sample)} and {len(self.phase.data[0])}."
-    #             )
-    #
-    #     E_field = np.sqrt(y_sample) * np.exp(-1j * y_phase)
-    #
-    #     E_pulse = np.abs(np.fft.ifft(E_field)) ** 2
-    #
-    #     x_spaced = np.linspace(
-    #         x_phase[0], x_phase[-1], len(x_phase)
-    #     )
-    #     timestep = np.diff(x_spaced)[0]
-    #     x_axis = np.fft.fftfreq(len(x_phase), d=timestep / (2 * np.pi))
-    #     if show_graph:
-    #         plt.figure()
-    #         plt.plot(x_axis, E_pulse)
-    #         plt.grid()
-    #         plt.show()
-    #     return x_axis, E_pulse
-    #
-    # def get_pulse_shape_from_file(self, filename, truncate=True, show_graph=False, **kwargs):
-    #     tol = 1E-6
-    #     if isinstance(filename, str):
-    #         df = pd.read_csv(filename, names=["x", "y"], **kwargs)
-    #         sample_x = df["x"].values
-    #         sample_y = df["y"].values
-    #         if len(sample_y) != len(self.phase.data[0]):
-    #             if truncate:
-    #                 idx = [(np.abs(sample_x[:, None] - self.phase.data[0]) < tol).any(1)]
-    #                 sample_y = sample_y[idx]
-    #             else:
-    #                 raise ValueError(
-    #                     f"Shapes differ with {len(sample)} and {len(self.phase.data[0])}."
-    #                 )
-    #     E_field = np.sqrt(sample_y) * np.exp(-1j * self.phase.data[1])
-    #
-    #     E_pulse = np.abs(np.fft.ifft(E_field)) ** 2
-    #
-    #     x_spaced = np.linspace(
-    #         self.phase.data.x[0], self.phase.data.x[-1], len(self.phase.data.x)
-    #     )
-    #     timestep = np.diff(x_spaced)[0]
-    #     x_axis = np.fft.fftfreq(len(self.phase.data.x), d=timestep / (2 * np.pi))
-    #     if show_graph:
-    #         plt.figure()
-    #         plt.plot(x_axis, E_pulse)
-    #         plt.grid()
-    #         plt.show()
-    #     return x_axis, E_pulse
+        # quick check if we're able to broadcast
+        y_sample = np.asarray(y_sample, dtype=float)
+        x_phase, y_phase = self.phase.data[0], self.phase.data[1]
+        if len(y_sample) != len(self.phase.data[0]):
+            if truncate:
+                x_sample, y_sample, x_phase, y_phase = longest_common_subsequence(
+                    x_sample, y_sample, x_phase, y_phase, tol=tol
+                )
+                logging.info(
+                    f"Shapes were truncated from {np.min(x_sample)} to {np.max(x_sample)} with length {len(x_sample)}."
+                )
+            else:
+                raise ValueError(
+                    f"Shapes differ with {len(x_sample)} and {len(self.phase.data[0])}."
+                )
+
+        E_field = np.sqrt(y_sample) * np.exp(-1j * y_phase)
+        E_pulse = np.abs(np.fft.ifft(E_field)) ** 2
+
+        x_spaced = np.linspace(
+            x_phase[0], x_phase[-1], len(x_phase)
+        )
+        timestep = np.diff(x_spaced)[0]
+        x_axis = np.fft.fftfreq(len(x_phase), d=timestep / (2 * np.pi))
+        return x_axis, E_pulse
+
+    def get_pulse_shape_from_file(
+            self, filename, truncate=True, tol=None, **kwargs
+    ):
+        if isinstance(filename, str):
+            ch = kwargs.pop("chdomain", False)
+            df = pd.read_csv(filename, names=["x", "y"], **kwargs)
+            x_sample = df["x"].values
+            y_sample = df["y"].values
+            if ch:
+                x_sample = self.wave2freq(x_sample)
+            self.get_pulse_shape_from_array(
+                x_sample, y_sample, truncate=truncate, tol=tol
+            )
 
     def errorplot(self, *args, **kwargs):
         try:
