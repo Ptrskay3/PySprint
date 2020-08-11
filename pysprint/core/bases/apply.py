@@ -40,7 +40,7 @@ class DatasetApply:
                 self.kwargs["axis"] = self.axis
             # Let's assume we don't mess up the shape internally
             func(*self.args, **self.kwargs)
-            return self.obj # we need to return this because of `inplacify` deco.
+            return self.obj  # we need to return this because of `inplacify` deco.
 
         elif isinstance(self.f, np.ufunc):
             target = getattr(self.obj, self.target)

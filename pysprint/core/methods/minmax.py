@@ -92,6 +92,9 @@ class MinMaxMethod(Dataset):
         # Better distribute these points between min and max, just in case
         # the default argrelextrema is definitely not called
         # in `pysprint.core.evaluate.min_max_method`.
+
+        # TODO : Don't distribute them, we'd rather sort by values to find
+        # out it's a min or max.
         self.xmin = _editpeak.get_dat[0][:len(_editpeak.get_dat[0]) // 2]
         self.xmax = _editpeak.get_dat[0][len(_editpeak.get_dat[0]) // 2:]
         print(f"{len(_editpeak.get_dat[0])} extremal points were recorded.")

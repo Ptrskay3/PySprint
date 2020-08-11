@@ -26,7 +26,7 @@ from pysprint.core.evaluate import (
 __all__ = ["FFTMethod"]
 
 logger = logging.getLogger(__name__)
-FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+FORMAT = "[ %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
 logging.basicConfig(format=FORMAT)
 
 
@@ -187,9 +187,9 @@ class FFTMethod(Dataset):
         self.fwhm = fwhm
         self.window_order = window_order
         gaussian = gaussian_window(self.x, self.at, self.fwhm, self.window_order)
-        self.plt.plot(self.x, gaussian * max(abs(self.y)), "r--")
+        self.plt.plot(self.x, gaussian * max(abs(self.y)), "k--")
         if plot:
-            self.plot()
+            self.plot(overwrite="$t\,[fs]$")
             self.show()
         return self
 
@@ -209,7 +209,6 @@ class FFTMethod(Dataset):
             win_order=self.window_order,
         )
         return self
-
 
     def retrieve_phase(self):
         """
@@ -364,7 +363,6 @@ class FFTMethod(Dataset):
             if only_phase:
                 y = np.unwrap(np.angle(self.y), axis=0)
                 self.phase = Phase(self.x, y)
-                self.phase.plot()
                 return self.phase
             self.calculate(
                 reference_point=reference_point, order=order, show_graph=True
@@ -379,7 +377,6 @@ class FFTMethod(Dataset):
             if only_phase:
                 y = np.unwrap(np.angle(self.y), axis=0)
                 self.phase = Phase(self.x, y)
-                self.phase.plot()
                 return self.phase
             self.calculate(
                 reference_point=reference_point, order=order, show_graph=True
@@ -429,7 +426,7 @@ class FFTMethod(Dataset):
             y_sample = df["y"].values
             if ch:
                 x_sample = self.wave2freq(x_sample)
-            self.get_pulse_shape_from_array(
+            return self.get_pulse_shape_from_array(
                 x_sample, y_sample, truncate=truncate, tol=tol
             )
 

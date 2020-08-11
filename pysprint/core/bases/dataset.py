@@ -12,6 +12,7 @@ from textwrap import dedent
 from math import factorial
 from inspect import signature
 import json  # for pretty printing dict
+import logging
 
 import numpy as np
 import pandas as pd
@@ -37,6 +38,10 @@ from pysprint.utils.exceptions import (
     DatasetError,
     PySprintWarning,
 )
+
+logger = logging.getLogger(__name__)
+FORMAT = "[ %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+logging.basicConfig(format=FORMAT)
 
 __all__ = ["Dataset"]
 
@@ -469,7 +474,7 @@ class Dataset(metaclass=DatasetBase):
         na_values=None,
         skip_blank_lines=True,
         keep_default_na=False,
-        meta_len=0,
+        meta_len=1,
         errors="raise"
     ):
         """
@@ -643,11 +648,14 @@ class Dataset(metaclass=DatasetBase):
             self.original_x = self.x
         return self
 
-    def detect_peak_cwt(self, width, floor_thres=0.05):
+    def detect_peak_cwt(self, widths, floor_thres=0.05):
         x, y, ref, sam = self._safe_cast()
         xmax, ymax, xmin, ymin = cwt(
-            x, y, ref, sam, width=width, floor_thres=floor_thres
+            x, y, ref, sam, widths=widths, floor_thres=floor_thres
         )
+        self.xmax = xmax
+        self.xmin = xmin
+        logging.info(f"{len(xmax)} max values and {len(xmin)} min values found.")
         return xmax, ymax, xmin, ymin
 
     def savgol_fil(self, window=5, order=3):
@@ -797,6 +805,9 @@ class Dataset(metaclass=DatasetBase):
             threshold=threshold,
             except_around=except_around,
         )
+        self.xmax = xmax
+        self.xmin = xmin
+        logging.info(f"{len(xmax)} max values and {len(xmin)} min values found.")
         return xmax, ymax, xmin, ymin
 
     def _plot_SPP_if_valid(self, ax=None, **kwargs):
@@ -826,6 +837,9 @@ class Dataset(metaclass=DatasetBase):
         datacolor = kwargs.pop("color", "red")
         _unit = self._render_unit(self.unit, mpl=True)
         xlabel = f"$\lambda\,[{_unit}]$" if self.probably_wavelength else f"$\omega\,[{_unit}]$"
+        overwrite = kwargs.pop("overwrite", None)
+        if overwrite is not None:
+            xlabel = overwrite
 
         if ax is None:
             ax = self.plt

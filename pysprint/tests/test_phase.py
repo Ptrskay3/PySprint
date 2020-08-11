@@ -1,8 +1,10 @@
 import pytest
 import numpy as np
+import matplotlib.pyplot as plt
 
 from unittest.mock import patch
 from pysprint.core.phase import Phase
+
 
 
 def test_phase_gd_mode():
@@ -23,6 +25,7 @@ def test_plots(mck):
 
     phase = Phase(x, y)
     phase.plot()
+    plt.show()
     mck.assert_called()
 
 

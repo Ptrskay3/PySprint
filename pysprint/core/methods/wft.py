@@ -221,16 +221,10 @@ class WFTMethod(FFTMethod):
             raise ValueError("Cannot fit constant function to data. Order must be in [2, 5].")
 
         d, ds, fr = self.GD._fit(
-            reference_point=reference_point, order=order - 1
+            reference_point=reference_point, order=order
         )
         if show_graph:
             self.GD.plot()
-
-        delay = np.fromiter(self.found_centers.keys(), dtype=float)
-        val, _ = find_nearest(delay, reference_point)
-        GD_val = self.found_centers[val]
-        d = np.insert(d, 0, GD_val)  # manually insert the GD value
-        ds = np.insert(ds, 0, 0)     # because we obtain the GD curve this way.
         return d, ds, fr
 
     def retrieve_GD(self, silent=False, fastmath=True, usenifft=False):
@@ -239,7 +233,7 @@ class WFTMethod(FFTMethod):
         self._clean_centers()
         delay = np.fromiter(self.found_centers.keys(), dtype=float)
         omega = np.fromiter(self.found_centers.values(), dtype=float)
-        self.GD = Phase(delay, omega)
+        self.GD = Phase(delay, omega, GD_mode=True)
         return self.GD
 
     def _predict_ideal_window_fwhm(self):

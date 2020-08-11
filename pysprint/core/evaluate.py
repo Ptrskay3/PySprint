@@ -37,48 +37,50 @@ __all__ = [
     "gaussian_window",
 ]
 
+# FIXME : This function does waaaaay more things than it should..
+# We have to split this up asap
+# Also, maybe we should fully rework this..
 
 def min_max_method(
-    x, y, ref, sam, ref_point, maxx=None, minx=None, fit_order=5, show_graph=False,
+    x,
+    y,
+    ref,
+    sam,
+    ref_point,
+    maxx=None,
+    minx=None,
+    fit_order=5,
+    SPP_callbacks=None,
+    show_graph=False,
 ):
-    """Calculates the dispersion with minimum-maximum method
+    """
+    Calculates the dispersion with minimum-maximum method
 
     Parameters
     ----------
-
     x: array-like
-    x-axis data
-
+        x-axis data
     y: array-like
-    y-axis data
-
+        y-axis data
     ref, sam: array-like
-    reference and sample arm spectra evaluated at x
-
+        reference and sample arm spectra evaluated at x
     ref_point: float
-    the reference point to calculate order
-
+        the reference point to calculate order
     maxx: array-like, optional
-    the accepted maximal x values (if you want to manually pass)
-
+        the accepted maximal x values (if you want to manually pass)
     minx: array-like, optional
-    the accepted minimal x values (if you want to manually pass)
-
+        the accepted minimal x values (if you want to manually pass)
     fit_order: int, optional
-    degree of polynomial to fit data [1, 5]
-
+        degree of polynomial to fit data [1, 5]
     show_graph: bool, optional
-    if True plot the calculated phase
+        if True plot the calculated phase
 
     Returns
     -------
-
     dispersion: array-like
-    [GD, GDD, TOD, FOD, QOD]
-
+        [GD, GDD, TOD, FOD, QOD]
     dispersion_std: array-like
-    [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
-
+        [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
     fit_report: lmfit report
     """
     if fit_order not in range(6):
@@ -94,17 +96,25 @@ def min_max_method(
 
     _, ref_index = find_nearest(x, ref_point)
 
+    # subtract the reference point from x axis at extremals
     max_freq = x[ref_index] - maxx
     min_freq = x[ref_index] - minx
 
+    # find which extremal point is where (relative to reference_point) and order them
+    # as they need to be multiplied together with the corresponding order `m`
     neg_freq = np.sort(np.append(max_freq[max_freq < 0], min_freq[min_freq < 0]))[::-1]
-    pos_freq = np.sort(np.append(max_freq[max_freq > 0], min_freq[min_freq > 0]))
+    pos_freq = np.sort(np.append(max_freq[max_freq >= 0], min_freq[min_freq >= 0]))
 
     if len(neg_freq) == 0 and len(pos_freq) == 0:
         raise ValueError("No extremal points found.")
 
-    pos_values = np.pi * np.arange(1, len(pos_freq) + 1)
-    neg_values = np.pi * np.arange(1, len(neg_freq) + 1)
+    # TODO: Add SPP callback here, where the two closest extremal
+    # point need to have the same phase
+    if SPP_callbacks is None:
+        pos_values = np.pi * np.arange(1, len(pos_freq) + 1, dtype=np.float64)
+        neg_values = np.pi * np.arange(1, len(neg_freq) + 1, dtype=np.float64)  # maybe start from 0?
+    else:
+        raise NotImplementedError
 
     x_s = np.append(pos_freq, neg_freq)
     y_s = np.append(pos_values, neg_values)

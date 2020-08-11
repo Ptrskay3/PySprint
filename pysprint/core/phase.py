@@ -65,7 +65,7 @@ class Phase:
         return cls(x, cls.poly(x))
 
     @classmethod
-    def from_coeff(cls, GD, GDD=0, TOD=0, FOD=0, QOD=0, SOD=0, domain=None):
+    def from_coeff(cls, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, SOD=0, domain=None):
         if domain is None:
             x = np.linspace(2, 4, num=2000)
         else:
@@ -83,6 +83,9 @@ class Phase:
     def plot(self, ax=None, **kwargs):
         if ax is None:
             ax = plt
+            plt.xlabel(r"$\omega\,[PHz]$")
+        else:
+            ax.set(xlabel=r"$\omega\,[PHz]$")
         if not self.is_dispersion_array or not self.is_coeff:
             # we need to sort them because plots become messy
             # if we keep it unsorted
@@ -94,8 +97,6 @@ class Phase:
             else:
                 # ax.plot(x, self.poly(x)[idx], **kwargs)
                 pass
-        plt.grid()
-        plt.show()
 
     @print_disp
     def fit(self, reference_point, order):

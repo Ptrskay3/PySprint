@@ -20,13 +20,13 @@ from pysprint.utils import (
 # TODO : all of these methods should be rewritten, they are poor quality.
 
 
-def cwt(x, y, ref, sam, width, floor_thres=0.1):
+def cwt(x, y, ref, sam, widths, floor_thres=0.1):
     x, y = _handle_input(x, y, ref, sam)
-    idx = find_peaks_cwt(y, np.arange(1, width))
+    idx = find_peaks_cwt(y, widths=widths)
     if _maybe_increase_before_cwt(y, tolerance=floor_thres):
         y += 2
     y_rec = 1 / y
-    idx2 = find_peaks_cwt(y_rec, np.arange(1, width))
+    idx2 = find_peaks_cwt(y_rec, widths=widths)
     return x[idx], y[idx] - 2, x[idx2], y[idx2] - 2
 
 

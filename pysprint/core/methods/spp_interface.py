@@ -58,13 +58,10 @@ class SPPMethod(metaclass=DatasetBase):
         ifg_list : list
             The list containing the interferograms. All member should be
             `pysprint.Dataset` or child class type, otherwise TypeError is raised.
-
         reference_point : float
             The reference point on the x axis.
-
         order : int
             Maximum dispersion order to look for. Must be in [2, 5].
-
         show_graph : bool, optional
             Shows a the final graph of the spectral phase and fitted curve.
             Default is False.
