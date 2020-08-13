@@ -350,10 +350,10 @@ class Dataset(metaclass=DatasetBase):
             raise ValueError("Engine must be `cwt` or `normal`.")
 
         if engine == "cwt":
-            width = kwargs.pop("width", 35)
+            widths = kwargs.pop("widths", np.arange(1, 20))
             floor_thres = kwargs.pop("floor_thres", 0.05)
             x_min, _, x_max, _ = self.detect_peak_cwt(
-                width=width, floor_thres=floor_thres
+                widths=widths, floor_thres=floor_thres
             )
 
             # just validation
@@ -370,7 +370,7 @@ class Dataset(metaclass=DatasetBase):
             )
 
             # just validation
-            _ = kwargs.pop("width", 10)
+            _ = kwargs.pop("widths", np.arange(1, 10))
             _ = kwargs.pop("floor_thres", 0.05)
 
         if kwargs:
@@ -655,7 +655,7 @@ class Dataset(metaclass=DatasetBase):
         )
         self.xmax = xmax
         self.xmin = xmin
-        logging.info(f"{len(xmax)} max values and {len(xmin)} min values found.")
+        logger.info(f"{len(xmax)} max values and {len(xmin)} min values found.")
         return xmax, ymax, xmin, ymin
 
     def savgol_fil(self, window=5, order=3):
@@ -807,7 +807,7 @@ class Dataset(metaclass=DatasetBase):
         )
         self.xmax = xmax
         self.xmin = xmin
-        logging.info(f"{len(xmax)} max values and {len(xmin)} min values found.")
+        logger.info(f"{len(xmax)} max values and {len(xmin)} min values found.")
         return xmax, ymax, xmin, ymin
 
     def _plot_SPP_if_valid(self, ax=None, **kwargs):

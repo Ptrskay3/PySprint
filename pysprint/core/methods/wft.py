@@ -211,9 +211,9 @@ class WFTMethod(FFTMethod):
         self.fastmath = fastmath
         if force_recalculate:
             self.found_centers.clear()
-            self.retrieve_GD(silent=silent, fastmath=fastmath, usenifft=usenifft)
+            self.build_GD(silent=silent, fastmath=fastmath, usenifft=usenifft)
         if self.GD is None:
-            self.retrieve_GD(silent=silent, fastmath=fastmath, usenifft=usenifft)
+            self.build_GD(silent=silent, fastmath=fastmath, usenifft=usenifft)
 
         self.cachedlen = len(self.window_seq)
 
@@ -227,7 +227,7 @@ class WFTMethod(FFTMethod):
             self.GD.plot()
         return d, ds, fr
 
-    def retrieve_GD(self, silent=False, fastmath=True, usenifft=False):
+    def build_GD(self, silent=False, fastmath=True, usenifft=False):
         self.fastmath = fastmath
         self._apply_window_sequence(silent=silent, fastmath=fastmath, usenifft=usenifft)
         self._clean_centers()

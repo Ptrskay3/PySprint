@@ -1,4 +1,7 @@
+import logging
+import numbers
 from math import factorial
+from typing import List, Union, Tuple
 
 import numpy as np
 from scipy import fftpack
@@ -12,7 +15,6 @@ try:
 except ImportError:
     _has_lmfit = False
 
-
 from pysprint.utils import (
     find_nearest,
     _handle_input,
@@ -25,6 +27,12 @@ from pysprint.utils import (
 
 from pysprint.core.functions import _fit_config, _cosfit_config
 
+Num = Union[int, float]
+NumericLike = Union[Num, Union[List, np.ndarray]]
+
+logger = logging.getLogger(__name__)
+FORMAT = "[ %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+logging.basicConfig(format=FORMAT)
 
 __all__ = [
     "min_max_method",
@@ -37,54 +45,82 @@ __all__ = [
     "gaussian_window",
 ]
 
-# FIXME : This function does waaaaay more things than it should..
-# We have to split this up asap
-# Also, maybe we should fully rework this..
+
+def is_inside(value, array):
+    try:
+        return np.any((value < np.max(array)) & (value > np.min(array)))
+    except ValueError:
+        return False
+
+
+def _split_on_SPP(a: np.ndarray, val: Union[List, np.ndarray]) -> List[np.ndarray]:
+    """
+    Split up an array based on value(s).
+    """
+    if isinstance(val, numbers.Number):
+        if is_inside(val, a):
+            v, _ = find_nearest(a, val)
+            logger.info(f"split value was set to {v} instead of {val}.")
+        else:
+            logger.info(
+                f"{val} is outside of array range, skipping."
+            )
+            return [a]
+        idx = np.where(a != v)[0]
+        return np.split(a[idx], np.where(np.diff(idx) != 1)[0] + 1)
+    elif isinstance(val, (list, np.ndarray)):
+        real_callbacks = []
+        for i, v in enumerate(val):
+            if not np.any(a == v):
+                if is_inside(v, a):
+                    value, _ = find_nearest(a, v)
+                    real_callbacks.append(value)
+                    logger.info(f"{v} was replaced with {value}.")
+                else:
+                    logger.info(f"{v} was thrown away, not in range..")
+            else:
+                real_callbacks.append(v)
+
+        idx = np.in1d(a, real_callbacks)
+        split_at = a.searchsorted(real_callbacks) - np.arange(0, np.count_nonzero(idx))
+        return np.split(a[~idx], split_at)
+
+
+def _build_single_phase_data(x: np.ndarray, SPP_callbacks: NumericLike = None, flip=False) -> Tuple[np.ndarray, np.ndarray]:
+    y = np.array([])
+    lastval = 0
+
+    if SPP_callbacks is not None:
+        x = _split_on_SPP(x, SPP_callbacks)
+    else:
+        x = (x,)
+    if flip:
+        x.insert(0, [])
+    logger.info(f"x was split to {len(x)} pieces (including the flip).")
+    for index, i in enumerate(x):
+        arr = np.asarray(i)
+        if index % 2 == 0:
+            y = np.append(y, lastval + np.pi * np.arange(1, len(arr) + 1))
+        elif index % 2 == 1:
+            y = np.append(y, lastval - np.pi * np.arange(1, len(arr) + 1))
+        try:
+            lastval = y[-1]
+        except IndexError:
+            lastval = 0
+
+    return np.concatenate(x), y
+
 
 def min_max_method(
-    x,
-    y,
-    ref,
-    sam,
-    ref_point,
-    maxx=None,
-    minx=None,
-    fit_order=5,
-    SPP_callbacks=None,
-    show_graph=False,
+        x,
+        y,
+        ref,
+        sam,
+        ref_point,
+        maxx=None,
+        minx=None,
+        SPP_callbacks=None,
 ):
-    """
-    Calculates the dispersion with minimum-maximum method
-
-    Parameters
-    ----------
-    x: array-like
-        x-axis data
-    y: array-like
-        y-axis data
-    ref, sam: array-like
-        reference and sample arm spectra evaluated at x
-    ref_point: float
-        the reference point to calculate order
-    maxx: array-like, optional
-        the accepted maximal x values (if you want to manually pass)
-    minx: array-like, optional
-        the accepted minimal x values (if you want to manually pass)
-    fit_order: int, optional
-        degree of polynomial to fit data [1, 5]
-    show_graph: bool, optional
-        if True plot the calculated phase
-
-    Returns
-    -------
-    dispersion: array-like
-        [GD, GDD, TOD, FOD, QOD]
-    dispersion_std: array-like
-        [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
-    fit_report: lmfit report
-    """
-    if fit_order not in range(6):
-        raise ValueError("fit order must be in [1, 5]")
 
     x, y = _handle_input(x, y, ref, sam)
     if maxx is None:
@@ -95,74 +131,48 @@ def min_max_method(
         minx = x[min_ind]
 
     _, ref_index = find_nearest(x, ref_point)
+    ref_point = x[ref_index]
+    logger.info(f"refpoint set to {x[ref_index]} instead of {ref_point}.")
 
     # subtract the reference point from x axis at extremals
     max_freq = x[ref_index] - maxx
     min_freq = x[ref_index] - minx
+
+    if SPP_callbacks is not None:
+        if isinstance(SPP_callbacks, numbers.Number):
+            SPP_callbacks -= ref_point
+        elif isinstance(SPP_callbacks, (list, np.ndarray)):
+            try:
+                SPP_callbacks = np.asarray(SPP_callbacks) - ref_point
+            except TypeError:
+                pass
+        else:
+            raise TypeError("SPP_callbacks must be list-like, or number.")
+        logger.info(f"SPP_callbacks are now {SPP_callbacks}, with ref_point {ref_point}.")
 
     # find which extremal point is where (relative to reference_point) and order them
     # as they need to be multiplied together with the corresponding order `m`
     neg_freq = np.sort(np.append(max_freq[max_freq < 0], min_freq[min_freq < 0]))[::-1]
     pos_freq = np.sort(np.append(max_freq[max_freq >= 0], min_freq[min_freq >= 0]))
 
-    if len(neg_freq) == 0 and len(pos_freq) == 0:
-        raise ValueError("No extremal points found.")
+    pos_data_x, pos_data_y = _build_single_phase_data(-pos_freq, SPP_callbacks=SPP_callbacks)
 
-    # TODO: Add SPP callback here, where the two closest extremal
-    # point need to have the same phase
-    if SPP_callbacks is None:
-        pos_values = np.pi * np.arange(1, len(pos_freq) + 1, dtype=np.float64)
-        neg_values = np.pi * np.arange(1, len(neg_freq) + 1, dtype=np.float64)  # maybe start from 0?
-    else:
-        raise NotImplementedError
+    # if we fail, the whole negative half is empty
+    try:
+        if np.diff(pos_data_y)[-1] < 0:
+            flip = True
+            logger.info("Positive side was flipped because the other side is decreasing.")
+        else:
+            flip = False
+    except IndexError:
+        flip = False
 
-    x_s = np.append(pos_freq, neg_freq)
-    y_s = np.append(pos_values, neg_values)
+    neq_data_x, neq_data_y = _build_single_phase_data(-neg_freq, SPP_callbacks=SPP_callbacks, flip=flip)
 
-    # FIXME: Do we even need this?
-    # Yes, we do. This generates a prettier plot.
-    idx = np.argsort(x_s)
-    full_x, full_y = x_s[idx], y_s[idx]
+    x_s = np.insert(neq_data_x, np.searchsorted(neq_data_x, pos_data_x), pos_data_x)
+    y_s = np.insert(neq_data_y, np.searchsorted(neq_data_x, pos_data_x), pos_data_y)
 
-    _function = _fit_config[fit_order]
-
-    if _has_lmfit:
-        fitmodel = Model(_function)
-        pars = fitmodel.make_params(**{f"b{i}": 1 for i in range(fit_order + 1)})
-        result = fitmodel.fit(full_y, x=full_x, params=pars)
-    else:
-        popt, pcov = curve_fit(_function, full_x, full_y, maxfev=8000)
-
-    if _has_lmfit:
-        dispersion, dispersion_std = transform_lmfit_params_to_dispersion(
-            *unpack_lmfit(result.params.items()), drop_first=True, dof=1
-        )
-        fit_report = result.fit_report()
-    else:
-        dispersion, dispersion_std = transform_cf_params_to_dispersion(
-            popt, drop_first=True
-        )
-        fit_report = "To display detailed results," " you must have `lmfit` installed."
-    if show_graph:
-        try:
-            plot_phase(
-                full_x,
-                full_y,
-                bf=result.best_fit,
-                bf_fallback=result.best_fit,
-                window_title="Min-max method fitted",
-            )
-        except UnboundLocalError:
-
-            plot_phase(
-                full_x,
-                full_y,
-                bf=_function(full_x, *popt),
-                bf_fallback=_function(full_x, *popt),
-                window_title="Min-max method fitted",
-            )
-
-    return dispersion, dispersion_std, fit_report
+    return x_s+ref_point, -y_s+ref_point
 
 
 def spp_method(delays, omegas, ref_point=0, fit_order=4):

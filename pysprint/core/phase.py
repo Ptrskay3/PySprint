@@ -2,6 +2,7 @@
 This file is not finished by any means.
 """
 import warnings
+import logging
 from math import factorial
 
 import numpy as np
@@ -26,6 +27,9 @@ from pysprint.utils import (
     inplacify
 )
 
+logger = logging.getLogger(__name__)
+FORMAT = "[ %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+logging.basicConfig(format=FORMAT)
 
 class Phase:
     """
@@ -176,6 +180,21 @@ class Phase:
             ax.grid()
         else:
             raise ValueError("Must fit a curve before requesting errors.")
+
+    def flip_around(self, value, side="left"):
+        if side == "left":
+            idx = np.where(self.x <= value)[0]
+        elif side == "right":
+            idx = np.where(self.x >= value)[0]
+
+        x_to_flip, y_to_flip = self.x[idx], self.y[idx]
+
+        _, cls_idx = find_nearest(x_to_flip, value)
+        logger.info(f"Using {self.x[cls_idx]} instead {value} as flip center.")
+        value_base = self.y[cls_idx]
+        y_to_flip *= -1
+        y_to_flip += 2 * value_base
+        self.y[idx] = y_to_flip
 
     @property
     def errors(self):

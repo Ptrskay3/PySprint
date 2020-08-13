@@ -210,7 +210,7 @@ class FFTMethod(Dataset):
         )
         return self
 
-    def retrieve_phase(self):
+    def build_phase(self):
         """
         Retrieve *only the phase* after the transforms. This will
         unwrap the angles and constructs a pysprint.core.phase.Phase object.
@@ -275,7 +275,7 @@ class FFTMethod(Dataset):
         first ifft was used. For now it's doing okay: giving good results.
         For consistency we should still implement that a better way later.
         """
-        self.retrieve_phase()
+        self.build_phase()
         dispersion, dispersion_std, fit_report = self.phase._fit(
             reference_point=reference_point, order=order
         )
@@ -398,7 +398,7 @@ class FFTMethod(Dataset):
                 x_sample, y_sample, x_phase, y_phase = longest_common_subsequence(
                     x_sample, y_sample, x_phase, y_phase, tol=tol
                 )
-                logging.info(
+                logger.info(
                     f"Shapes were truncated from {np.min(x_sample)} to {np.max(x_sample)} with length {len(x_sample)}."
                 )
             else:
