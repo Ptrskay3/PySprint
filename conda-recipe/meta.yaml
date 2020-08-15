@@ -1,6 +1,10 @@
 {% set name = "pysprint" %}
 {% set version = "0.12.1" %}
 
+build:
+  script_env:
+   - CONDA_BLD_PATH
+
 package:
   name: "{{ name|lower }}"
   version: "{{ version }}"
