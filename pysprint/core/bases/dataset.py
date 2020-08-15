@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 
 from pysprint.core.bases.dataset_base import DatasetBase, C_LIGHT
 from pysprint.core.bases.apply import DatasetApply
+from pysprint.core.evaluate import is_inside
 from pysprint.core.io.parser import _parse_raw
 from pysprint.mpl_tools.spp_editor import SPPEditor
 from pysprint.mpl_tools.normalize import DraggableEnvelope
@@ -817,21 +818,23 @@ class Dataset(metaclass=DatasetBase):
         if ax is None:
             ax = self.plt
         if isinstance(self.positions, numbers.Number):
-            x_closest, idx = find_nearest(self.x, self.positions)
-            try:
-                ax.plot(x_closest, self.y_norm[idx], **kwargs)
-            except (ValueError, TypeError):
-                ax.plot(x_closest, self.y[idx], **kwargs)
+            if is_inside(self.positions, self.x):
+                x_closest, idx = find_nearest(self.x, self.positions)
+                try:
+                    ax.plot(x_closest, self.y_norm[idx], **kwargs)
+                except (ValueError, TypeError):
+                    ax.plot(x_closest, self.y[idx], **kwargs)
 
         if isinstance(self.positions, np.ndarray) or isinstance(
                 self.positions, Iterable
         ):
             for i, val in enumerate(self.positions):
-                x_closest, idx = find_nearest(self.x, self.positions[i])
-                try:
-                    ax.plot(x_closest, self.y_norm[idx], **kwargs)
-                except (ValueError, TypeError):
-                    ax.plot(x_closest, self.y[idx], **kwargs)
+                if is_inside(self.positions[i], self.x):
+                    x_closest, idx = find_nearest(self.x, self.positions[i])
+                    try:
+                        ax.plot(x_closest, self.y_norm[idx], **kwargs)
+                    except (ValueError, TypeError):
+                        ax.plot(x_closest, self.y[idx], **kwargs)
 
     def plot(self, ax=None, title=None, xlim=None, ylim=None, **kwargs):
         datacolor = kwargs.pop("color", "red")
