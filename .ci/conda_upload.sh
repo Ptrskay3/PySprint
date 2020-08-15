@@ -4,7 +4,6 @@ USER=ptrskay
 mkdir ~/conda-bld
 conda config --set anaconda_upload no
 export CONDA_BLD_PATH=~/conda-bld
-pwd
 ls -l
 conda build .
 
