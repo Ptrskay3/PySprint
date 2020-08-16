@@ -6,7 +6,13 @@ set -e
 mkdir ~/conda-bld
 conda config --set anaconda_upload no
 export CONDA_BLD_PATH=~/conda-bld
-conda build .
+conda build . --python=$TRAVIS_PYTHON_VERSION
+
+find $CONDA_BLD_PATH/ -name *.tar.bz2 | while read file
+do
+    echo $file
+    conda convert --platform all $file -o CONDA_BLD_PATH/
+done
 
 find $CONDA_BLD_PATH/ -name *.tar.bz2 | while read file
 do
