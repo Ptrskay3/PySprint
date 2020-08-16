@@ -25,7 +25,6 @@ from pysprint.core.io.parser import _parse_raw
 from pysprint.mpl_tools.spp_editor import SPPEditor
 from pysprint.mpl_tools.normalize import DraggableEnvelope
 from pysprint.utils import MetaData, find_nearest, inplacify
-
 from pysprint.core.preprocess import (
     savgol,
     find_peak,
@@ -33,7 +32,6 @@ from pysprint.core.preprocess import (
     cut_data,
     cwt,
 )
-
 from pysprint.utils.exceptions import (
     InterpolationWarning,
     DatasetError,
