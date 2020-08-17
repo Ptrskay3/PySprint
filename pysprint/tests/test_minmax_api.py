@@ -46,5 +46,62 @@ class TestEvaluate(unittest.TestCase):
         mock_show.assert_called()
 
 
+def test_phase_build():
+    m = MinMaxMethod(np.arange(10), np.arange(10))
+    m.xmin = np.arange(0, 10)[::2]
+    m.xmax = np.arange(0, 10)[1::2]
+
+    m.build_phase(reference_point=0)
+
+    np.testing.assert_array_equal(np.arange(10), m.phase.x)
+    np.testing.assert_array_almost_equal(
+        np.array(
+            [
+                -3.141593,
+                -3.141593,
+                -6.283185,
+                -9.424778,
+                -12.566371,
+                -15.707963,
+                -18.849556,
+                -21.991149,
+                -25.132741,
+                -28.274334
+            ]
+        )
+        , m.phase.y
+    )
+
+
+def test_calculate():
+    m = MinMaxMethod(np.arange(10), np.arange(10))
+    m.xmin = np.arange(0, 10)[::2]
+    m.xmax = np.arange(0, 10)[1::2]
+
+    d, ds, _ = m.calculate(reference_point=0, order=1)
+
+    np.testing.assert_array_almost_equal(d, [-2.970233])
+
+    np.testing.assert_array_equal(np.arange(10), m.phase.x)
+    np.testing.assert_array_almost_equal(
+        np.array(
+            [
+                -3.141593,
+                -3.141593,
+                -6.283185,
+                -9.424778,
+                -12.566371,
+                -15.707963,
+                -18.849556,
+                -21.991149,
+                -25.132741,
+                -28.274334
+            ]
+        )
+        , m.phase.y
+    )
+
+
+
 if __name__ == "__main__":
     unittest.main()
