@@ -95,13 +95,14 @@ def test_build_single_phase_data_cb3():
     retx, rety = _build_single_phase_data(x, SPP_callbacks=[2, 6])
     np.testing.assert_array_equal(np.array([0, 1, 3, 4, 5, 7, 8, 9, 10]), retx)
     np.testing.assert_array_almost_equal(
-        np.array([3.141593, 6.283185, 3.141593, 0. , -3.141593, 0., 3.141593, 6.283185, 9.424778]), rety
+        np.array([3.141593, 6.283185, 3.141593, 0., -3.141593, 0., 3.141593, 6.283185, 9.424778]), rety
     )
 
 
 def test_minmax_fail():
     with pytest.raises(TypeError):
         min_max_method(1, 2, 3, 4, SPP_callbacks="sda")
+
 
 def test_minmax_basic():
     x, y = min_max_method(
@@ -129,6 +130,6 @@ def test_minmax_basic():
                 -25.132741,
                 -28.274334
             ]
-        )
-        , y
+        ),
+        y
     )

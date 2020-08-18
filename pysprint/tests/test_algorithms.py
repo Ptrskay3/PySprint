@@ -28,4 +28,3 @@ def test_lcs_nonbase():
     np.testing.assert_array_equal(b, x)
     np.testing.assert_array_equal(c, y)
     np.testing.assert_array_equal(d, y)
-

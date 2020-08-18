@@ -11,6 +11,11 @@ from pysprint.utils.exceptions import DatasetError
 __all__ = ["SPPMethod"]
 
 
+def defaultcallback(broadcaster, listener=None):
+    if listener is not None:
+        listener.listen(*broadcaster.emit())
+
+
 class SPPMethod(metaclass=DatasetBase):
     """
     Interface for Stationary Phase Point Method.
@@ -39,6 +44,7 @@ class SPPMethod(metaclass=DatasetBase):
         self.decimal = kwargs.pop("decimal", ",")
         self.sep = kwargs.pop("sep", ";")
         self.meta_len = kwargs.pop("meta_len", 4)
+        self.cb = kwargs.pop("callback", defaultcallback)
 
         if kwargs:
             raise TypeError(f"invalid keyword argument:{kwargs}")
@@ -138,6 +144,8 @@ class SPPMethod(metaclass=DatasetBase):
                     decimal=self.decimal,
                     sep=self.sep,
                     meta_len=self.meta_len,
+                    callback=self.cb,
+                    parent=self
                 )
             except TypeError:
                 d = Dataset.parse_raw(
@@ -146,6 +154,8 @@ class SPPMethod(metaclass=DatasetBase):
                     decimal=self.decimal,
                     sep=self.sep,
                     meta_len=self.meta_len,
+                    callback=self.cb,
+                    parent=self
                 )
             self.idx += 1
             return d
@@ -161,6 +171,8 @@ class SPPMethod(metaclass=DatasetBase):
                 decimal=self.decimal,
                 sep=self.sep,
                 meta_len=self.meta_len,
+                callback=self.cb,
+                parent=None  # a single indexing should not affect this object
             )
         except (TypeError, ValueError):
             dataframe = Dataset.parse_raw(
@@ -169,6 +181,8 @@ class SPPMethod(metaclass=DatasetBase):
                 decimal=self.decimal,
                 sep=self.sep,
                 meta_len=self.meta_len,
+                callback=self.cb,
+                parent=None
             )
         return dataframe
 

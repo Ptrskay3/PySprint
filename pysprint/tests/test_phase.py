@@ -6,7 +6,6 @@ from unittest.mock import patch
 from pysprint.core.phase import Phase
 
 
-
 def test_phase_gd_mode():
     x = np.arange(100)
     y = np.arange(100)

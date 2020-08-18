@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
-from pysprint.utils import find_nearest, run_from_ipython
+from pysprint.utils import find_nearest, run_from_ipython, progress
 from pysprint.core.functions import _cosfit_config, cos_fit1
 
 
@@ -177,11 +177,11 @@ class FitOptimizer:
             else:
                 print(f"{label} = {(params[i] * factorial(i + 1)):.5f} fs^{i + 1}")
 
+    @progress
     def run(self, r_extend_by, r_threshold, max_tries=5000, show_endpoint=True):
 
         if not self._init_set:
             raise ValueError("Set the initial conditions.")
-        print("This action might take a little time..")
         self._fit()
         while self._fit_goodness() > r_threshold:
 

@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 FORMAT = "[ %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
 logging.basicConfig(format=FORMAT)
 
+
 class Phase:
     """
     A class that represents a phase obtained from various

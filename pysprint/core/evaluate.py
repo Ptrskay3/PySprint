@@ -172,7 +172,7 @@ def min_max_method(
     x_s = np.insert(neq_data_x, np.searchsorted(neq_data_x, pos_data_x), pos_data_x)
     y_s = np.insert(neq_data_y, np.searchsorted(neq_data_x, pos_data_x), pos_data_y)
 
-    return x_s+ref_point, -y_s+ref_point
+    return x_s + ref_point, -y_s + ref_point
 
 
 def spp_method(delays, omegas, ref_point=0, fit_order=4):

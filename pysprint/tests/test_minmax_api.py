@@ -68,8 +68,8 @@ def test_phase_build():
                 -25.132741,
                 -28.274334
             ]
-        )
-        , m.phase.y
+        ),
+        m.phase.y
     )
 
 
@@ -97,10 +97,9 @@ def test_calculate():
                 -25.132741,
                 -28.274334
             ]
-        )
-        , m.phase.y
+        ),
+        m.phase.y
     )
-
 
 
 if __name__ == "__main__":

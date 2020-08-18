@@ -168,7 +168,7 @@ class MinMaxMethod(Dataset):
             right_d = np.where(np.sign(left_d) != np.sign(right_d), -right_d, right_d)
             right_ds = np.where(np.sign(left_ds) != np.sign(right_ds), -right_ds, right_ds)
 
-            diffs = np.abs(np.trim_zeros(right_d) - np.trim_zeros(left_d))/np.trim_zeros(left_d)
+            diffs = np.abs(np.trim_zeros(right_d) - np.trim_zeros(left_d)) / np.trim_zeros(left_d)
 
             if (diffs[~np.isnan(diffs)] > 0.5).any():
                 dispersion = left_d if len(left_phase.x) >= len(right_phase.x) else right_d

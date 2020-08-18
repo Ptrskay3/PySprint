@@ -1,7 +1,11 @@
 import os
+import sys
 import re
 from copy import copy
 from functools import wraps, lru_cache
+import threading
+import time
+from itertools import cycle
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -22,8 +26,33 @@ __all__ = [
     "pad_with_trailing_zeros",
     "mutually_exclusive_args",
     "lazy_property",
-    "inplacify"
+    "inplacify",
+    "progress"
 ]
+
+
+def progress(func):
+    active = threading.Lock()
+
+    def spinning_pbar_printer():
+        symbols = ['|', '/', '-', '\\', '\\']
+        cursor = cycle(symbols)
+        while active.locked():
+            sys.stdout.write("\r")
+            sys.stdout.write("Working... " + next(cursor))
+            sys.stdout.flush()
+            time.sleep(0.1)
+
+    def wrapper(*args, **kwargs):
+        t = threading.Thread(target=spinning_pbar_printer)
+        active.acquire()
+        t.start()
+        res = func(*args, **kwargs)
+        active.release()
+        return res
+
+    return wrapper
+
 
 _inplace_doc = """\n\tinplace : bool, optional
             Whether to apply the operation on the dataset in an "inplace" manner.

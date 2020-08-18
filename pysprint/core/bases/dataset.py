@@ -50,12 +50,25 @@ class Dataset(metaclass=DatasetBase):
 
     meta = MetaData("""Additional info about the dataset""", copy=False)
 
-    def __init__(self, x, y, ref=None, sam=None, meta=None, errors="raise"):
+    def __init__(
+            self,
+            x,
+            y,
+            ref=None,
+            sam=None,
+            meta=None,
+            errors="raise",
+            callback=None,
+            parent=None
+    ):
 
         super().__init__()
 
         if errors not in ("raise", "force"):
             raise ValueError("errors must be `raise` or `force`.")
+
+        self.callback = callback or (lambda *args: args)
+        self.parent = parent
 
         self.x = x
         self.y = y
@@ -258,6 +271,10 @@ class Dataset(metaclass=DatasetBase):
     @delay.setter
     def delay(self, value):
         self._delay = value
+        try:
+            self.callback(self, self.parent)
+        except ValueError:
+            pass  # delay or position is missing, we must pass there
 
     @property
     def positions(self):
@@ -282,6 +299,10 @@ class Dataset(metaclass=DatasetBase):
                         f"Cannot set SPP position to {val} since it's not in the dataset's range."
                     )
         self._positions = value
+        try:
+            self.callback(self, self.parent)
+        except ValueError:
+            pass  # delay or position is missing, we must pass there
 
     def _ensure_norm(self):
         """
@@ -474,7 +495,9 @@ class Dataset(metaclass=DatasetBase):
         skip_blank_lines=True,
         keep_default_na=False,
         meta_len=1,
-        errors="raise"
+        errors="raise",
+        callback=None,
+        parent=None,
     ):
         """
         Dataset object alternative constructor.
@@ -565,7 +588,7 @@ class Dataset(metaclass=DatasetBase):
             meta_len=meta_len
         )
 
-        return cls(**parsed, errors=errors)
+        return cls(**parsed, errors=errors, callback=callback, parent=parent)
 
     def __str__(self):
         return self.__repr__()
