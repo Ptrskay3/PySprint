@@ -9,7 +9,7 @@ from pysprint import Generator, CosFitMethod
 
 
 @pytest.mark.skipif(
-    isinstance(threading.current_thread(), threading._MainThread),
+    not isinstance(threading.current_thread(), threading._MainThread),
     reason="threading breaks matplotlib.."
 )
 def test_optimizer1():
@@ -23,7 +23,7 @@ def test_optimizer1():
 
 
 @pytest.mark.skipif(
-    isinstance(threading.current_thread(), threading._MainThread),
+    not isinstance(threading.current_thread(), threading._MainThread),
     reason="threading breaks matplotlib.."
 )
 @pytest.mark.parametrize("val", [-10, 500])
@@ -37,7 +37,7 @@ def test_optimizer2(val):
 
 
 @pytest.mark.skipif(
-    isinstance(threading.current_thread(), threading._MainThread),
+    not isinstance(threading.current_thread(), threading._MainThread),
     reason="threading breaks matplotlib.."
 )
 def test_optimizer3():
@@ -53,7 +53,7 @@ def test_optimizer3():
 
 # threading somehow breaks it, will be disabled until I figure it out
 @pytest.mark.skipif(
-    isinstance(threading.current_thread(), threading._MainThread),
+    not isinstance(threading.current_thread(), threading._MainThread),
     reason="threading breaks matplotlib.."
 )
 @pytest.mark.parametrize("GD", [100, -500])
@@ -72,7 +72,7 @@ def test_optimizer_from_api(delay, GD, GDD):
 
 
 @pytest.mark.skipif(
-    isinstance(threading.current_thread(), threading._MainThread),
+    not isinstance(threading.current_thread(), threading._MainThread),
     reason="threading breaks matplotlib.."
 )
 def test_optimizer_from_api2():

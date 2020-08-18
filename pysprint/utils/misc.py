@@ -47,8 +47,10 @@ def progress(func):
         t = threading.Thread(target=spinning_pbar_printer)
         active.acquire()
         t.start()
-        res = func(*args, **kwargs)
-        active.release()
+        try:
+            res = func(*args, **kwargs)
+        finally:
+            active.release()
         return res
 
     return wrapper
