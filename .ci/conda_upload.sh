@@ -11,7 +11,7 @@ conda build . --python=$TRAVIS_PYTHON_VERSION
 find $CONDA_BLD_PATH/ -name *.tar.bz2 | while read file
 do
     echo $file
-    conda convert --platform all $file -o CONDA_BLD_PATH/
+    conda convert --platform all $file -o $CONDA_BLD_PATH/
 done
 
 find $CONDA_BLD_PATH/ -name *.tar.bz2 | while read file
