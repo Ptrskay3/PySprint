@@ -50,6 +50,7 @@ after_success:
 before_deploy:
   - cd ..
   - cd ..
+  - bash .ci/conda_upload.sh
 
 deploy:
   - provider: pypi
@@ -60,7 +61,3 @@ deploy:
       tags: true
     distributions: "sdist bdist_wheel"
     skip_existing: true
-    cleanup: true
-
-after_deploy:
-  - bash .ci/conda_upload.sh
