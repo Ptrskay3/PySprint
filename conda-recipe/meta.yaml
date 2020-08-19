@@ -5,9 +5,9 @@ package:
   name: "{{ name|lower }}"
   version: "{{ version }}"
 
-#source:
-#  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
-#  sha256: 5fee159c59c81fd31957e23bbd292bcfc1c947583f27eda7f4215594ec898ddd
+source:
+  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
+  sha256: 2afed4405ae54310be176ede660121c3a1fc14d82f9e0ef97547c2534e50c47e
 
 build:
   number: 0
