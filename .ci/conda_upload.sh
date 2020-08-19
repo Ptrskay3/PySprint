@@ -1,4 +1,3 @@
-PKG_NAME=pysprint
 USER=ptrskay
 
 set -e
