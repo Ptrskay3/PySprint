@@ -22,6 +22,20 @@ class SPPMethod(metaclass=DatasetBase):
     """
 
     def __init__(self, ifg_names, sam_names=None, ref_names=None, **kwargs):
+        """
+        SPPMethod constructor.
+
+        Parameters
+        ----------
+        ifg_names : list
+            The list containing the filenames of the interferograms.
+        sam_names : list, optional
+            The list containing the filenames of the sample arm's spectra.
+        ref_names : list, optinal
+            The list containing the filenames of the reference arm's spectra.
+        kwargs :
+            Additional keyword arguments to pass to `parse_raw` function.
+        """
         self.ifg_names = ifg_names
         if sam_names:
             self.sam_names = sam_names
@@ -67,7 +81,7 @@ class SPPMethod(metaclass=DatasetBase):
         reference_point : float
             The reference point on the x axis.
         order : int
-            Maximum dispersion order to look for. Must be in [2, 5].
+            Maximum dispersion order to look for. Must be in [2, 6].
         show_graph : bool, optional
             Shows a the final graph of the spectral phase and fitted curve.
             Default is False.
@@ -76,12 +90,12 @@ class SPPMethod(metaclass=DatasetBase):
         -------
         dispersion : array-like
             The dispersion coefficients in the form of:
-            [GD, GDD, TOD, FOD, QOD]
+            [GD, GDD, TOD, FOD, QOD, SOD]
 
         dispersion_std : array-like
             Standard deviations due to uncertainty of the fit.
             It is only calculated if lmfit is installed. The form is:
-            [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
+            [GD_std, GDD_std, TOD_std, FOD_std, QOD_std, SOD_std]
 
         fit_report : str
             If lmfit is available returns the fit report, else returns an
@@ -204,6 +218,15 @@ class SPPMethod(metaclass=DatasetBase):
         self._positions[self.idx] = position
 
     def save_data(self, filename):
+        """
+        Save the currectly stored SPP data.
+
+        Parameters
+        ----------
+        filename : str
+            The filename to save as. If not ends with ".txt" it's
+            appended by default.
+        """
         if not filename.endswith(".txt"):
             filename += ".txt"
         delay = np.concatenate([_ for _ in self._delay.values()]).ravel()
@@ -221,27 +244,22 @@ class SPPMethod(metaclass=DatasetBase):
         ----------
         omegas : np.ndarray
             The SPP positions.
-
         delays : np.ndarray
             The delay values in fs.
-
         reference_point : float
             The reference point on the x axis.
-
         order : int
-            Maximum dispersion order to look for. Must be in [2, 5].
+            Maximum dispersion order to look for. Must be in [2, 6].
 
         Returns
         -------
         dispersion : array-like
             The dispersion coefficients in the form of:
-            [GD, GDD, TOD, FOD, QOD]
-
+            [GD, GDD, TOD, FOD, QOD, SOD]
         dispersion_std : array-like
             Standard deviations due to uncertainty of the fit.
             It is only calculated if lmfit is installed. The form is:
-            [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
-
+            [GD_std, GDD_std, TOD_std, FOD_std, QOD_std, SOD_std]
         fit_report : str
             If lmfit is available returns the fit report, else returns an
             empty string.
@@ -258,17 +276,15 @@ class SPPMethod(metaclass=DatasetBase):
     def calculate(self, reference_point, order=2, show_graph=False):
         """
         This function should be used after setting the SPP data in
-        the interactive matplotlib editor.
+        the interactive matplotlib editor or other way.
 
         Parameters
         ----------
         reference_point : float
             The reference point on the x axis.
-
         order : int, optional
-            Maximum dispersion order to look for. Must be in [2, 5].
+            Maximum dispersion order to look for. Must be in [2, 6].
             Default is 2.
-
         show_graph : bool, optional
             Shows a the final graph of the spectral phase and fitted curve.
             Default is False.
@@ -277,13 +293,11 @@ class SPPMethod(metaclass=DatasetBase):
         -------
         dispersion : array-like
             The dispersion coefficients in the form of:
-            [GD, GDD, TOD, FOD, QOD]
-
+            [GD, GDD, TOD, FOD, QOD, SOD]
         dispersion_std : array-like
             Standard deviations due to uncertainty of the fit.
             It is only calculated if lmfit is installed. The form is:
-            [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
-
+            [GD_std, GDD_std, TOD_std, FOD_std, QOD_std, SOD_std]
         fit_report : str
             If lmfit is available returns the fit report, else returns an
             empty string.
@@ -312,6 +326,9 @@ class SPPMethod(metaclass=DatasetBase):
 
     @property
     def info(self):
+        """
+        Return how many interferograms where processed.
+        """
         self._info = f"Progress: {len(self._delay)}/{len(self)}"
         return self._info
 

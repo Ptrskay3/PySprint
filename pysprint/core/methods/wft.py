@@ -47,7 +47,7 @@ class Window:
             The axis to plot on. If not given, plot on the last axis.
 
         scalefactor : float, optional
-            Number describing how much a given should be scaled up ONLY
+            Number describing how much a given window should be scaled up ONLY
             for visibility.
 
         zorder : float, optional
@@ -79,6 +79,25 @@ class WFTMethod(FFTMethod):
 
     @mutually_exclusive_args("std", "fwhm")
     def add_window(self, center, std=None, fwhm=None, order=2):
+        """
+        Add a Gaussian window to the interferogram.
+
+        Parameters
+        ----------
+        center : float
+            The center of the Gaussian window.
+        std : float, optional
+            The standard deviation of the Gaussian window
+            in units of the x axis of the interferogram.
+            You must specify exactly one of std and fwhm.
+        fwhm : float, optional
+            The full width at half max of the Gaussian window
+            in units of the x axis of the interferogram.
+            You must specify exactly one of std and fwhm.
+        order : int, optional
+            The order of Gaussian window. Must be even.
+            The default is 2.
+        """
         if not np.min(self.x) <= center <= np.max(self.x):
             raise ValueError(
                 f"Cannot add window at {center}, because "
@@ -107,6 +126,26 @@ class WFTMethod(FFTMethod):
         """
         Build a window sequence of given parameters to apply on ifg.
         Works similar to numpy.arange.
+
+        Parameters
+        ----------
+        start : float
+            The start of the centers.
+        stop : float
+            The end value of the center
+        step : float
+            The step value to increment center.
+        std : float, optional
+            The standard deviation of the Gaussian window
+            in units of the x axis of the interferogram.
+            You must specify exactly one of std and fwhm.
+        fwhm : float, optional
+            The full width at half max of the Gaussian window
+            in units of the x axis of the interferogram.
+            You must specify exactly one of std and fwhm.
+        order : int, optional
+            The order of Gaussian window. Must be even.
+            The default is 2.
         """
         arr = np.arange(start, stop, step)
         for cent in arr:
@@ -122,6 +161,26 @@ class WFTMethod(FFTMethod):
         """
         Build a window sequence of given parameters to apply on ifg.
         Works similar to numpy.linspace.
+
+        Parameters
+        ----------
+        start : float
+            The start of the centers.
+        stop : float
+            The end value of the center
+        num : float
+            The number of Gaussian windows.
+        std : float, optional
+            The standard deviation of the Gaussian window
+            in units of the x axis of the interferogram.
+            You must specify exactly one of std and fwhm.
+        fwhm : float, optional
+            The full width at half max of the Gaussian window
+            in units of the x axis of the interferogram.
+            You must specify exactly one of std and fwhm.
+        order : int, optional
+            The order of Gaussian window. Must be even.
+            The default is 2.
         """
         arr = np.linspace(start, stop, num)
         for cent in arr:
@@ -137,6 +196,26 @@ class WFTMethod(FFTMethod):
         """
         Build a window sequence of given parameters to apply on ifg.
         Works similar to numpy.geomspace.
+
+        Parameters
+        ----------
+        start : float
+            The start of the centers.
+        stop : float
+            The end value of the center
+        num : float
+            The number of Gaussian windows.
+        std : float, optional
+            The standard deviation of the Gaussian window
+            in units of the x axis of the interferogram.
+            You must specify exactly one of std and fwhm.
+        fwhm : float, optional
+            The full width at half max of the Gaussian window
+            in units of the x axis of the interferogram.
+            You must specify exactly one of std and fwhm.
+        order : int, optional
+            The order of Gaussian window. Must be even.
+            The default is 2.
         """
         arr = np.geomspace(start, stop, num)
         for cent in arr:
@@ -149,6 +228,18 @@ class WFTMethod(FFTMethod):
     def view_windows(self, ax=None, maxsize=80, **kwargs):
         """
         Gives a rough view of the different windows along with the ifg.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes, optional
+            An axis to draw the plot on. If not given, it will plot
+            of the last used axis.
+        maxsize : int, optional
+            The maximum number of Gaussian windows to display on plot.
+            Default is 80, but be aware that setting a high value can
+            drastically reduce performance.
+        kwargs : dict, optional
+            Additional keyword arguments to pass to plot function.
         """
         winlen = len(self.window_seq)
         ratio = winlen % maxsize
@@ -166,9 +257,16 @@ class WFTMethod(FFTMethod):
         self.plot(ax=ax)
 
     def remove_all_windows(self):
+        """
+        Remove all the Gaussian windows.
+        """
         self.window_seq.clear()
 
     def reset_state(self):
+        """
+        Reset the object's state fully: delete all the
+        calculated GD, caches, heatmaps and window sequences.
+        """
         self.remove_all_windows()
         self.found_centers.clear()
         self.X_cont = np.array([])
@@ -179,6 +277,15 @@ class WFTMethod(FFTMethod):
         self.fastmath = True
 
     def remove_window_at(self, center):
+        """
+        Removes a window at center.
+
+        Parameters
+        ----------
+        center : float
+            The center of the window to remove.
+            Raises ValueError if there is not such window.
+        """
         if center not in self.window_seq.keys():
             c = find_nearest(
                 np.fromiter(self.window_seq.keys(), dtype=float), center
@@ -189,7 +296,7 @@ class WFTMethod(FFTMethod):
             )
         self.window_seq.pop(center, None)
 
-    def remove_window_interval(self, start, stop):
+    def remove_window_interval(self, start, stop): # TODO : implement it.
         pass
 
     # TODO : Add parameter to describe how many peaks we are looking for..
@@ -203,6 +310,33 @@ class WFTMethod(FFTMethod):
             fastmath=True,
             usenifft=False
     ):
+        """
+        Calculates the dispersion.
+
+        Parameters
+        ----------
+        reference_point : float
+            The reference point.
+        order : int
+            The dispersion order to look for. Must be in [2, 6].
+        show_graph : bool, optional
+            Whether to show the GD graph on complete. Default is False.
+        silent : bool, optional
+            Whether to print progressbar. By default it will print.
+        force_recalculate : bool, optional
+            Force to recalculate the GD graph not only the curve fitting.
+            Default is False.
+        fastmath : bool, optional
+            Whether to build additional arrays to display heatmap.
+            Default is True.
+        usenifft : bool, optional
+            Whether to use Non-unfirom FFT when calculating GD.
+            Default is False. **Not stable.**
+
+        Raises
+        ------
+        ValueError, if no window sequence is added to the interferogram.
+        """
         if len(self.window_seq) == 0:
             raise ValueError("Before calculating a window sequence must be set.")
 
@@ -218,7 +352,7 @@ class WFTMethod(FFTMethod):
         self.cachedlen = len(self.window_seq)
 
         if order == 1:
-            raise ValueError("Cannot fit constant function to data. Order must be in [2, 5].")
+            raise ValueError("Cannot fit constant function to data. Order must be in [2, 6].")
 
         d, ds, fr = self.GD._fit(
             reference_point=reference_point, order=order
@@ -228,6 +362,20 @@ class WFTMethod(FFTMethod):
         return d, ds, fr
 
     def build_GD(self, silent=False, fastmath=True, usenifft=False):
+        """
+        Build the GD.
+
+        Parameters
+        ----------
+        silent : bool, optional
+            Whether to print progressbar. By default it will print.
+        fastmath : bool, optional
+            Whether to build additional arrays to display heatmap.
+            Default is True.
+        usenifft : bool, optional
+            Whether to use Non-unfirom FFT when calculating GD.
+            Default is False. **Not stable.**
+        """
         self.fastmath = fastmath
         self._apply_window_sequence(silent=silent, fastmath=fastmath, usenifft=usenifft)
         self._clean_centers()
@@ -293,6 +441,21 @@ class WFTMethod(FFTMethod):
                 )
 
     def errorplot(self, *args, **kwargs):
+        """
+        Plot the errors of fitting.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes, optional
+            An axis to draw the plot on. If not given, it will plot
+            of the last used axis.
+        percent : bool, optional
+            Whether to plot percentage difference. Default is False.
+        title : str, optional
+            The title of the plot. Default is "Errors".
+        kwargs : dict, optional
+            Additional keyword arguments to pass to plot function.
+        """
         try:
             getattr(self.GD, "errorplot", None)(*args, **kwargs)
         except TypeError:
@@ -300,12 +463,18 @@ class WFTMethod(FFTMethod):
 
     @property
     def get_GD(self):
+        """
+        Return the GD if it is already calculated.
+        """
         if self.GD is not None:
             return self.GD
         raise ValueError("Must calculate GD first.")
 
     @property
     def errors(self):
+        """
+        Return the fitting errors as np.ndarray.
+        """
         return getattr(self.GD, "errors", None)
 
     # TODO : Integrate this into _apply_window_sequence and add matplotlib dispatcher
@@ -331,6 +500,22 @@ class WFTMethod(FFTMethod):
         self.X_cont = np.fromiter(self.window_seq.keys(), dtype=float)
 
     def heatmap(self, ax=None, levels=None, cmap="viridis", include_ridge=True):
+        """
+        Plot the heatmap.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes, optional
+            An axis to draw the plot on. If not given, it will plot
+            of the last used axis.
+        levels : np.ndarray, optional
+            The levels to use for plotting.
+        cmap : str, optional
+            The colormap to use.
+        include_ridge : bool, optional
+            Whether to mark the detected ridge of the plot.
+            Default is True.
+        """
         if self.GD is None:
             raise ValueError("Must calculate first.")
 
@@ -378,13 +563,10 @@ class WFTMethod(FFTMethod):
 
         Returns
         -------
-
         X_cont : np.ndarray
             The window centers with shape (n,).
-
         Y_cont : np.ndarray
             The time axis calculated from the IFFT of the dataset with shape (m,).
-
         Z_cont : np.ndarray
             2D array with shape (m, n) containing the depth information.
         """

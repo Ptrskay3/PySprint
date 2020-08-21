@@ -29,7 +29,7 @@ def test_basic(mck):
 
     d, _, _ = f.calculate(reference_point=2, order=5, fastmath=False)
 
-    np.testing.assert_array_almost_equal(d, [3000.19708, 399.94187, 3998.03310, 3991.45904, 49894.99719], decimal=4)
+    np.testing.assert_array_almost_equal(d, [3000.19527, 399.94162, 3998.03069, 3991.45663, 49894.96710], decimal=5)
 
     f.heatmap()
     f.show()

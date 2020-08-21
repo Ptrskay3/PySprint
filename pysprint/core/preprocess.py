@@ -83,7 +83,7 @@ def convolution(x, y, ref, sam, win_len, standev=200):
         raise ValueError("Window length must be 0 < window_length < len(x)")
 
     xint, yint = interpolate_data(x, y, [], [])
-    window = gaussian(win_len, std=standev)
+    window = gaussian(win_len, std=standev) # TODO : this is deprecated
     smoothed = convolve(yint, window / window.sum(), mode="same")
     return xint, smoothed
 

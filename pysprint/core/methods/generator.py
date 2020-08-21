@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from pysprint.core.bases.dataset_base import DatasetBase, C_LIGHT
-from pysprint.core._generator import generatorFreq, generatorWave
+from pysprint.core._generator import generator_freq, generator_wave
 
 __all__ = ["Generator"]
 
@@ -11,8 +11,7 @@ class Generator(metaclass=DatasetBase):
     """
     Basic dataset generator.
     """
-
-    def __init__(
+    def __init__( # TODO : add docstring.
         self,
         start,
         stop,
@@ -23,8 +22,8 @@ class Generator(metaclass=DatasetBase):
         TOD=0,
         FOD=0,
         QOD=0,
+        SOD=0,
         resolution=0.1,
-        delimiter=",",
         pulse_width=10,
         normalize=False,
         chirp=0,
@@ -38,8 +37,8 @@ class Generator(metaclass=DatasetBase):
         self.TOD = TOD
         self.FOD = FOD
         self.QOD = QOD
+        self.SOD = SOD
         self.resolution = resolution
-        self.delimiter = delimiter
         self.pulse_width = pulse_width
         self.chirp = chirp
         self.normalize = normalize
@@ -55,7 +54,7 @@ class Generator(metaclass=DatasetBase):
 
     # TODO: PEP8 that horrible line below
     def __repr__(self):
-        return f"Generator({self.start}, {self.stop}, {self.center}, delay={self.delay}, GD={self.GD}, GDD={self.GDD}, TOD={self.TOD}, FOD={self.FOD}, QOD={self.QOD}, resolution={self.resolution}, delimiter='{self.delimiter}', pulse_width={self.pulse_width}, normalize={self.normalize})"
+        return f"Generator({self.start}, {self.stop}, {self.center}, delay={self.delay}, GD={self.GD}, GDD={self.GDD}, TOD={self.TOD}, FOD={self.FOD}, QOD={self.QOD}, SOD={self.SOD}, resolution={self.resolution}, pulse_width={self.pulse_width}, normalize={self.normalize})"
 
     def _check_norm(self):
         """
@@ -83,7 +82,7 @@ class Generator(metaclass=DatasetBase):
         """
         Use this to generate the spectrogram in ang. frequency domain.
         """
-        self.x, self.y, self.ref, self.sam = generatorFreq(
+        self.x, self.y, self.ref, self.sam = generator_freq(
             self.start,
             self.stop,
             self.center,
@@ -93,8 +92,8 @@ class Generator(metaclass=DatasetBase):
             self.TOD,
             self.FOD,
             self.QOD,
+            self.SOD,
             self.resolution,
-            self.delimiter,
             self.pulse_width,
             self.normalize,
             self.chirp,
@@ -105,7 +104,7 @@ class Generator(metaclass=DatasetBase):
         Use this to generate the spectrogram in wavelength domain.
         """
         self.is_wave = True
-        self.x, self.y, self.ref, self.sam = generatorWave(
+        self.x, self.y, self.ref, self.sam = generator_wave(
             self.start,
             self.stop,
             self.center,
@@ -115,8 +114,8 @@ class Generator(metaclass=DatasetBase):
             self.TOD,
             self.FOD,
             self.QOD,
+            self.SOD,
             self.resolution,
-            self.delimiter,
             self.pulse_width,
             self.normalize,
             self.chirp,
@@ -161,14 +160,14 @@ class Generator(metaclass=DatasetBase):
             np.savetxt(
                 f"{name}.txt",
                 np.transpose([self.x, self.y, self.ref, self.sam]),
-                delimiter=self.delimiter,
+                delimiter=",",
             )
             print(f"Successfully saved as {name}.")
         else:
             np.savetxt(
                 f"{path}/{name}.txt",
                 np.transpose([self.x, self.y, self.ref, self.sam]),
-                delimiter=self.delimiter,
+                delimiter=",",
             )
             print(f"Successfully saved as {name}.")
 
@@ -192,6 +191,7 @@ class Generator(metaclass=DatasetBase):
             + (self.TOD / 6) * j ** 3
             + (self.FOD / 24) * j ** 4
             + (self.QOD / 120) * j ** 5
+            + (self.SOD / 720) * j ** 6
         )
 
     def phase_graph(self):

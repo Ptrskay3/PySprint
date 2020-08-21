@@ -159,7 +159,8 @@ def _maybe_increase_before_cwt(y, tolerance=0.05):
 
 
 def calc_envelope(x, ind, mode="u"):
-    """Source: https://stackoverflow.com/a/39662343/11751294
+    """
+    https://stackoverflow.com/a/39662343/11751294
     """
     x_abs = np.abs(x)
     if mode == "u":
@@ -175,10 +176,10 @@ def calc_envelope(x, ind, mode="u"):
 
 def run_from_ipython():
     """
-    Detect explicitly if code is run inside Jupyter.
+    Detect if code is run inside Jupyter or maybe Spyder.
     """
     try:
-        __IPYTHON__
+        __IPYTHON__ # noqa
         if any("SPYDER" in name for name in os.environ):
             return False
         return True

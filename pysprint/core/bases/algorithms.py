@@ -8,6 +8,31 @@ def longest_common_subsequence(x1, y1, x2, y2, tol=None):
     present due to numerical errors.
     This function is mainly used when two datasets's y values need
     to be multiplied together, but their domains are slightly off.
+
+    Parameters
+    ----------
+    x1 : np.ndarray-like
+        The x values for the original array
+    y1 : np.ndarray-like
+        The y values for the original array
+    x2 : np.ndarray-like
+        The x values for the second array
+    y2 : np.ndarray-like
+        The y values for the second array
+    tol : float, optional
+        The tolerance which determines how big difference is allowed
+        between x values to interpret them as the same datapoint.
+
+    Returns
+    -------
+    longest_x1: np.ndarray
+        The x values of longest common subsequence in x1.
+    longest_y1: np.ndarray
+        The y values of longest common subsequence in y1.
+    longest_x2: np.ndarray
+        The x values of longest common subsequence in x2.
+    longest_y2: np.ndarray
+        The y values of longest common subsequence in y2.
     """
     # sort both datasets first to maintain order
     idx1 = np.argsort(x1)

@@ -19,7 +19,7 @@ class TestEvaluateNoLmfit(unittest.TestCase):
         b = np.arange(100)
         with self.assertRaises(KeyError):
             evaluate.cff_method(
-                a, b, [], [], ref_point=0, p0=[1, 1, 1, 1, 1, 1, 1, 1, 1]
+                a, b, [], [], ref_point=0, p0=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
             )
 
     def test_ffts_primitive(self):
@@ -123,7 +123,7 @@ class TestEvaluateNoLmfit(unittest.TestCase):
         f.fft()
         d, _, _ = f.calculate(order=5, reference_point=2.4)
         np.testing.assert_array_almost_equal(
-            d, [1499.96, -0.14, 7.88, 15.99, 898920.79], decimal=1
+            d, [1499.9646, -0.1429, 7.893, 16.075, 898919.85], decimal=1
         )
 
 

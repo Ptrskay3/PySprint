@@ -34,15 +34,13 @@ class MinMaxMethod(Dataset):
         left clicks(`i` key later) will add a new point. Just close
         the window when finished.
 
-        Parameters:
+        Parameters
         ----------
-
         engine : str
             Must be 'cwt', 'normal' or 'slope'.
             Peak detection algorithm to use.
             Default is normal.
-
-        **kwargs:
+        kwargs :
             pmax, pmin, threshold, except_around, width
         """
         engines = ("cwt", "normal", "slope")
@@ -101,7 +99,6 @@ class MinMaxMethod(Dataset):
         # the default argrelextrema is definitely not called
         # in `pysprint.core.evaluate.min_max_method`.
 
-        # TODO : Don't distribute them, we'd rather sort by values to find
         # out it's a min or max.
         self.xmin = _editpeak.get_dat[0][:len(_editpeak.get_dat[0]) // 2]
         self.xmax = _editpeak.get_dat[0][len(_editpeak.get_dat[0]) // 2:]
@@ -128,22 +125,22 @@ class MinMaxMethod(Dataset):
         SPP_callbacks : number, or numeric list-like
             The positions of SPP's on the interferogram. If not given it will check
             if there's any SPP position set on the object.
-        show_graph: bool, optional
+        show_graph : bool, optional
             Shows a the final graph of the spectral phase and fitted curve.
             Default is False.
 
         Returns
         -------
-        dispersion: array-like
-            [GD, GDD, TOD, FOD, QOD]
-        dispersion_std: array-like
+        dispersion : array-like
+            [GD, GDD, TOD, FOD, QOD, SOD]
+        dispersion_std : array-like
             Standard deviations due to uncertainty of the fit.
             They are only calculated if lmfit is installed.
-            [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
-        fit_report: string
+            [GD_std, GDD_std, TOD_std, FOD_std, QOD_std, SOD_std]
+        fit_report : str
             lmfit report if installed, else empty string.
 
-        Notes:
+        Notes
         ------
         Decorated with print_disp, so the results are
         immediately printed without explicitly saying so.
@@ -203,6 +200,17 @@ class MinMaxMethod(Dataset):
         return dispersion, dispersion_std, fit_report
 
     def build_phase(self, reference_point, SPP_callbacks=None):
+        """
+        Build **only the phase** using reference point and SPP positions.
+
+        Parameters
+        ----------
+        reference_point : float
+            The reference point from where the phase building starts.
+        SPP_callbacks : number, or numeric list-like
+            The positions of SPP's on the interferogram. If not given it will check
+            if there's any SPP position set on the object.
+        """
         if SPP_callbacks is None and self._positions is not None:
             SPP_callbacks = np.array(self._positions)
 

@@ -10,7 +10,6 @@ from collections.abc import Iterable
 from contextlib import suppress
 from textwrap import dedent
 from math import factorial
-from inspect import signature
 import json  # for pretty printing dict
 import logging
 
@@ -46,7 +45,10 @@ __all__ = ["Dataset"]
 
 
 class Dataset(metaclass=DatasetBase):
-    """Base class for the all evaluating methods."""
+    """
+    This class implements all the functionality a dataset
+    should have in general.
+    """
 
     meta = MetaData("""Additional info about the dataset""", copy=False)
 
@@ -61,7 +63,39 @@ class Dataset(metaclass=DatasetBase):
             callback=None,
             parent=None
     ):
+        """
+        Base constructor for Dataset.
 
+        Parameters
+        ----------
+        x : np.ndarray
+            The x values.
+        y : np.ndarray
+            The y values.
+        ref : np.ndarray, optional
+            The reference arm's spectra.
+        sam : np.ndarray, optional
+            The sample arm's spectra.
+        meta : dict-like
+            The dictionary containing further information about the dataset.
+            Can be extended, or set to be any valid ~collections.abc.Mapping.
+        errors: str, optional
+            Whether to raise on missmatching sized data. Must be "raise" or
+            "force". If "force" then truncate to the shortest size. Default is
+            "raise".
+        callback : callable, optional
+            The function that notifies parent objects about SPP related
+            changes. In most cases the user should leave this empty. The
+            default callback is only initialized if this object is constructed
+            by the `pysprint.SPPMethod` object.
+        parent : any class, optional
+            The object which handles the callback function. In most cases
+            the user should leave this empty.
+
+        Notes
+        -----
+        The other constructor `parse_raw` is used to load in data by files.
+        """
         super().__init__()
 
         if errors not in ("raise", "force"):
@@ -155,40 +189,28 @@ class Dataset(metaclass=DatasetBase):
 
         self._dispersion_array = None
 
-    def __call__(self, reference_point, *, order=None, show_graph=None):
-        """
-        Alias for self.calculate.
-        """
-
-        if hasattr(self, "calculate"):
-
-            sig = len(signature(self.calculate).parameters)
-            if sig == 1:
-                if order or show_graph:
-                    warnings.warn("order and show_graph has no effect here.")
-                self.calculate(reference_point)
-            elif sig == 3:
-
-                # set up defaults here
-                if order is None:
-                    order = 3
-                if show_graph is None:
-                    show_graph = False
-
-                self.calculate(
-                    reference_point=reference_point, order=order, show_graph=show_graph
-                )
-
-            else:
-                raise ValueError("Unknown function signature.")
-        else:
-            raise NotImplementedError
-
-    def __len__(self):
-        return len(self.x)
-
     @inplacify
     def chrange(self, current_unit, target_unit="phz"):
+        """
+        Change the domain range of the dataset.
+        Supported units for frequency:
+            * PHz
+            * THz
+            * GHz
+        Supported units for wavelength:
+            * um
+            * nm
+            * pm
+            * fm
+
+        Parameters
+        ----------
+        current_unit : str
+            The current unit of the domain. Case insensitive.
+        target_unit : str, optional
+            The target unit. Must be compatible with the currect unit.
+            Case insensitive. Default is `phz`.
+        """
         current_unit, target_unit = current_unit.lower(), target_unit.lower()
         conversions = {
             "um": {"um": 1, "nm": 1000, "pm": 1E6, "fm": 1E9},
@@ -225,6 +247,22 @@ class Dataset(metaclass=DatasetBase):
 
     @inplacify
     def transform(self, func, axis=None, args=None, kwargs=None):
+        """
+        Function which enables to apply arbitrary function to the
+        dataset.
+
+        Parameters
+        ----------
+        func : callable
+            The function to apply on the dataset.
+        axis : int or str, optional
+            The axis which is the operation is performed on.
+            Must be 'x', 'y', '0' or '1'.
+        args : tuple, optional
+            Additional arguments to pass to func.
+        kwargs : dict, optional
+            Additional keyword arguments to pass to func.
+        """
         operation = DatasetApply(
             obj=self, func=func, axis=axis, args=args, kwargs=kwargs
         )
@@ -238,7 +276,6 @@ class Dataset(metaclass=DatasetBase):
 
         Parameters
         ----------
-
         exclude_GD : bool
             Whether to exclude the GD part of the polynomial.
             Default is `False`.
@@ -335,10 +372,8 @@ class Dataset(metaclass=DatasetBase):
 
         Parameters
         ----------
-
         reference_point : float
             The reference point for the algorithm.
-
         engine : str
             The backend to use. Must be "cwt", "normal" or "fft".
             "cwt" will use `scipy.signal.find_peaks_cwt` function to
@@ -346,10 +381,8 @@ class Dataset(metaclass=DatasetBase):
             to detect peaks. The "fft" engine uses Fourier-transform and
             looks for the outer peak to guess delay value. It's not
             reliable when working with low delay values.
-
         silent : bool
             Whether to print the results immediately. Default in `False`.
-
         **kwargs
             Additional keyword arguments to pass for peak detection
             algorithms. These are:
@@ -568,6 +601,14 @@ class Dataset(metaclass=DatasetBase):
             If set to `force`, it will truncate every array to have the
             same shape as the shortest column. It truncates from
             the top of the file.
+        callback : callable, optional
+            The function that notifies parent objects about SPP related
+            changes. In most cases the user should leave this empty. The
+            default callback is only initialized if this object is constructed
+            by the `pysprint.SPPMethod` object.
+        parent : any class, optional
+            The object which handles the callback function. In most cases
+            the user should leave this empty.
         """
 
         parsed = _parse_raw(
@@ -590,10 +631,10 @@ class Dataset(metaclass=DatasetBase):
 
         return cls(**parsed, errors=errors, callback=callback, parent=parent)
 
-    def __str__(self):
-        return self.__repr__()
-
     def __repr__(self):
+        return "pysprint.core.bases.dataset.Dataset"
+
+    def __str__(self):
         if isinstance(self._delay, np.ndarray):
             pprint_delay = self._delay.flat[0]
         elif isinstance(self._delay, Iterable):
@@ -671,6 +712,28 @@ class Dataset(metaclass=DatasetBase):
         return self
 
     def detect_peak_cwt(self, widths, floor_thres=0.05):
+        """
+        Basic algorithm to find extremal points in data
+        using ``scipy.signal.find_peaks_cwt``.
+
+        Parameters
+        ----------
+        widths : np.ndarray
+            The widths passed to `find_peaks_cwt`.
+        floor_thres : float
+            Will be removed.
+
+        Returns
+        -------
+        xmax : `array-like`
+            x coordinates of the maximums
+        ymax : `array-like`
+            y coordinates of the maximums
+        xmin : `array-like`
+            x coordinates of the minimums
+        ymin : `array-like`
+            y coordinates of the minimums
+        """
         x, y, ref, sam = self._safe_cast()
         xmax, ymax, xmin, ymin = cwt(
             x, y, ref, sam, widths=widths, floor_thres=floor_thres
@@ -686,10 +749,10 @@ class Dataset(metaclass=DatasetBase):
 
         Parameters
         ----------
-        window: int
+        window : int
             Length of the convolutional window for the filter.
             Default is `10`.
-        order: int
+        order : int
             Degree of polynomial to fit after the convolution.
             If not odd, it's incremented by 1. Must be lower than window.
             Usually it's a good idea to stay with a low degree, e.g 3 or 5.
@@ -730,8 +793,7 @@ class Dataset(metaclass=DatasetBase):
             Default is `None`.
 
         Notes
-        ------
-
+        -----
         If arms were given, it will merge them into the `self.y` and
         `self.y_norm` variables. After this operation, the arms' spectra
         cannot be retrieved.
@@ -755,18 +817,14 @@ class Dataset(metaclass=DatasetBase):
 
         Parameters
         ----------
-        window_length: int
+        window_length : int
             Length of the gaussian window.
-        std: float
+        std : float
             Standard deviation of the gaussian window.
             Default is `20`.
 
-        Returns
-        -------
-        None
-
-        Notes:
-        ------
+        Notes
+        -----
         If arms were given, it will merge them into the `self.y` and
         `self.y_norm` variables.
         Also applies a linear interpolation on dataset.
@@ -807,13 +865,13 @@ class Dataset(metaclass=DatasetBase):
 
         Returns
         -------
-        xmax: `array-like`
+        xmax : `array-like`
             x coordinates of the maximums
-        ymax: `array-like`
+        ymax : `array-like`
             y coordinates of the maximums
-        xmin: `array-like`
+        xmin : `array-like`
             x coordinates of the minimums
-        ymin: `array-like`
+        ymin : `array-like`
             y coordinates of the minimums
         """
         x, y, ref, sam = self._safe_cast()
@@ -858,6 +916,27 @@ class Dataset(metaclass=DatasetBase):
                         ax.plot(x_closest, self.y[idx], **kwargs)
 
     def plot(self, ax=None, title=None, xlim=None, ylim=None, **kwargs):
+        """
+        Plot the dataset.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes, optional
+            An axis to draw the plot on. If not given, it will plot
+            of the last used axis.
+        title : str, optional
+            The title of the plot.
+        xlim : tuple, optional
+            The limits of x axis.
+        ylim : tuple, optional
+            The limits of y axis.
+        kwargs : dict, optional
+            Additional keyword arguments to pass to plot function.
+
+        Notes
+        -----
+        If SPP positions are correctly set, it will mark them on plot.
+        """
         datacolor = kwargs.pop("color", "red")
         _unit = self._render_unit(self.unit, mpl=True)
         xlabel = f"$\lambda\,[{_unit}]$" if self.probably_wavelength else f"$\omega\,[{_unit}]$"
@@ -896,7 +975,7 @@ class Dataset(metaclass=DatasetBase):
 
     def show(self):
         """
-        Draws a graph of the current dataset using matplotlib.
+        Equivalent with plt.show().
         """
         self.plt.show(block=True)
 
@@ -908,17 +987,14 @@ class Dataset(metaclass=DatasetBase):
 
         Parameters
         ----------
-        filename : `str`
+        filename : str, optional
             Save the normalized interferogram named by filename in the
             working directory. If not given it will not be saved.
             Default None.
-        smoothing_level : int
+        smoothing_level : int, optional
             The smoothing level used on the dataset before finding the
             envelopes. It applies Savitzky-Golay filter under the hood.
-
-        Returns
-        -------
-        None
+            Default is 0.
         """
         x, y, _, _ = self._safe_cast()
         if smoothing_level != 0:
@@ -944,6 +1020,8 @@ class Dataset(metaclass=DatasetBase):
         """
         Opens the interactive matplotlib editor for SPP data.
         Use `i` button to add a new point, use `d` key to delete one.
+        The delay field is parsed to only get the numeric values.
+        Close the window on finish.
         """
         _spp = SPPEditor(self.x, self.y_norm)
         self.delay, self.positions = _spp.get_data()
@@ -973,7 +1051,7 @@ class Dataset(metaclass=DatasetBase):
 
     def set_SPP_data(self, delay, positions, force=False):
         """
-        Set the SPP data (delay and SPP positions) for the dataset
+        Set the SPP data (delay and SPP positions) for the dataset.
 
         Parameters
         ----------
@@ -987,10 +1065,6 @@ class Dataset(metaclass=DatasetBase):
             Can be used to set specific SPP positions which are outside of
             the dataset's range. Note that in most cases you should avoid using
             this option. Default is `False`.
-
-        Returns
-        -------
-        None
 
         Notes
         -----

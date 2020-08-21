@@ -5,7 +5,6 @@ import logging
 
 import numpy as np
 from scipy.fftpack import fftshift
-import matplotlib.pyplot as plt
 import pandas as pd
 
 from pysprint.core.bases.dataset import Dataset
@@ -19,7 +18,6 @@ from pysprint.core.evaluate import (
     fft_method,
     cut_gaussian,
     ifft_method,
-    args_comp,
     gaussian_window,
 )
 
@@ -34,7 +32,6 @@ class FFTMethod(Dataset):
     """
     Basic interface for the Fourier transform method.
     """
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         #  making sure it's not normalized
@@ -60,7 +57,7 @@ class FFTMethod(Dataset):
         Parameters
         ----------
         axis : str
-            either 'x', 'y', 'both', 'xy' or 'yx'.
+            Must be 'x', 'y', 'both', 'xy' or 'yx'.
         """
         if axis == "x":
             self.x = fftshift(self.x)
@@ -86,7 +83,6 @@ class FFTMethod(Dataset):
 
         Parameters
         ----------
-
         interpolate : bool, default is True -- WILL BE REMOVED
             Whether to apply linear interpolation on the dataset
             before transforming.
@@ -105,7 +101,6 @@ class FFTMethod(Dataset):
 
         Notes
         -----
-
         The basic scheme is ifft -> windowing -> fft, so you should call
         these functions in this order. Otherwise the transforms may be
         inconsistent.
@@ -115,7 +110,6 @@ class FFTMethod(Dataset):
 
         References
         ----------
-
         [1] Dutt A., Rokhlin V. : Fast Fourier Transforms for Nonequispaced Data II,
             Applied and Computational Harmonic Analysis
             Volume 2, Issue 1, January 1995, Pages 85-100
@@ -167,9 +161,8 @@ class FFTMethod(Dataset):
         The maximum value is adjusted for the dataset's maximum value,
         mostly for visibility.
 
-        Parameters:
+        Parameters
         ----------
-
         at : float
             The maximum of the gaussian curve.
         fwhm : float
@@ -181,7 +174,6 @@ class FFTMethod(Dataset):
         plot : bool, optional
             Whether to immediately show the window with the data.
             Default is `True`.
-
         """
         self.at = at
         self.fwhm = fwhm
@@ -232,30 +224,26 @@ class FFTMethod(Dataset):
         deltas between values to 2*pi complement. After that, fit a curve to
         determine dispersion coefficients.
 
-        Parameters:
+        Parameters
         ----------
-
         reference_point : float
             The reference point on the x axis.
-
         order : int
             Polynomial (and maximum dispersion) order to fit. Must be in [1, 5].
-
         show_graph : bool, optional
             Shows a the final graph of the spectral phase and fitted curve.
             Default is False.
 
-        Returns:
+        Returns
         -------
-
         dispersion : array-like
             The dispersion coefficients in the form of:
-            [GD, GDD, TOD, FOD, QOD]
+            [GD, GDD, TOD, FOD, QOD, SOD]
 
         dispersion_std : array-like
             Standard deviations due to uncertainty of the fit.
             It is only calculated if lmfit is installed. The form is:
-            [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
+            [GD_std, GDD_std, TOD_std, FOD_std, QOD_std, SOD_std]
 
         fit_report : str
             If lmfit is available returns the fit report, else returns an
@@ -263,7 +251,6 @@ class FFTMethod(Dataset):
 
         Notes:
         ------
-
         Decorated with print_disp, so the results are immediately
         printed without explicitly saying so.
 
@@ -303,40 +290,32 @@ class FFTMethod(Dataset):
 
         Parameters
         ----------
-
         reference_point : float, optional
             The reference point on the x axis. If not given, only_phase mode
             will be activated. Default is None.
-
         order : int, optional
             Polynomial (and maximum dispersion) order to fit. Must be in [1, 5].
             If not given, only_phase mode will be activated. Default is None.
-
         only_phase : bool, optional
             If True, activate the only_phase mode, which will retrieve the phase
             without fitting a curve, and return a `pysprint.core.Phase.phase` object.
             Default is False (also not giving enough information for curve fitting
             will automatically activate it).
-
         enable_printing : bool, optional
             If True enable printing the detailed results. Default is True.
-
         skip_domain_check : bool, optional
             If True skip the interferogram domain check and force the algorithm
             to perform actions without changing domain. If False, check for potential
             wrong domains and change for an appropriate one. Default is False.
-
         show_graph : bool, optional
             If True show the graph with the phase and the fitted curve, if there is any.
             Default is True.
-
         usenifft : bool, optional
             If True use the Non Uniform Fast Fourier Transform algorithm. For more details
             see `help(pysprint.FFTMethod.ifft)`. Default is False.
 
         References
         ----------
-
         [1] Dutt A., Rokhlin V. : Fast Fourier Transforms for Nonequispaced Data II,
             Applied and Computational Harmonic Analysis
             Volume 2, Issue 1, January 1995, Pages 85-100
@@ -382,9 +361,27 @@ class FFTMethod(Dataset):
                 reference_point=reference_point, order=order, show_graph=True
             )
 
+    # TODO: add interpolation
     def get_pulse_shape_from_array(
             self, x_sample, y_sample, truncate=True, tol=None
     ):
+        """
+        Find out the shape of the pulse in the time domain I(t).
+
+        Parameters
+        ----------
+        x_sample : np.ndarray
+            The x values of the sample arm.
+        y_sample : np.ndarray
+            The y values of the sample arm.
+        truncate : bool, optional
+            Whether to truncate the phase and sample spectra
+            to the longest_common_subsequence (imeplemented at
+            pysprint.core.bases.algorithms). Default is True.
+        tol : float or None, optional
+            The tolerance which determines how big difference is allowed
+            between x values to interpret them as the same datapoint.
+        """
         if self.phase is None:
             raise ValueError("Must calculate phase first.")
         if not len(y_sample) == len(x_sample):
@@ -419,6 +416,26 @@ class FFTMethod(Dataset):
     def get_pulse_shape_from_file(
             self, filename, truncate=True, tol=None, **kwargs
     ):
+        """
+        Find out the shape of the pulse in the time domain I(t).
+        The sample arm's spectra is loaded from file.
+
+        Parameters
+        ----------
+        filename : str
+            The file containing the sample arm's spectra.
+        truncate : bool, optional
+            Whether to truncate the phase and sample spectra
+            to the longest_common_subsequence (imeplemented at
+            pysprint.core.bases.algorithms). Default is True.
+        tol : float or None, optional
+            The tolerance which determines how big difference is allowed
+            between x values to interpret them as the same datapoint.
+        kwargs : dict, optional
+            The additional keyword arguments for parsing. Same as
+            `pysprint.Dataset.parse_raw`. If `chdomain=True`, then
+            change the domain after loading.
+        """
         if isinstance(filename, str):
             ch = kwargs.pop("chdomain", False)
             df = pd.read_csv(filename, names=["x", "y"], **kwargs)
@@ -431,6 +448,21 @@ class FFTMethod(Dataset):
             )
 
     def errorplot(self, *args, **kwargs):
+        """
+        Plot the errors of fitting.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes, optional
+            An axis to draw the plot on. If not given, it will plot
+            of the last used axis.
+        percent : bool, optional
+            Whether to plot percentage difference. Default is False.
+        title : str, optional
+            The title of the plot. Default is "Errors".
+        kwargs : dict, optional
+            Additional keyword arguments to pass to plot function.
+        """
         try:
             getattr(self.phase, "errorplot", None)(*args, **kwargs)
         except TypeError:
@@ -438,10 +470,16 @@ class FFTMethod(Dataset):
 
     @property
     def get_phase(self):
+        """
+        Return the phase if it is already calculated.
+        """
         if self.phase is not None:
             return self.phase
         raise ValueError("Must retrieve the phase first.")
 
     @property
     def errors(self):
+        """
+        Return the fitting errors as np.ndarray.
+        """
         return getattr(self.phase, "errors", None)

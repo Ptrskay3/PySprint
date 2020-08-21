@@ -7,6 +7,10 @@ import numpy as np
 
 
 class DatasetApply:
+    """
+    Helper class to apply function to
+    `pysprint.core.bases.dataset.Dataset` objects.
+    """
     def __init__(
             self,
             obj,
@@ -32,7 +36,9 @@ class DatasetApply:
         self.shape = len(getattr(self.obj, self.target))
 
     def perform(self):
-
+        """
+        Apply the specified function.
+        """
         if isinstance(self.f, str):
             func = getattr(self.obj, self.f)
             sig = getfullargspec(func)

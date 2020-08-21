@@ -8,7 +8,8 @@ C_LIGHT = 299.792458
 
 
 class DatasetBase(type):
-    """Base metaclass that defines the behaviour
+    """
+    Base metaclass that defines the behaviour
     of any interferogram class.
 
     Set autoprinting if subclass implements calculate-like method.

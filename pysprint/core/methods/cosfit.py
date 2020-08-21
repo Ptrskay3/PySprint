@@ -17,7 +17,7 @@ class CosFitMethod(Dataset):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.params = [1, 1, 1, 1, 1, 1, 1, 1]
+        self.params = [1, 1, 1, 1, 1, 1, 1, 1, 1]
         self.fit = None
         self.mt = 8000
         self.f = None
@@ -70,24 +70,29 @@ class CosFitMethod(Dataset):
         """
         self.params[7] = value / 120
 
+    def guess_SOD(self, value):
+        """
+        Initial guess for QOD in fs^6.
+        """
+        self.params[8] = value / 720
+
     def set_max_order(self, order):
         """
         Sets the maximum order of dispersion to look for.
         Should be called after guessing the initial parameters.
 
-        Parameters:
+        Parameters
         ----------
-
         order : int
-            Maximum order of dispersion to look for. Must be in [1, 5].
+            Maximum order of dispersion to look for. Must be in [1, 6].
         """
-        if order > 5 or order < 1:
-            print("Order should be an in integer from [1, 5].")
+        if order > 6 or order < 1:
+            print("Order should be an in integer from [1, 6].")
         try:
             int(order)
         except ValueError:
-            print("Order should be an in integer from [1, 5].")
-        order = 6 - order
+            print("Order should be an in integer from [1, 6].")
+        order = 7 - order
         for i in range(1, order):
             self.params[-i] = 0
 
@@ -102,20 +107,17 @@ class CosFitMethod(Dataset):
 
         Returns
         -------
-        dispersion: array-like
-            [GD, GDD, TOD, FOD, QOD]
-
-        dispersion_std: array-like
+        dispersion : array-like
+            [GD, GDD, TOD, FOD, QOD, SOD]
+        dispersion_std : array-like
             Standard deviations due to uncertainty of the fit.
             They are only calculated if lmfit is installed.
-            [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
-
-        fit_report: string
+            [GD_std, GDD_std, TOD_std, FOD_std, QOD_std, SOD_std]
+        fit_report : str
             Not implemented yet. It returns an empty string for the time being.
 
-        Notes:
+        Notes
         ------
-
         Decorated with print_disp, so the results are
         immediately printed without explicitly saying so.
         """
@@ -129,11 +131,11 @@ class CosFitMethod(Dataset):
             maxtries=self.mt,
         )
         dispersion = list(dispersion)
-        while len(dispersion) < 5:
+        while len(dispersion) < 6:
             dispersion.append(0)
         return (
             dispersion,
-            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0],
             "",
         )
 
@@ -175,37 +177,30 @@ class CosFitMethod(Dataset):
 
         Parameters
         ----------
-
         reference_point : float
             The reference point on the x axis.
-
         order : int, optional
-            Polynomial (and maximum dispersion) order to fit. Must be in [1, 5].
+            Polynomial (and maximum dispersion) order to fit. Must be in [1, 6].
             Default is 3.
-
         initial_region_ratio : float, optional
             The initial region in portion of the length of the dataset
             (0.1 will mean 10%, and so on..). Note that the bigger
             resolution the interferogram is, the lower it should be set.
             Default is 0.1. It should not be set too low, because too small
             initial region can result in failure.
-
         extend_by : float, optional
             The coefficient determining how quickly the region of fit is
             growing. The bigger resolution the interferogram is (or in general
             the higher the dispersion is), the lower it should be set.
             Default is 0.1.
-
         coef_threshold: float, optional
             The desired R^2 threshold which determines when to expand the region
             of fitting. It's often enough to leave it as is, however if you decide to
             change it, it is highly advised not to set a higher value than 0.7.
             Default is 0.3.
-
         max_tries : int, optional
             The maximum number of tries to fit a curve before failing.
             Default is 5000.
-
         show_endpoint : bool, optional
             If True show the fitting results when finished.
             Default is True.
@@ -217,48 +212,47 @@ class CosFitMethod(Dataset):
         its suspected reasons and solutions.
 
         **SciPy raises OptimizeWarning and the affected area is small
-        or not showing any fit
+        or not showing any fit**
 
         Reasons:
-        - Completely wrong initial GD guess (or lack of guessing).
-        - Too broad inital region, so that the optimizer cannot find a
-        suitable fit.
+        * Completely wrong initial GD guess (or lack of guessing).
+        * Too broad inital region, so that the optimizer cannot find a
+          suitable fit.
 
         This usually happens when the used data is large, or the spectral
         resolution is high.
 
         Solution:
-        - Provide better inital guess for GD.
-        - Lower the inital_region_ratio.
+        * Provide better inital guess for GD.
+        * Lower the inital_region_ratio.
 
-        **SciPy raises OptimizeWarning and the affected area is bigger
+        **SciPy raises OptimizeWarning and the affected area is bigger**
 
         Reasons:
-        - When the optimizer steps up with order it also extends the
-        region of fit.
+        * When the optimizer steps up with order it also extends the
+          region of fit.
 
         This error usually present when the region of fit is too quickly
         growing.
 
         Solution:
-        - Lower extend_by argument.
+        * Lower extend_by argument.
 
-        **The optimizer is finished, but wrong fit is produced.
+        **The optimizer is finished, but wrong fit is produced.**
 
         Reasons:
-        - We measure the goodness of fit with r^2 value. To allow this
-        optimizer to smoothly find appropriate fits even for noisy datasets
-        it's a good practice to keep the r^2 a lower value, such as
-        the default 0.3. The way it works is we step up in order of fit
-        (until max order) and extend region every time when a fit reaches
-        the specified r^2 threshold value. This can be controlled via the
-        coef_threshold argument.
+        * We measure the goodness of fit with r^2 value. To allow this
+          optimizer to smoothly find appropriate fits even for noisy datasets
+          it's a good practice to keep the r^2 a lower value, such as
+          the default 0.3. The way it works is we step up in order of fit
+          (until max order) and extend region every time when a fit reaches
+          the specified r^2 threshold value. This can be controlled via the
+          coef_threshold argument.
 
         Solution:
-        - Adjust the coef_threshold value. Note that it's highly
-        recommended not to set a higher value than 0.6.
+        * Adjust the coef_threshold value. Note that it's highly
+          recommended not to set a higher value than 0.6.
         """
-
         x, y, ref, sam = self._safe_cast()
         self.f = FitOptimizer(
             x, y, ref, sam, reference_point=reference_point, max_order=order
@@ -270,6 +264,7 @@ class CosFitMethod(Dataset):
             TOD=self.params[5],
             FOD=self.params[6],
             QOD=self.params[7],
+            SOD=self.params[8]
         )  # we can pass it higher params safely, they are ignored.
         disp = self.f.run(
             extend_by, coef_threshold, max_tries=max_tries, show_endpoint=show_endpoint,

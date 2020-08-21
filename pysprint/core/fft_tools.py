@@ -5,6 +5,10 @@ from scipy.signal import find_peaks
 
 
 def signaltonoise(a, axis=0, ddof=0):
+    """
+    Reimplementation of the deprecated
+    signaltonoise function from scipy.
+    """
     a = np.asanyarray(a)
     m = a.mean(axis)
     sd = a.std(axis=axis, ddof=ddof)
@@ -12,13 +16,18 @@ def signaltonoise(a, axis=0, ddof=0):
 
 
 def find_roi(x, y):
+    """
+    Find the region of interest in FFT data.
+    """
     y = np.abs(y)
     idx = np.where(x > 0)
     return x[idx], y[idx]
 
 
 def find_center(x, y, n_largest=5, return_multiple=None):
-
+    """
+    Find the center of the peak in FFT'd data.
+    """
     peaks, props = find_peaks(y, prominence=0.001, height=np.max(y) / 100)
 
     if n_largest > len(props["prominences"]):
@@ -59,68 +68,6 @@ def find_center(x, y, n_largest=5, return_multiple=None):
     return _x[residx], _y_[residx]
 
 
-# THIS FUNCTION IS EXPERIMENTAL!
-# def __find_center(x, y, n_largest=5, return_multiple=None):
-#     if return_multiple:
-#         try:
-#             N = int(return_multiple)
-#         except ValueError as err:
-#             raise ValueError("Must return integer number of peaks.") from err
-#
-#     dist = 150 if len(x) < 5000 else len(x) / 50
-#     peaks, props = find_peaks(y, prominence=0.001, height=np.max(y) / 100, distance=dist)
-#
-#     if n_largest > len(props["prominences"]):
-#         n_largest = len(props["prominences"])
-#
-#     # find the most outlying peaks from the noise
-#     ind1 = np.argpartition(props["prominences"], -n_largest)[-n_largest:]
-#     # find the highest peaks by value
-#     ind2 = np.argpartition(props["peak_heights"], -n_largest)[-n_largest:]
-#
-#     candidates = np.intersect1d(ind1, ind2)
-#     ind = np.unique(np.concatenate((ind1, ind2)))
-#
-#     if return_multiple:
-#
-#         if N <= len(ind2):
-#             pks = peaks[ind1][:N]
-#             return x[pks], y[pks]
-#
-#         elif N == len(candidates):
-#             pks = peaks[candidates]
-#             return x[pks], y[pks]
-#
-#         elif N > len(ind2) and N > len(candidates):
-#             _peaks, _props = find_peaks(y, prominence=0.001, height=np.max(y) / 100, distance=dist / 2)
-#             try:
-#                 _ind2 = np.argpartition(_props["peak_heights"], -N)[-N:]
-#             except ValueError as err:
-#                 msg = ValueError("Not enough peaks found..")
-#                 raise msg from err
-#
-#             pks = _peaks[_ind2]
-#             return x[pks], y[pks]
-#         else:
-#             raise ValueError("Not enough peaks found..")
-#
-#     peaks = peaks[ind]
-#
-#     y_prob_density = np.exp((-((x - np.max(x) / 2.5) ** 2)) / (1000 * np.max(x)))
-#     _x, _y, _y_ = x[peaks], y_prob_density[peaks], y[peaks]
-#     # weighted with the prob density function above from origin
-#     try:
-#         residx = np.argmax(_x * _y * _y_)
-#     except ValueError as err:
-#         msg = ValueError(
-#             "Probably you need to set bigger window FWHM. "
-#             "After IFFT, the center of the peak could not be determined."
-#         )
-#         raise msg from err
-#
-#     return _x[residx], _y_[residx]
-
-
 def _ensure_window_at_origin(center, fwhm, order, peak_center_height, tol=1e-3):
     """
     Ensure that the gaussian window of given parameters is
@@ -132,6 +79,9 @@ def _ensure_window_at_origin(center, fwhm, order, peak_center_height, tol=1e-3):
 
 
 def predict_fwhm(x, y, center, peak_center_height, prefer_high_order=True, tol=1e-3):
+    """
+    Predicts ideal fwhm for Gaussian windows. Still needs work to be reliable.
+    """
     if np.iscomplexobj(y):
         y = np.abs(y)
 

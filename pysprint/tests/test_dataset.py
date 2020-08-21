@@ -180,7 +180,7 @@ def test_chrange_errors():
         fg.chrange(current_unit="PHz", target_unit="undefined")
 
 
-def test_blank_repr():
+def test_blank_str():
     expected = [
         "Dataset",
         '----------',
@@ -202,11 +202,11 @@ def test_blank_repr():
 
     d = Dataset(x_, y_, errors='force')
 
-    string = d.__repr__().split("\n")
+    string = d.__str__().split("\n")
     assert string == expected
 
 
-def test_blank_repr_2():
+def test_blank_str_2():
     expected = [
         "Dataset",
         '----------',
@@ -229,11 +229,11 @@ def test_blank_repr_2():
     d = Dataset(x_, y_, errors='force')
     d.delay = 100
 
-    string = d.__repr__().split("\n")
+    string = d.__str__().split("\n")
     assert string == expected
 
 
-def test_blank_repr_3():
+def test_blank_str_3():
     expected = [
         "Dataset",
         '----------',
@@ -255,11 +255,11 @@ def test_blank_repr_3():
     d = Dataset(x_, x_)
     d.delay = 100
     d.positions = 0.5
-    string = d.__repr__().split("\n")
+    string = d.__str__().split("\n")
     assert string == expected
 
 
-def test_raw_repr():
+def test_raw_str():
     string = [
         'Dataset',
         '----------',
@@ -289,7 +289,7 @@ def test_raw_repr():
     ]
 
     ifg = Dataset.parse_raw("test_rawparsing.trt", skiprows=8, meta_len=5, decimal=",", sep=";")
-    assert ifg.__repr__().split("\n") == string
+    assert ifg.__str__().split("\n") == string
 
 
 def test_arm_warning():

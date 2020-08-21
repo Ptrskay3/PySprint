@@ -3,7 +3,6 @@ __all__ = [
     "DatasetError",
     "InterpolationWarning",
     "FourierWarning",
-    "NotebookError",
 ]
 
 
@@ -42,6 +41,3 @@ class DatasetError(Exception):
 
     pass
 
-
-class NotebookError(Exception):
-    pass

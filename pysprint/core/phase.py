@@ -39,6 +39,19 @@ class Phase:
     """
 
     def __init__(self, x, y, GD_mode=False):
+        """
+        Phase constructor.
+
+        Parameters
+        ----------
+        x : np.ndarray
+            The domain of the phase.
+        y : np.ndarray
+            The y values of the phase.
+        GD_mode : bool, optional
+            Whether to treat dataset as a GD graph
+            instead of plain phase. Default is False.
+        """
         self.x = x
         self.y = y
         self.poly = None
@@ -55,6 +68,22 @@ class Phase:
 
     @inplacify
     def slice(self, start=None, stop=None):
+        """
+        Cuts the dataset on x axis.
+
+        Parameters
+        ----------
+        start : float
+            start value of cutting interval
+            Not giving a value will keep the dataset's original minimum value.
+            Note that giving `None` will leave original minimum untouched too.
+            Default is `None`.
+        stop : float
+            stop value of cutting interval
+            Not giving a value will keep the dataset's original maximum value.
+            Note that giving `None` will leave original maximum untouched too.
+            Default is `None`.
+        """
         self.x, self.y = cut_data(self.x, self.y, [], [], start=start, stop=stop)
         return self
 
@@ -86,6 +115,17 @@ class Phase:
         raise NotImplementedError("Before calling, a polynomial must be fitted.")
 
     def plot(self, ax=None, **kwargs):
+        """
+        Plot the phase and the fitted curve (if there's any).
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes, optional
+            An axis to draw the plot on. If not given, it will plot
+            of the last used axis.
+        kwargs : dict, optional
+            Additional keyword arguments to pass to plot function.
+        """
         if ax is None:
             ax = plt
             plt.xlabel(r"$\omega\,[PHz]$")
@@ -105,6 +145,17 @@ class Phase:
 
     @print_disp
     def fit(self, reference_point, order):
+        """
+        Fit the phase and determine dispersion coefficients.
+
+        Parameters
+        ----------
+
+        reference_point : float
+            The reference point to use for fitting.
+        order : int
+            The order of dispersion to look for. Must be in [1, 6].
+        """
         return self._fit(reference_point=reference_point, order=order)
 
     def _fit(self, reference_point, order):
@@ -145,7 +196,7 @@ class Phase:
                     popt, drop_first=True, dof=1
                 )
                 fit_report = (
-                    "To display detailed results," " you must have `lmfit` installed."
+                    "To display detailed results you must have `lmfit` installed."
                 )
 
                 self.fitted_curve = _function(x, *popt)
@@ -159,6 +210,21 @@ class Phase:
             return dispersion, dispersion_std, fit_report
 
     def errorplot(self, ax=None, percent=False, title="Errors", **kwargs):
+        """
+        Plot the errors of fitting.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes, optional
+            An axis to draw the plot on. If not given, it will plot
+            of the last used axis.
+        percent : bool, optional
+            Whether to plot percentage difference. Default is False.
+        title : str, optional
+            The title of the plot. Default is "Errors".
+        kwargs : dict, optional
+            Additional keyword arguments to pass to plot function.
+        """
         if ax is None:
             ax = plt
             plt.xlabel("$\omega\, [PHz]$")
@@ -183,6 +249,16 @@ class Phase:
             raise ValueError("Must fit a curve before requesting errors.")
 
     def flip_around(self, value, side="left"):
+        """
+        Flip the phase's y values.
+
+        Parameters
+        ----------
+        value : float
+            The x value where to perform flipping.
+        side : str, optional
+            The side where to flip the y values. Default is "left".
+        """
         if side == "left":
             idx = np.where(self.x <= value)[0]
         elif side == "right":
@@ -199,12 +275,18 @@ class Phase:
 
     @property
     def errors(self):
+        """
+        Return the fitting errors as np.ndarray.
+        """
         if self.fitted_curve is not None:
             return self.y - self.fitted_curve
         raise ValueError("Must fit a curve before requesting errors.")
 
     @property
     def order(self):
+        """
+        Return the order of polynomial which was fitted.
+        """
         if self.is_coeff or self.is_dispersion_array:
             self._order = self.poly.order
         else:
@@ -213,8 +295,14 @@ class Phase:
 
     @property
     def dispersion_order(self):
+        """
+        Return the dispersion order.
+        """
         return self.fitorder + 1 if self.GD_mode else self.fitorder
 
     @property
     def data(self):
+        """
+        Return the data as tuple (x, y).
+        """
         return self.x, self.y

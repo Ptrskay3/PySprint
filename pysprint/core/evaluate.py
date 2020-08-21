@@ -22,13 +22,12 @@ from pysprint.utils import (
     fourier_interpolate,
     transform_cf_params_to_dispersion,
     transform_lmfit_params_to_dispersion,
-    plot_phase,
 )
 
 from pysprint.core.functions import _fit_config, _cosfit_config
 
 Num = Union[int, float]
-NumericLike = Union[Num, Union[List, np.ndarray]]
+NumericLike = Union[Num, List, np.ndarray]
 
 logger = logging.getLogger(__name__)
 FORMAT = "[ %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
@@ -41,12 +40,14 @@ __all__ = [
     "fft_method",
     "cut_gaussian",
     "ifft_method",
-    "args_comp",
     "gaussian_window",
 ]
 
 
 def is_inside(value, array):
+    """
+    Returns whether `value` is strictly inside an array's bounds.
+    """
     try:
         return np.any((value < np.max(array)) & (value > np.min(array)))
     except ValueError:
@@ -86,7 +87,12 @@ def _split_on_SPP(a: np.ndarray, val: Union[List, np.ndarray]) -> List[np.ndarra
         return np.split(a[~idx], split_at)
 
 
-def _build_single_phase_data(x: np.ndarray, SPP_callbacks: NumericLike = None, flip=False) -> Tuple[np.ndarray, np.ndarray]:
+def _build_single_phase_data(
+        x: np.ndarray,
+        SPP_callbacks: NumericLike = None,
+        flip=False
+) -> Tuple[np.ndarray, np.ndarray]:
+
     y = np.array([])
     lastval = 0
 
@@ -121,7 +127,9 @@ def min_max_method(
         minx=None,
         SPP_callbacks=None,
 ):
-
+    """
+    Build the phase from extremal positions and SPP_callbacks.
+    """
     x, y = _handle_input(x, y, ref, sam)
     if maxx is None:
         max_ind = argrelextrema(y, np.greater)
@@ -181,38 +189,30 @@ def spp_method(delays, omegas, ref_point=0, fit_order=4):
 
     Parameters
     ----------
-
     delays: array-like
-    The delay values in fs exactly where omegas taken.
-
+        The delay values in fs exactly where omegas taken.
     omegas: array-like
-    The angular frequency values where SPP's are located
-
+        The angular frequency values where SPP's are located
     ref_point: float
-    The reference point in dataset for fitting.
-
+        The reference point in dataset for fitting.
     fit_order: int
-    order of polynomial to fit the given data
+        order of polynomial to fit the given data
 
     Returns
     -------
     omegas: array-like
-    x axis data
-
+        x axis data
     delays: array-like
-    y axis data
-
+        y axis data
     dispersion: array-like
-    [GD, GDD, TOD, FOD, QOD]
-
+        [GD, GDD, TOD, FOD, QOD]
     dispersion_std: array-like
-    [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
-
+        [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
     bf: array-like
-    best fitting curve for plotting
+        best fitting curve for plotting
     """
-    if fit_order not in range(5):
-        raise ValueError("fit order must be in [1, 4]")
+    if fit_order not in range(6):
+        raise ValueError("fit order must be in [1, 5]")
 
     omegas = np.asarray(omegas).astype(np.float64)
 
@@ -245,34 +245,29 @@ def spp_method(delays, omegas, ref_point=0, fit_order=4):
     return omegas, delays, -dispersion, dispersion_std, bf
 
 
-def cff_method(x, y, ref, sam, ref_point=0, p0=[1, 1, 1, 1, 1, 1, 1, 1], maxtries=8000):
+# mutable default argument is fine, because we treat it internally and it's never
+# exposed to the user
+def cff_method(x, y, ref, sam, ref_point=0, p0=[1, 1, 1, 1, 1, 1, 1, 1, 1], maxtries=8000):
     """
     Phase modulated cosine function fit method.
 
     Parameters
     ----------
-
     x: array-like
-    x-axis data
-
+        x-axis data
     y: array-like
-    y-axis data
-
+        y-axis data
     ref, sam: array-like
-    the reference and sample arm spectra evaluated at x
-
+        the reference and sample arm spectra evaluated at x
     p0: array-like
-    the initial parameters for fitting
+        the initial parameters for fitting
 
     Returns
     -------
-
     dispersion: array-like
-    [GD, GDD, TOD, FOD, QOD]
-
+        [GD, GDD, TOD, FOD, QOD]
     bf: array-like
-    best fitting curve
-
+        best fitting curve
     """
 
     x, y = _handle_input(x, y, ref, sam)
@@ -298,24 +293,22 @@ def cff_method(x, y, ref, sam, ref_point=0, p0=[1, 1, 1, 1, 1, 1, 1, 1], maxtrie
 
 
 def fft_method(x, y):
-    """Perfoms FFT on data
+    """
+    Perfoms FFT on data
 
     Parameters
     ----------
-
     x: array-like
-    the x-axis data
-
+        the x-axis data
     y: array-like
-    the y-axis data
+        the y-axis data
 
     Returns
     -------
     xf: array-like
-    the transformed x data
-
+        the transformed x data
     yf: array-like
-    transformed y data
+        transformed y data
     """
     yf = fftpack.fft(y)
     xf = np.linspace(x[0], x[-1], len(x))
@@ -329,21 +322,18 @@ def gaussian_window(t, tau, fwhm, order):
     Parameters
     ----------
     t: array-like
-    input array to perform window on
-
+        input array to perform window on
     tau: float
-    center of gaussian window
-
+        center of gaussian window
     fwhm: float
-    FWHM of given gaussian
-
+        FWHM of given gaussian
     order: float
-    order of gaussian window. If not even it's incremented by 1.
+        order of gaussian window. If not even it's incremented by 1.
 
     Returns
     -------
     array : array-like
-    nth order gaussian window with params above
+        nth order gaussian window with params above
 
     """
     if order % 2 == 1:
@@ -359,25 +349,20 @@ def cut_gaussian(x, y, spike, fwhm, win_order):
     Parameters
     ----------
     x: array-like
-    x-axis data
-
+        x-axis data
     y: array-like
-    y-axis data
-
+        y-axis data
     spike: float
-    center of gaussian window
-
+        center of gaussian window
     fwhm: float
-    Full width at half max
-
+        Full width at half max
     win_order: int
-    The order of gaussian window. Must be even.
+        The order of gaussian window. Must be even.
 
     Returns
     -------
-
     y: array-like
-    the windowed y values
+        the windowed y values
     """
     y *= gaussian_window(x, tau=spike, fwhm=fwhm, order=win_order)
     return y
@@ -385,28 +370,23 @@ def cut_gaussian(x, y, spike, fwhm, win_order):
 
 def ifft_method(x, y, interpolate=True):
     """
-    Perfoms IFFT on data
+    Perfoms IFFT on data.
 
     Parameters
     ----------
-
     x: array-like
-    the x-axis data
-
+        the x-axis data
     y: array-like
-    the y-axis data
-
+        the y-axis data
     interpolate: bool
-    if True perform a linear interpolation on dataset before transforming
+        if True perform a linear interpolation on dataset before transforming
 
     Returns
     -------
     xf: array-like
-    the transformed x data
-
+        the transformed x data
     yf: array-like
-    transformed y data
-
+        transformed y data
     """
     N = len(x)
     if interpolate:
@@ -414,85 +394,3 @@ def ifft_method(x, y, interpolate=True):
     xf = np.fft.fftfreq(N, d=(x[1] - x[0]) / (2 * np.pi))
     yf = np.fft.ifft(y)
     return xf, yf
-
-
-def args_comp(x, y, ref_point=0, fit_order=5, show_graph=False):
-    """
-    Calculates the phase of complex dataset then unwrap by changing
-    deltas between values to 2*pi complement. At the end, fit a
-    polynomial curve to determine dispersion coeffs.
-
-    Parameters
-    ----------
-
-    x: array-like
-    the x-axis data
-
-    y: array-like
-    the y-axis data
-
-    ref_point: float
-    the reference point to calculate order
-
-    fit_order: int
-    degree of polynomial to fit data [1, 5]
-
-    show_graph: bool
-    if True return a plot with the results
-
-    Returns
-    -------
-
-    dispersion: array-like
-    [GD, GDD, TOD, FOD, QOD]
-
-    dispersion_std: array-like
-    [GD_std, GDD_std, TOD_std, FOD_std, QOD_std]
-
-    fit_report: lmfit report
-    """
-    if fit_order not in range(6):
-        raise ValueError("fit order must be in [1, 5]")
-
-    x -= ref_point
-    y = np.unwrap(np.angle(y), axis=0)
-
-    _function = _fit_config[fit_order]
-
-    if _has_lmfit:
-        fitmodel = Model(_function)
-        pars = fitmodel.make_params(**{f"b{i}": 1 for i in range(fit_order + 1)})
-        result = fitmodel.fit(y, x=x, params=pars)
-    else:
-        popt, pcov = curve_fit(_function, x, y, maxfev=8000)
-
-    if _has_lmfit:
-        dispersion, dispersion_std = transform_lmfit_params_to_dispersion(
-            *unpack_lmfit(result.params.items()), drop_first=True, dof=1
-        )
-        fit_report = result.fit_report()
-    else:
-        dispersion, dispersion_std = transform_cf_params_to_dispersion(
-            popt, drop_first=True, dof=1
-        )
-        fit_report = "To display detailed results," " you must have `lmfit` installed."
-    if show_graph:
-        try:
-            plot_phase(
-                x,
-                y,
-                result.best_fit,
-                bf_fallback=result.best_fit,
-                window_title="Phase",
-            )
-        except UnboundLocalError:
-
-            plot_phase(
-                x,
-                y,
-                _function(x, *popt),
-                bf_fallback=_function(x, *popt),
-                window_title="Phase",
-            )
-
-    return -dispersion, dispersion_std, fit_report

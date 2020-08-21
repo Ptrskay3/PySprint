@@ -52,7 +52,7 @@ class FitOptimizer:
         self.rest = None
         self.figure = plt.figure()
 
-    def set_final_guess(self, GD, GDD=None, TOD=None, FOD=None, QOD=None):
+    def set_final_guess(self, GD, GDD=None, TOD=None, FOD=None, QOD=None, SOD=None):
         self.p0[3] = GD
         self.rest = []
         if GDD is not None:
@@ -63,6 +63,8 @@ class FitOptimizer:
             self.rest.append(FOD / 24)
         if QOD is not None:
             self.rest.append(QOD / 120)
+        if SOD is not None:
+            self.rest.append(SOD / 720)
 
     @property
     def user_guess(self):
@@ -77,7 +79,6 @@ class FitOptimizer:
             self._x_curr, self.func(self._x_curr, *self.popt), "r--", label="Fit",
         )
         plt.grid()
-        # plt.legend(loc='upper left')
         plt.draw()
         plt.xlabel(r"$\Delta\omega\, [PHz]$")
         plt.ylabel("I")
@@ -162,12 +163,13 @@ class FitOptimizer:
         ss_tot = np.sum((self._y_curr - np.mean(self._y_curr)) ** 2)
         return 1 - (ss_res / ss_tot)
 
+    # TODO : this should be print_disp
     def result_wrapper(self):
-        labels = ("GD", "GDD", "TOD", "FOD", "QOD")
+        labels = ("GD", "GDD", "TOD", "FOD", "QOD", "SOD")
         params = self.p0[3:]
         for i, (label, param) in enumerate(zip(labels, params)):
             if run_from_ipython():
-                from IPython.display import display, Math
+                from IPython.display import display, Math # noqa
 
                 display(
                     Math(
@@ -199,7 +201,7 @@ class FitOptimizer:
 
                 self.result_wrapper()
                 if run_from_ipython():
-                    from IPython.display import display, Math
+                    from IPython.display import display, Math # noqa
 
                     display(Math(f"with \\ R^2 = {(self._fit_goodness()):.5f}."))
                 else:
