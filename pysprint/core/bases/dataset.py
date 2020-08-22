@@ -372,7 +372,7 @@ class Dataset(metaclass=_DatasetBase):
     def GD_lookup(self, reference_point, engine="cwt", silent=False, **kwargs):
         """
         Quick GD lookup: it finds extremal points near the
-        `reference_point` and returns an average value of $2 \cdot \pi$
+        `reference_point` and returns an average value of 2*pi
         divided by distances _between consecutive minimal or maximal values.
         Since it's relying on peak detection, the results may be irrelevant
         in some cases. If the parent class is `~pysprint.CosFitMethod`, then
