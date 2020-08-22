@@ -52,10 +52,3 @@ pysprint.core.methods.wft module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
-
-.. automodule:: pysprint.core.methods
-   :members:
-   :undoc-members:
-   :show-inheritance:

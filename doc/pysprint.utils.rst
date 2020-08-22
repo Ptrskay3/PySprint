@@ -44,10 +44,3 @@ pysprint.utils.misc module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
-
-.. automodule:: pysprint.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:

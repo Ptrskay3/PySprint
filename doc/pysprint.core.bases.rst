@@ -20,10 +20,3 @@ pysprint.core.bases.dataset module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
-
-.. automodule:: pysprint.core.bases
-   :members:
-   :undoc-members:
-   :show-inheritance:

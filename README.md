@@ -7,7 +7,6 @@
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Ptrskay3/PySprint.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Ptrskay3/PySprint/context:python)
 [![codecov](https://codecov.io/gh/Ptrskay3/PySprint/branch/master/graph/badge.svg)](https://codecov.io/gh/Ptrskay3/PySprint)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-![Downloads](https://img.shields.io/pypi/dm/pysprint.svg)
 [![Documentation Status](https://readthedocs.org/projects/pysprint/badge/?version=latest)](https://pysprint.readthedocs.io/en/latest/?badge=latest)
 | | |
 |-|-|
@@ -67,6 +66,6 @@ Optional packages:
 
 ## Documentation
 
-The documentation is [here](pysprint.readthedocs.io/en/latest/), hosted on readthedocs.io.
+The documentation is hosted on readthedocs.io.
 
 

@@ -1,9 +1,11 @@
 .. Pysprint documentation master file
 
+
+
 .. _pysprint GitHub repository:   https://github.com/Ptrskay3/PySprint
 
-Spectrally resolved interferometry in Python
-============================================
+Pysprint: Spectrally resolved interferometry in Python
+======================================================
 
 Pysprint provides a high-level interface for evaluating measurements
 relying on spectrally resolved interferometry.
