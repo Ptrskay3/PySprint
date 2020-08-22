@@ -8,7 +8,7 @@
 [![codecov](https://codecov.io/gh/Ptrskay3/PySprint/branch/master/graph/badge.svg)](https://codecov.io/gh/Ptrskay3/PySprint)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 ![Downloads](https://img.shields.io/pypi/dm/pysprint.svg)
-
+[![Documentation Status](https://readthedocs.org/projects/pysprint/badge/?version=latest)](https://pysprint.readthedocs.io/en/latest/?badge=latest)
 | | |
 |-|-|
 |__Name__| PySprint|
@@ -67,6 +67,6 @@ Optional packages:
 
 ## Documentation
 
-In progress.
+The documentation is [here](pysprint.readthedocs.io/en/latest/), hosted on readthedocs.io.
 
 
