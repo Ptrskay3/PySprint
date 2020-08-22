@@ -6,7 +6,7 @@ from inspect import getfullargspec
 import numpy as np
 
 
-class DatasetApply:
+class _DatasetApply:
     """
     Helper class to apply function to
     `pysprint.core.bases.dataset.Dataset` objects.

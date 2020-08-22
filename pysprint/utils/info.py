@@ -73,6 +73,9 @@ def get_dep_info():
 
 
 def print_info():
+    """
+    Print all the relevant information about system and dependecies.
+    """
     sysinfo = get_system_info()
     deps = get_dep_info()
     n = max(len(x) for x in deps)

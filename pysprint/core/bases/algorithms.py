@@ -21,7 +21,7 @@ def longest_common_subsequence(x1, y1, x2, y2, tol=None):
         The y values for the second array
     tol : float, optional
         The tolerance which determines how big difference is allowed
-        between x values to interpret them as the same datapoint.
+        _between x values to interpret them as the same datapoint.
 
     Returns
     -------

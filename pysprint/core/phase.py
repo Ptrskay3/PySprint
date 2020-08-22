@@ -16,13 +16,13 @@ try:
 except ImportError:
     _has_lmfit = False
 
-from pysprint.core.functions import _fit_config
-from pysprint.core.preprocess import cut_data
+from pysprint.core._functions import _fit_config
+from pysprint.core._preprocess import cut_data
 from pysprint.utils import (
-    print_disp,
+    pprint_disp,
     transform_lmfit_params_to_dispersion,
     transform_cf_params_to_dispersion,
-    unpack_lmfit,
+    _unpack_lmfit,
     find_nearest,
     inplacify
 )
@@ -143,7 +143,7 @@ class Phase:
                 # ax.plot(x, self.poly(x)[idx], **kwargs)
                 pass
 
-    @print_disp
+    @pprint_disp
     def fit(self, reference_point, order):
         """
         Fit the phase and determine dispersion coefficients.
@@ -160,7 +160,7 @@ class Phase:
 
     def _fit(self, reference_point, order):
         """
-        This is meant to be used privately, when the print_disp
+        This is meant to be used privately, when the pprint_disp
         is handled by another function. The `fit` method is for
         public use.
         """
@@ -187,7 +187,7 @@ class Phase:
 
             if _has_lmfit:
                 dispersion, dispersion_std = transform_lmfit_params_to_dispersion(
-                    *unpack_lmfit(result.params.items()), drop_first=True, dof=1
+                    *_unpack_lmfit(result.params.items()), drop_first=True, dof=1
                 )
                 fit_report = result.fit_report()
                 self.fitted_curve = result.best_fit

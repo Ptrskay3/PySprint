@@ -10,11 +10,11 @@ import pandas as pd
 from pysprint.core.bases.dataset import Dataset
 from pysprint.core.bases.algorithms import longest_common_subsequence
 from pysprint.core.nufft import nuifft
-from pysprint.utils import inplacify
+from pysprint.utils.decorators import inplacify
 from pysprint.utils.exceptions import FourierWarning
-from pysprint.core.fft_tools import _run
+from pysprint.core._fft_tools import _run
 from pysprint.core.phase import Phase
-from pysprint.core.evaluate import (
+from pysprint.core._evaluate import (
     fft_method,
     cut_gaussian,
     ifft_method,
@@ -205,7 +205,7 @@ class FFTMethod(Dataset):
     def build_phase(self):
         """
         Retrieve *only the phase* after the transforms. This will
-        unwrap the angles and constructs a pysprint.core.phase.Phase object.
+        unwrap the angles and constructs a `~pysprint.core.phase.Phase` object.
 
         Returns
         -------
@@ -221,7 +221,7 @@ class FFTMethod(Dataset):
     def calculate(self, reference_point, order, show_graph=False):
         """
         FFTMethod's calculate function. It will unwrap the phase by changing
-        deltas between values to 2*pi complement. After that, fit a curve to
+        deltas _between values to 2*pi complement. After that, fit a curve to
         determine dispersion coefficients.
 
         Parameters
@@ -251,7 +251,7 @@ class FFTMethod(Dataset):
 
         Notes:
         ------
-        Decorated with print_disp, so the results are immediately
+        Decorated with pprint_disp, so the results are immediately
         printed without explicitly saying so.
 
         Developer commentary:
@@ -380,7 +380,7 @@ class FFTMethod(Dataset):
             pysprint.core.bases.algorithms). Default is True.
         tol : float or None, optional
             The tolerance which determines how big difference is allowed
-            between x values to interpret them as the same datapoint.
+            _between x values to interpret them as the same datapoint.
         """
         if self.phase is None:
             raise ValueError("Must calculate phase first.")
@@ -430,7 +430,7 @@ class FFTMethod(Dataset):
             pysprint.core.bases.algorithms). Default is True.
         tol : float or None, optional
             The tolerance which determines how big difference is allowed
-            between x values to interpret them as the same datapoint.
+            _between x values to interpret them as the same datapoint.
         kwargs : dict, optional
             The additional keyword arguments for parsing. Same as
             `pysprint.Dataset.parse_raw`. If `chdomain=True`, then

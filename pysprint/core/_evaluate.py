@@ -18,13 +18,13 @@ except ImportError:
 from pysprint.utils import (
     find_nearest,
     _handle_input,
-    unpack_lmfit,
-    fourier_interpolate,
+    _unpack_lmfit,
+    _fourier_interpolate,
     transform_cf_params_to_dispersion,
     transform_lmfit_params_to_dispersion,
 )
 
-from pysprint.core.functions import _fit_config, _cosfit_config
+from pysprint.core._functions import _fit_config, _cosfit_config
 
 Num = Union[int, float]
 NumericLike = Union[Num, List, np.ndarray]
@@ -233,7 +233,7 @@ def spp_method(delays, omegas, ref_point=0, fit_order=4):
         result = fitmodel.fit(delays, x=omegas, params=pars)
 
         dispersion, dispersion_std = transform_lmfit_params_to_dispersion(
-            *unpack_lmfit(result.params.items()), drop_first=False, dof=0
+            *_unpack_lmfit(result.params.items()), drop_first=False, dof=0
         )
         bf = result.best_fit
     else:
@@ -390,7 +390,7 @@ def ifft_method(x, y, interpolate=True):
     """
     N = len(x)
     if interpolate:
-        x, y = fourier_interpolate(x, y)
+        x, y = _fourier_interpolate(x, y)
     xf = np.fft.fftfreq(N, d=(x[1] - x[0]) / (2 * np.pi))
     yf = np.fft.ifft(y)
     return xf, yf

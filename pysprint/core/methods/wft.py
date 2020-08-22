@@ -6,10 +6,11 @@ import matplotlib.pyplot as plt
 
 from pysprint.core.phase import Phase
 from pysprint.utils import PySprintWarning
-from pysprint.core.fft_tools import find_center, find_roi
-from pysprint.core.methods._fft import FFTMethod
-from pysprint.core.evaluate import gaussian_window
-from pysprint.utils.misc import mutually_exclusive_args, lazy_property, find_nearest
+from pysprint.core._fft_tools import find_center, find_roi
+from pysprint.core.methods.fftmethod import FFTMethod
+from pysprint.core._evaluate import gaussian_window
+from pysprint.utils.decorators import _mutually_exclusive_args, _lazy_property
+from pysprint.utils.misc import find_nearest
 
 
 class Window:
@@ -24,7 +25,7 @@ class Window:
         self.fwhm = fwhm
         self.order = order
 
-    @lazy_property
+    @_lazy_property
     def y(self):
         return gaussian_window(self.x, self.center, self.fwhm, self.order)
 
@@ -77,7 +78,7 @@ class WFTMethod(FFTMethod):
         self.Z_cont = np.array([])
         self.fastmath = True
 
-    @mutually_exclusive_args("std", "fwhm")
+    @_mutually_exclusive_args("std", "fwhm")
     def add_window(self, center, std=None, fwhm=None, order=2):
         """
         Add a Gaussian window to the interferogram.
@@ -119,7 +120,7 @@ class WFTMethod(FFTMethod):
     def centers(self):
         return self.window_seq.keys()
 
-    @mutually_exclusive_args("std", "fwhm")
+    @_mutually_exclusive_args("std", "fwhm")
     def add_window_arange(
         self, start, stop, step, std=None, fwhm=None, order=2
     ):
@@ -154,7 +155,7 @@ class WFTMethod(FFTMethod):
             else:
                 self.add_window(center=cent, fwhm=fwhm, order=order)
 
-    @mutually_exclusive_args("std", "fwhm")
+    @_mutually_exclusive_args("std", "fwhm")
     def add_window_linspace(
         self, start, stop, num, std=None, fwhm=None, order=2
     ):
@@ -189,7 +190,7 @@ class WFTMethod(FFTMethod):
             else:
                 self.add_window(center=cent, fwhm=fwhm, order=order)
 
-    @mutually_exclusive_args("std", "fwhm")
+    @_mutually_exclusive_args("std", "fwhm")
     def add_window_geomspace(
         self, start, stop, num, std=None, fwhm=None, order=2
     ):
@@ -375,6 +376,11 @@ class WFTMethod(FFTMethod):
         usenifft : bool, optional
             Whether to use Non-unfirom FFT when calculating GD.
             Default is False. **Not stable.**
+
+        Returns
+        -------
+        GD : pysprint.core.phase.Phase
+            The phase object with `GD_mode=True`. See its docstring for more info.
         """
         self.fastmath = fastmath
         self._apply_window_sequence(silent=silent, fastmath=fastmath, usenifft=usenifft)

@@ -13,7 +13,7 @@ from scipy.interpolate import interp1d
 from pysprint.utils import (
     find_nearest,
     _handle_input,
-    between,
+    _between,
     _maybe_increase_before_cwt,
 )
 
@@ -65,10 +65,10 @@ def find_peak(x, y, ref, sam, pro_max=1, pro_min=1, threshold=0.1, except_around
     min_idx = []
     max_idx = []
     for idx in max_indexes:
-        if between(x[idx], except_around) or np.abs(y[idx]) > threshold:
+        if _between(x[idx], except_around) or np.abs(y[idx]) > threshold:
             max_idx.append(idx)
     for idx in min_indexes:
-        if between(x[idx], except_around) or np.abs(y[idx]) > threshold:
+        if _between(x[idx], except_around) or np.abs(y[idx]) > threshold:
             min_idx.append(idx)
 
     if len(x[max_idx]) != len(y[max_idx]) or len(x[min_idx]) != len(y[min_idx]):

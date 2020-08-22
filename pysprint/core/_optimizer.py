@@ -4,8 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
-from pysprint.utils import find_nearest, run_from_ipython, progress
-from pysprint.core.functions import _cosfit_config, cos_fit1
+from pysprint.utils import find_nearest, run_from_ipython, _progress
+from pysprint.core._functions import _cosfit_config, cos_fit1
 
 
 class FitOptimizer:
@@ -163,7 +163,7 @@ class FitOptimizer:
         ss_tot = np.sum((self._y_curr - np.mean(self._y_curr)) ** 2)
         return 1 - (ss_res / ss_tot)
 
-    # TODO : this should be print_disp
+    # TODO : this should be pprint_disp
     def result_wrapper(self):
         labels = ("GD", "GDD", "TOD", "FOD", "QOD", "SOD")
         params = self.p0[3:]
@@ -179,7 +179,7 @@ class FitOptimizer:
             else:
                 print(f"{label} = {(params[i] * factorial(i + 1)):.5f} fs^{i + 1}")
 
-    @progress
+    @_progress
     def run(self, r_extend_by, r_threshold, max_tries=5000, show_endpoint=True):
 
         if not self._init_set:

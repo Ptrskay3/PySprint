@@ -5,7 +5,7 @@ import numpy as np
 
 import pysprint
 from pysprint import FFTMethod, Generator
-from pysprint.core.fft_tools import (
+from pysprint.core._fft_tools import (
     find_roi,
     find_center,
     _ensure_window_at_origin,

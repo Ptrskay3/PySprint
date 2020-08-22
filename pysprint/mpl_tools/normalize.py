@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import rcParams
 from matplotlib import pyplot as plt
 
-from pysprint.utils import calc_envelope
+from pysprint.utils import _calc_envelope
 from pysprint.mpl_tools.peak import SelectButton
 
 
@@ -19,12 +19,12 @@ class DraggableEnvelope:
         self.y = y
         self.mode = mode
         if self.mode == "l":
-            self.envelope, self.y_env, self.loc = calc_envelope(
+            self.envelope, self.y_env, self.loc = _calc_envelope(
                 self.y, np.arange(len(self.y)), "l"
             )
             plt.title("Adjust the lower envelope.")
         elif self.mode == "u":
-            self.envelope, self.y_env, self.loc = calc_envelope(
+            self.envelope, self.y_env, self.loc = _calc_envelope(
                 self.y, np.arange(len(self.y)), "u"
             )
             plt.title("Adjust the upper envelope.")

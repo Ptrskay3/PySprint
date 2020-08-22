@@ -1,151 +1,23 @@
 import os
-import sys
-import re
-from copy import copy
-from functools import wraps, lru_cache
-import threading
-import time
-from itertools import cycle
 
 import numpy as np
 from scipy.interpolate import interp1d
 import scipy.stats as st
 
 __all__ = [
-    "unpack_lmfit",
+    "_unpack_lmfit",
     "find_nearest",
     "_handle_input",
-    "print_disp",
-    "fourier_interpolate",
-    "between",
-    "get_closest",
+    "_fourier_interpolate",
+    "_between",
+    "_get_closest",
     "run_from_ipython",
-    "calc_envelope",
+    "_calc_envelope",
     "measurement",
     "_maybe_increase_before_cwt",
     "pad_with_trailing_zeros",
-    "mutually_exclusive_args",
-    "lazy_property",
-    "inplacify",
-    "progress"
+
 ]
-
-
-def progress(func):
-    active = threading.Lock()
-
-    def spinning_pbar_printer():
-        symbols = ['|', '/', '-', '\\', '\\']
-        cursor = cycle(symbols)
-        while active.locked():
-            sys.stdout.write("\r")
-            sys.stdout.write("Working... " + next(cursor))
-            sys.stdout.flush()
-            time.sleep(0.1)
-
-    def wrapper(*args, **kwargs):
-        t = threading.Thread(target=spinning_pbar_printer)
-        active.acquire()
-        t.start()
-        try:
-            res = func(*args, **kwargs)
-        finally:
-            active.release()
-        return res
-
-    return wrapper
-
-
-_inplace_doc = """\n\tinplace : bool, optional
-            Whether to apply the operation on the dataset in an "inplace" manner.
-            This means if inplace is True it will apply the changes directly on
-            the current dataset and returns None. If inplace is False, it will
-            leave the current object untouched, but returns a copy of it, and
-            the operation will be performed on the copy. It's useful when
-            chaining operations on a dataset.\n\n\t"""
-
-
-def _has_parameter_section(method):
-    try:
-        return "Parameters" in method.__doc__
-    except TypeError:
-        return False
-
-
-def update_doc(method, doc):
-    if _has_parameter_section(method):
-        newdoc = _build_doc(method, doc)
-        method.__doc__ = newdoc
-    else:
-        newdoc = """\n\tParameters
-        ----------\n\tinplace : bool, optional
-            Whether to apply the operation on the dataset in an "inplace" manner.
-            This means if inplace is True it will apply the changes directly on
-            the current dataset and returns None. If inplace is False, it will
-            leave the current object untouched, but returns a copy of it, and
-            the operation will be performed on the copy. It's useful when
-            chaining operations on a dataset.\n\n\t"""
-
-        nodoc_head = (f"Docstring automatically created for {method.__name__}. "
-                      "Parameter list may not be complete.\n")
-        if method.__doc__ is not None:
-            method.__doc__ += newdoc
-        else:
-            method.__doc__ = nodoc_head + newdoc
-        return
-
-
-def _build_doc(method, param):
-    patt = r"(\w+(?=\s*[-]{4,}[^/]))"  # finding sections
-    splitted_doc = re.split(patt, method.__doc__)
-    try:
-        target = splitted_doc.index("Parameters") + 1
-    except ValueError:
-        return method.__doc__
-
-    splitted_doc[target] = splitted_doc[target].rstrip() + param
-
-    return ''.join(_ for _ in splitted_doc if _ is not None)
-
-
-def inplacify(method):
-    update_doc(method, _inplace_doc)
-
-    @wraps(method)
-    def wrapper(self, *args, **kwds):
-        inplace = kwds.pop("inplace", True)
-        if inplace:
-            method(self, *args, **kwds)
-        else:
-            return method(copy(self), *args, **kwds)
-
-    return wrapper
-
-
-# https://stackoverflow.com/a/54487188/11751294
-def mutually_exclusive_args(keyword, *keywords):
-    """"
-    Decorator to restrict the user to specify exactly one of the given parameters.
-    Often used for std and fwhm for Gaussian windows.
-    """
-    keywords = (keyword,) + keywords
-
-    def wrapper(func):
-        @wraps(func)
-        def inner(*args, **kwargs):
-            if sum(k in keywords for k in kwargs) != 1:
-                raise TypeError(
-                    "You must specify exactly one of {}.".format(" and ".join(keywords))
-                )
-            return func(*args, **kwargs)
-
-        return inner
-
-    return wrapper
-
-
-def lazy_property(f):
-    return property(lru_cache()(f))
 
 
 def _maybe_increase_before_cwt(y, tolerance=0.05):
@@ -158,7 +30,7 @@ def _maybe_increase_before_cwt(y, tolerance=0.05):
     return True
 
 
-def calc_envelope(x, ind, mode="u"):
+def _calc_envelope(x, ind, mode="u"):
     """
     https://stackoverflow.com/a/39662343/11751294
     """
@@ -187,13 +59,16 @@ def run_from_ipython():
         return False
 
 
-def get_closest(x_val, y_val, x_array, y_array):
+def _get_closest(x_val, y_val, x_array, y_array):
+    """
+    Get the closest 2D point in array.
+    """
     idx = np.argmin((np.hypot(x_array - x_val, y_array - y_val)))
     value = x_array[idx]
     return value, y_array[idx], idx
 
 
-def between(val, except_around):
+def _between(val, except_around):
     if except_around is None:
         return False
     elif len(except_around) != 2:
@@ -208,7 +83,7 @@ def between(val, except_around):
     return False
 
 
-def unpack_lmfit(r):
+def _unpack_lmfit(r):
     dispersion, dispersion_std = [], []
     for name, par in r:
         dispersion.append(par.value)
@@ -228,7 +103,7 @@ def measurement(array, confidence=0.95, silent=False):
         The array containing the measured values
 
     confidence : float, optional
-        The desired confidence level. Must be between 0 and 1.
+        The desired confidence level. Must be _between 0 and 1.
 
     silent : bool, optional
         Whether to print results immediately. Default is `False`.
@@ -268,6 +143,23 @@ def measurement(array, confidence=0.95, silent=False):
 
 
 def find_nearest(array, value):
+    """
+    Find the nearest element in array to value.
+
+    Parameters
+    ----------
+    array : np.ndarray-like
+        The array to search in.
+    value : float
+        The value to search.
+
+    Returns
+    -------
+    value : float
+        The closest value in array.
+    idx : int
+        The index of the closest element.
+    """
     array = np.asarray(array)
     idx = (np.abs(value - array)).argmin()
     return array[idx], idx
@@ -313,30 +205,7 @@ def _handle_input(x, y, ref, sam):
     return np.asarray(x), np.asarray(y_data)
 
 
-def print_disp(f):
-    @wraps(f)
-    def wrapping(*args, **kwargs):
-        disp, disp_std, stri = f(*args, **kwargs)
-        labels = ("GD", "GDD", "TOD", "FOD", "QOD", "SOD")
-        disp = np.trim_zeros(disp, "b")
-        disp_std = disp_std[: len(disp)]
-        for i, (label, disp_item, disp_std_item) in enumerate(
-                zip(labels, disp, disp_std)
-        ):
-            if run_from_ipython():
-                from IPython.display import display, Math
-
-                display(
-                    Math(f"{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i + 1}")
-                )
-            else:
-                print(f"{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i + 1}")
-        return disp, disp_std, stri
-
-    return wrapping
-
-
-def fourier_interpolate(x, y):
+def _fourier_interpolate(x, y):
     """ Simple linear interpolation for FFTs"""
     xs = np.linspace(x[0], x[-1], len(x))
     intp = interp1d(x, y, kind="linear", fill_value="extrapolate")

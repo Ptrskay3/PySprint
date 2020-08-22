@@ -40,7 +40,7 @@ matplotlib.backend_tools.ToolBase.__init__ = tb_init
 
 
 from matplotlib.backend_tools import ToolToggleBase
-from pysprint.utils import get_closest
+from pysprint.utils import _get_closest
 
 
 class SelectButton(ToolToggleBase):
@@ -104,11 +104,11 @@ class EditPeak(object):
             return
         if self.my_select_button.toggled:
             if event.key == "d":
-                ix, iy, idx = get_closest(ix, iy, self.x_extremal, self.y_extremal)
+                ix, iy, idx = _get_closest(ix, iy, self.x_extremal, self.y_extremal)
                 self.x_extremal = np.delete(self.x_extremal, idx)
                 self.y_extremal = np.delete(self.y_extremal, idx)
             elif event.key == "i":
-                ix, iy, idx = get_closest(ix, iy, self.x, self.y)
+                ix, iy, idx = _get_closest(ix, iy, self.x, self.y)
                 self.x_extremal = np.append(self.x_extremal, ix)
                 self.y_extremal = np.append(self.y_extremal, iy)
             self.lins.set_data(self.x_extremal, self.y_extremal)

@@ -4,8 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from pysprint.core.bases.dataset import Dataset
-from pysprint.core.bases.dataset_base import DatasetBase
-from pysprint.core.evaluate import spp_method
+from pysprint.core.bases._dataset_base import _DatasetBase
+from pysprint.core._evaluate import spp_method
 from pysprint.utils.exceptions import DatasetError
 
 __all__ = ["SPPMethod"]
@@ -16,7 +16,7 @@ def defaultcallback(broadcaster, listener=None):
         listener.listen(*broadcaster.emit())
 
 
-class SPPMethod(metaclass=DatasetBase):
+class SPPMethod(metaclass=_DatasetBase):
     """
     Interface for Stationary Phase Point Method.
     """

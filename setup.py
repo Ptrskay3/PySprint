@@ -3,7 +3,6 @@ import sys
 if sys.version_info[:2] < (3, 6):
     raise RuntimeError("Python version >= 3.6 required.")
 
-
 try:
     from setuptools import setup, find_packages
 except ImportError:

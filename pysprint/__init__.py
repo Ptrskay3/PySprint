@@ -9,12 +9,18 @@ from pysprint.utils.misc import run_from_ipython
 warnings.filterwarnings("ignore", message="invalid value encountered in sqrt")
 warnings.filterwarnings("ignore", message="divide by zero encountered in true_divide")
 
+__version__ = "0.12.3"
+__author__ = "Leéh Péter"
+
+from .core import *
+from .utils import print_info
+
 
 @contextmanager
 def interactive(backend="Qt5Agg", figsize=(15, 5)):
     """
     Context manager to temporarily change the matplotlib
-    backend to ensure interactive figure are rendered
+    backend to ensure interactive figures are rendered
     correctly.
 
     Parameters
@@ -30,7 +36,7 @@ def interactive(backend="Qt5Agg", figsize=(15, 5)):
     try:
         plt.switch_backend(backend)
         yield
-    except AttributeError as err:
+    except (AttributeError, ImportError, ModuleNotFoundError) as err:
         raise ValueError(
             f"Couldn't set backend {backend}, you should manually "
             "change to an appropriate GUI backend."
@@ -59,10 +65,3 @@ def set_interactive(backend="Qt5Agg", figsize=(15, 5)):
             f"Couldn't set backend {backend}, you should manually "
             "change to an appropriate GUI backend."
         ) from err
-
-
-__version__ = "0.12.3"
-__author__ = "Leéh Péter"
-
-from .core import *
-from .utils import print_info

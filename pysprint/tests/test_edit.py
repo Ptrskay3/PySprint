@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 
-from pysprint.core.preprocess import *
+from pysprint.core._preprocess import *
 
 
 class TestEdit(unittest.TestCase):

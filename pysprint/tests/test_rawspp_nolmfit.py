@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 import numpy as np
 
-from pysprint.core.evaluate import spp_method
+from pysprint.core._evaluate import spp_method
 from pysprint import SPPMethod
 
 

@@ -1,4 +1,4 @@
-from ._fft import *
+from .fftmethod import *
 from .cosfit import *
 from .generator import *
 from .minmax import *

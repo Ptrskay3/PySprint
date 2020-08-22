@@ -1,13 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from pysprint.core.bases.dataset_base import DatasetBase, C_LIGHT
+from pysprint.core.bases._dataset_base import _DatasetBase, C_LIGHT
 from pysprint.core._generator import generator_freq, generator_wave
 
 __all__ = ["Generator"]
 
 
-class Generator(metaclass=DatasetBase):
+class Generator(metaclass=_DatasetBase):
     """
     Basic dataset generator.
     """
@@ -144,12 +144,11 @@ class Generator(metaclass=DatasetBase):
         """
         Saves the generated dataset with numpy.savetxt.
 
-        Parameters:
+        Parameters
         ----------
 
         name: string
             Name of the output file. You shouldn't include the .txt at the end.
-
         path: string, default is None
             You can also specify the save path.
             e.g path='C:/examplefolder'

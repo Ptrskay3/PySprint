@@ -5,7 +5,7 @@ sys.modules["lmfit"] = None
 
 import numpy as np
 
-from pysprint.core import evaluate
+from pysprint.core import _evaluate
 from pysprint import Generator, FFTMethod
 
 
@@ -18,7 +18,7 @@ class TestEvaluateNoLmfit(unittest.TestCase):
         a = np.arange(100)
         b = np.arange(100)
         with self.assertRaises(KeyError):
-            evaluate.cff_method(
+            _evaluate.cff_method(
                 a, b, [], [], ref_point=0, p0=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
             )
 
@@ -26,14 +26,14 @@ class TestEvaluateNoLmfit(unittest.TestCase):
         # adapted from scipy's unittests
         np.random.seed(1534)
         x = np.random.randn(10) + 1j * np.random.randn(10)
-        fr, yf = evaluate.ifft_method(x, x, interpolate=False)
-        _, y = evaluate.fft_method(yf, yf)
+        fr, yf = _evaluate.ifft_method(x, x, interpolate=False)
+        _, y = _evaluate.fft_method(yf, yf)
         np.testing.assert_allclose(y, x)
 
     def test_windowing(self):
         _has_lmfit = False
         a, b = np.loadtxt("test_window.txt", unpack=True, delimiter=",")
-        y_data = evaluate.cut_gaussian(a, b, 2.5, 0.2, 6)
+        y_data = _evaluate.cut_gaussian(a, b, 2.5, 0.2, 6)
         assert len(b) == len(y_data)
         np.testing.assert_almost_equal(y_data[0], 0)
         np.testing.assert_almost_equal(y_data[-1], 0)
@@ -43,8 +43,8 @@ class TestEvaluateNoLmfit(unittest.TestCase):
         # adapted from scipy's unittests
         np.random.seed(1534)
         x = np.random.randn(10) + 1j * np.random.randn(10)
-        fr, yf = evaluate.ifft_method(x, x, interpolate=False)
-        _, y = evaluate.fft_method(yf, yf)
+        fr, yf = _evaluate.ifft_method(x, x, interpolate=False)
+        _, y = _evaluate.fft_method(yf, yf)
         np.testing.assert_allclose(y, x)
 
     def test_ffts_advanced2(self):

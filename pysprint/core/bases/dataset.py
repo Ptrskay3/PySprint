@@ -17,14 +17,15 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from pysprint.core.bases.dataset_base import DatasetBase, C_LIGHT
-from pysprint.core.bases.apply import DatasetApply
-from pysprint.core.evaluate import is_inside
-from pysprint.core.io.parser import _parse_raw
+from pysprint.core.bases._dataset_base import _DatasetBase, C_LIGHT
+from pysprint.core.bases._apply import _DatasetApply
+from pysprint.core._evaluate import is_inside
+from pysprint.core.io._parser import _parse_raw
 from pysprint.mpl_tools.spp_editor import SPPEditor
 from pysprint.mpl_tools.normalize import DraggableEnvelope
-from pysprint.utils import MetaData, find_nearest, inplacify
-from pysprint.core.preprocess import (
+from pysprint.utils import MetaData, find_nearest
+from pysprint.utils.decorators import inplacify
+from pysprint.core._preprocess import (
     savgol,
     find_peak,
     convolution,
@@ -44,7 +45,7 @@ logging.basicConfig(format=FORMAT)
 __all__ = ["Dataset"]
 
 
-class Dataset(metaclass=DatasetBase):
+class Dataset(metaclass=_DatasetBase):
     """
     This class implements all the functionality a dataset
     should have in general.
@@ -193,6 +194,7 @@ class Dataset(metaclass=DatasetBase):
     def chrange(self, current_unit, target_unit="phz"):
         """
         Change the domain range of the dataset.
+
         Supported units for frequency:
             * PHz
             * THz
@@ -263,7 +265,7 @@ class Dataset(metaclass=DatasetBase):
         kwargs : dict, optional
             Additional keyword arguments to pass to func.
         """
-        operation = DatasetApply(
+        operation = _DatasetApply(
             obj=self, func=func, axis=axis, args=args, kwargs=kwargs
         )
         operation.perform()
@@ -303,6 +305,9 @@ class Dataset(metaclass=DatasetBase):
 
     @property
     def delay(self):
+        """
+        Return the delay value if set.
+        """
         return self._delay
 
     @delay.setter
@@ -315,6 +320,9 @@ class Dataset(metaclass=DatasetBase):
 
     @property
     def positions(self):
+        """
+        Return the SPP position(s) if set.
+        """
         return self._positions
 
     @positions.setter
@@ -324,7 +332,7 @@ class Dataset(metaclass=DatasetBase):
                 raise ValueError(
                     f"Cannot set SPP position to {value} since it's not in the dataset's range."
                 )
-        # FIXME: maybe we don't need to distinguish between np.ndarray and Iterable
+        # FIXME: maybe we don't need to distinguish _between np.ndarray and Iterable
         elif isinstance(value, np.ndarray) or isinstance(value, Iterable):
             for val in value:
                 if not isinstance(val, numbers.Number):
@@ -364,8 +372,8 @@ class Dataset(metaclass=DatasetBase):
     def GD_lookup(self, reference_point, engine="cwt", silent=False, **kwargs):
         """
         Quick GD lookup: it finds extremal points near the
-        `reference_point` and returns an average value of 2*np.pi
-        divided by distances between consecutive minimal or maximal values.
+        `reference_point` and returns an average value of $2 \cdot \pi$
+        divided by distances _between consecutive minimal or maximal values.
         Since it's relying on peak detection, the results may be irrelevant
         in some cases. If the parent class is `~pysprint.CosFitMethod`, then
         it will set the predicted value as initial parameter for fitting.
@@ -374,16 +382,16 @@ class Dataset(metaclass=DatasetBase):
         ----------
         reference_point : float
             The reference point for the algorithm.
-        engine : str
+        engine : str, optional
             The backend to use. Must be "cwt", "normal" or "fft".
             "cwt" will use `scipy.signal.find_peaks_cwt` function to
             detect peaks, "normal" will use `scipy.signal.find_peaks`
             to detect peaks. The "fft" engine uses Fourier-transform and
             looks for the outer peak to guess delay value. It's not
             reliable when working with low delay values.
-        silent : bool
+        silent : bool, optional
             Whether to print the results immediately. Default in `False`.
-        **kwargs
+        kwargs : dict, optional
             Additional keyword arguments to pass for peak detection
             algorithms. These are:
                 pmin, pmax, threshold, width, floor_thres, etc..
@@ -479,14 +487,14 @@ class Dataset(metaclass=DatasetBase):
 
     @staticmethod
     def wave2freq(value):
-        """Switches values between wavelength and angular frequency."""
+        """Switches a single value _between wavelength and angular frequency."""
         return (2 * np.pi * C_LIGHT) / value
 
     _dispatch = wave2freq.__func__
 
     @staticmethod
     def freq2wave(value):
-        """Switches values between angular frequency and wavelength."""
+        """Switches a single value _between angular frequency and wavelength."""
         return Dataset._dispatch(value)
 
     def _check_domain(self):
@@ -537,7 +545,7 @@ class Dataset(metaclass=DatasetBase):
         Helps to load in data just by giving the filenames in
         the target directory.
 
-        Parameters:
+        Parameters
         ----------
         filename: `str`
             base interferogram
@@ -782,12 +790,12 @@ class Dataset(metaclass=DatasetBase):
         Parameters
         ----------
         start : float
-            start value of cutting interval
+            Start value of cutting interval.
             Not giving a value will keep the dataset's original minimum value.
             Note that giving `None` will leave original minimum untouched too.
             Default is `None`.
         stop : float
-            stop value of cutting interval
+            Stop value of cutting interval.
             Not giving a value will keep the dataset's original maximum value.
             Note that giving `None` will leave original maximum untouched too.
             Default is `None`.
@@ -813,7 +821,7 @@ class Dataset(metaclass=DatasetBase):
 
     def convolution(self, window_length, std=20):
         """
-        Applies a convolution with a gaussian on the dataset.
+        Convolve the dataset with a specified Gaussian window.
 
         Parameters
         ----------
@@ -983,7 +991,11 @@ class Dataset(metaclass=DatasetBase):
     def normalize(self, filename=None, smoothing_level=0):
         """
         Normalize the interferogram by finding upper and lower envelope
-        on an interactive matplotlib editor.
+        on an interactive matplotlib editor. Points can be deleted with
+        key `d` and inserted with key `i`. Also points can be dragged
+        using the mouse. On complete just close the window. Must be
+        called with interactive backend. The best practice is to call
+        this function inside `~pysprint.interactive` context manager.
 
         Parameters
         ----------
@@ -1021,7 +1033,9 @@ class Dataset(metaclass=DatasetBase):
         Opens the interactive matplotlib editor for SPP data.
         Use `i` button to add a new point, use `d` key to delete one.
         The delay field is parsed to only get the numeric values.
-        Close the window on finish.
+        Close the window on finish. Must be called with interactive
+        backend. The best practice is to call this function inside
+        `~pysprint.interactive` context manager.
         """
         _spp = SPPEditor(self.x, self.y_norm)
         self.delay, self.positions = _spp.get_data()

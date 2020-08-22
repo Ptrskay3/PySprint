@@ -1,7 +1,4 @@
-### References used for the creation of PySprint package
-#### 2020
-
-Note that this list is by no means complete.
+### References used so far in the creation of PySprint package
 
 * [1] T. Grósz, „Mikrostruktúrál toptikai szálak diszperziójának vizsgálata spektrális interferometriával” Ph.D.  thesis,  University of Szeged, Department of Optics and Quantum Electronics, Szeged (2017).
 * [2] A. Kovács, „Optikai elemek fázistulajdonságainak interferometrikus vizsgálata,” Ph.D.  thesis,  University of Szeged, Department of Optics and Quantum Electronics, Szeged (2000).

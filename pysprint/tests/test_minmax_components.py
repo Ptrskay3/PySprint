@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from pysprint.core.evaluate import (
+from pysprint.core._evaluate import (
     is_inside, _split_on_SPP, _build_single_phase_data, min_max_method)
 
 

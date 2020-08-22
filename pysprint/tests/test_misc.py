@@ -5,8 +5,8 @@ import numpy as np
 
 from pysprint.utils import (
     _handle_input,
-    print_disp,
-    fourier_interpolate,
+    pprint_disp,
+    _fourier_interpolate,
     pad_with_trailing_zeros,
     find_nearest,
     measurement,
@@ -56,7 +56,7 @@ class TestMisc(unittest.TestCase):
             out = StringIO()
             sys.stdout = out
 
-            @print_disp
+            @pprint_disp
             def calculation():
                 return [0, 1], [0, 1], ""
 
@@ -71,7 +71,7 @@ GDD = 1.00000 ± 1.00000 fs^2"""
             sys.stdout = saved_stdout
 
     def test_fourier_interpol(self):
-        x, _ = fourier_interpolate(np.geomspace(10, 1000), np.geomspace(10, 1000))
+        x, _ = _fourier_interpolate(np.geomspace(10, 1000), np.geomspace(10, 1000))
         np.testing.assert_array_equal(x, np.linspace(10, 1000))
 
     def test_padding(self):

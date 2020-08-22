@@ -3,14 +3,14 @@ Sample generator
 """
 import numpy as np
 
-from pysprint.core.bases.dataset_base import C_LIGHT
+from pysprint.core.bases._dataset_base import C_LIGHT
 
 
 def _ensure_input(start, stop, center, resolution, pulse_width):
     if start >= stop:
         raise ValueError("start value must be less than stop")
     if center < start or center > stop:
-        raise ValueError("center must be between start and stop")
+        raise ValueError("center must be _between start and stop")
     if resolution > (stop - start):
         raise ValueError("resolution is too big")
     if pulse_width <= 0:

@@ -4,7 +4,7 @@ import threading
 import pytest
 import numpy as np
 
-from pysprint.core.optimizer import FitOptimizer
+from pysprint.core._optimizer import FitOptimizer
 from pysprint import Generator, CosFitMethod
 
 

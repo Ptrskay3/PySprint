@@ -5,10 +5,10 @@ import numpy as np
 from pysprint.core.bases.dataset import Dataset
 from pysprint.mpl_tools.peak import EditPeak
 from pysprint.core.phase import Phase
-from pysprint.core.evaluate import min_max_method, is_inside
+from pysprint.core._evaluate import min_max_method, is_inside
 from pysprint.utils import (
     _maybe_increase_before_cwt,
-    calc_envelope,
+    _calc_envelope,
 )
 
 logger = logging.getLogger(__name__)
@@ -32,15 +32,17 @@ class MinMaxMethod(Dataset):
         Function to initialize peak editing on a plot.
         Right clicks (`d` key later) will delete the closest point,
         left clicks(`i` key later) will add a new point. Just close
-        the window when finished.
+        the window when finished. Must be called with interactive
+        backend. The best practice is to call this function inside
+        `~pysprint.interactive` context manager.
 
         Parameters
         ----------
-        engine : str
+        engine : str, optional
             Must be 'cwt', 'normal' or 'slope'.
             Peak detection algorithm to use.
             Default is normal.
-        kwargs :
+        kwargs : dict, optional
             pmax, pmin, threshold, except_around, width
         """
         engines = ("cwt", "normal", "slope")
@@ -64,8 +66,8 @@ class MinMaxMethod(Dataset):
             y = np.copy(self.y_norm)
             if _maybe_increase_before_cwt(y):
                 y += 2
-            _, lp, lloc = calc_envelope(y, np.arange(len(y)), "l")
-            _, up, uloc = calc_envelope(y, np.arange(len(y)), "u")
+            _, lp, lloc = _calc_envelope(y, np.arange(len(y)), "l")
+            _, up, uloc = _calc_envelope(y, np.arange(len(y)), "u")
             lp -= 2
             up -= 2
             _x, _xx = x[lloc], x[uloc]
@@ -95,7 +97,7 @@ class MinMaxMethod(Dataset):
         except ValueError:
             _editpeak = EditPeak(self.x, self.y, _xm, _ym)
         # Automatically propagate these points to the mins and maxes.
-        # Better distribute these points between min and max, just in case
+        # Better distribute these points _between min and max, just in case
         # the default argrelextrema is definitely not called
         # in `pysprint.core.evaluate.min_max_method`.
 
@@ -142,7 +144,7 @@ class MinMaxMethod(Dataset):
 
         Notes
         ------
-        Decorated with print_disp, so the results are
+        Decorated with pprint_disp, so the results are
         immediately printed without explicitly saying so.
         """
 
@@ -210,6 +212,11 @@ class MinMaxMethod(Dataset):
         SPP_callbacks : number, or numeric list-like
             The positions of SPP's on the interferogram. If not given it will check
             if there's any SPP position set on the object.
+
+        Returns
+        -------
+        phase : pysprint.core.phase.Phase
+            The phase object. See its docstring for more info.
         """
         if SPP_callbacks is None and self._positions is not None:
             SPP_callbacks = np.array(self._positions)
