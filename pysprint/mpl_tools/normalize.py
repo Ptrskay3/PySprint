@@ -48,9 +48,11 @@ class DraggableEnvelope:
 
         tm = self.fig.canvas.manager.toolmanager
         tm.add_tool("Toggle recording", SelectButton)
+
         self.fig.canvas.manager.toolbar.add_tool(
             tm.get_tool("Toggle recording"), "toolgroup"
         )
+
         self.my_select_button = tm.get_tool("Toggle recording")
         plt.grid()
         plt.show(block=True)

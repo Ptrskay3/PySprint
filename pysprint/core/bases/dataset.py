@@ -316,7 +316,7 @@ class Dataset(metaclass=_DatasetBase):
         try:
             self.callback(self, self.parent)
         except ValueError:
-            pass  # delay or position is missing, we must pass there
+            pass  # delay or position is missing
 
     @property
     def positions(self):
@@ -347,7 +347,7 @@ class Dataset(metaclass=_DatasetBase):
         try:
             self.callback(self, self.parent)
         except ValueError:
-            pass  # delay or position is missing, we must pass there
+            pass  # delay or position is missing
 
     def _ensure_norm(self):
         """
@@ -363,8 +363,7 @@ class Dataset(metaclass=_DatasetBase):
     def scale_up(self):
         """
         If the interferogram is normalized to [0, 1] interval, scale
-        up to [-1, 1] with easy algebra.. Just in case you need comparison,
-        or any other purpose.
+        up to [-1, 1] with easy algebra.
         """
         self.y_norm = (self.y_norm - 0.5) * 2
         self.y = (self.y - 0.5) * 2
@@ -394,7 +393,7 @@ class Dataset(metaclass=_DatasetBase):
         kwargs : dict, optional
             Additional keyword arguments to pass for peak detection
             algorithms. These are:
-                pmin, pmax, threshold, width, floor_thres, etc..
+            pmin, pmax, threshold, width, floor_thres, etc..
             Most of them are described in the `find_peaks` and
             `find_peaks_cwt` docs.
         """
@@ -931,7 +930,7 @@ class Dataset(metaclass=_DatasetBase):
         ----------
         ax : matplotlib.axes.Axes, optional
             An axis to draw the plot on. If not given, it will plot
-            of the last used axis.
+            on the last used axis.
         title : str, optional
             The title of the plot.
         xlim : tuple, optional

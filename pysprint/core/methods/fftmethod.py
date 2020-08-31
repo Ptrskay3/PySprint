@@ -249,12 +249,13 @@ class FFTMethod(Dataset):
             If lmfit is available returns the fit report, else returns an
             empty string.
 
-        Notes:
-        ------
+        Notes
+        -----
         Decorated with pprint_disp, so the results are immediately
         printed without explicitly saying so.
 
-        Developer commentary:
+        Developer commentary
+        --------------------
         Currently the x-axis transformation is sloppy, because we cache the
         original x axis and not transforming it	backwards.
         In addition we need to keep track of interpolation and

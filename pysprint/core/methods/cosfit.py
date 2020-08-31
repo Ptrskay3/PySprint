@@ -72,7 +72,7 @@ class CosFitMethod(Dataset):
 
     def guess_SOD(self, value):
         """
-        Initial guess for QOD in fs^6.
+        Initial guess for SOD in fs^6.
         """
         self.params[8] = value / 720
 

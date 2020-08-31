@@ -15,9 +15,11 @@ __author__ = "Leéh Péter"
 from .core import *
 from .utils import print_info
 
+default_backend = "Qt5Agg" if getattr(matplotlib, "__version__", None) != "3.3.1" else "TkAgg"
+
 
 @contextmanager
-def interactive(backend="Qt5Agg", figsize=(15, 5)):
+def interactive(backend=default_backend, figsize=(15, 5)):
     """
     Context manager to temporarily change the matplotlib
     backend to ensure interactive figures are rendered
@@ -39,13 +41,14 @@ def interactive(backend="Qt5Agg", figsize=(15, 5)):
     except (AttributeError, ImportError, ModuleNotFoundError) as err:
         raise ValueError(
             f"Couldn't set backend {backend}, you should manually "
-            "change to an appropriate GUI backend."
+            "change to an appropriate GUI backend. (Matplotlib 3.3.1"
+            "is broken. In that case use backend='TkAgg')."
         ) from err
     finally:
         plt.switch_backend(original_backend)
 
 
-def set_interactive(backend="Qt5Agg", figsize=(15, 5)):
+def set_interactive(backend=default_backend, figsize=(15, 5)):
     """
     Set the backend for matplotlib permanently.
 
@@ -63,5 +66,6 @@ def set_interactive(backend="Qt5Agg", figsize=(15, 5)):
     except AttributeError as err:
         raise ValueError(
             f"Couldn't set backend {backend}, you should manually "
-            "change to an appropriate GUI backend."
+            "change to an appropriate GUI backend. (Matplotlib 3.3.1"
+            "is broken. In that case use backend='TkAgg')."
         ) from err
