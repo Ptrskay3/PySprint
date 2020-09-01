@@ -297,8 +297,21 @@ class WFTMethod(FFTMethod):
             )
         self.window_seq.pop(center, None)
 
-    def remove_window_interval(self, start, stop): # TODO : implement it.
-        pass
+    def remove_window_interval(self, start, stop):
+        """
+        Remove window interval inclusively.
+
+        Parameters
+        ----------
+        start : float
+            The start value of the interval.
+        stop : float
+            The stop value of the interval.
+        """
+        wins = np.fromiter(self.window_seq.keys(), dtype=float)
+        mask = wins[(wins <= stop) & (wins >= start)]
+        for center in mask:
+            self.window_seq.pop(center, None)
 
     # TODO : Add parameter to describe how many peaks we are looking for..
     def calculate(

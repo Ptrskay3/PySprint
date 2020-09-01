@@ -215,43 +215,42 @@ class CosFitMethod(Dataset):
         or not showing any fit**
 
         Reasons:
-        - Completely wrong initial GD guess (or lack of guessing).
-        - Too broad inital region, so that the optimizer cannot find a
-          suitable fit.
+        Completely wrong initial GD guess (or lack of guessing).
+        Too broad inital region, so that the optimizer cannot find a
+        suitable fit.
 
         This usually happens when the used data is large, or the spectral
         resolution is high.
 
         Solution:
-        - Provide better inital guess for GD.
-        - Lower the inital_region_ratio.
+        Provide better inital guess for GD.
+        Lower the inital_region_ratio.
 
         **SciPy raises OptimizeWarning and the affected area is bigger**
 
-        Reasons:
-        - When the optimizer steps up with order it also extends the
-          region of fit.
+        Reasons: When the optimizer steps up with order it also extends the
+        region of fit.
 
         This error usually present when the region of fit is too quickly
         growing.
 
         Solution:
-        - Lower extend_by argument.
+        Lower extend_by argument.
 
         **The optimizer is finished, but wrong fit is produced.**
 
         Reasons:
-        - We measure the goodness of fit with r^2 value. To allow this
-          optimizer to smoothly find appropriate fits even for noisy datasets
-          it's a good practice to keep the r^2 a lower value, such as
-          the default 0.3. The way it works is we step up in order of fit
-          (until max order) and extend region every time when a fit reaches
-          the specified r^2 threshold value. This can be controlled via the
-          coef_threshold argument.
+        We measure the goodness of fit with r^2 value. To allow this
+        optimizer to smoothly find appropriate fits even for noisy datasets
+        it's a good practice to keep the r^2 a lower value, such as
+        the default 0.3. The way it works is we step up in order of fit
+        (until max order) and extend region every time when a fit reaches
+        the specified r^2 threshold value. This can be controlled via the
+        coef_threshold argument.
 
         Solution:
-        - Adjust the coef_threshold value. Note that it's highly
-          recommended not to set a higher value than 0.6.
+        Adjust the coef_threshold value. Note that it's highly
+        recommended not to set a higher value than 0.6.
         """
         x, y, ref, sam = self._safe_cast()
         self.f = FitOptimizer(
