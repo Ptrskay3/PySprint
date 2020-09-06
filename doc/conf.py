@@ -30,7 +30,7 @@ author = 'Peter Leeh'
 release = '0.12.3'
 
 autodoc_default_options = {
-    'special-members' : '__init__'
+    'special-members': '__init__'
 }
 
 # -- General configuration ---------------------------------------------------
@@ -67,6 +67,7 @@ html_static_path = ['_static']
 autodoc_member_order = 'bysource'
 add_module_names = False
 
+
 def maybe_skip_member(app, what, name, obj, skip, options):
     EXCLUDE_CLASSES = (
         'DatasetBase', 'DatasetApply', 'pysprint.core.bases.apply',
@@ -74,6 +75,7 @@ def maybe_skip_member(app, what, name, obj, skip, options):
     )
     exclude = name in EXCLUDE_CLASSES
     return skip or exclude
+
 
 def setup(app):
     app.connect('autodoc-skip-member', maybe_skip_member)

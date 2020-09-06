@@ -5,7 +5,7 @@ import numpy as np
 from scipy.signal import (
     find_peaks,
     savgol_filter,
-    gaussian,
+    gaussian,  # TODO : this is deprecated
     convolve,
     find_peaks_cwt,
 )
@@ -83,7 +83,7 @@ def convolution(x, y, ref, sam, win_len, standev=200):
         raise ValueError("Window length must be 0 < window_length < len(x)")
 
     xint, yint = interpolate_data(x, y, [], [])
-    window = gaussian(win_len, std=standev) # TODO : this is deprecated
+    window = gaussian(win_len, std=standev)
     smoothed = convolve(yint, window / window.sum(), mode="same")
     return xint, smoothed
 

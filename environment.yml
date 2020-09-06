@@ -10,6 +10,12 @@ dependencies:
   - scipy
   - numba>=0.46.0
   - lmfit
+  - Jinja2
+
+  # docs
+  - sphinx
+  - nbsphinx
+  - recommonmark
 
   # Strictly speaking this is not neseccary, but better safe than sorry
   - cython>=0.29.16

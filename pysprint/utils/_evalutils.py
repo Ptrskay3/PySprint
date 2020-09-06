@@ -1,7 +1,6 @@
 from math import factorial
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 from pysprint.utils import pad_with_trailing_zeros
 
@@ -40,4 +39,3 @@ def transform_lmfit_params_to_dispersion(popt, popt_std, drop_first=True, dof=1)
     _disp = pad_with_trailing_zeros(popt, 6)
     _disp_std = pad_with_trailing_zeros(popt_std, 6)
     return _disp, _disp_std
-

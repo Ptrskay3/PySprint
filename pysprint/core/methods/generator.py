@@ -11,7 +11,7 @@ class Generator(metaclass=_DatasetBase):
     """
     Basic dataset generator.
     """
-    def __init__( # TODO : add docstring.
+    def __init__(  # TODO : add docstring.
         self,
         start,
         stop,
