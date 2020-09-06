@@ -1,0 +1,43 @@
+## Type SPP position if there's any (use tuple, np.ndarray or list for multiple)
+# ifg.positions = 
+
+
+## Run the interactive editor
+# with ps.interactive(backend="Qt5Agg"):
+#     ifg.init_edit_session(engine="normal", pmax=0.01, pmin=0.01, threshold=0.5)
+
+# OR
+
+## Set the extremal positions manually
+# ifg.xmin = ...
+# ifg.xmax = ...
+
+# OR
+
+## Use the built-in functions to set extremals
+# xmax, ymax, xmin, ymin = ifg.detect_peak(pmax=0.1, pmin=0.1, threshold=0.5)
+# xmax, ymax, xmin, ymin = ifg.detect_peak_cwt(widths=np.arange(1, 10))
+
+## Calculate immediately
+# ifg.calculate(
+#     reference_point,
+#     order,
+#     SPP_callbacks=None,
+#     show_graph=False,
+#     allow_parallel=True
+# )
+
+# OR
+
+## Build only the phase
+# phase = ifg.build_phase(reference_point, SPP_callbacks=None)
+
+## Preprocess the phase optionally
+# phase.slice(start, stop)
+
+## Fit the phase
+# phase.fit(reference_point, order)
+
+## Plot the fitting and errors optionally
+# phase.plot()
+# phase.errorplot()

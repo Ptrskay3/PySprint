@@ -111,8 +111,7 @@ class FitOptimizer:
         try:
             self.func = _cosfit_config[self.curr_order + 1]
         except KeyError as e:
-            e.args = (e.args[0], "Order must be in [1, 5].")
-            raise
+            raise ValueError("Order must be in [1, 6].") from e
         try:
             self.p0 = np.append(self.p0, self.rest[self.curr_order - 1])
         except (IndexError, ValueError):

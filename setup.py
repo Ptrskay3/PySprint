@@ -13,7 +13,7 @@ with open("README.md", "r") as fh:
 
 MAJOR = 0
 MINOR = 12
-MICRO = 3
+MICRO = 4
 VERSION = f"{MAJOR}.{MINOR}.{MICRO}"
 
 setup(
@@ -34,6 +34,11 @@ setup(
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Physics",
     ],
-    install_requires=["numpy>=1.16.6", "scipy", "matplotlib", "pandas"],
+    install_requires=["numpy>=1.16.6", "scipy", "matplotlib", "pandas", "Jinja2"],
     extras_require={"optional": ["numba", "lmfit", "pytest"]},
+    entry_points={
+        'console_scripts': [
+            'pysprint = pysprint.templates.build:main',
+        ],
+    }
 )

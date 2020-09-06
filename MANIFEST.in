@@ -1,2 +1,3 @@
 recursive-include doc *
 recursive-include example_datasets *
+recursive-include pysprint/templates *

@@ -27,10 +27,16 @@ class Window:
 
     @_lazy_property
     def y(self):
+        """
+        The y values of the given window. It's a "lazy_property".
+        """
         return gaussian_window(self.x, self.center, self.fwhm, self.order)
 
     @classmethod
     def from_std(cls, x, center, std, order=2):
+        """
+        Build the Gaussian window from standard deviation instead of fwhm.
+        """
         _fwhm = std * 2 * np.log(2) ** (1 / order)
         return cls(x, center, _fwhm, order)
 
@@ -44,7 +50,7 @@ class Window:
         Parameters
         ----------
 
-        ax : axis
+        ax : matplotlib.axes.Axes, optional
             The axis to plot on. If not given, plot on the last axis.
 
         scalefactor : float, optional
@@ -225,7 +231,7 @@ class WFTMethod(FFTMethod):
             else:
                 self.add_window(center=cent, fwhm=fwhm, order=order)
 
-    #  TODO : scale them up for visibility
+    #  TODO : subsample if too many windows present at the plot
     def view_windows(self, ax=None, maxsize=80, **kwargs):
         """
         Gives a rough view of the different windows along with the ifg.
@@ -313,7 +319,6 @@ class WFTMethod(FFTMethod):
         for center in mask:
             self.window_seq.pop(center, None)
 
-    # TODO : Add parameter to describe how many peaks we are looking for..
     def calculate(
             self,
             reference_point,

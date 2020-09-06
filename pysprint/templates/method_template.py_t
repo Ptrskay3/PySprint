@@ -1,0 +1,43 @@
+## PySprint generated template file
+## Created at : {{ date }}
+## Method used here : {{ methodname }}
+
+import numpy as np
+import matplotlib.pyplot as plt
+import pysprint as ps
+
+# -----------------------------LOADING DATA-----------------------------------
+
+ifg = ps.{{ methodname }}.parse_raw(
+    "ifg_file.txt",
+    {%- if ("wft" in methodname.lower()) or ("fft" in methodname.lower()) -%}
+    {% else %} 
+    "ref_file.txt",
+    "sam_file.txt",{% endif %} 
+    skiprows=0,
+    decimal=".",
+    sep=None,
+    delimiter=None,
+    comment=None,
+    usecols=None,
+    names=None,
+    swapaxes=False,
+    na_values=None,
+    skip_blank_lines=True,
+    keep_default_na=False,
+    meta_len=1
+)
+
+# -----------------------------PREPROCESSING-----------------------------------
+
+## change range if needed
+# ifg.chrange(current_unit, target_unit)
+
+## change to frequency domain if needed
+# ifg.chdomain()
+
+## slice domain if needed
+# ifg.slice(start, stop)
+
+# ------------------------------CALCULATION------------------------------------
+{{ body }}

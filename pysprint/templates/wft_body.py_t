@@ -1,0 +1,44 @@
+## safely remove everything to ensure proper windows
+# ifg.remove_all_windows()
+
+## Add a window sequence
+# ifg.add_window_linspace(start, stop, number, fwhm=None, std=None, order=2)
+
+# OR
+
+# ifg.add_window_arange(start, stop, step, fwhm=None, std=None, order=2)
+
+# OR
+
+# ifg.add_window_geomspace(start, stop, number, fwhm=None, std=None, order=2)
+
+# OR
+
+# ifg.add_window(center, fwhm=None, std=None, order=2)
+
+## Optionally remove windows
+
+# ifg.remove_window_at(center)
+# ifg.remove_window_interval(start, stop)
+
+## Calculate immediately
+# ifg.calculate(reference_point, order, fastmath=False)
+
+## Plot the heatmap
+# ifg.heatmap()
+
+# OR
+
+# Build only the GD
+# GD_curve = ifg.build_GD(fastmath=False)
+
+## Preprocess the GD optionally
+# GD_curve.slice(start, stop)
+
+## Fit the GD
+# GD_curve.fit(reference_point, order)
+
+## Plot the fitting and errors optionally
+# GD_curve.plot()
+# GD_curve.errorplot()
+

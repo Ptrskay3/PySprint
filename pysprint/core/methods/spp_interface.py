@@ -20,7 +20,7 @@ class SPPMethod(metaclass=_DatasetBase):
     """
     Interface for Stationary Phase Point Method.
     """
-
+    # TODO: kwargs should accept all the new params
     def __init__(self, ifg_names, sam_names=None, ref_names=None, **kwargs):
         """
         SPPMethod constructor.
@@ -214,6 +214,9 @@ class SPPMethod(metaclass=_DatasetBase):
                     raise FileNotFoundError(f"""File named '{ref}' is not found.""")
 
     def listen(self, delay, position):
+        """
+        Function which records SPP data when received.
+        """
         self._delay[self.idx] = delay
         self._positions[self.idx] = position
 

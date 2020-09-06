@@ -1,0 +1,42 @@
+## IFFT the interferogram
+# ifg.ifft(usenifft=False)
+
+## Setup a Gaussian window
+# ifg.window(center, fwhm, window_order=6, plot=True)
+
+
+## Apply the window
+# ifg.apply_window()
+
+
+## FFT back to frequency domain
+# ifg.fft()
+
+
+## Calculate immediately
+# ifg.calculate(reference_point, order, show_graph=True)
+
+# OR
+
+## Build the phase only
+# phase = ifg.build_phase()
+
+## Preprocess the phase optionally
+# phase.slice(start, stop)
+
+## Fit the phase
+# phase.fit(reference_point, order)
+
+## Plot the fitting and errors optionally
+# phase.plot()
+# phase.errorplot()
+
+# OR
+
+## Using fully automated evaluation with immediate calculate
+# ifg.autorun(reference_point, order)
+
+# OR
+
+## Using fully automated evaluation only with phase retrieval
+# phase = ifg.autorun()

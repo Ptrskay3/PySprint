@@ -332,7 +332,7 @@ class Dataset(metaclass=_DatasetBase):
                 raise ValueError(
                     f"Cannot set SPP position to {value} since it's not in the dataset's range."
                 )
-        # FIXME: maybe we don't need to distinguish _between np.ndarray and Iterable
+        # FIXME: maybe we don't need to distinguish between np.ndarray and Iterable
         elif isinstance(value, np.ndarray) or isinstance(value, Iterable):
             for val in value:
                 if not isinstance(val, numbers.Number):
@@ -372,7 +372,7 @@ class Dataset(metaclass=_DatasetBase):
         """
         Quick GD lookup: it finds extremal points near the
         `reference_point` and returns an average value of 2*pi
-        divided by distances _between consecutive minimal or maximal values.
+        divided by distances between consecutive minimal or maximal values.
         Since it's relying on peak detection, the results may be irrelevant
         in some cases. If the parent class is `~pysprint.CosFitMethod`, then
         it will set the predicted value as initial parameter for fitting.
@@ -486,14 +486,14 @@ class Dataset(metaclass=_DatasetBase):
 
     @staticmethod
     def wave2freq(value):
-        """Switches a single value _between wavelength and angular frequency."""
+        """Switches a single value between wavelength and angular frequency."""
         return (2 * np.pi * C_LIGHT) / value
 
     _dispatch = wave2freq.__func__
 
     @staticmethod
     def freq2wave(value):
-        """Switches a single value _between angular frequency and wavelength."""
+        """Switches a single value between angular frequency and wavelength."""
         return Dataset._dispatch(value)
 
     def _check_domain(self):

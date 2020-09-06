@@ -1,0 +1,77 @@
+## PySprint generated template file
+## Created at : {{ date }}
+## Method used : {{ methodname }}
+
+import numpy as np
+import matplotlib.pyplot as plt
+import pysprint as ps
+
+# -----------------------------LOADING DATA-----------------------------------
+
+## Filenames of ifg files (list of strings)
+ifg_files = ['', '', ....]
+
+## Filenames of reference arm's files, optionally (list of strings)
+ref_files = ['', '', ....]
+
+## Filenames of sample arm's files, optionally (list of strings)
+sam_files = ['', '', ....]
+
+myspp = ps.SPPMethod(
+    ifg_files,
+    ref_files,
+    sam_files,
+    skiprows=0,
+    decimal=".",
+    delimiter=None,
+    meta_len=1
+)
+
+## Use the interactive matplotlib editor to record data
+
+# with ps.interactive(backend="Qt5Agg"):
+#     for ifg in myspp:
+#
+#         ## optionally preprocess the file
+#         # ifg.chdomain() 
+#         # ifg.slice(start=1.2)
+#
+#         ## open the editor on the current ifg
+#         ifg.open_SPP_panel()
+
+
+## Optinally save the recorded data as `filename`
+# myspp.save_data(filename)
+
+## Evaluate
+# myspp.calculate(reference_point, order)
+
+# OR
+
+## Evaluate from matching pairs of delay and SPP positions
+# delays = np.array([...])
+# positions = np.array([...])
+# ps.SPPMethod.calculate_from_raw(delays, positions, reference_point, order)
+
+# OR
+
+## Evaluate from existing interferogram objects
+
+# ifg_list = [ifg_1, ifg_2, ifg_3, ..] 
+## where ifg_n are the existing interferogram objects with
+## SPP positions and delays already set up. 
+
+For example:
+"""
+ifg_1.delay = 0
+ifg_1.positions = 2
+
+ifg_2.delay = 100
+ifg_2.positions = 2
+
+ifg_3.delay = 150
+ifg_3.positions = 1.6
+"""
+
+## Run the evaluation
+# ps.SPPMethod.calculate_from_ifg(ifg_list, reference_point, order)

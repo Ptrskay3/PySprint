@@ -1,0 +1,28 @@
+## Automatic GD estimate
+ifg.GD_lookup(reference_point, engine="cwt", widths=np.arange(1, 10))
+
+## OR
+
+## Manual initial conditions
+# ifg.guess_GD(value)
+# ifg.guess_GDD(value)
+# ifg.guess_TOD(value)
+# ifg.guess_FOD(value)
+# ifg.guess_QOD(value)
+# ifg.guess_SOD(value)
+
+## Setting maximum order to look for (only if manual fitting is used)
+# ifg.set_max_order(order)
+
+
+## Using the successive optimizer
+ifg.optimizer(reference_point, order, extend_by=0.01, initial_region_ratio=0.01)
+
+## OR
+
+## Using manual fitting
+# ifg.calculate(reference_point)
+
+
+## Plotting the result (only if manual fitting is used)
+# ifg.plot_result()

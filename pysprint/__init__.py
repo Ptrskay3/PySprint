@@ -9,7 +9,7 @@ from pysprint.utils.misc import run_from_ipython
 warnings.filterwarnings("ignore", message="invalid value encountered in sqrt")
 warnings.filterwarnings("ignore", message="divide by zero encountered in true_divide")
 
-__version__ = "0.12.3"
+__version__ = "0.12.4"
 __author__ = "Leéh Péter"
 
 from .core import *
