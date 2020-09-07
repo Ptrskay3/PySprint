@@ -42,34 +42,28 @@ def _update_doc(method, doc):
         method.__doc__ = newdoc
     else:
         newdoc = """\n\tParameters
-        ----------\n\tinplace : bool, optional
-            Whether to apply the operation on the dataset in an "inplace" manner.
-            This means if inplace is True it will apply the changes directly on
-            the current dataset and returns None. If inplace is False, it will
-            leave the current object untouched, but returns a copy of it, and
-            the operation will be performed on the copy. It's useful when
-            chaining operations on a dataset.\n\n\t"""
+                ----------""" + _inplace_doc
 
         nodoc_head = (f"Docstring automatically created for {method.__name__}. "
                       "Parameter list may not be complete.\n")
         if method.__doc__ is not None:
-            method.__doc__ += newdoc
+            method.__doc__ = "".join([method.__doc__, newdoc])
         else:
-            method.__doc__ = nodoc_head + newdoc
+            method.__doc__ = "".join([nodoc_head, newdoc])
         return
 
 
 def _build_doc(method, param):
     patt = r"(\w+(?=\s*[-]{4,}[^/]))"  # finding sections
-    splitted_doc = re.split(patt, method.__doc__)
+    split_doc = re.split(patt, method.__doc__)
     try:
-        target = splitted_doc.index("Parameters") + 1
+        target = split_doc.index("Parameters") + 1
     except ValueError:
         return method.__doc__
 
-    splitted_doc[target] = splitted_doc[target].rstrip() + param
+    split_doc[target] = ''.join([split_doc[target].rstrip(), param])
 
-    return ''.join(_ for _ in splitted_doc if _ is not None)
+    return ''.join(filter(None, split_doc))
 
 
 def inplacify(method):
