@@ -1,6 +1,7 @@
 import pytest
 
 import numpy as np
+import pandas
 
 from pysprint.core.methods import SPPMethod
 from pysprint.core.bases import Dataset
@@ -84,3 +85,14 @@ def test_ambiguous_positions(construct_ifg_sequence):
     np.testing.assert_almost_equal(-0.76698, disp[2], decimal=5)
     np.testing.assert_almost_equal(0.02171, disp[3], decimal=5)
     np.testing.assert_almost_equal(-0.00014, disp[4], decimal=5)
+
+
+def test_spp_append():
+    s = SPPMethod(["test_rawparsing.trt"])
+    s.append("test_peak.txt")
+    assert len(s) == 2
+    assert s.idx == 0
+    next(s)
+    assert s.idx == 1
+    with pytest.raises(pandas.errors.ParserError):
+        next(s)

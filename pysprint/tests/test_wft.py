@@ -4,6 +4,7 @@ import pytest
 import numpy as np
 
 from pysprint import Generator, WFTMethod
+from pysprint.utils import NotCalculatedException
 
 
 @pytest.mark.slow
@@ -34,3 +35,28 @@ def test_basic(mck):
     f.heatmap()
     f.show()
     mck.assert_called()
+
+
+def test_window_basic():
+    w = WFTMethod(np.arange(100), np.arange(100))
+    w.add_window(20, fwhm=1)
+    with pytest.raises(TypeError):
+        w.add_window(515)
+    w.remove_window_at(20)
+    w.add_window_linspace(1, 20, 19, fwhm=1)
+    w.remove_window_interval(1, 20)
+    assert len(w.windows) == 0
+
+
+@patch('matplotlib.pyplot.show')
+def test_window_generic(mock_show):
+    w = WFTMethod(np.arange(100), np.arange(100))
+    w.add_window_generic(np.random.normal(50, 10, size=50), fwhm=50)
+    assert len(w.windows) == 50
+    w.view_windows()
+    w.reset_state()
+    assert len(w.windows) == 0
+    with pytest.raises(NotCalculatedException):
+        w.heatmap()
+    with pytest.raises(NotCalculatedException):
+        w.get_GD()

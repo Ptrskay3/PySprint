@@ -11,7 +11,7 @@ from pysprint.core.bases.dataset import Dataset
 from pysprint.core.bases.algorithms import longest_common_subsequence
 from pysprint.core.nufft import nuifft
 from pysprint.utils.decorators import inplacify
-from pysprint.utils.exceptions import FourierWarning
+from pysprint.utils.exceptions import FourierWarning, NotCalculatedException
 from pysprint.core._fft_tools import _run
 from pysprint.core.phase import Phase
 from pysprint.core._evaluate import (
@@ -384,7 +384,7 @@ class FFTMethod(Dataset):
             _between x values to interpret them as the same datapoint.
         """
         if self.phase is None:
-            raise ValueError("Must calculate phase first.")
+            raise NotCalculatedException("Must calculate phase first.")
         if not len(y_sample) == len(x_sample):
             raise ValueError("Missmatching shapes.")
 
@@ -467,7 +467,7 @@ class FFTMethod(Dataset):
         try:
             getattr(self.phase, "errorplot", None)(*args, **kwargs)
         except TypeError:
-            raise ValueError("Must calculate before plotting errors.")
+            raise NotCalculatedException("Must calculate before plotting errors.")
 
     @property
     def get_phase(self):
@@ -476,7 +476,7 @@ class FFTMethod(Dataset):
         """
         if self.phase is not None:
             return self.phase
-        raise ValueError("Must retrieve the phase first.")
+        raise NotCalculatedException("Must retrieve the phase first.")
 
     @property
     def errors(self):

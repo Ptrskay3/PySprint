@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch
 
 import numpy as np
+import pytest
 
 import pysprint
 from pysprint import FFTMethod, Generator
@@ -11,6 +12,7 @@ from pysprint.core._fft_tools import (
     _ensure_window_at_origin,
     predict_fwhm,
 )
+from pysprint.utils import NotCalculatedException
 
 
 class TestFFTAuto(unittest.TestCase):
@@ -93,15 +95,21 @@ class TestFFTAuto(unittest.TestCase):
         assert cent > 1000
         assert win_size > 2000
 
-    @patch("matplotlib.pyplot.show")
-    def test_autorun(self, mck):
-        g = Generator(1, 4, 3, 1000)
-        g.generate()
 
-        f = FFTMethod(*g.data)
-        phase = f.autorun(enable_printing=True)
+@pytest.mark.parametrize("printing", [True, False])
+def test_autorun(printing):
+    g = Generator(1, 4, 3, 1000)
+    g.generate()
+
+    f = FFTMethod(*g.data)
+    with pytest.raises(NotCalculatedException):
+        f.get_pulse_shape_from_array(np.arange(10), np.arange(20))
+    with unittest.mock.patch("matplotlib.pyplot.show") as mck:
+        phase = f.autorun(enable_printing=printing)
         assert isinstance(phase, pysprint.core.phase.Phase)
         mck.assert_called()
+        with pytest.raises(ValueError):
+            f.get_pulse_shape_from_array(np.arange(10), np.arange(20))
 
 
 if __name__ == "__main__":
