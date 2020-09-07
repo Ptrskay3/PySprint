@@ -67,6 +67,13 @@ class SPPMethod(metaclass=_DatasetBase):
         self._positions = {}
         self._info = f"Progress: {len(self._delay)}/{len(self)}"
 
+    def append(self, newifg, newsam=None, newref=None):
+        self.ifg_names.append(newifg)
+        if newsam is not None:
+            self.sam_names.append(newsam)
+        if newref is not None:
+            self.ref_names.append(newref)
+
     @staticmethod
     def calculate_from_ifg(ifg_list, reference_point, order, show_graph=False):
         """

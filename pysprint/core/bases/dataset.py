@@ -638,9 +638,6 @@ class Dataset(metaclass=_DatasetBase):
 
         return cls(**parsed, errors=errors, callback=callback, parent=parent)
 
-    def __repr__(self):
-        return "pysprint.core.bases.dataset.Dataset"
-
     def __str__(self):
         if isinstance(self._delay, np.ndarray):
             pprint_delay = self._delay.flat[0]

@@ -4,6 +4,7 @@ __all__ = [
     "DatasetError",
     "InterpolationWarning",
     "FourierWarning",
+    "NotCalculatedException",
 ]
 
 
@@ -40,4 +41,12 @@ class DatasetError(Exception):
     when initializing a dataset or inherited object.
     """
 
+    pass
+
+
+class NotCalculatedException(ValueError):
+    """
+    This error is raised when a function is available
+    because the dispersion needs to be calculated first.
+    """
     pass

@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from pysprint.core.phase import Phase
-from pysprint.utils import PySprintWarning
+from pysprint.utils import PySprintWarning, NotCalculatedException
 from pysprint.core._fft_tools import find_center, find_roi
 from pysprint.core.methods.fftmethod import FFTMethod
 from pysprint.core._evaluate import gaussian_window
@@ -127,6 +127,36 @@ class WFTMethod(FFTMethod):
         return self.window_seq.keys()
 
     @_mutually_exclusive_args("std", "fwhm")
+    def add_window_generic(self, array, std=None, fwhm=None, order=2):
+        """
+        Build a window sequence of given parameters with centers
+        specified with ``array`` argument.
+
+        Parameters
+        ----------
+        array : list, np.ndarray
+            The array containing the centers of windows.
+        std : float, optional
+            The standard deviation of the Gaussian window
+            in units of the x axis of the interferogram.
+            You must specify exactly one of std and fwhm.
+        fwhm : float, optional
+            The full width at half max of the Gaussian window
+            in units of the x axis of the interferogram.
+            You must specify exactly one of std and fwhm.
+        order : int, optional
+            The order of Gaussian window. Must be even.
+            The default is 2.
+        """
+        if not isinstance(array, (list, np.ndarray)):
+            raise TypeError("Expected list-like as ``array``.")
+        for center in array:
+            if std:
+                self.add_window(center=center, std=std, order=order)
+            else:
+                self.add_window(center=center, fwhm=fwhm, order=order)
+
+    @_mutually_exclusive_args("std", "fwhm")
     def add_window_arange(
         self, start, stop, step, std=None, fwhm=None, order=2
     ):
@@ -231,7 +261,7 @@ class WFTMethod(FFTMethod):
             else:
                 self.add_window(center=cent, fwhm=fwhm, order=order)
 
-    #  TODO : subsample if too many windows present at the plot
+    # TODO : subsample if too many windows present at the plot
     def view_windows(self, ax=None, maxsize=80, **kwargs):
         """
         Gives a rough view of the different windows along with the ifg.
@@ -483,7 +513,7 @@ class WFTMethod(FFTMethod):
         try:
             getattr(self.GD, "errorplot", None)(*args, **kwargs)
         except TypeError:
-            raise ValueError("Must calculate before plotting errors.")
+            raise NotCalculatedException("Must calculate before plotting errors.")
 
     @property
     def get_GD(self):
@@ -492,7 +522,7 @@ class WFTMethod(FFTMethod):
         """
         if self.GD is not None:
             return self.GD
-        raise ValueError("Must calculate GD first.")
+        raise NotCalculatedException("Must calculate GD first.")
 
     @property
     def errors(self):
@@ -520,6 +550,9 @@ class WFTMethod(FFTMethod):
         _obj.plot()
         _obj.show()
 
+    def _collect_failures(self):
+        return [k for k in self.window_seq.keys() if k not in self.found_centers.keys()]
+
     def _construct_heatmap_data(self):
         self.X_cont = np.fromiter(self.window_seq.keys(), dtype=float)
 
@@ -541,7 +574,7 @@ class WFTMethod(FFTMethod):
             Default is True.
         """
         if self.GD is None:
-            raise ValueError("Must calculate first.")
+            raise NotCalculatedException("Must calculate first.")
 
         if self.fastmath:
             raise ValueError(
