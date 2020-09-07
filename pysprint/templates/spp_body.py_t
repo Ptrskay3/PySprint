@@ -26,7 +26,7 @@ myspp = ps.SPPMethod(
     delimiter=None,
     meta_len=1
 )
-
+# -----------------------PREPROCESSING & CALCULATION---------------------------
 ## Use the interactive matplotlib editor to record data
 
 # with ps.interactive(backend="Qt5Agg"):
@@ -61,17 +61,13 @@ myspp = ps.SPPMethod(
 ## where ifg_n are the existing interferogram objects with
 ## SPP positions and delays already set up. 
 
-For example:
-"""
-ifg_1.delay = 0
-ifg_1.positions = 2
-
-ifg_2.delay = 100
-ifg_2.positions = 2
-
-ifg_3.delay = 150
-ifg_3.positions = 1.6
-"""
+## For example:
+## ifg_1.delay = 0
+## ifg_1.positions = 2
+## ifg_2.delay = 100
+## ifg_2.positions = 2
+##ifg_3.delay = 150
+##ifg_3.positions = 1.6
 
 ## Run the evaluation
 # ps.SPPMethod.calculate_from_ifg(ifg_list, reference_point, order)

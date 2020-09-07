@@ -39,5 +39,9 @@ ifg = ps.{{ methodname }}.parse_raw(
 ## slice domain if needed
 # ifg.slice(start, stop)
 
+## Optionally plot the interferogram
+# ifg.plot()
+# ifg.show()
+
 # ------------------------------CALCULATION------------------------------------
 {{ body }}

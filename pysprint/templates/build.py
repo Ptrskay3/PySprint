@@ -2,8 +2,8 @@ import sys
 import argparse
 import pathlib
 import datetime
-import jinja2
 
+from jinja2 import Environment, PackageLoader
 
 NAME_MAPPING = {
     "cff": 'CosFitMethod',
@@ -15,11 +15,11 @@ NAME_MAPPING = {
 
 
 def render(methodname):
-    templateEnv = jinja2.Environment(loader=jinja2.PackageLoader('pysprint', 'templates'))
+    template_env = Environment(loader=PackageLoader('pysprint', 'templates'))
     TEMPLATE_FILE = "method_template.py_t"
-    template = templateEnv.get_template(TEMPLATE_FILE)
+    template = template_env.get_template(TEMPLATE_FILE)
     BODY_FILE = methodname + "_body.py_t"
-    body = templateEnv.get_template(BODY_FILE)
+    body = template_env.get_template(BODY_FILE)
     t = template.render(
         methodname=NAME_MAPPING[methodname],
         body=body.render(),
@@ -27,7 +27,7 @@ def render(methodname):
     )
     if methodname == "spp":
         SPP_TEMPLATE = "spp_body.py_t"
-        template = templateEnv.get_template(SPP_TEMPLATE)
+        template = template_env.get_template(SPP_TEMPLATE)
         t = template.render(
             methodname=NAME_MAPPING[methodname],
             date=datetime.datetime.now()
@@ -40,7 +40,11 @@ def render(methodname):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description=("""
+Generate sample evaluation files for different methods.
+        """)
+    )
     parser.add_argument('-T', '--template', choices=NAME_MAPPING.keys())
     return parser
 
