@@ -41,8 +41,7 @@ def _update_doc(method, doc):
         newdoc = _build_doc(method, doc)
         method.__doc__ = newdoc
     else:
-        newdoc = """\n\tParameters
-                ----------""" + _inplace_doc
+        newdoc = "\n\tParameters\n\t----------" + _inplace_doc
 
         nodoc_head = (f"Docstring automatically created for {method.__name__}. "
                       "Parameter list may not be complete.\n")
