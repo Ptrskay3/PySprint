@@ -86,12 +86,16 @@ class CosFitMethod(Dataset):
         order : int
             Maximum order of dispersion to look for. Must be in [1, 6].
         """
-        if order > 6 or order < 1:
-            print("Order should be an in integer from [1, 6].")
         try:
             int(order)
-        except ValueError:
-            print("Order should be an in integer from [1, 6].")
+        except ValueError as err:
+            raise TypeError(
+                "Order should be an in integer from [1, 6]."
+            ) from err
+        if order > 6 or order < 1:
+            raise ValueError(
+                "Order should be an in integer from [1, 6]."
+            )
         order = 7 - order
         for i in range(1, order):
             self.params[-i] = 0
