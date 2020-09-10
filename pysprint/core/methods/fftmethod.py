@@ -295,7 +295,7 @@ class FFTMethod(Dataset):
             The reference point on the x axis. If not given, only_phase mode
             will be activated. Default is None.
         order : int, optional
-            Polynomial (and maximum dispersion) order to fit. Must be in [1, 5].
+            Polynomial (and maximum dispersion) order to fit. Must be in [1, 6].
             If not given, only_phase mode will be activated. Default is None.
         only_phase : bool, optional
             If True, activate the only_phase mode, which will retrieve the phase
@@ -483,4 +483,7 @@ class FFTMethod(Dataset):
         """
         Return the fitting errors as np.ndarray.
         """
-        return getattr(self.phase, "errors", None)
+        errors = getattr(self.phase, "errors", None)
+        if errors is not None:
+            return errors
+        raise NotCalculatedException("Must calculate the fit first.")

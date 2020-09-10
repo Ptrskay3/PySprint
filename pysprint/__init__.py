@@ -63,7 +63,7 @@ def set_interactive(backend=default_backend, figsize=(15, 5)):
     matplotlib.rcParams["figure.figsize"] = figsize
     try:
         plt.switch_backend(backend)
-    except AttributeError as err:
+    except (AttributeError, ImportError, ModuleNotFoundError) as err:
         raise ValueError(
             f"Couldn't set backend {backend}, you should manually "
             "change to an appropriate GUI backend. (Matplotlib 3.3.1"

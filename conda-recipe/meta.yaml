@@ -1,5 +1,5 @@
 {% set name = "pysprint" %}
-{% set version = "0.12.3" %}
+{% set version = "0.12.4" %}
 
 package:
   name: "{{ name|lower }}"
@@ -7,7 +7,7 @@ package:
 
 source:
   url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
-  sha256: 608c7700f89e7491bd2dab82e9cf751e5ee594c2f2d81a3677e493181a756ca4
+  sha256: 88dc0445cf008da3ce72ba8cefdf394835775f3201a0976947b2ecc972b7a1fd
 
 build:
   number: 0
@@ -15,36 +15,38 @@ build:
   script_env:
    - CONDA_BLD_PATH
   entry_points:
-   - pysprint = pysprint.templates.build:main
+    - pysprint = pysprint.templates.build:main
 
 requirements:
   host:
+    - jinja2
     - matplotlib
     - numpy >=1.16.6
     - pandas
     - pip
     - python
     - scipy
-    - jinja2
   run:
+    - jinja2
     - matplotlib
     - numpy >=1.16.6
     - pandas
     - python
     - scipy
-    - jinja2
 
 test:
   imports:
     - pysprint
-    - pysprint.api
     - pysprint.core
     - pysprint.core.bases
     - pysprint.core.io
     - pysprint.core.methods
     - pysprint.mpl_tools
+    - pysprint.templates
     - pysprint.tests
     - pysprint.utils
+  commands:
+    - pysprint --help
 
 about:
   home: "https://github.com/Ptrskay3/PySprint"
