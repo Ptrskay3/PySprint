@@ -41,7 +41,7 @@ def interactive(backend=default_backend, figsize=(15, 5)):
     except (AttributeError, ImportError, ModuleNotFoundError) as err:
         raise ValueError(
             f"Couldn't set backend {backend}, you should manually "
-            "change to an appropriate GUI backend. (Matplotlib 3.3.1"
+            "change to an appropriate GUI backend. (Matplotlib 3.3.1 "
             "is broken. In that case use backend='TkAgg')."
         ) from err
     finally:

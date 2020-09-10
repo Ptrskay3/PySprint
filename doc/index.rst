@@ -14,8 +14,8 @@ The Pysprint package is free software, using an Open Source MIT license. The
 software and this document are works in progress. See the project at
 `pysprint GitHub repository`_.
 
-Guide!
-======
+Guide
+=====
 .. toctree::
    :maxdepth: 2
 
