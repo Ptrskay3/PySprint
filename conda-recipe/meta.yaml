@@ -34,20 +34,6 @@ requirements:
     - python
     - scipy
 
-test:
-  imports:
-    - pysprint
-    - pysprint.core
-    - pysprint.core.bases
-    - pysprint.core.io
-    - pysprint.core.methods
-    - pysprint.mpl_tools
-    - pysprint.templates
-    - pysprint.tests
-    - pysprint.utils
-  commands:
-    - pysprint --help
-
 about:
   home: "https://github.com/Ptrskay3/PySprint"
   license: MIT
