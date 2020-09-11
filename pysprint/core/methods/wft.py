@@ -9,7 +9,9 @@ from pysprint.utils import PySprintWarning, NotCalculatedException
 from pysprint.core._fft_tools import find_center, find_roi
 from pysprint.core.methods.fftmethod import FFTMethod
 from pysprint.core._evaluate import gaussian_window
-from pysprint.utils.decorators import _mutually_exclusive_args, _lazy_property
+from pysprint.utils.decorators import _mutually_exclusive_args
+from pysprint.utils.decorators import _lazy_property
+from pysprint.utils.decorators import inplacify
 from pysprint.utils.misc import find_nearest
 
 
@@ -84,6 +86,7 @@ class WFTMethod(FFTMethod):
         self.Z_cont = np.array([])
         self.fastmath = True
 
+    @inplacify
     @_mutually_exclusive_args("std", "fwhm")
     def add_window(self, center, std=None, fwhm=None, order=2):
         """
@@ -117,6 +120,7 @@ class WFTMethod(FFTMethod):
         else:
             window = Window(self.x, center=center, fwhm=fwhm, order=order)
         self.window_seq[center] = window
+        return self
 
     @property
     def windows(self):
@@ -126,6 +130,7 @@ class WFTMethod(FFTMethod):
     def centers(self):
         return self.window_seq.keys()
 
+    @inplacify
     @_mutually_exclusive_args("std", "fwhm")
     def add_window_generic(self, array, std=None, fwhm=None, order=2):
         """
@@ -155,7 +160,9 @@ class WFTMethod(FFTMethod):
                 self.add_window(center=center, std=std, order=order)
             else:
                 self.add_window(center=center, fwhm=fwhm, order=order)
+        return self
 
+    @inplacify
     @_mutually_exclusive_args("std", "fwhm")
     def add_window_arange(
         self, start, stop, step, std=None, fwhm=None, order=2
@@ -190,7 +197,9 @@ class WFTMethod(FFTMethod):
                 self.add_window(center=cent, std=std, order=order)
             else:
                 self.add_window(center=cent, fwhm=fwhm, order=order)
+        return self
 
+    @inplacify
     @_mutually_exclusive_args("std", "fwhm")
     def add_window_linspace(
         self, start, stop, num, std=None, fwhm=None, order=2
@@ -225,7 +234,9 @@ class WFTMethod(FFTMethod):
                 self.add_window(center=cent, std=std, order=order)
             else:
                 self.add_window(center=cent, fwhm=fwhm, order=order)
+        return self
 
+    @inplacify
     @_mutually_exclusive_args("std", "fwhm")
     def add_window_geomspace(
         self, start, stop, num, std=None, fwhm=None, order=2
@@ -260,6 +271,7 @@ class WFTMethod(FFTMethod):
                 self.add_window(center=cent, std=std, order=order)
             else:
                 self.add_window(center=cent, fwhm=fwhm, order=order)
+        return self
 
     # TODO : subsample if too many windows present at the plot
     def view_windows(self, ax=None, maxsize=80, **kwargs):
@@ -293,12 +305,15 @@ class WFTMethod(FFTMethod):
                 val.plot(ax=ax, scalefactor=np.max(self.y) * .75, **kwargs)
         self.plot(ax=ax)
 
+    @inplacify
     def remove_all_windows(self):
         """
         Remove all the Gaussian windows.
         """
         self.window_seq.clear()
+        return self
 
+    @inplacify
     def reset_state(self):
         """
         Reset the object's state fully: delete all the
@@ -312,7 +327,9 @@ class WFTMethod(FFTMethod):
         self.GD = None
         self.cachedlen = 0
         self.fastmath = True
+        return self
 
+    @inplacify
     def remove_window_at(self, center):
         """
         Removes a window at center.
@@ -332,7 +349,9 @@ class WFTMethod(FFTMethod):
                 f"Did you mean {c[0]}?"
             )
         self.window_seq.pop(center, None)
+        return self
 
+    @inplacify
     def remove_window_interval(self, start, stop):
         """
         Remove window interval inclusively.
@@ -348,6 +367,7 @@ class WFTMethod(FFTMethod):
         mask = wins[(wins <= stop) & (wins >= start)]
         for center in mask:
             self.window_seq.pop(center, None)
+        return self
 
     def calculate(
             self,
@@ -574,7 +594,7 @@ class WFTMethod(FFTMethod):
             Default is True.
         """
         if self.GD is None:
-            raise NotCalculatedException("Must calculate first.")
+            raise NotCalculatedException("Must calculate GD first.")
 
         if self.fastmath:
             raise ValueError(
@@ -589,11 +609,11 @@ class WFTMethod(FFTMethod):
             if not isinstance(levels, np.ndarray):
                 raise ValueError("Expected np.ndarray as levels.")
         if ax is None:
-            cs = plt.contourf(
+            plt.contourf(
                 self.X_cont, self.Y_cont, self.Z_cont, levels=levels, cmap=cmap, extend="both"
             )
         else:
-            cs = ax.contourf(
+            ax.contourf(
                 self.X_cont, self.Y_cont, self.Z_cont, levels=levels, cmap=cmap, extend="both"
             )
         if include_ridge:
