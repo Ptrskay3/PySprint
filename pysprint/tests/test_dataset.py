@@ -347,5 +347,16 @@ def test_specfuncs(func):
     np.testing.assert_array_equal(d.y, d.y_norm)
 
 
+def test_resample():
+    x_ = np.linspace(0, 1, 199)
+    d = Dataset(x_, x_)
+    d.resample(200)
+    assert len(d) == 200
+    d.resample(400, inplace=False)
+    assert len(d) == 200
+    with pytest.warns(PySprintWarning):
+        d.resample(50)
+
+
 if __name__ == "__main__":
     unittest.main()

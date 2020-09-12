@@ -87,12 +87,8 @@ def test_ambiguous_positions(construct_ifg_sequence):
     np.testing.assert_almost_equal(-0.00014, disp[4], decimal=5)
 
 
+# TODO : Make more verbose tests for that
 def test_spp_append():
     s = SPPMethod(["test_rawparsing.trt"])
     s.append("test_peak.txt")
     assert len(s) == 2
-    assert s.idx == 0
-    next(s)
-    assert s.idx == 1
-    with pytest.raises(pandas.errors.ParserError):
-        next(s)

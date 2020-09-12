@@ -12,9 +12,13 @@ class SPPEditor:
 
     epsilon = 7  # max absolute pixel distance to count as a hit
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, info=None):
         plt.ion()
         self.fig, self.ax = plt.subplots()
+        if info is not None:
+            if not isinstance(info, str):
+                info = str(info)
+            self.fig.suptitle(info, fontsize=16)
         self.fig.set_figheight(6)
         self.fig.set_figwidth(10)
         plt.grid()

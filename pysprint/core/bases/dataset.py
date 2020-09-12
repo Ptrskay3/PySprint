@@ -2,12 +2,13 @@
 This file implements the Dataset class with all the functionality
 that an interferogram should have in general.
 """
+import base64
 import warnings
 import numbers
 import re
-
 from collections.abc import Iterable
 from contextlib import suppress
+from io import BytesIO
 from textwrap import dedent
 from math import factorial
 import json  # for pretty printing dict
@@ -16,6 +17,8 @@ import logging
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy.interpolate import interp1d
+from jinja2 import Template
 
 from pysprint.core.bases._dataset_base import _DatasetBase, C_LIGHT
 from pysprint.core.bases._apply import _DatasetApply
@@ -231,6 +234,9 @@ class Dataset(metaclass=_DatasetBase):
         self.unit = self._render_unit(target_unit)
         return self
 
+    def __len__(self):
+        return len(self.x)
+
     @staticmethod
     def _render_unit(unit, mpl=False):
         unit = unit.lower()
@@ -354,8 +360,11 @@ class Dataset(metaclass=_DatasetBase):
         Ensure the interferogram is normalized and only a little part
         which is outlying from the [-1, 1] interval (because of noise).
         """
-        idx = np.where((self.y_norm > 2))
-        val = len(idx[0]) / len(self.y_norm)
+        try:
+            idx = np.where((self.y_norm > 2))
+            val = len(idx[0]) / len(self.y_norm)
+        except TypeError as e:
+            raise DatasetError("Non-numeric values found while reading dataset.") from e
         if val > 0.015:  # this is a custom threshold, which often works..
             return False
         return True
@@ -509,8 +518,8 @@ class Dataset(metaclass=_DatasetBase):
                 self.probably_wavelength = False
                 self.unit = "PHz"
 
-        # this is the first function to fail if the user sets up
-        # wrong values.
+        # This is the first function to fail if the user sets up
+        # wrong values. Usually..
         except TypeError as error:
             msg = ValueError(
                 "The file could not be parsed properly."
@@ -658,7 +667,7 @@ class Dataset(metaclass=_DatasetBase):
         Predicted domain: {'wavelength' if self.probably_wavelength else 'frequency'}
         Range: from {np.min(self.x):.3f} to {np.max(self.x):.3f} {_unit}
         Normalized: {self._is_normalized}
-        Delay value: {(str(pprint_delay) + ' fs') if np.all(self._delay) else 'Not given'}
+        Delay value: {(str(pprint_delay) + ' fs') if self._delay is not None else 'Not given'}
         SPP position(s): {str(self._positions) + ' PHz' if np.all(self._positions) else 'Not given'}
         ----------------------------
         Metadata extracted from file
@@ -668,6 +677,89 @@ class Dataset(metaclass=_DatasetBase):
         string = re.sub('^\s+', '', string, flags=re.MULTILINE)
         string += json.dumps(self.meta, indent=4, sort_keys=True)
         return string
+
+    def _repr_html_(self):  # TODO: move this to a separate template file
+        if isinstance(self._delay, np.ndarray):
+            pprint_delay = self._delay.flat[0]
+        elif isinstance(self._delay, Iterable):
+            pprint_delay = next((_ for _ in self._delay), None)
+        elif isinstance(self._delay, numbers.Number):
+            pprint_delay = self._delay
+        else:
+            pprint_delay = "-"
+        _unit = self._render_unit(self.unit)
+        t = f"""
+        <div id="header" style="height:10%;width:100%;">
+        <div style='float:left'>
+        <table style="border:1px solid black;float:top;">
+        <tbody>
+        <tr>
+        <td colspan=2 style="text-align:center">
+        <font size="5">{type(self).__name__}</font>
+        </td>
+        </tr>
+        <tr>
+        <td colspan=2 style="text-align:center">
+        <font size="3.5">Parameters</font>
+        </td>
+        </tr>
+        <tr>
+        <td style="text-align:center"><b>Datapoints<b></td>
+            <td style="text-align:center"> {len(self.x)}</td>
+        </tr>
+        <tr>
+            <td style="text-align:center"><b>Predicted domain<b> </td>
+            <td style="text-align:center"> {'wavelength' if self.probably_wavelength else 'frequency'} </td>
+        </tr>
+        <tr>
+        <td style="text-align:center"> <b>Range min</b> </td>
+        <td style="text-align:center">{np.min(self.x):.3f} {_unit}</td>
+        </tr>
+        <tr>
+        <td style="text-align:center"> <b>Range max</b> </td>
+        <td style="text-align:center">{np.max(self.x):.3f} {_unit}</td>
+        </tr>
+        <tr>
+        <td style="text-align:center"> <b>Normalized</b></td>
+        <td style="text-align:center"> {self._is_normalized} </td>
+        </tr>
+        <tr>
+        <td style="text-align:center"><b>Delay value</b></td>
+        <td style="text-align:center">{(str(pprint_delay) + ' fs') if self._delay is not None else 'Not given'}</td>
+        </tr>
+        <tr>
+        <td style="text-align:center"><b>SPP position(s)</b></td>
+        <td style="text-align:center">{str(self._positions) + ' PHz' if np.all(self._positions) else 'Not given'}</td>
+        </tr>
+        <tr>
+        <td colspan=2 style="text-align:center">
+        <font size="3.5">Metadata</font>
+        </td>
+        </tr>
+        """
+        jjstring = Template("""
+        {% for key, value in meta.items() %}
+           <tr>
+        <th style="text-align:center"> <b>{{ key }} </b></th>
+        <td style="text-align:center"> {{ value }} </td>
+           </tr>
+        {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        <div style='float:leftt'>""")
+        rendered_fig = self._render_html_plot()
+        return t + jjstring.render(meta=self.meta) + rendered_fig
+
+    def _render_html_plot(self):
+        fig, ax = plt.subplots(figsize=(7, 5))
+        self.plot(ax=ax)
+        plt.close()
+        tmpfile = BytesIO()
+        fig.savefig(tmpfile, format='png')
+        encoded = base64.b64encode(tmpfile.getvalue()).decode('utf-8')
+        html_fig = "<img src=\'data:image/png;base64,{}\'>".format(encoded)
+        return html_fig
 
     @property
     def data(self):
@@ -691,7 +783,7 @@ class Dataset(metaclass=_DatasetBase):
             self._data = pd.DataFrame({"x": self.x, "y": self.y})
         return self._data
 
-    #  https://stackoverflow.com/a/15774013/11751294
+    # from : https://stackoverflow.com/a/15774013/11751294
     def __copy__(self):
         cls = self.__class__
         result = cls.__new__(cls)
@@ -843,6 +935,36 @@ class Dataset(metaclass=_DatasetBase):
             "Linear interpolation have been applied to data.", InterpolationWarning,
         )
 
+    @inplacify
+    def resample(self, N, kind="linear", **kwds):
+        """
+        Resample the interferogram to have `N` datapoints.
+
+        Parameters
+        ----------
+        N : int
+            The number of datapoints required.
+        kind : str, optional
+            The type of interpolation to use. Default is `linear`.
+        kwds : optional
+            Additional keyword argument to pass to `scipy.interpolate.interp1d`.
+
+        Raises
+        ------
+        PySprintWarning, if trying to subsample to lower `N` datapoints than original.
+        """
+        f = interp1d(self.x, self.y_norm, kind, **kwds)
+        if N < len(self.x):
+            N = len(self.x)
+            warnings.warn(
+                "Trying to resample to lower resolution, keeping shape..", PySprintWarning
+            )
+        xnew = np.linspace(np.min(self.x), np.max(self.x), N)
+        ynew = f(xnew)
+        setattr(self, "x", xnew)
+        setattr(self, "y_norm", ynew)
+        return self
+
     def detect_peak(self, pmax=0.1, pmin=0.1, threshold=0.1, except_around=None):
         """
         Basic algorithm to find extremal points in data
@@ -911,6 +1033,9 @@ class Dataset(metaclass=_DatasetBase):
         if isinstance(self.positions, np.ndarray) or isinstance(
                 self.positions, Iterable
         ):
+            if np.array(self.positions).ndim == 0:
+                self.positions = np.atleast_1d(self.positions)
+            # iterate over 0-d array: need to cast np.atleast_1d
             for i, val in enumerate(self.positions):
                 if is_inside(self.positions[i], self.x):
                     x_closest, idx = find_nearest(self.x, self.positions[i])
@@ -1024,7 +1149,7 @@ class Dataset(metaclass=_DatasetBase):
             print(f"Successfully saved as {filename}.")
         return self
 
-    def open_SPP_panel(self):
+    def open_SPP_panel(self, header=None):
         """
         Opens the interactive matplotlib editor for SPP data.
         Use `i` button to add a new point, use `d` key to delete one.
@@ -1032,8 +1157,23 @@ class Dataset(metaclass=_DatasetBase):
         Close the window on finish. Must be called with interactive
         backend. The best practice is to call this function inside
         `~pysprint.interactive` context manager.
+
+        Parameters
+        ----------
+        header : str, optional
+            An arbitary string to include as header. This can be
+            any attribute's name, or even metadata key.
         """
-        _spp = SPPEditor(self.x, self.y_norm)
+        if header is not None:
+            if isinstance(header, str):
+                head = getattr(self, header, None)
+                metahead = self.meta.get(header, None)
+                info = head or metahead or header
+            else:
+                info = None
+        else:
+            info = None
+        _spp = SPPEditor(self.x, self.y_norm, info=info)
         self.delay, self.positions = _spp.get_data()
 
     def emit(self):
@@ -1057,7 +1197,7 @@ class Dataset(metaclass=_DatasetBase):
             self._positions = np.asarray(self.positions)
         if not isinstance(self.delay, np.ndarray):
             self.delay = np.ones_like(self.positions) * self.delay
-        return self.delay, self.positions
+        return np.atleast_1d(self.delay), np.atleast_1d(self.positions)
 
     def set_SPP_data(self, delay, positions, force=False):
         """

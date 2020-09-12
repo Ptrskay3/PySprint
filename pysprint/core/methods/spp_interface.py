@@ -1,4 +1,6 @@
 import os
+from functools import lru_cache
+from itertools import zip_longest
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -20,8 +22,9 @@ class SPPMethod(metaclass=_DatasetBase):
     """
     Interface for Stationary Phase Point Method.
     """
+
     # TODO: kwargs should accept all the new params
-    def __init__(self, ifg_names, sam_names=None, ref_names=None, **kwargs):
+    def __init__(self, ifg_names, sam_names=None, ref_names=None, errors="raise", **kwargs):
         """
         SPPMethod constructor.
 
@@ -36,6 +39,8 @@ class SPPMethod(metaclass=_DatasetBase):
         kwargs :
             Additional keyword arguments to pass to `parse_raw` function.
         """
+        if errors not in ("raise", "ignore"):
+            raise ValueError("errors must be `raise` or `ignore`.")
         self.ifg_names = ifg_names
         if sam_names:
             self.sam_names = sam_names
@@ -45,15 +50,14 @@ class SPPMethod(metaclass=_DatasetBase):
             self.ref_names = ref_names
         else:
             self.ref_names = None
-
-        self._validate()
-        if self.sam_names:
-            if not len(self.ifg_names) == len(self.sam_names):
-                raise DatasetError("Missmatching length of files.")
-        if self.ref_names:
-            if not len(self.ifg_names) == len(self.ref_names):
-                raise DatasetError("Missmatching length of files.")
-        self.idx = 0
+        if errors == "raise":
+            self._validate()
+            if self.sam_names:
+                if not len(self.ifg_names) == len(self.sam_names):
+                    raise DatasetError("Missmatching length of files.")
+            if self.ref_names:
+                if not len(self.ifg_names) == len(self.ref_names):
+                    raise DatasetError("Missmatching length of files.")
         self.skiprows = kwargs.pop("skiprows", 8)
         self.decimal = kwargs.pop("decimal", ",")
         self.sep = kwargs.pop("sep", ";")
@@ -68,11 +72,24 @@ class SPPMethod(metaclass=_DatasetBase):
         self._info = f"Progress: {len(self._delay)}/{len(self)}"
 
     def append(self, newifg, newsam=None, newref=None):
+        """
+        Append a new interferogram to the object.
+        """
+        # ensure padding before trying to append, and also
+        # we better prevent infinite loop
         self.ifg_names.append(newifg)
         if newsam is not None:
-            self.sam_names.append(newsam)
+            if self.sam_names is not None:
+                if len(self.ifg_names) > len(self.sam_names):
+                    while len(self.ifg_names) != len(self.sam_names):
+                        self.sam_names.append(None)
+                self.sam_names.append(newsam)
         if newref is not None:
-            self.ref_names.append(newref)
+            if self.ref_names is not None:
+                if len(self.ifg_names) > len(self.ref_names):
+                    while len(self.ifg_names) != len(self.ref_names):
+                        self.ref_names.append(None)
+                self.ref_names.append(newref)
 
     @staticmethod
     def calculate_from_ifg(ifg_list, reference_point, order, show_graph=False):
@@ -122,7 +139,7 @@ class SPPMethod(metaclass=_DatasetBase):
         for idx, ifg in enumerate(ifg_list):
             delay, position = ifg.emit()
             if idx != 0 and delay.flat[0] in np.concatenate(
-                [a.ravel() for a in local_delays.values()]
+                    [a.ravel() for a in local_delays.values()]
             ):
                 raise ValueError(
                     f"Duplicated delay values found. Delay {delay.flat[0]} fs was previously seen."
@@ -148,19 +165,18 @@ class SPPMethod(metaclass=_DatasetBase):
     def __len__(self):
         return len(self.ifg_names)
 
-    def __iter__(self):
-        return self
-
     def __str__(self):
         return f"{type(self).__name__}\nInterferogram count : {len(self)}"
 
-    def __next__(self):
-        if self.idx < len(self):
-            try:
+    def __iter__(self):
+        try:
+            for i, j, k in zip_longest(
+                    self.ifg_names, self.sam_names, self.ref_names
+            ):
                 d = Dataset.parse_raw(
-                    self.ifg_names[self.idx],
-                    self.sam_names[self.idx],
-                    self.ref_names[self.idx],
+                    i,
+                    j,
+                    k,
                     skiprows=self.skiprows,
                     decimal=self.decimal,
                     sep=self.sep,
@@ -168,9 +184,11 @@ class SPPMethod(metaclass=_DatasetBase):
                     callback=self.cb,
                     parent=self
                 )
-            except TypeError:
+                yield d
+        except TypeError:
+            for i in self.ifg_names:
                 d = Dataset.parse_raw(
-                    self.ifg_names[self.idx],
+                    i,
                     skiprows=self.skiprows,
                     decimal=self.decimal,
                     sep=self.sep,
@@ -178,10 +196,9 @@ class SPPMethod(metaclass=_DatasetBase):
                     callback=self.cb,
                     parent=self
                 )
-            self.idx += 1
-            return d
-        raise StopIteration
+                yield d
 
+    @lru_cache()
     def __getitem__(self, key):
         try:
             dataframe = Dataset.parse_raw(
@@ -224,8 +241,9 @@ class SPPMethod(metaclass=_DatasetBase):
         """
         Function which records SPP data when received.
         """
-        self._delay[self.idx] = delay
-        self._positions[self.idx] = position
+        currlen = len(self._delay)
+        self._delay[currlen] = delay
+        self._positions[currlen] = position
 
     def save_data(self, filename):
         """
