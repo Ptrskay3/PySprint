@@ -168,7 +168,7 @@ class SPPMethod(metaclass=_DatasetBase):
     def __str__(self):
         return f"{type(self).__name__}\nInterferogram count : {len(self)}"
 
-    def __iter__(self):
+    def __iter__(self):  # TODO : better integration with getitem
         try:
             for i, j, k in zip_longest(
                     self.ifg_names, self.sam_names, self.ref_names

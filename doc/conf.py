@@ -42,7 +42,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
-    'sphinx.ext.mathjax'
+    'sphinx.ext.mathjax',
 ]
 
 templates_path = ['_templates']
@@ -57,6 +57,14 @@ exclude_patterns = [
     'pysprint.bases.io.rst',
     '**.ipynb_checkpoints'
 ]
+
+
+intersphinx_mapping = {
+    'numpy':  ('https://numpy.org/', None),
+    'matplotlib': ('https://matplotlib.org/', None),
+    'pandas': ('https://pandas.pydata.org/', None),
+    'scipy': ('https://www.scipy.org/', None)
+}
 
 # -- Options for HTML output -------------------------------------------------
 
