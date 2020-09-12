@@ -60,10 +60,10 @@ exclude_patterns = [
 
 
 intersphinx_mapping = {
-    'numpy':  ('https://numpy.org/', None),
+    'numpy':  ('https://numpy.org/doc/stable/', None),
     'matplotlib': ('https://matplotlib.org/', None),
     'pandas': ('https://pandas.pydata.org/', None),
-    'scipy': ('https://www.scipy.org/', None)
+    'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None)
 }
 
 # -- Options for HTML output -------------------------------------------------
