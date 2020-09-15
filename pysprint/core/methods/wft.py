@@ -5,14 +5,16 @@ from inspect import isfunction
 import numpy as np
 import matplotlib.pyplot as plt
 
-from pysprint.core.phase import Phase
-from pysprint.utils import PySprintWarning, NotCalculatedException
-from pysprint.core._fft_tools import find_center, find_roi
 from pysprint.core.methods.fftmethod import FFTMethod
+from pysprint.core.phase import Phase
 from pysprint.core._evaluate import gaussian_window
+from pysprint.core._fft_tools import find_roi
+from pysprint.core._fft_tools import find_center
 from pysprint.utils.decorators import _mutually_exclusive_args
 from pysprint.utils.decorators import _lazy_property
 from pysprint.utils.decorators import inplacify
+from pysprint.utils import NotCalculatedException
+from pysprint.utils import PySprintWarning
 from pysprint.utils.misc import find_nearest
 
 try:
@@ -286,7 +288,7 @@ class WFTMethod(FFTMethod):
                 self.add_window(center=cent, fwhm=fwhm, order=order)
         return self
 
-    # TODO : subsample if too many windows present at the plot
+    # TODO : The ratio mechanism is wrong. REWRITE PRIORITY: HIGH
     def view_windows(self, ax=None, maxsize=80, **kwargs):
         """
         Gives a rough view of the different windows along with the ifg.
@@ -305,6 +307,8 @@ class WFTMethod(FFTMethod):
         """
         winlen = len(self.window_seq)
         ratio = winlen % maxsize
+        if ratio == 0:
+            ratio = 20
         if winlen > maxsize:
             warnings.warn(
                 "Image seems crowded, displaying only a sequence of the given windows.",
@@ -392,6 +396,7 @@ class WFTMethod(FFTMethod):
             fastmath=True,
             usenifft=False,
             parallel=False,
+            errors="ignore"
     ):
         """
         Calculates the dispersion.
@@ -416,7 +421,7 @@ class WFTMethod(FFTMethod):
             Whether to use Non-unfirom FFT when calculating GD.
             Default is False. **Not stable.**
         parallel : bool, optional
-            Whether to use parallel computation. Only availabe if Dask
+            Whether to use parallel computation. Only availabe if `Dask`
             is installed. The speedup is about 50-70%. Default is False.
         errors : str, optional
             Whether to raise an error is the algorithm couldn't find the
@@ -425,6 +430,8 @@ class WFTMethod(FFTMethod):
         Raises
         ------
         ValueError, if no window sequence is added to the interferogram.
+        ValueError, if order is 1.
+        ModuleNotFoundError, if `Dask` is not available when using parallel=True.
         """
         if len(self.window_seq) == 0:
             raise ValueError("Before calculating a window sequence must be set.")
@@ -434,9 +441,13 @@ class WFTMethod(FFTMethod):
         self.fastmath = fastmath
         if force_recalculate:
             self.found_centers.clear()
-            self.build_GD(silent=silent, fastmath=fastmath, usenifft=usenifft, parallel=parallel)
+            self.build_GD(
+                silent=silent, fastmath=fastmath, usenifft=usenifft, parallel=parallel, errors=errors
+            )
         if self.GD is None:
-            self.build_GD(silent=silent, fastmath=fastmath, usenifft=usenifft, parallel=parallel)
+            self.build_GD(
+                silent=silent, fastmath=fastmath, usenifft=usenifft, parallel=parallel, errors=errors
+            )
 
         self.cachedlen = len(self.window_seq)
 
@@ -465,8 +476,8 @@ class WFTMethod(FFTMethod):
             Whether to use Non-unfirom FFT when calculating GD.
             Default is False. **Not stable.**
         parallel : bool, optional
-            Whether to use parallel computation. Only availabe if Dask
-            is installed. The speedup is about 40-50%. Default is False.
+            Whether to use parallel computation. Only availabe if `Dask`
+            is installed. The speedup is about 50-70%. Default is False.
         errors : str, optional
             Whether to raise an error is the algorithm couldn't find the
             center of the peak.

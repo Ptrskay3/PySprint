@@ -157,14 +157,14 @@ class Generator(metaclass=_DatasetBase):
             name += ".txt"
         if path is None:
             np.savetxt(
-                f"{name}.txt",
+                f"{name}",
                 np.transpose([self.x, self.y, self.ref, self.sam]),
                 delimiter=",",
             )
             print(f"Successfully saved as {name}.")
         else:
             np.savetxt(
-                f"{path}/{name}.txt",
+                f"{path}/{name}",
                 np.transpose([self.x, self.y, self.ref, self.sam]),
                 delimiter=",",
             )
@@ -200,7 +200,6 @@ class Generator(metaclass=_DatasetBase):
         self._check_norm()
         self.fig, self.ax = self.plotwidget.subplots(2, 1, figsize=(8, 7))
         self.plotwidget.subplots_adjust(top=0.95)
-        self.fig.canvas.set_window_title("Spectrum and phase")
         try:
             self.ax[0].plot(self.x, self._y, "r")
         except Exception:  # TODO : handle that too

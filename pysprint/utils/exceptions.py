@@ -46,7 +46,7 @@ class DatasetError(Exception):
 
 class NotCalculatedException(ValueError):
     """
-    This error is raised when a function is available
-    because the dispersion needs to be calculated first.
+    This error is raised when a function is not available yet
+    because something needs to be calculated before.
     """
     pass
