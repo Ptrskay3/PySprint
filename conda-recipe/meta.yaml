@@ -1,5 +1,5 @@
 {% set name = "pysprint" %}
-{% set version = "0.12.4" %}
+{% set version = "0.12.5" %}
 
 package:
   name: "{{ name|lower }}"
@@ -7,7 +7,7 @@ package:
 
 source:
   url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
-  sha256: 88dc0445cf008da3ce72ba8cefdf394835775f3201a0976947b2ecc972b7a1fd
+  sha256: a0c046caa49e219dd0e54a50701149687cc6f52134f201ec83180af5eb0b8cf0
 
 build:
   number: 0

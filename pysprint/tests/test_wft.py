@@ -30,7 +30,9 @@ def test_basic(mck):
 
     d, _, _ = f.calculate(reference_point=2, order=5, fastmath=False)
 
-    np.testing.assert_array_almost_equal(d, [3000.19527, 399.94162, 3998.03069, 3991.45663, 49894.96710], decimal=5)
+    np.testing.assert_array_almost_equal(
+        d, [3000.19527, 399.94162, 3998.03069, 3991.45663, 49894.96710], decimal=5
+    )
 
     f.heatmap()
     f.show()
@@ -60,3 +62,6 @@ def test_window_generic(mock_show):
         w.heatmap()
     with pytest.raises(NotCalculatedException):
         w.get_GD()
+
+
+
