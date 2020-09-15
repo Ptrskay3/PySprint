@@ -1,5 +1,6 @@
 import sys
 import warnings
+from inspect import isfunction
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,6 +14,19 @@ from pysprint.utils.decorators import _mutually_exclusive_args
 from pysprint.utils.decorators import _lazy_property
 from pysprint.utils.decorators import inplacify
 from pysprint.utils.misc import find_nearest
+
+try:
+    from dask import delayed
+    from dask.diagnostics import ProgressBar
+    import dask
+    CAN_PARALLELIZE = True
+except ImportError:
+    CAN_PARALLELIZE = False
+
+    def delayed(func=None, *args, **kwargs):
+        """Define delayed as identity deco."""
+        if isfunction(func):
+            return func
 
 
 class Window:
@@ -77,14 +91,13 @@ class WFTMethod(FFTMethod):
         super().__init__(*args, **kwargs)
         self.window_seq = {}
         self.found_centers = {}
-        self.secondary_centers = {}
-        self.tertiary_centers = {}
         self.GD = None
         self.cachedlen = 0
         self.X_cont = np.array([])
         self.Y_cont = np.array([])
         self.Z_cont = np.array([])
         self.fastmath = True
+        self.errorcounter = 0
 
     @inplacify
     @_mutually_exclusive_args("std", "fwhm")
@@ -377,7 +390,8 @@ class WFTMethod(FFTMethod):
             silent=False,
             force_recalculate=False,
             fastmath=True,
-            usenifft=False
+            usenifft=False,
+            parallel=False,
     ):
         """
         Calculates the dispersion.
@@ -401,6 +415,12 @@ class WFTMethod(FFTMethod):
         usenifft : bool, optional
             Whether to use Non-unfirom FFT when calculating GD.
             Default is False. **Not stable.**
+        parallel : bool, optional
+            Whether to use parallel computation. Only availabe if Dask
+            is installed. The speedup is about 50-70%. Default is False.
+        errors : str, optional
+            Whether to raise an error is the algorithm couldn't find the
+            center of the peak.
 
         Raises
         ------
@@ -414,9 +434,9 @@ class WFTMethod(FFTMethod):
         self.fastmath = fastmath
         if force_recalculate:
             self.found_centers.clear()
-            self.build_GD(silent=silent, fastmath=fastmath, usenifft=usenifft)
+            self.build_GD(silent=silent, fastmath=fastmath, usenifft=usenifft, parallel=parallel)
         if self.GD is None:
-            self.build_GD(silent=silent, fastmath=fastmath, usenifft=usenifft)
+            self.build_GD(silent=silent, fastmath=fastmath, usenifft=usenifft, parallel=parallel)
 
         self.cachedlen = len(self.window_seq)
 
@@ -430,7 +450,7 @@ class WFTMethod(FFTMethod):
             self.GD.plot()
         return d, ds, fr
 
-    def build_GD(self, silent=False, fastmath=True, usenifft=False):
+    def build_GD(self, silent=False, fastmath=True, usenifft=False, parallel=False, errors="ignore"):
         """
         Build the GD.
 
@@ -444,17 +464,54 @@ class WFTMethod(FFTMethod):
         usenifft : bool, optional
             Whether to use Non-unfirom FFT when calculating GD.
             Default is False. **Not stable.**
+        parallel : bool, optional
+            Whether to use parallel computation. Only availabe if Dask
+            is installed. The speedup is about 40-50%. Default is False.
+        errors : str, optional
+            Whether to raise an error is the algorithm couldn't find the
+            center of the peak.
 
         Returns
         -------
         GD : pysprint.core.phase.Phase
             The phase object with `GD_mode=True`. See its docstring for more info.
         """
-        self.fastmath = fastmath
-        self._apply_window_sequence(silent=silent, fastmath=fastmath, usenifft=usenifft)
-        self._clean_centers()
-        delay = np.fromiter(self.found_centers.keys(), dtype=float)
-        omega = np.fromiter(self.found_centers.values(), dtype=float)
+        if parallel:
+
+            if not CAN_PARALLELIZE:
+                raise ModuleNotFoundError(
+                    "Module `dask` not found. Please install it in order to use parallelism."
+                )
+
+            else:
+                self.fastmath = fastmath
+                self._apply_window_seq_parallel(fastmath=fastmath, usenifft=usenifft, errors=errors)
+
+                if not silent:
+                    with ProgressBar():
+                        computed = dask.compute(*self.found_centers.values())
+
+                else:
+                    computed = dask.compute(*self.found_centers.values())
+
+                cleaned_delays = [
+                    k for i, k in enumerate(self.found_centers.keys()) if computed[i] is not None
+                ]
+                delay = np.fromiter(cleaned_delays, dtype=float)
+
+                omega = np.fromiter([c for c in computed if c is not None], dtype=float)
+
+                if not silent:
+                    print(f"Errors found: {len(self.window_seq) - sum(1 for _ in filter(None.__ne__, computed))}")
+
+        else:
+            self.fastmath = fastmath
+            self._apply_window_sequence(silent=silent, fastmath=fastmath, usenifft=usenifft)
+            self._clean_centers()
+
+            delay = np.fromiter(self.found_centers.keys(), dtype=float)
+            omega = np.fromiter(self.found_centers.values(), dtype=float)
+
         self.GD = Phase(delay, omega, GD_mode=True)
         return self.GD
 
@@ -465,7 +522,7 @@ class WFTMethod(FFTMethod):
             self, silent=False, fastmath=True, usenifft=False, errors="ignore"
     ):
         winlen = len(self.window_seq)
-
+        self.errorcounter = 0
         if not fastmath:
             # here we setup the shape for the Z array because
             # it is much faster than using np.append in every iteration
@@ -473,6 +530,7 @@ class WFTMethod(FFTMethod):
             _obj = FFTMethod(_x, _y)
             _obj.ifft(usenifft=usenifft)
             x, y = find_roi(_obj.x, _obj.y)
+            self.Y_cont = np.array(x)
             yshape = y.size
             xshape = len(self.window_seq)
             self.Z_cont = np.empty(shape=(yshape, xshape))
@@ -484,22 +542,63 @@ class WFTMethod(FFTMethod):
             _obj.ifft(usenifft=usenifft)
             x, y = find_roi(_obj.x, _obj.y)
             if not fastmath:
-                if self.Y_cont.size == 0:  # prevent allocating it in every iteration
-                    self.Y_cont = np.array(x)
                 self.Z_cont[:, idx] = y
             try:
                 centx, _ = find_center(x, y)
                 self.found_centers[_center] = centx
             except ValueError as err:
+                self.errorcounter += 1
                 if errors == "ignore":
                     self.found_centers[_center] = None
                 else:
                     raise err
-            if not silent:
+            if not silent:  # FIXME : This creates about 5-15% overhead..
                 sys.stdout.write('\r')
                 j = (idx + 1) / winlen
-                sys.stdout.write("Progress : [%-30s] %d%%" % ('=' * int(30 * j), 100 * j))
+                sys.stdout.write(
+                    "Progress : [%-30s] %d%% (Errors: %d)" % ('=' * int(30 * j), 100 * j, self.errorcounter)
+                )
                 sys.stdout.flush()
+
+    def _apply_window_seq_parallel(
+            self, fastmath=True, usenifft=False, errors="ignore"
+    ):
+        self.errorcounter = 0
+        if not fastmath:
+            # here we setup the shape for the Z array and allocate Y, because
+            # it is much faster than using np.append in every iteration
+            _x, _y, _, _ = self._safe_cast()
+            _obj = FFTMethod(_x, _y)
+            _obj.ifft(usenifft=usenifft)
+            x, y = find_roi(_obj.x, _obj.y)
+            yshape = y.size
+            self.Y_cont = np.array(x)
+            xshape = len(self.window_seq)
+            self.Z_cont = np.empty(shape=(yshape, xshape))
+
+        for idx, (_center, _window) in enumerate(self.window_seq.items()):
+            element = self._prepare_element(idx, _window, fastmath, usenifft, errors)
+            if element is None:
+                self.errorcounter += 1  # This might be useless, since we lazy evaluate things..
+            self.found_centers[_center] = element
+
+    @delayed
+    def _prepare_element(self, idx, window, fastmath=True, usenifft=False, errors="ignore"):
+        _x, _y, _, _ = self._safe_cast()
+        _obj = FFTMethod(_x, _y)
+        _obj.y *= window.y
+        _obj.ifft(usenifft=usenifft)
+        x, y = find_roi(_obj.x, _obj.y)
+        if not fastmath:
+            self.Z_cont[:, idx] = y
+        try:
+            centx, _ = find_center(x, y)
+            return centx
+        except ValueError as err:
+            if errors == "ignore":
+                return None
+            else:
+                raise err
 
     def _clean_centers(self, silent=False):
         dct = {k: v for k, v in self.found_centers.items() if v is not None}
@@ -550,25 +649,6 @@ class WFTMethod(FFTMethod):
         Return the fitting errors as np.ndarray.
         """
         return getattr(self.GD, "errors", None)
-
-    # TODO : Integrate this into _apply_window_sequence and add matplotlib dispatcher
-    def _prepare_element(self, center):
-        if center not in self.window_seq.keys():
-            raise ValueError(
-                f"Window with center {center} cannot be found."
-            )
-        _x, _y, _, _ = self._safe_cast()
-        _obj = FFTMethod(_x, _y)
-        _obj.y *= self.window_seq[center].y
-        _obj.ifft()
-        x, y = find_roi(_obj.x, _obj.y)
-        try:
-            xx, yy = find_center(x, y)
-            _obj.plt.plot(xx, yy, markersize=10, marker="*")
-        except ValueError:
-            pass
-        _obj.plot()
-        _obj.show()
 
     def _collect_failures(self):
         return [k for k in self.window_seq.keys() if k not in self.found_centers.keys()]

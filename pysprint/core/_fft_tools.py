@@ -143,7 +143,7 @@ def _run(
         ifg, skip_domain_check=False, show_graph=True, usenifft=False,
 ):
     print("Interferogram received.")
-    if ifg.probably_wavelength is True and not skip_domain_check:
+    if ifg.probably_wavelength and not skip_domain_check:
         print(
             "Probably in wavelength domain, changing to frequency...",
             end="",

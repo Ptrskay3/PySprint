@@ -35,7 +35,7 @@ setup(
         "Topic :: Scientific/Engineering :: Physics",
     ],
     install_requires=["numpy>=1.16.6", "scipy", "matplotlib", "pandas", "Jinja2"],
-    extras_require={"optional": ["numba", "lmfit", "pytest"]},
+    extras_require={"optional": ["numba", "lmfit", "pytest", "dask"]},
     entry_points={
         'console_scripts': [
             'pysprint = pysprint.templates.build:main',
