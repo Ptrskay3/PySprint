@@ -6,7 +6,7 @@ mkdir ~/conda-bld
 conda config --set anaconda_upload no
 conda config --set ssl_verify no
 export CONDA_BLD_PATH=~/conda-bld
-conda build . --python=$TRAVIS_PYTHON_VERSION
+conda build . --python=3.8
 
 find $CONDA_BLD_PATH/ -name *.tar.bz2 | while read file
 do

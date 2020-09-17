@@ -98,9 +98,3 @@ def test_basic_parallel():
     np.testing.assert_array_almost_equal(
         d, [3000.19527, 399.94162, 3998.03069, 3991.45663, 49894.96710], decimal=5
     )
-
-
-
-
-
-
