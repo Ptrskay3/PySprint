@@ -7,7 +7,7 @@ services:
 language: python
 
 python:
-  - 3.8
+  - 3.7
 
 addons:
   apt:
@@ -28,9 +28,8 @@ before_install:
   - conda info -a
 
 install:
-  - conda env create -f environment.yml python==$TRAVIS_PYTHON_VERSION
+  - conda env create -f environment.yml
   - activate pysprint-dev
-  - conda install flake8 codecov pytest coverage
   - conda install conda-build anaconda-client
   - python setup.py install
 
