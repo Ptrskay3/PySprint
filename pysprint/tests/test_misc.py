@@ -1,4 +1,5 @@
 import unittest
+import importlib
 
 import pytest
 import numpy as np
@@ -11,6 +12,13 @@ from pysprint.utils import (
     find_nearest,
     measurement,
 )
+
+
+try:
+    importlib.import_module("IPython")
+    SKIP_PPRINT = True
+except ModuleNotFoundError:
+    SKIP_PPRINT = False
 
 
 class TestMisc(unittest.TestCase):
@@ -45,7 +53,9 @@ class TestMisc(unittest.TestCase):
         with self.assertRaises(ValueError):
             _handle_input([], self.y, [], [])
 
-    @pytest.mark.skip(reason="IPython.display treats this another way")
+    @pytest.mark.skipif(
+        SKIP_PPRINT, reason="IPython.display treats this another way"
+    )
     def test_pprint(self):
         """source : https://stackoverflow.com/a/4220278/11751294"""
         import sys

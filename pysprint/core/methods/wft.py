@@ -18,9 +18,8 @@ from pysprint.utils import PySprintWarning
 from pysprint.utils.misc import find_nearest
 
 try:
-    from dask import delayed
+    from dask import delayed, compute
     from dask.diagnostics import ProgressBar
-    import dask
     CAN_PARALLELIZE = True
 except ImportError:
     CAN_PARALLELIZE = False
@@ -500,10 +499,10 @@ class WFTMethod(FFTMethod):
 
                 if not silent:
                     with ProgressBar():
-                        computed = dask.compute(*self.found_centers.values())
+                        computed = compute(*self.found_centers.values())
 
                 else:
-                    computed = dask.compute(*self.found_centers.values())
+                    computed = compute(*self.found_centers.values())
 
                 cleaned_delays = [
                     k for i, k in enumerate(self.found_centers.keys()) if computed[i] is not None

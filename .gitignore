@@ -10,6 +10,7 @@ core/__pycache__/
 mightneed/
 .idea/*
 doc/.ipynb_checkpoints/*
+venv/
 
 # C extensions
 *.so
