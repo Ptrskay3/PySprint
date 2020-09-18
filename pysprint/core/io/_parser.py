@@ -56,6 +56,8 @@ def _parse_metadata(filename, ref=None, sam=None, meta_len=1, encoding='utf-8'):
             if len(el) == 2:
                 _meta[el[0]] = el[1]
             else:
+                # _meta.setdefault("unparsed", []).append(el)
+                # should do the trick here
                 if "unparsed" not in _meta:
                     _meta["unparsed"] = []
                 _meta["unparsed"].append(el)
@@ -89,7 +91,7 @@ def _parse_raw(
         keep_default_na=False,
         meta_len=1
 ):
-    if len([_ for _ in (ref, sam) if _ is not None]) == 1:
+    if len([x for x in (ref, sam) if x is not None]) == 1:
         warnings.warn(
             "Reference and sample arm should be passed together or neither one.",
             PySprintWarning

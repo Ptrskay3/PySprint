@@ -118,7 +118,6 @@ class EditPeak(object):
     def press(self):
         """Usual function to connect matplotlib.."""
         self.cid = self.figure.canvas.mpl_connect("key_press_event", self.on_clicked)
-        # FIXME : Maybe this is key press event?
 
     def release(self):
         """ On release functionality. It's never called but we will

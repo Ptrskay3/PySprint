@@ -66,14 +66,11 @@ class Window:
 
         Parameters
         ----------
-
         ax : matplotlib.axes.Axes, optional
             The axis to plot on. If not given, plot on the last axis.
-
         scalefactor : float, optional
             Number describing how much a given window should be scaled up ONLY
             for visibility.
-
         zorder : float, optional
             The drawing order of artists is determined by their zorder attribute, which is
             a floating point number. Artists with higher zorder are drawn on top. You can
@@ -562,7 +559,7 @@ class WFTMethod(FFTMethod):
                     self.found_centers[_center] = None
                 else:
                     raise err
-            if not silent:  # FIXME : This creates about 5-15% overhead..
+            if not silent:  # This creates about 5-15% overhead..
                 sys.stdout.write('\r')
                 j = (idx + 1) / winlen
                 sys.stdout.write(

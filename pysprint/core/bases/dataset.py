@@ -98,7 +98,7 @@ class Dataset(metaclass=_DatasetBase):
 
         Notes
         -----
-        The other constructor `parse_raw` is used to load in data by files.
+        To load in data by files, see the other constructor `parse_raw`.
         """
         super().__init__()
 

@@ -77,7 +77,6 @@ class Generator(metaclass=_DatasetBase):
             else:
                 self.generate_wave()
 
-    # TODO: Maybe intelligently decide the domain in a new function
     def generate_freq(self):
         """
         Use this to generate the spectrogram in ang. frequency domain.

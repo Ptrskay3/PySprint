@@ -1,4 +1,3 @@
-# TODO: Add consistent exceptions, priority: high
 __all__ = [
     "PySprintWarning",
     "DatasetError",
