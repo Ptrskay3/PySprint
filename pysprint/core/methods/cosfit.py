@@ -5,7 +5,9 @@ import numpy as np
 from pysprint.core.bases.dataset import Dataset
 from pysprint.core._optimizer import FitOptimizer
 from pysprint.core._evaluate import cff_method
-
+from pysprint.utils import pprint_math_or_default
+from pysprint.utils import NotCalculatedException
+from pysprint.utils import pad_with_trailing_zeros
 
 __all__ = ["CosFitMethod"]
 
@@ -21,6 +23,7 @@ class CosFitMethod(Dataset):
         self.fit = None
         self.mt = 8000
         self.f = None
+        self.r_squared = None
 
     def set_max_tries(self, value):
         """
@@ -134,14 +137,25 @@ class CosFitMethod(Dataset):
             p0=self.params,
             maxtries=self.mt,
         )
-        dispersion = list(dispersion)
-        while len(dispersion) < 6:
-            dispersion.append(0)
+
+        self.r_squared = self._get_r_squared()
+        pprint_math_or_default(f"R^2 = {self.r_squared}\n")
+        dispersion = pad_with_trailing_zeros(dispersion, 6)
         return (
             dispersion,
             [0, 0, 0, 0, 0, 0],
             "",
         )
+
+    def _get_r_squared(self):
+        if self.fit is None:
+            raise NotCalculatedException(
+                "Must fit a curve before requesting r squared."
+            )
+        residuals = self.y_norm - self.fit
+        ss_res = np.sum(residuals ** 2)
+        ss_tot = np.sum((self.y_norm - np.mean(self.y_norm)) ** 2)
+        return 1 - (ss_res / ss_tot)
 
     def plot_result(self):
         """
@@ -150,12 +164,10 @@ class CosFitMethod(Dataset):
         fit (a.k.a. r^2).
         """
         try:
-            residuals = self.y_norm - self.fit
-            ss_res = np.sum(residuals ** 2)
-            ss_tot = np.sum((self.y_norm - np.mean(self.y_norm)) ** 2)
-            print("r^2 = " + str(1 - (ss_res / ss_tot)))
-        except Exception:  # TODO: handle that blank exception
-            pass
+            self._get_r_squared()
+            pprint_math_or_default(f"R^2 = {self.r_squared}")
+        except NotCalculatedException as e:
+            raise ValueError("There's nothing to plot.") from e
         if self.fit is not None:
             self.plt.plot(self.x, self.fit, "k--", label="fit", zorder=99)
             self.plt.legend()

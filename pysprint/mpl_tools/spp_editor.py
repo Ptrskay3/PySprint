@@ -38,7 +38,14 @@ class SPPEditor:
         self.text_box.on_submit(self.submit)
         self.text_box.on_text_change(self.text_change)
 
+    def _show(self):
         plt.show(block=True)
+
+    def _get_textbox(self):
+        return self.text_box
+
+    def _get_ax(self):
+        return self.ax
 
     def submit(self, delay):
         try:
@@ -58,7 +65,8 @@ class SPPEditor:
         positions, _ = self.points.get_data()
         if not hasattr(self, "delay"):
             self.delay = 0
-        self.delay = np.ones_like(positions) * self.delay
+        if positions.size != 0:
+            self.delay = np.ones_like(positions) * self.delay
         return self.delay, positions
 
     def button_release_callback(self, event):

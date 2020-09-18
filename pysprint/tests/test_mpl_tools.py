@@ -114,7 +114,6 @@ def test_normalize_btn_release(mock_show):
     assert obj._ind is None
     y_transform = obj.get_data()
     np.testing.assert_allclose(y_transform[100:9900], np.ones(9800), atol=1, rtol=1)
-    mock_show.assert_called()
 
 
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
@@ -125,7 +124,6 @@ def test_normalize_keypress_cb(mock_show):
     obj = DraggableEnvelope(x, y, mode="u")
     mck = mock_event(xdata=50, ydata=50, button="d", key="d", fig=obj.fig, canvas=obj.fig.canvas, inaxes=True)
     obj.key_press_callback(event=mck)
-    mock_show.assert_called()
 
 
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
@@ -230,7 +228,6 @@ def test_sppeditor_btn_release(mock_show):
     mck = mock_event(xdata=50, ydata=50, button=1, key=1, fig=obj.fig, canvas=obj.fig.canvas, inaxes=None)
     obj.button_release_callback(event=mck)
     assert obj._ind is None
-    mock_show.assert_called()
 
 
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
@@ -243,7 +240,6 @@ def test_sppeditor_get_ind(mock_show):
     obj.y_pos = np.array([1, 2])
     mck = mock_event(xdata=1.5, ydata=1.3, button=1, key=1, fig=obj.fig, canvas=obj.fig.canvas, inaxes=obj.ax)
     obj.get_ind_under_point(event=mck)
-    mock_show.assert_called()
 
 
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
@@ -258,7 +254,6 @@ def test_sppeditor_keypress_cb(mock_show):
     obj.key_press_callback(event=mck)
     np.testing.assert_array_equal(obj.x_pos, np.array([1, 2, 2]))
     np.testing.assert_array_equal(obj.y_pos, np.array([1, 2, 0]))
-    mock_show.assert_called()
 
 
 @pytest.mark.skip(reason="Index can't be set..")

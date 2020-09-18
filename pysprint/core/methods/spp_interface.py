@@ -1,16 +1,22 @@
 import os
+import warnings
 from functools import lru_cache
 from itertools import zip_longest
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.cbook as cbook
 
 from pysprint.core.bases.dataset import Dataset
 from pysprint.core.bases._dataset_base import _DatasetBase
 from pysprint.core._evaluate import spp_method
-from pysprint.utils.exceptions import DatasetError
+from pysprint.utils.exceptions import DatasetError, PySprintWarning
 
 __all__ = ["SPPMethod"]
+
+# to suppress MatplotlibDeprecationWarning: Toggling axes navigation from
+# the keyboard is deprecated since 3.3 and will be removed two minor releases later.
+warnings.filterwarnings("ignore", category=cbook.mplDeprecation)
 
 
 def defaultcallback(broadcaster, listener=None):
@@ -41,7 +47,9 @@ class SPPMethod(metaclass=_DatasetBase):
         """
         if errors not in ("raise", "ignore"):
             raise ValueError("errors must be `raise` or `ignore`.")
+
         self.ifg_names = ifg_names
+
         if sam_names:
             self.sam_names = sam_names
         else:
@@ -50,22 +58,52 @@ class SPPMethod(metaclass=_DatasetBase):
             self.ref_names = ref_names
         else:
             self.ref_names = None
+
         if errors == "raise":
             self._validate()
             if self.sam_names:
                 if not len(self.ifg_names) == len(self.sam_names):
-                    raise DatasetError("Missmatching length of files.")
+                    raise DatasetError(
+                        "Missmatching length of files. Use None if a file is missing."
+                    )
             if self.ref_names:
                 if not len(self.ifg_names) == len(self.ref_names):
-                    raise DatasetError("Missmatching length of files.")
-        self.skiprows = kwargs.pop("skiprows", 8)
+                    raise DatasetError(
+                        "Missmatching length of files. Use None if a file is missing."
+                    )
+
+        self.skiprows = kwargs.pop("skiprows", 0)
         self.decimal = kwargs.pop("decimal", ",")
         self.sep = kwargs.pop("sep", ";")
-        self.meta_len = kwargs.pop("meta_len", 4)
+        self.meta_len = kwargs.pop("meta_len", 1)
         self.cb = kwargs.pop("callback", defaultcallback)
+        self.delimiter = kwargs.pop("delimiter", None)
+        self.comment = kwargs.pop("comment", None)
+        self.usecols = kwargs.pop("usecols", None)
+        self.names = kwargs.pop("names", None)
+        self.swapaxes = kwargs.pop("swapaxes", False)
+        self.na_values = kwargs.pop("na_values", None)
+        self.skip_blank_lines = kwargs.pop("skip_blank_lines", True)
+        self.keep_default_na = kwargs.pop("keep_default_na", False)
 
         if kwargs:
             raise TypeError(f"invalid keyword argument:{kwargs}")
+
+        self.load_dict = {
+            "skiprows": self.skiprows,
+            "decimal": self.decimal,
+            "sep": self.sep,
+            "meta_len": self.meta_len,
+            "callback": self.cb,
+            "delimiter": self.delimiter,
+            "comment": self.comment,
+            "usecols": self.usecols,
+            "names": self.names,
+            "swapaxes": self.swapaxes,
+            "na_values": self.na_values,
+            "skip_blank_lines": self.skip_blank_lines,
+            "keep_default_na": self.keep_default_na
+        }
 
         self._delay = {}
         self._positions = {}
@@ -169,7 +207,7 @@ class SPPMethod(metaclass=_DatasetBase):
         return f"{type(self).__name__}\nInterferogram count : {len(self)}"
 
     # Maybe we don't even need this.. __getitem__ seems enough
-    def __iter__(self):  # TODO : better integration with getitem
+    def __iter__(self):
         try:
             for i, j, k in zip_longest(
                     self.ifg_names, self.sam_names, self.ref_names
@@ -178,11 +216,7 @@ class SPPMethod(metaclass=_DatasetBase):
                     i,
                     j,
                     k,
-                    skiprows=self.skiprows,
-                    decimal=self.decimal,
-                    sep=self.sep,
-                    meta_len=self.meta_len,
-                    callback=self.cb,
+                    **self.load_dict,
                     parent=self
                 )
                 yield d
@@ -190,11 +224,7 @@ class SPPMethod(metaclass=_DatasetBase):
             for i in self.ifg_names:
                 d = Dataset.parse_raw(
                     i,
-                    skiprows=self.skiprows,
-                    decimal=self.decimal,
-                    sep=self.sep,
-                    meta_len=self.meta_len,
-                    callback=self.cb,
+                    **self.load_dict,
                     parent=self
                 )
                 yield d
@@ -206,21 +236,13 @@ class SPPMethod(metaclass=_DatasetBase):
                 self.ifg_names[key],
                 self.sam_names[key],
                 self.ref_names[key],
-                skiprows=self.skiprows,
-                decimal=self.decimal,
-                sep=self.sep,
-                meta_len=self.meta_len,
-                callback=self.cb,
+                **self.load_dict,
                 parent=None  # a single indexing should not affect this object
             )
         except (TypeError, ValueError):
             dataframe = Dataset.parse_raw(
                 self.ifg_names[key],
-                skiprows=self.skiprows,
-                decimal=self.decimal,
-                sep=self.sep,
-                meta_len=self.meta_len,
-                callback=self.cb,
+                **self.load_dict,
                 parent=None
             )
         return dataframe
@@ -243,8 +265,24 @@ class SPPMethod(metaclass=_DatasetBase):
         Function which records SPP data when received.
         """
         currlen = len(self._delay)
+        # TODO : Empty results are broadcasted twice..
+        # It doesn't make any difference, but we'd still
+        # better correct it.
+
+        # if currlen + 1 > len(self.ifg_names):
+        #     warnings.warn(
+        #         "Overwriting previous values, use `reset_records` to flush the last used values.",
+        #         PySprintWarning
+        #     )
         self._delay[currlen] = delay
         self._positions[currlen] = position
+
+    def reset_records(self):
+        """
+        Reset the state of recorded delays and positions.
+        """
+        self._delay = {}
+        self._positions = {}
 
     def save_data(self, filename):
         """

@@ -16,8 +16,20 @@ __all__ = [
     "measurement",
     "_maybe_increase_before_cwt",
     "pad_with_trailing_zeros",
-
+    "pprint_math_or_default",
 ]
+
+
+def pprint_math_or_default(s):
+    try:
+        from IPython.display import display, Math
+        display(
+            Math(
+                s
+            )
+        )
+    except ImportError:
+        print(s)
 
 
 def _maybe_increase_before_cwt(y, tolerance=0.05):
@@ -51,7 +63,7 @@ def run_from_ipython():
     Detect if code is run inside Jupyter or maybe Spyder.
     """
     try:
-        __IPYTHON__ # noqa
+        __IPYTHON__  # noqa
         if any("SPYDER" in name for name in os.environ):
             return False
         return True
@@ -91,7 +103,7 @@ def _unpack_lmfit(r):
     return dispersion, dispersion_std
 
 
-def measurement(array, confidence=0.95, silent=False):
+def measurement(array, confidence=0.95, precision=5, silent=False):
     """
     Give the measurement results with condifence interval
     assuming the standard deviation is unknown.
@@ -138,7 +150,9 @@ def measurement(array, confidence=0.95, silent=False):
     mean = np.mean(array)
     conf = st.t.interval(confidence, len(array) - 1, loc=mean, scale=st.sem(array))
     if not silent:
-        print(f"{mean:5f} ± {(mean - conf[0]):5f}")
+        pprint_math_or_default(
+            f"{mean:.{precision}f} ± {(mean - conf[0]):.{precision}f}"
+        )
     return mean, conf
 
 
@@ -218,4 +232,6 @@ def pad_with_trailing_zeros(array, shape):
     Pad an array with trailing zeros to be the desired shape
     """
     c = shape - len(array)
+    if c < 1:
+        return np.asarray(array)
     return np.pad(array, pad_width=(0, c), mode="constant")

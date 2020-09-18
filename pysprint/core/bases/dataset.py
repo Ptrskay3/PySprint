@@ -27,6 +27,7 @@ from pysprint.core.io._parser import _parse_raw
 from pysprint.mpl_tools.spp_editor import SPPEditor
 from pysprint.mpl_tools.normalize import DraggableEnvelope
 from pysprint.utils import MetaData, find_nearest
+from pysprint.utils import pprint_math_or_default
 from pysprint.utils.decorators import inplacify
 from pysprint.core._preprocess import (
     savgol,
@@ -475,7 +476,7 @@ class Dataset(metaclass=_DatasetBase):
             self.params[3] = (lowguess + highguess) / 2
 
         if not silent:
-            print(
+            pprint_math_or_default(
                 f"The predicted GD is ± {((lowguess + highguess) / 2):.5f} fs"
                 f" based on reference point of {reference_point}."
             )
@@ -689,8 +690,8 @@ class Dataset(metaclass=_DatasetBase):
             pprint_delay = "-"
         _unit = self._render_unit(self.unit)
         t = f"""
-        <div id="header" style="height:10%;width:100%;">
-        <div style='float:left'>
+        <div id="header" class="row" style="height:10%;width:100%;">
+        <div style='float:left' class="column">
         <table style="border:1px solid black;float:top;">
         <tbody>
         <tr>
@@ -747,7 +748,7 @@ class Dataset(metaclass=_DatasetBase):
             </tbody>
         </table>
         </div>
-        <div style='float:leftt'>""")
+        <div style='float:leftt' class="column">""")
         rendered_fig = self._render_html_plot()
         return t + jjstring.render(meta=self.meta) + rendered_fig
 
@@ -1174,6 +1175,18 @@ class Dataset(metaclass=_DatasetBase):
         else:
             info = None
         _spp = SPPEditor(self.x, self.y_norm, info=info)
+
+        # Currently we only allow the delay to be shown,
+        # positions are harder to make, but definitely
+        # can be solved.
+        if self.delay is not None:
+            textbox = _spp._get_textbox()
+            if isinstance(self.delay, np.ndarray):
+                pprint = self.delay.flat[0]
+            else:
+                pprint = self.delay
+            textbox.set_val(pprint)
+        _spp._show()
         self.delay, self.positions = _spp.get_data()
 
     def emit(self):

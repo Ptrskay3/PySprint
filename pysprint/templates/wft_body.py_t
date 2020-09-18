@@ -22,7 +22,7 @@
 # ifg.remove_window_interval(start, stop)
 
 ## Calculate immediately
-# ifg.calculate(reference_point, order, fastmath=False)
+# ifg.calculate(reference_point, order, fastmath=False, parallel=False)
 
 ## Plot the heatmap
 # ifg.heatmap()
@@ -30,7 +30,7 @@
 # OR
 
 # Build only the GD
-# GD_curve = ifg.build_GD(fastmath=False)
+# GD_curve = ifg.build_GD(fastmath=False, parallel=False)
 
 ## Preprocess the GD optionally
 # GD_curve.slice(start, stop)
