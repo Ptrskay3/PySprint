@@ -2,7 +2,7 @@ name: pysprint-dev
 channels:
   - conda-forge
 dependencies:
-  # required
+  # required and optionals
   - python=3.8
   - numpy>=1.15,<1.19.0
   - python=3
@@ -12,11 +12,13 @@ dependencies:
   - numba>=0.46.0
   - lmfit
   - Jinja2
+  - dask
 
   # docs
   - sphinx
   - nbsphinx
   - recommonmark
+  - sphinx_rtd_theme
 
   # Strictly speaking this is not neseccary, but better safe than sorry
   - cython>=0.29.16

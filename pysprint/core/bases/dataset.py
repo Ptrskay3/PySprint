@@ -192,6 +192,16 @@ class Dataset(metaclass=_DatasetBase):
         self._delay = None
         self._positions = None
 
+        # TODO : A nice way to include this
+        # nanwarning = np.isnan(self.y_norm).sum()
+        # infwarning = np.isinf(self.y_norm).sum()
+        #
+        # warnings.warn(
+        #     ("Extreme values found during normalization.\n"
+        #     f"Nan values: {nanwarning}\nInf values: {infwarning}"),
+        #     PySprintWarning
+        # )
+
         self._dispersion_array = None
 
     @inplacify
@@ -476,7 +486,7 @@ class Dataset(metaclass=_DatasetBase):
             self.params[3] = (lowguess + highguess) / 2
 
         if not silent:
-            pprint_math_or_default(
+            print(
                 f"The predicted GD is ± {((lowguess + highguess) / 2):.5f} fs"
                 f" based on reference point of {reference_point}."
             )
