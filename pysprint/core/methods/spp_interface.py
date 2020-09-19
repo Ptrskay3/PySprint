@@ -14,9 +14,7 @@ from pysprint.utils.exceptions import DatasetError, PySprintWarning
 
 __all__ = ["SPPMethod"]
 
-# to suppress MatplotlibDeprecationWarning: Toggling axes navigation from
-# the keyboard is deprecated since 3.3 and will be removed two minor releases later.
-warnings.filterwarnings("ignore", category=cbook.mplDeprecation)
+warnings.simplefilter("ignore", category=cbook.MatplotlibDeprecationWarning)
 
 
 def defaultcallback(broadcaster, listener=None):
