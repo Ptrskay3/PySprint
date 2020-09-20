@@ -1,6 +1,3 @@
-"""
-Experimental
-"""
 import re
 
 import numpy as np
@@ -12,7 +9,7 @@ class SPPEditor:
 
     epsilon = 7  # max absolute pixel distance to count as a hit
 
-    def __init__(self, x, y, info=None):
+    def __init__(self, x, y, info=None, x_pos=None, y_pos=None):
         plt.ion()
         self.fig, self.ax = plt.subplots()
         if info is not None:
@@ -26,17 +23,27 @@ class SPPEditor:
         self.x = x
         self.y = y
         self._ind = None  # the active point index
-        self.x_pos, self.y_pos = np.array([]), np.array([])
         (self.basedata,) = self.ax.plot(self.x, self.y)
-        (self.points,) = self.ax.plot(self.x_pos, self.y_pos, "ko")
-        self.fig.canvas.mpl_connect("key_press_event", self.key_press_callback)
+        if (x_pos is None) or (y_pos is None):
+            x_pos = []
+            y_pos = []
+        self._setup_positions(x_pos, y_pos)
+        self.fig.canvas.mpl_connect(
+            "key_press_event", self.key_press_callback
+        )
         self.fig.canvas.mpl_connect(
             "button_release_event", self.button_release_callback
         )
         self.axbox = plt.axes([0.1, 0.05, 0.8, 0.1])
-        self.text_box = TextBox(self.axbox, "Delay [fs]", initial="0")
+        self.text_box = TextBox(
+            self.axbox, "Delay [fs]", initial="", color="silver", hovercolor="whitesmoke"
+        )
         self.text_box.on_submit(self.submit)
         self.text_box.on_text_change(self.text_change)
+
+    def _setup_positions(self, x_pos, y_pos):
+        self.x_pos, self.y_pos = x_pos, y_pos
+        (self.points,) = self.ax.plot(self.x_pos, self.y_pos, "ko")
 
     def _show(self):
         plt.show(block=True)
@@ -52,19 +59,20 @@ class SPPEditor:
             delay = re.sub(r"[^0-9\.,\-]", "", delay)
             self.delay = float(delay)
         except ValueError:
-            pass  # we ignore bad calls
+            pass
 
     def text_change(self, delay):
         try:
             delay = re.sub(r"[^0-9\.,\-]", "", delay)
             self.delay = float(delay)
         except ValueError:
-            pass  # we ignore bad calls
+            pass
 
+    # TODO: Config should decide how to treat missing values.
     def get_data(self):
         positions, _ = self.points.get_data()
         if not hasattr(self, "delay"):
-            self.delay = 0
+            return np.array([]), np.array([])
         if positions.size != 0:
             self.delay = np.ones_like(positions) * self.delay
         return self.delay, positions

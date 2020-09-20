@@ -27,7 +27,6 @@ from pysprint.core.io._parser import _parse_raw
 from pysprint.mpl_tools.spp_editor import SPPEditor
 from pysprint.mpl_tools.normalize import DraggableEnvelope
 from pysprint.utils import MetaData, find_nearest
-from pysprint.utils import pprint_math_or_default
 from pysprint.utils.decorators import inplacify
 from pysprint.core._preprocess import (
     savgol,
@@ -659,14 +658,6 @@ class Dataset(metaclass=_DatasetBase):
         return cls(**parsed, errors=errors, callback=callback, parent=parent)
 
     def __str__(self):
-        if isinstance(self._delay, np.ndarray):
-            pprint_delay = self._delay.flat[0]
-        elif isinstance(self._delay, Iterable):
-            pprint_delay = next((_ for _ in self._delay), None)
-        elif isinstance(self._delay, numbers.Number):
-            pprint_delay = self._delay
-        else:
-            pprint_delay = "-"
         _unit = self._render_unit(self.unit)
         string = dedent(
             f"""
@@ -678,8 +669,8 @@ class Dataset(metaclass=_DatasetBase):
         Predicted domain: {'wavelength' if self.probably_wavelength else 'frequency'}
         Range: from {np.min(self.x):.3f} to {np.max(self.x):.3f} {_unit}
         Normalized: {self._is_normalized}
-        Delay value: {(str(pprint_delay) + ' fs') if self._delay is not None else 'Not given'}
-        SPP position(s): {str(self._positions) + ' PHz' if np.all(self._positions) else 'Not given'}
+        Delay value: {str(self._format_delay()) + ' fs' if self._delay is not None else 'Not given'}
+        SPP position(s): {str(self._format_positions()) + ' PHz' if np.all(self._positions) else 'Not given'}
         ----------------------------
         Metadata extracted from file
         ----------------------------
@@ -736,11 +727,11 @@ class Dataset(metaclass=_DatasetBase):
         </tr>
         <tr>
         <td style="text-align:center"><b>Delay value</b></td>
-        <td style="text-align:center">{(str(pprint_delay) + ' fs') if self._delay is not None else 'Not given'}</td>
+        <td style="text-align:center">{str(self._format_delay()) + ' fs' if self._delay is not None else 'Not given'}</td>
         </tr>
         <tr>
         <td style="text-align:center"><b>SPP position(s)</b></td>
-        <td style="text-align:center">{str(self._positions) + ' PHz' if np.all(self._positions) else 'Not given'}</td>
+        <td style="text-align:center">{str(self._format_positions()) + ' PHz' if np.all(self._positions) else 'Not given'}</td>
         </tr>
         <tr>
         <td colspan=2 style="text-align:center">
@@ -1055,6 +1046,64 @@ class Dataset(metaclass=_DatasetBase):
                     except (ValueError, TypeError):
                         ax.plot(x_closest, self.y[idx], **kwargs)
 
+    def _format_delay(self):
+        if self.delay is None:
+            return ""  # FIXME : Not sure yet how to treat this case.
+        if isinstance(self.delay, np.ndarray):
+            if self.delay.size == 0:
+                return 0
+            delay = np.atleast_1d(self.delay).flatten()
+            return delay[0]
+        elif isinstance(self.delay, (list, tuple)):
+            return self.delay[0]
+        elif isinstance(self.delay, numbers.Number):
+            return self.delay
+        elif isinstance(self.delay, str):
+            try:
+                delay = float(self.delay)
+            except ValueError as e:
+                raise TypeError("Delay value not understood.") from e
+            return delay
+        else:
+            raise TypeError("Delay value not understood.")
+
+    def _format_positions(self):
+        if self.positions is None:
+            return "Not given"  # FIXME : Not sure yet how to treat this case.
+        if isinstance(self.positions, np.ndarray):
+            positions = np.atleast_1d(self.positions).flatten()
+            return ", ".join(map(str, positions))
+        elif isinstance(self.positions, (list, tuple)):
+            return ", ".join(map(str, self.positions))
+        elif isinstance(self.positions, numbers.Number):
+            return self.positions
+        elif isinstance(self.positions, str):
+            split = self.positions.split(",")
+            try:
+                positions = [float(p) for p in split]
+            except ValueError as e:
+                raise TypeError("Delay value not understood.") from e
+            return ", ".join(map(str, positions))
+        else:
+            raise TypeError("Delay value not understood.")
+
+    def _prepare_SPP_data(self):
+        pos_x, pos_y = [], []
+        if self.positions is not None:
+            position = np.array(self.positions, dtype=np.float64).flatten()
+            for i, val in enumerate(position):
+                if is_inside(position[i], self.x):
+                    x_closest, idx = find_nearest(self.x, position[i])
+                    try:
+                        pos_x.append(x_closest)
+                        pos_y.append(self.y_norm[idx])
+                    except (ValueError, TypeError):
+                        pos_x.append(x_closest)
+                        pos_y.append(self.y[idx])
+            pos_x = np.array(pos_x)
+            pos_y = np.array(pos_y)
+        return pos_x, pos_y
+
     def plot(self, ax=None, title=None, xlim=None, ylim=None, **kwargs):
         """
         Plot the dataset.
@@ -1078,6 +1127,7 @@ class Dataset(metaclass=_DatasetBase):
         If SPP positions are correctly set, it will mark them on plot.
         """
         datacolor = kwargs.pop("color", "red")
+        nospp = kwargs.pop("nospp", False)
         _unit = self._render_unit(self.unit, mpl=True)
         xlabel = f"$\lambda\,[{_unit}]$" if self.probably_wavelength else f"$\omega\,[{_unit}]$"
         overwrite = kwargs.pop("overwrite", None)
@@ -1111,7 +1161,8 @@ class Dataset(metaclass=_DatasetBase):
                 ax.plot(self.x, self.y_norm, color=datacolor, **kwargs)
             except (ValueError, TypeError):
                 ax.plot(self.x, self.y, color=datacolor, **kwargs)
-        self._plot_SPP_if_valid(ax=ax, color="black", marker="o", markersize=10, label="SPP")
+        if not nospp:
+            self._plot_SPP_if_valid(ax=ax, color="black", marker="o", markersize=10, label="SPP")
 
     def show(self):
         """
@@ -1184,20 +1235,20 @@ class Dataset(metaclass=_DatasetBase):
                 info = None
         else:
             info = None
-        _spp = SPPEditor(self.x, self.y_norm, info=info)
+        spp_x, spp_y = self._prepare_SPP_data()
+        _spp = SPPEditor(
+            self.x, self.y_norm, info=info, x_pos=np.array(spp_x), y_pos=np.array(spp_y)
+        )
 
-        # Currently we only allow the delay to be shown,
-        # positions are harder to make, but definitely
-        # can be solved.
-        if self.delay is not None:
-            textbox = _spp._get_textbox()
-            if isinstance(self.delay, np.ndarray):
-                pprint = self.delay.flat[0]
-            else:
-                pprint = self.delay
-            textbox.set_val(pprint)
+        textbox = _spp._get_textbox()
+        textbox.set_val(self._format_delay())
+
         _spp._show()
-        self.delay, self.positions = _spp.get_data()
+
+        # We need to split this into separate lines,
+        # because empty results are broadcasted twice.
+        delay, positions = _spp.get_data()
+        self.delay, self.positions = delay, positions
 
     def emit(self):
         """
@@ -1211,9 +1262,14 @@ class Dataset(metaclass=_DatasetBase):
         positions : np.ndarray
             The given SPP positions.
         """
-        if self.positions is None:
+        # TODO: We need to test for np.array([]) condition too.
+        if self.positions is None or (
+                isinstance(self.positions, np.ndarray) and self.positions.size == 0
+        ):
             raise ValueError("SPP positions are missing.")
-        if self.delay is None:
+        if self.delay is None or (
+                isinstance(self.delay, np.ndarray) and self.delay.size == 0
+        ):
             raise ValueError("Delay value is missing.")
         # validate if it's typed by hand..
         if not isinstance(self._positions, np.ndarray):

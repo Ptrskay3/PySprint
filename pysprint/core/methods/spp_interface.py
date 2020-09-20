@@ -1,7 +1,6 @@
 import os
 import warnings
 from functools import lru_cache
-from itertools import zip_longest
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,7 +9,7 @@ import matplotlib.cbook as cbook
 from pysprint.core.bases.dataset import Dataset
 from pysprint.core.bases._dataset_base import _DatasetBase
 from pysprint.core._evaluate import spp_method
-from pysprint.utils.exceptions import DatasetError, PySprintWarning
+from pysprint.utils.exceptions import DatasetError
 
 __all__ = ["SPPMethod"]
 
@@ -205,27 +204,27 @@ class SPPMethod(metaclass=_DatasetBase):
         return f"{type(self).__name__}\nInterferogram count : {len(self)}"
 
     # Maybe we don't even need this.. __getitem__ seems enough
-    def __iter__(self):
-        try:
-            for i, j, k in zip_longest(
-                    self.ifg_names, self.sam_names, self.ref_names
-            ):
-                d = Dataset.parse_raw(
-                    i,
-                    j,
-                    k,
-                    **self.load_dict,
-                    parent=self
-                )
-                yield d
-        except TypeError:
-            for i in self.ifg_names:
-                d = Dataset.parse_raw(
-                    i,
-                    **self.load_dict,
-                    parent=self
-                )
-                yield d
+    # def __iter__(self):
+    #     try:
+    #         for i, j, k in zip_longest(
+    #                 self.ifg_names, self.sam_names, self.ref_names
+    #         ):
+    #             d = Dataset.parse_raw(
+    #                 i,
+    #                 j,
+    #                 k,
+    #                 **self.load_dict,
+    #                 parent=self
+    #             )
+    #             yield d
+    #     except TypeError:
+    #         for i in self.ifg_names:
+    #             d = Dataset.parse_raw(
+    #                 i,
+    #                 **self.load_dict,
+    #                 parent=self
+    #             )
+    #             yield d
 
     @lru_cache()
     def __getitem__(self, key):
@@ -235,13 +234,13 @@ class SPPMethod(metaclass=_DatasetBase):
                 self.sam_names[key],
                 self.ref_names[key],
                 **self.load_dict,
-                parent=None  # a single indexing should not affect this object
+                parent=self
             )
         except (TypeError, ValueError):
             dataframe = Dataset.parse_raw(
                 self.ifg_names[key],
                 **self.load_dict,
-                parent=None
+                parent=self
             )
         return dataframe
 
@@ -263,7 +262,7 @@ class SPPMethod(metaclass=_DatasetBase):
         Function which records SPP data when received.
         """
         currlen = len(self._delay)
-        # TODO : Empty results are broadcasted twice..
+        # TODO : Empty results are broadcasted twice, still not sure why
         # It doesn't make any difference, but we'd still
         # better correct it.
 
@@ -275,12 +274,18 @@ class SPPMethod(metaclass=_DatasetBase):
         self._delay[currlen] = delay
         self._positions[currlen] = position
 
-    def reset_records(self):
+    def flush(self):
         """
-        Reset the state of recorded delays and positions.
+        Reset the state of recorded delays and positions, even on
+        active objects that have been constructed on the runtime.
         """
         self._delay = {}
         self._positions = {}
+        for ifg in self:
+            ifg._delay = None
+            ifg.delay = None
+            ifg._positions = None
+            ifg.positions = None
 
     def save_data(self, filename):
         """
