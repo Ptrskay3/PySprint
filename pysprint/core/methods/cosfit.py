@@ -2,6 +2,7 @@ from math import factorial
 
 import numpy as np
 
+from pysprint.config import _get_config_value
 from pysprint.core.bases.dataset import Dataset
 from pysprint.core._optimizer import FitOptimizer
 from pysprint.core._evaluate import cff_method
@@ -137,9 +138,9 @@ class CosFitMethod(Dataset):
             p0=self.params,
             maxtries=self.mt,
         )
-
+        precision = _get_config_value("precision")
         self.r_squared = self._get_r_squared()
-        pprint_math_or_default(f"R^2 = {self.r_squared}\n")
+        pprint_math_or_default(f"R^2 = {self.r_squared:.{precision}f}\n")
         dispersion = pad_with_trailing_zeros(dispersion, 6)
         return (
             dispersion,
@@ -163,9 +164,10 @@ class CosFitMethod(Dataset):
         dataset. Also prints the coeffitient of determination of the
         fit (a.k.a. r^2).
         """
+        precision = _get_config_value("precision")
         try:
             self._get_r_squared()
-            pprint_math_or_default(f"R^2 = {self.r_squared}")
+            pprint_math_or_default(f"R^2 = {self.r_squared:.{precision}f}")
         except NotCalculatedException as e:
             raise ValueError("There's nothing to plot.") from e
         if self.fit is not None:

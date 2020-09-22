@@ -3,6 +3,8 @@ import warnings
 import numpy as np
 from scipy.signal import find_peaks
 
+from pysprint.config import _get_config_value
+
 
 def signaltonoise(a, axis=0, ddof=0):
     """
@@ -142,6 +144,7 @@ def predict_fwhm(x, y, center, peak_center_height, prefer_high_order=True, tol=1
 def _run(
         ifg, skip_domain_check=False, show_graph=True, usenifft=False,
 ):
+    precision = _get_config_value("precision")
     print("Interferogram received.")
     if ifg.probably_wavelength and not skip_domain_check:
         print(
@@ -165,7 +168,7 @@ def _run(
     c, ws, _order = predict_fwhm(x, y, center=a, peak_center_height=b)
     print(
         f"A {_order} order gaussian window centered at "
-        f"{c:.2f} fs with FWHM {ws:.2f} fs was applied."
+        f"{c:.{precision}f} fs with FWHM {ws:.{precision}f} fs was applied."
     )
     ifg.window(at=c, fwhm=ws, window_order=_order, plot=show_graph)
     ifg.apply_window()

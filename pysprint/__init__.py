@@ -4,6 +4,7 @@ from contextlib import contextmanager
 import matplotlib  # noqa
 import matplotlib.pyplot as plt  # noqa
 
+import pysprint.core.init_config
 from pysprint.utils.misc import run_from_ipython
 
 warnings.filterwarnings("ignore", message="invalid value encountered in sqrt")
@@ -66,6 +67,6 @@ def set_interactive(backend=default_backend, figsize=(15, 5)):
     except (AttributeError, ImportError, ModuleNotFoundError) as err:
         raise ValueError(
             f"Couldn't set backend {backend}, you should manually "
-            "change to an appropriate GUI backend. (Matplotlib 3.3.1"
+            "change to an appropriate GUI backend. (Matplotlib 3.3.1 "
             "is broken. In that case use backend='TkAgg')."
         ) from err

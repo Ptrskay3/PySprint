@@ -8,6 +8,7 @@ from copy import copy
 
 import numpy as np
 
+from pysprint.config import _get_config_value
 from pysprint.utils.misc import run_from_ipython
 
 
@@ -144,6 +145,7 @@ def pprint_disp(f):
         labels = ("GD", "GDD", "TOD", "FOD", "QOD", "SOD")
         disp = np.trim_zeros(disp, "b")
         disp_std = disp_std[: len(disp)]
+        precision = _get_config_value("precision")
         for i, (label, disp_item, disp_std_item) in enumerate(
                 zip(labels, disp, disp_std)
         ):
@@ -151,10 +153,10 @@ def pprint_disp(f):
                 from IPython.display import display, Math # noqa
 
                 display(
-                    Math(f"{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i + 1}")
+                    Math(f"{label} = {disp_item:.{precision}f} ± {disp_std_item:.{precision}f} fs^{i + 1}")
                 )
             else:
-                print(f"{label} = {disp_item:.5f} ± {disp_std_item:.5f} fs^{i + 1}")
+                print(f"{label} = {disp_item:.{precision}f} ± {disp_std_item:.{precision}f} fs^{i + 1}")
         return disp, disp_std, stri
 
     return wrapping

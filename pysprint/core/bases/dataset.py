@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from jinja2 import Template
 
+from pysprint.config import _get_config_value
 from pysprint.core.bases._dataset_base import _DatasetBase, C_LIGHT
 from pysprint.core.bases._apply import _DatasetApply
 from pysprint.core._evaluate import is_inside
@@ -484,10 +485,11 @@ class Dataset(metaclass=_DatasetBase):
         if hasattr(self, "params"):
             self.params[3] = (lowguess + highguess) / 2
 
+        precision = _get_config_value("precision")
         if not silent:
             print(
-                f"The predicted GD is ± {((lowguess + highguess) / 2):.5f} fs"
-                f" based on reference point of {reference_point}."
+                f"The predicted GD is ± {((lowguess + highguess) / 2):.{precision}f} fs"
+                f" based on reference point of {reference_point:.{precision}f}."
             )
 
     def _safe_cast(self):
@@ -659,6 +661,7 @@ class Dataset(metaclass=_DatasetBase):
 
     def __str__(self):
         _unit = self._render_unit(self.unit)
+        precision = _get_config_value("precision")
         string = dedent(
             f"""
         {type(self).__name__}
@@ -667,7 +670,7 @@ class Dataset(metaclass=_DatasetBase):
         ----------
         Datapoints: {len(self.x)}
         Predicted domain: {'wavelength' if self.probably_wavelength else 'frequency'}
-        Range: from {np.min(self.x):.3f} to {np.max(self.x):.3f} {_unit}
+        Range: from {np.min(self.x):.{precision}f} to {np.max(self.x):.{precision}f} {_unit}
         Normalized: {self._is_normalized}
         Delay value: {str(self._format_delay()) + ' fs' if self._delay is not None else 'Not given'}
         SPP position(s): {str(self._format_positions()) + ' PHz' if np.all(self._positions) else 'Not given'}
@@ -681,15 +684,8 @@ class Dataset(metaclass=_DatasetBase):
         return string
 
     def _repr_html_(self):  # TODO: move this to a separate template file
-        if isinstance(self._delay, np.ndarray):
-            pprint_delay = self._delay.flat[0]
-        elif isinstance(self._delay, Iterable):
-            pprint_delay = next((_ for _ in self._delay), None)
-        elif isinstance(self._delay, numbers.Number):
-            pprint_delay = self._delay
-        else:
-            pprint_delay = "-"
         _unit = self._render_unit(self.unit)
+        precision = _get_config_value("precision")
         t = f"""
         <div id="header" class="row" style="height:10%;width:100%;">
         <div style='float:left' class="column">
@@ -715,11 +711,11 @@ class Dataset(metaclass=_DatasetBase):
         </tr>
         <tr>
         <td style="text-align:center"> <b>Range min</b> </td>
-        <td style="text-align:center">{np.min(self.x):.3f} {_unit}</td>
+        <td style="text-align:center">{np.min(self.x):.{precision}f} {_unit}</td>
         </tr>
         <tr>
         <td style="text-align:center"> <b>Range max</b> </td>
-        <td style="text-align:center">{np.max(self.x):.3f} {_unit}</td>
+        <td style="text-align:center">{np.max(self.x):.{precision}f} {_unit}</td>
         </tr>
         <tr>
         <td style="text-align:center"> <b>Normalized</b></td>

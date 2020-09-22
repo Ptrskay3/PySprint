@@ -89,7 +89,7 @@ def _parse_raw(
         na_values=None,
         skip_blank_lines=True,
         keep_default_na=False,
-        meta_len=1
+        meta_len: int = 1
 ):
     if len([x for x in (ref, sam) if x is not None]) == 1:
         warnings.warn(

@@ -5,6 +5,7 @@ from inspect import isfunction
 import numpy as np
 import matplotlib.pyplot as plt
 
+from pysprint.config import _get_config_value
 from pysprint.core.methods.fftmethod import FFTMethod
 from pysprint.core.phase import Phase
 from pysprint.core._evaluate import gaussian_window
@@ -58,7 +59,8 @@ class Window:
         return cls(x, center, _fwhm, order)
 
     def __repr__(self):
-        return f"Window(center={self.center:.5f}, fwhm={self.fwhm}, order={self.order})"
+        precision = _get_config_value("precision")
+        return f"Window(center={self.center:.{precision}f}, fwhm={self.fwhm}, order={self.order})"
 
     def plot(self, ax=None, scalefactor=1, zorder=90, **kwargs):
         """

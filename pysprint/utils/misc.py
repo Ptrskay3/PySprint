@@ -4,6 +4,8 @@ import numpy as np
 from scipy.interpolate import interp1d
 import scipy.stats as st
 
+from pysprint.config import _get_config_value
+
 __all__ = [
     "_unpack_lmfit",
     "find_nearest",
@@ -103,7 +105,7 @@ def _unpack_lmfit(r):
     return dispersion, dispersion_std
 
 
-def measurement(array, confidence=0.95, precision=5, silent=False):
+def measurement(array, confidence=0.95, silent=False):
     """
     Give the measurement results with condifence interval
     assuming the standard deviation is unknown.
@@ -147,6 +149,7 @@ def measurement(array, confidence=0.95, precision=5, silent=False):
     I decided to print the results immediately, because people often don't use
     it for further code. Of course, they are also returned if needed.
     """
+    precision = _get_config_value("precision")
     mean = np.mean(array)
     conf = st.t.interval(confidence, len(array) - 1, loc=mean, scale=st.sem(array))
     if not silent:

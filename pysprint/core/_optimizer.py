@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
+from pysprint.config import _get_config_value
 from pysprint.utils import find_nearest, run_from_ipython, _progress
 from pysprint.core._functions import _cosfit_config, cos_fit1
 
@@ -164,6 +165,7 @@ class FitOptimizer:
 
     # TODO : this should be pprint_disp
     def result_wrapper(self):
+        precision = _get_config_value("precision")
         labels = ("GD", "GDD", "TOD", "FOD", "QOD", "SOD")
         params = self.p0[3:]
         for i, (label, param) in enumerate(zip(labels, params)):
@@ -172,15 +174,15 @@ class FitOptimizer:
 
                 display(
                     Math(
-                        f"{label} = {(params[i] * factorial(i + 1)):.5f} \\ fs^{i + 1}"
+                        f"{label} = {(params[i] * factorial(i + 1)):.{precision}f} \\ fs^{i + 1}"
                     )
                 )
             else:
-                print(f"{label} = {(params[i] * factorial(i + 1)):.5f} fs^{i + 1}")
+                print(f"{label} = {(params[i] * factorial(i + 1)):.{precision}f} fs^{i + 1}")
 
     @_progress
     def run(self, r_extend_by, r_threshold, max_tries=5000, show_endpoint=True):
-
+        precision = _get_config_value("precision")
         if not self._init_set:
             raise ValueError("Set the initial conditions.")
         self._fit()
@@ -202,9 +204,9 @@ class FitOptimizer:
                 if run_from_ipython():
                     from IPython.display import display, Math # noqa
 
-                    display(Math(f"with \\ R^2 = {(self._fit_goodness()):.5f}."))
+                    display(Math(f"with \\ R^2 = {(self._fit_goodness()):.{precision}f}."))
                 else:
-                    print(f"with R^2 = {(self._fit_goodness()):.5f}.")
+                    print(f"with R^2 = {(self._fit_goodness()):.{precision}f}.")
                 return self.popt
             if self.counter == max_tries:
                 if show_endpoint:

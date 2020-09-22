@@ -9,6 +9,7 @@ import pandas as pd
 
 from pysprint import Dataset
 from pysprint.utils.exceptions import DatasetError, PySprintWarning, InterpolationWarning
+from pysprint.config import setting
 
 
 class TestEvaluate(unittest.TestCase):
@@ -201,8 +202,8 @@ def test_blank_str():
     y_ = np.linspace(0, 1, 199)
 
     d = Dataset(x_, y_, errors='force')
-
-    string = d.__str__().split("\n")
+    with setting("precision", 3):
+        string = d.__str__().split("\n")
     assert string == expected
 
 
@@ -228,8 +229,8 @@ def test_blank_str_2():
 
     d = Dataset(x_, y_, errors='force')
     d.delay = 100
-
-    string = d.__str__().split("\n")
+    with setting("precision", 3):
+        string = d.__str__().split("\n")
     assert string == expected
 
 
@@ -255,7 +256,8 @@ def test_blank_str_3():
     d = Dataset(x_, x_)
     d.delay = 100
     d.positions = 0.5
-    string = d.__str__().split("\n")
+    with setting("precision", 3):
+        string = d.__str__().split("\n")
     assert string == expected
 
 
@@ -289,7 +291,9 @@ def test_raw_str():
     ]
 
     ifg = Dataset.parse_raw("test_rawparsing.trt", skiprows=8, meta_len=5, decimal=",", sep=";")
-    assert ifg.__str__().split("\n") == string
+    with setting("precision", 3):
+        actual = ifg.__str__().split("\n")
+    assert actual == string
 
 
 def test_arm_warning():
