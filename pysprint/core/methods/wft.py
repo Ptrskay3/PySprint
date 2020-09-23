@@ -58,7 +58,7 @@ class Window:
         _fwhm = std * 2 * np.log(2) ** (1 / order)
         return cls(x, center, _fwhm, order)
 
-    def __repr__(self):
+    def __str__(self):
         precision = _get_config_value("precision")
         return f"Window(center={self.center:.{precision}f}, fwhm={self.fwhm}, order={self.order})"
 
@@ -286,7 +286,6 @@ class WFTMethod(FFTMethod):
                 self.add_window(center=cent, fwhm=fwhm, order=order)
         return self
 
-    # TODO : The ratio mechanism is wrong. REWRITE PRIORITY: HIGH
     def view_windows(self, ax=None, maxsize=80, **kwargs):
         """
         Gives a rough view of the different windows along with the ifg.
@@ -304,20 +303,19 @@ class WFTMethod(FFTMethod):
             Additional keyword arguments to pass to plot function.
         """
         winlen = len(self.window_seq)
-        ratio = winlen % maxsize
-        if ratio == 0:
-            ratio = 20
-        if winlen > maxsize:
-            warnings.warn(
-                "Image seems crowded, displaying only a sequence of the given windows.",
-                PySprintWarning
-            )
-            for i, (_, val) in enumerate(self.window_seq.items()):
-                if i % ratio == 0:
+        if maxsize != 0:
+            ratio = winlen // maxsize
+            if winlen > maxsize:
+                warnings.warn(
+                    "Image seems crowded, displaying only a subsample of the given windows.",
+                    PySprintWarning
+                )
+                for i, (_, val) in enumerate(self.window_seq.items()):
+                    if i % ratio == 0:
+                        val.plot(ax=ax, scalefactor=np.max(self.y) * .75, **kwargs)
+            else:
+                for _, val in self.window_seq.items():
                     val.plot(ax=ax, scalefactor=np.max(self.y) * .75, **kwargs)
-        else:
-            for _, val in self.window_seq.items():
-                val.plot(ax=ax, scalefactor=np.max(self.y) * .75, **kwargs)
         self.plot(ax=ax)
 
     @inplacify
@@ -714,14 +712,24 @@ class WFTMethod(FFTMethod):
         if ax is None:
             plt.xlabel('Window center [PHz]')
             plt.ylabel('Delay [fs]')
-            plt.ylim(None, 1.5 * np.max(self.GD.data[1]))
+            try:
+                upper_bound = min(1.5 * np.max(self.GD.data[1]), np.max(self.Y_cont))
+                plt.ylim(None, upper_bound)
+            except ValueError:
+                pass
+            # ValueError: zero-size array to reduction operation maximum which has no identity
+            # This means that the array is empty, we should pass that case.
         else:
             ax.set_autoscalex_on(False)
-            ax.set(
-                xlabel="Window center [PHz]",
-                ylabel="Delay [fs]",
-                ylim=(None, 1.5 * np.max(self.GD.data[1]))
-            )
+            try:
+                upper_bound = min(1.5 * np.max(self.GD.data[1]), np.max(self.Y_cont))
+                ax.set(
+                    xlabel="Window center [PHz]",
+                    ylabel="Delay [fs]",
+                    ylim=(None, upper_bound)
+                )
+            except ValueError:
+                pass
 
     def get_heatmap_data(self):
         """

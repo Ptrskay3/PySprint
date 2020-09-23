@@ -192,15 +192,14 @@ class Dataset(metaclass=_DatasetBase):
         self._delay = None
         self._positions = None
 
-        # TODO : A nice way to include this
-        # nanwarning = np.isnan(self.y_norm).sum()
-        # infwarning = np.isinf(self.y_norm).sum()
-        #
-        # warnings.warn(
-        #     ("Extreme values found during normalization.\n"
-        #     f"Nan values: {nanwarning}\nInf values: {infwarning}"),
-        #     PySprintWarning
-        # )
+        nanwarning = np.isnan(self.y_norm).sum()
+        infwarning = np.isinf(self.y_norm).sum()
+        if nanwarning > 0 or infwarning > 0:
+            warnings.warn(
+                ("Extreme values encountered during normalization.\n"
+                f"Nan values: {nanwarning}\nInf values: {infwarning}"),
+                PySprintWarning
+            )
 
         self._dispersion_array = None
 
@@ -288,7 +287,7 @@ class Dataset(metaclass=_DatasetBase):
         operation.perform()
         return self
 
-    #  TODO : The plot must be formatted.
+    #  TODO : Rewrite this
     def phase_plot(self, exclude_GD=False):
         """
         Plot the phase if the dispersion is already calculated.
@@ -961,6 +960,11 @@ class Dataset(metaclass=_DatasetBase):
         ynew = f(xnew)
         setattr(self, "x", xnew)
         setattr(self, "y_norm", ynew)
+        # Really ugly solution: we check if it's an FFT or WFT method
+        # and assign the resampling to the y attr too.. Later this should
+        # be deleted..
+        if hasattr(self, "_ifft_called_first"):
+            setattr(self, "y", ynew)
         return self
 
     def detect_peak(self, pmax=0.1, pmin=0.1, threshold=0.1, except_around=None):
@@ -1044,7 +1048,7 @@ class Dataset(metaclass=_DatasetBase):
 
     def _format_delay(self):
         if self.delay is None:
-            return ""  # FIXME : Not sure yet how to treat this case.
+            return ""
         if isinstance(self.delay, np.ndarray):
             if self.delay.size == 0:
                 return 0
@@ -1065,7 +1069,7 @@ class Dataset(metaclass=_DatasetBase):
 
     def _format_positions(self):
         if self.positions is None:
-            return "Not given"  # FIXME : Not sure yet how to treat this case.
+            return "Not given"
         if isinstance(self.positions, np.ndarray):
             positions = np.atleast_1d(self.positions).flatten()
             return ", ".join(map(str, positions))
@@ -1258,20 +1262,17 @@ class Dataset(metaclass=_DatasetBase):
         positions : np.ndarray
             The given SPP positions.
         """
-        # TODO: We need to test for np.array([]) condition too.
-        if self.positions is None or (
-                isinstance(self.positions, np.ndarray) and self.positions.size == 0
-        ):
+        if self.positions is None:
             raise ValueError("SPP positions are missing.")
-        if self.delay is None or (
-                isinstance(self.delay, np.ndarray) and self.delay.size == 0
-        ):
+        if self.delay is None:
             raise ValueError("Delay value is missing.")
-        # validate if it's typed by hand..
+        # Important: Use underscored variables to avoid invoking the
+        # setter again, which might result in RecursionError and crashes
+        # the interpreter.
         if not isinstance(self._positions, np.ndarray):
             self._positions = np.asarray(self.positions)
         if not isinstance(self.delay, np.ndarray):
-            self.delay = np.ones_like(self.positions) * self.delay
+            self._delay = np.ones_like(self._positions) * self._delay
         return np.atleast_1d(self.delay), np.atleast_1d(self.positions)
 
     def set_SPP_data(self, delay, positions, force=False):

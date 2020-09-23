@@ -9,16 +9,12 @@ import matplotlib.cbook as cbook
 from pysprint.core.bases.dataset import Dataset
 from pysprint.core.bases._dataset_base import _DatasetBase
 from pysprint.core._evaluate import spp_method
-from pysprint.utils.exceptions import DatasetError
+from pysprint.utils.exceptions import DatasetError, PySprintWarning
+from pysprint.core.callbacks import defaultcallback
 
 __all__ = ["SPPMethod"]
 
 warnings.simplefilter("ignore", category=cbook.MatplotlibDeprecationWarning)
-
-
-def defaultcallback(broadcaster, listener=None):
-    if listener is not None:
-        listener.listen(*broadcaster.emit())
 
 
 class SPPMethod(metaclass=_DatasetBase):
@@ -26,7 +22,6 @@ class SPPMethod(metaclass=_DatasetBase):
     Interface for Stationary Phase Point Method.
     """
 
-    # TODO: kwargs should accept all the new params
     def __init__(self, ifg_names, sam_names=None, ref_names=None, errors="raise", **kwargs):
         """
         SPPMethod constructor.
@@ -203,6 +198,35 @@ class SPPMethod(metaclass=_DatasetBase):
     def __str__(self):
         return f"{type(self).__name__}\nInterferogram count : {len(self)}"
 
+    def _repr_html_(self):
+        alive = [i for i in Dataset._get_instances() if i.parent == self]
+        s = f"""
+        <table style="border:1px solid black;float:top;">
+        <tbody>
+        <tr>
+        <td colspan=2 style="text-align:center">
+        <font size="5">{type(self).__name__}</font>
+        </td>
+        </tr>       
+        <tr>
+        <td style="text-align:center"><b>Interferograms accumulated<b></td>
+            <td style="text-align:center"> {len(self)}</td>
+        </tr>
+        <tr>
+        <td style="text-align:center"><b>Interferograms cached<b></td>
+            <td style="text-align:center"> {len(alive)}</td>
+        </tr>
+        <tr>
+        <td style="text-align:center"><b>Eagerly calculating<b></td>
+            <td style="text-align:center"> {self.is_eager}</td>
+        </tr>
+        <tr>
+        <td style="text-align:center"><b>Data recorded from<b></td>
+            <td style="text-align:center"> {len(self._delay)}</td>
+        </tr>
+        """
+        return s
+
     # Maybe we don't even need this.. __getitem__ seems enough
     # def __iter__(self):
     #     try:
@@ -262,13 +286,11 @@ class SPPMethod(metaclass=_DatasetBase):
         Function which records SPP data when received.
         """
         currlen = len(self._delay)
-        # TODO : Empty results are broadcasted twice, still not sure why
-        # It doesn't make any difference, but we'd still
-        # better correct it.
 
+        # TODO: Store them with id's. PRIORITY: VERY HIGH
         # if currlen + 1 > len(self.ifg_names):
         #     warnings.warn(
-        #         "Overwriting previous values, use `reset_records` to flush the last used values.",
+        #         "Overwriting previous values, use `flush` to remove the last used values.",
         #         PySprintWarning
         #     )
         self._delay[currlen] = delay
@@ -403,5 +425,8 @@ class SPPMethod(metaclass=_DatasetBase):
         return self._info
 
     @property
-    def stats(self):
-        raise NotImplementedError
+    def is_eager(self):
+        # TODO
+        if self.cb.__name__ == "inner":
+            return True
+        return False

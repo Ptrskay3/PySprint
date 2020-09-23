@@ -27,7 +27,7 @@ from pysprint.utils import (
 from pysprint.core._functions import _fit_config, _cosfit_config
 
 Num = Union[int, float]
-NumericLike = Union[Num, List, np.ndarray]
+NumericLike = Union[Num, List[Num], np.ndarray]
 
 logger = logging.getLogger(__name__)
 FORMAT = "[ %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
@@ -245,9 +245,7 @@ def spp_method(delays, omegas, ref_point=0, fit_order=4):
     return omegas, delays, -dispersion, dispersion_std, bf
 
 
-# mutable default argument is fine, because we treat it internally and it's never
-# exposed to the user
-def cff_method(x, y, ref, sam, ref_point=0, p0=[1, 1, 1, 1, 1, 1, 1, 1, 1], maxtries=8000):
+def cff_method(x, y, ref, sam, ref_point=0, p0=None, maxtries=8000):
     """
     Phase modulated cosine function fit method.
 
@@ -269,6 +267,8 @@ def cff_method(x, y, ref, sam, ref_point=0, p0=[1, 1, 1, 1, 1, 1, 1, 1, 1], maxt
     bf: array-like
         best fitting curve
     """
+    if p0 is None:
+        p0 = [1, 1, 1, 1, 1, 1, 1, 1, 1]
 
     x, y = _handle_input(x, y, ref, sam)
 

@@ -1,6 +1,3 @@
-"""
-This file is not finished by any means.
-"""
 import warnings
 import logging
 from math import factorial

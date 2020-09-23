@@ -11,7 +11,9 @@ from pysprint.core.bases.dataset import Dataset
 from pysprint.core.bases.algorithms import longest_common_subsequence
 from pysprint.core.nufft import nuifft
 from pysprint.utils.decorators import inplacify
-from pysprint.utils.exceptions import FourierWarning, NotCalculatedException
+from pysprint.utils.exceptions import FourierWarning
+from pysprint.utils.exceptions import PySprintWarning
+from pysprint.utils.exceptions import NotCalculatedException
 from pysprint.core._fft_tools import _run
 from pysprint.core.phase import Phase
 from pysprint.core._evaluate import (
@@ -38,6 +40,11 @@ class FFTMethod(Dataset):
         if self._is_normalized:
             self.y_norm = self.y
             self._is_normalized = False
+        if np.any(self.sam) or np.any(self.ref):
+            warnings.warn(
+                "This method doesn't require arms' spectra.",
+                PySprintWarning
+            )
         self.original_x = self.x
         self.at = None
         self.std = None
