@@ -1,4 +1,4 @@
-from pysprint import config as c
+from pysprint import config as cfg
 
 
 def is_nonnegative_int(value):
@@ -12,4 +12,5 @@ _precision_doc = """
     The precision of floating point numbers in the output.
 """
 
-c.register_config_value("precision", 5, doc=_precision_doc, validator=is_nonnegative_int)
+cfg.register_config_value("precision", 5, doc=_precision_doc, validator=is_nonnegative_int)
+

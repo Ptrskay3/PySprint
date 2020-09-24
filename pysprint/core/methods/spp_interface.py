@@ -9,7 +9,7 @@ import matplotlib.cbook as cbook
 from pysprint.core.bases.dataset import Dataset
 from pysprint.core.bases._dataset_base import _DatasetBase
 from pysprint.core._evaluate import spp_method
-from pysprint.utils.exceptions import DatasetError, PySprintWarning
+from pysprint.utils.exceptions import DatasetError
 from pysprint.core.callbacks import defaultcallback
 
 __all__ = ["SPPMethod"]
