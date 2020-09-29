@@ -1,0 +1,19 @@
+name: pysprint-dev
+channels:
+  - conda-forge
+dependencies:
+  - python=3.8
+  - numpy>=1.15,<1.19.0
+  - matplotlib
+  - pandas
+  - scipy
+  - numba>=0.46.0
+  - lmfit
+  - Jinja2
+  - dask
+  - ipython>=7.11.1
+  - ipykernel
+  - ipywidgets
+  - nbformat
+  - notebook>=5.7.5
+  - pip
