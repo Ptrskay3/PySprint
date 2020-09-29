@@ -8,6 +8,7 @@
 [![codecov](https://codecov.io/gh/Ptrskay3/PySprint/branch/master/graph/badge.svg)](https://codecov.io/gh/Ptrskay3/PySprint)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Documentation Status](https://readthedocs.org/projects/pysprint/badge/?version=latest)](https://pysprint.readthedocs.io/en/latest/?badge=latest)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Ptrskay3/PySprint/6db5b492a16603cb487be237ad55b20f6a2b40e1?filepath=index.ipynb)
 | | |
 |-|-|
 |__Name__| PySprint|
