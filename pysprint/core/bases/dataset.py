@@ -24,6 +24,8 @@ from pysprint.config import _get_config_value
 from pysprint.core.bases._dataset_base import _DatasetBase, C_LIGHT
 from pysprint.core.bases._apply import _DatasetApply
 from pysprint.core._evaluate import is_inside
+from pysprint.core._evaluate import ifft_method
+from pysprint.core._fft_tools import find_center
 from pysprint.core.io._parser import _parse_raw
 from pysprint.mpl_tools.spp_editor import SPPEditor
 from pysprint.mpl_tools.normalize import DraggableEnvelope
@@ -109,8 +111,8 @@ class Dataset(metaclass=_DatasetBase):
         self.callback = callback or (lambda *args: args)
         self.parent = parent
 
-        self.x = x
-        self.y = y
+        self.x = np.array(x, dtype=np.float64)
+        self.y = np.array(y, dtype=np.float64)
         if ref is None:
             self.ref = []
         else:
@@ -148,8 +150,7 @@ class Dataset(metaclass=_DatasetBase):
                 )
             else:
                 truncated_shape = min(len(self.x), len(self.y))
-                # probably we've cut down the first half, that's why we index it
-                # this way
+                # probably we should cut down the first half
                 self.x, self.y = self.x[-truncated_shape:], self.y[-truncated_shape:]
 
         if len([x for x in (self.ref, self.sam) if len(x) != 0]) == 1:
@@ -387,7 +388,7 @@ class Dataset(metaclass=_DatasetBase):
         self.y_norm = (self.y_norm - 0.5) * 2
         self.y = (self.y - 0.5) * 2
 
-    def GD_lookup(self, reference_point, engine="cwt", silent=False, **kwargs):
+    def GD_lookup(self, reference_point=None, engine="cwt", silent=False, **kwargs):
         """
         Quick GD lookup: it finds extremal points near the
         `reference_point` and returns an average value of 2*pi
@@ -416,17 +417,29 @@ class Dataset(metaclass=_DatasetBase):
             Most of them are described in the `find_peaks` and
             `find_peaks_cwt` docs.
         """
+        precision = _get_config_value("precision")
 
-        # TODO: implement FFT-based engine
+        if engine not in ("cwt", "normal", "fft"):
+            raise ValueError("Engine must be `cwt`, `fft` or `normal`.")
+
+        if reference_point is None and engine != "fft":
+            warnings.warn(
+                f"Engine `{engine}` isn't available without reference point, falling back to FFT based prediction.",
+                PySprintWarning
+            )
+            engine = "fft"
 
         if engine == "fft":
-            warnings.warn(
-                "FFT based engine is not implemented yet, falling back to 'cwt'."
-            )
-            engine = "cwt"
+            pred, _ = find_center(*ifft_method(self.x, self.y))
+            if pred is None:
+                if not silent:
+                    print("Prediction failed, skipping.")
+                return
+            print(f"The predicted GD is ± {pred:.{precision}f} fs.")
 
-        if engine not in ("cwt", "normal"):
-            raise ValueError("Engine must be `cwt` or `normal`.")
+            if hasattr(self, "params"):
+                self.params[3] = pred
+            return
 
         if engine == "cwt":
             widths = kwargs.pop("widths", np.arange(1, 20))
@@ -460,21 +473,21 @@ class Dataset(metaclass=_DatasetBase):
             m_closest_val, m_idx1 = find_nearest(x_max, reference_point)
         except (ValueError, IndexError):
             if not silent:
-                print("Prediction failed.\nSkipping.. ")
+                print("Prediction failed, skipping.. ")
             return
         try:
             truncated = np.delete(x_min, idx1)
             second_closest_val, _ = find_nearest(truncated, reference_point)
         except (IndexError, ValueError):
             if not silent:
-                print("Prediction failed.\nSkipping.. ")
+                print("Prediction failed, skipping.. ")
             return
         try:
             m_truncated = np.delete(x_max, m_idx1)
             m_second_closest_val, _ = find_nearest(m_truncated, reference_point)
         except (IndexError, ValueError):
             if not silent:
-                print("Prediction failed.\nSkipping.. ")
+                print("Prediction failed, skipping.. ")
             return
 
         lowguess = 2 * np.pi / np.abs(closest_val - second_closest_val)
@@ -484,7 +497,6 @@ class Dataset(metaclass=_DatasetBase):
         if hasattr(self, "params"):
             self.params[3] = (lowguess + highguess) / 2
 
-        precision = _get_config_value("precision")
         if not silent:
             print(
                 f"The predicted GD is ± {((lowguess + highguess) / 2):.{precision}f} fs"
@@ -960,11 +972,6 @@ class Dataset(metaclass=_DatasetBase):
         ynew = f(xnew)
         setattr(self, "x", xnew)
         setattr(self, "y_norm", ynew)
-        # Really ugly solution: we check if it's an FFT or WFT method
-        # and assign the resampling to the y attr too.. Later this should
-        # be deleted..
-        if hasattr(self, "_ifft_called_first"):
-            setattr(self, "y", ynew)
         return self
 
     def detect_peak(self, pmax=0.1, pmin=0.1, threshold=0.1, except_around=None):

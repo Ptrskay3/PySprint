@@ -1,3 +1,10 @@
+"""
+The implementation is mostly taken from the pandas library with some simplifications
+(e.g. deprecations are left out).
+# Copyright (c) Pandas Development Team.
+# Distributed under the terms of the BSD 3-Clause "New" or "Revised" License.
+"""
+
 import re
 import keyword
 import tokenize

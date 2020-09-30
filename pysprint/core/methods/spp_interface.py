@@ -207,7 +207,7 @@ class SPPMethod(metaclass=_DatasetBase):
         <td colspan=2 style="text-align:center">
         <font size="5">{type(self).__name__}</font>
         </td>
-        </tr>       
+        </tr>
         <tr>
         <td style="text-align:center"><b>Interferograms accumulated<b></td>
             <td style="text-align:center"> {len(self)}</td>

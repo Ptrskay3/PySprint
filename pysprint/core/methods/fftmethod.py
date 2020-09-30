@@ -6,6 +6,7 @@ import logging
 import numpy as np
 from scipy.fftpack import fftshift
 import pandas as pd
+from scipy.interpolate import interp1d
 
 from pysprint.core.bases.dataset import Dataset
 from pysprint.core.bases.algorithms import longest_common_subsequence
@@ -494,3 +495,36 @@ class FFTMethod(Dataset):
         if errors is not None:
             return errors
         raise NotCalculatedException("Must calculate the fit first.")
+
+    # redefinition to ensure proper attributes are changed
+
+    @inplacify
+    def resample(self, N, kind="linear", **kwds):
+        """
+        Resample the interferogram to have `N` datapoints.
+
+        Parameters
+        ----------
+        N : int
+            The number of datapoints required.
+        kind : str, optional
+            The type of interpolation to use. Default is `linear`.
+        kwds : optional
+            Additional keyword argument to pass to `scipy.interpolate.interp1d`.
+
+        Raises
+        ------
+        PySprintWarning, if trying to subsample to lower `N` datapoints than original.
+        """
+        f = interp1d(self.x, self.y_norm, kind, **kwds)
+        if N < len(self.x):
+            N = len(self.x)
+            warnings.warn(
+                "Trying to resample to lower resolution, keeping shape..", PySprintWarning
+            )
+        xnew = np.linspace(np.min(self.x), np.max(self.x), N)
+        ynew = f(xnew)
+        setattr(self, "x", xnew)
+        setattr(self, "y_norm", ynew)
+        setattr(self, "y", ynew)
+        return self

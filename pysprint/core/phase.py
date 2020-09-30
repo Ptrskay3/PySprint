@@ -6,6 +6,8 @@ import numpy as np
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 
+from pysprint.config import _get_config_value
+
 try:
     from lmfit import Model
 
@@ -21,7 +23,8 @@ from pysprint.utils import (
     transform_cf_params_to_dispersion,
     _unpack_lmfit,
     find_nearest,
-    inplacify
+    inplacify,
+    NotCalculatedException,
 )
 
 logger = logging.getLogger(__name__)
@@ -223,11 +226,11 @@ class Phase:
             Additional keyword arguments to pass to plot function.
         """
         if ax is None:
-            ax = plt
+            ax = plt.gca()
             plt.xlabel("$\omega\, [PHz]$")
             if percent:
                 plt.ylabel("%")
-            ax.title(title)
+            plt.title(title)
         else:
             ax.set(xlabel="$\omega\, [PHz]$", title=title)
             if percent:
@@ -240,10 +243,18 @@ class Phase:
                 ax.plot(x, np.abs((y - self.fitted_curve[idx]) / y) * 100, **kwargs)
             else:
                 ax.plot(x, y - self.fitted_curve[idx], **kwargs)
-
+            ax.text(
+                0.02,
+                0.95,
+                f"$R^2 = {self._get_r_squared():.{_get_config_value('precision')}f}$",
+                transform=ax.transAxes,
+                fontsize="medium",
+                bbox=dict(facecolor='white', edgecolor='black', boxstyle='round'),
+                zorder=100
+            )
             ax.grid()
         else:
-            raise ValueError("Must fit a curve before requesting errors.")
+            raise NotCalculatedException("Must fit a curve before requesting errors.")
 
     def flip_around(self, value, side="left"):
         """
@@ -303,3 +314,25 @@ class Phase:
         Return the data as tuple (x, y).
         """
         return self.x, self.y
+
+    def _get_r_squared(self):
+        """
+        Calculate the R^2 value.
+        """
+        if self.fitted_curve is not None:
+            residuals = self.y - self.fitted_curve
+            ss_res = np.sum(residuals ** 2)
+            ss_tot = np.sum((self.y - np.mean(self.y)) ** 2)
+            return 1 - (ss_res / ss_tot)
+        raise NotCalculatedException
+
+    @property
+    def r_squared(self):
+        """
+        The value of R^2.
+        """
+        return self._get_r_squared()
+
+    # TODO
+    def del_range(self, start, stop):
+        pass

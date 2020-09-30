@@ -13,4 +13,3 @@ _precision_doc = """
 """
 
 cfg.register_config_value("precision", 5, doc=_precision_doc, validator=is_nonnegative_int)
-

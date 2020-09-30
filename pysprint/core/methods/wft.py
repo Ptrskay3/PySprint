@@ -616,7 +616,7 @@ class WFTMethod(FFTMethod):
         if not silent:
             if winlen != usefullen:
                 print(
-                    f"\nIn total {winlen-usefullen} out of {winlen} datapoints "
+                    f"\nIn total {abs(winlen-usefullen)} out of {winlen} datapoints "
                     f"were thrown away due to ambiguous peak positions."
                 )
 
@@ -690,11 +690,6 @@ class WFTMethod(FFTMethod):
         # Only construct if we need to..
         if not (self.Y_cont.size, self.X_cont.size) == self.Z_cont.shape:
             self._construct_heatmap_data()
-        if levels is None:
-            levels = np.linspace(0, 0.02, 30)
-        else:
-            if not isinstance(levels, np.ndarray):
-                raise ValueError("Expected np.ndarray as levels.")
         if ax is None:
             plt.contourf(
                 self.X_cont, self.Y_cont, self.Z_cont, levels=levels, cmap=cmap, extend="both"

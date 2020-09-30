@@ -35,9 +35,9 @@ class TestEvaluate(unittest.TestCase):
         ifg = Dataset([15, 4], [3, 4])
         assert type(ifg.x) == np.ndarray
         assert type(ifg.y) == np.ndarray
-        with self.assertRaises(DatasetError):
+        with self.assertRaises(ValueError):
             Dataset(["das", 6541], [1, 2])
-        with self.assertRaises(DatasetError):
+        with self.assertRaises(ValueError):
             Dataset([2, 6541], ["das", 2])
 
     def test_safe_casting(self):
@@ -312,10 +312,11 @@ def test_scale_up():
 
 
 def test_GD_lookup():
-    x_ = np.linspace(0, 1, 199)
-    d = Dataset(x_, x_)
-    with pytest.warns(UserWarning):
-        d.GD_lookup(2, engine="fft")
+    x_ = np.linspace(0, 20, 199)
+    d = Dataset(x_, np.sin(x_))
+    d.GD_lookup(engine="fft")
+    with pytest.warns(PySprintWarning):
+        d.GD_lookup()
 
 
 @pytest.mark.parametrize("val", [-1, 1, 200])
