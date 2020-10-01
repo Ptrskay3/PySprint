@@ -14,6 +14,11 @@ The Pysprint package is free software, using an Open Source MIT license. The
 software and this document are works in progress. See the project at
 `pysprint GitHub repository`_.
 
+Try it online:
+
+.. image:: https://mybinder.org/badge_logo.svg
+ :target: https://mybinder.org/v2/gh/Ptrskay3/PySprint/6db5b492a16603cb487be237ad55b20f6a2b40e1?filepath=index.ipynb
+
 Guide
 =====
 .. toctree::
