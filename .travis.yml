@@ -30,6 +30,8 @@ before_install:
 install:
   - conda env create -f environment.yml
   - activate pysprint-dev
+  -  conda install -c anaconda jupyter
+  - conda install -c anaconda notebook
   - conda install flake8 codecov pytest coverage nbconvert
   - conda install conda-build anaconda-client
   - python setup.py install
@@ -38,6 +40,7 @@ before_script:
   - flake8 pysprint/ --count --select=E9,F63,F72,F82 --show-source --statistics
 
 script:
+  - jupyter nbconvert --version
   - cd doc
   - python test_notebooks.py .
   - cd ..
