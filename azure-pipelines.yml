@@ -36,6 +36,9 @@ steps:
 
 - script: |
     flake8 pysprint/ --count --select=E9,F63,F72,F82 --show-source --statistics
+    cd doc
+    python test_notebooks.py .
+    cd ..
     cd pysprint/tests
     pytest
   displayName: 'unittest'

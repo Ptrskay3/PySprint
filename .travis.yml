@@ -38,6 +38,9 @@ before_script:
   - flake8 pysprint/ --count --select=E9,F63,F72,F82 --show-source --statistics
 
 script:
+  - cd doc
+  - python test_notebooks.py .
+  - cd ..
   - cd pysprint/tests
   - coverage run --source=pysprint -m pytest
   - coverage report -m
