@@ -1,6 +1,7 @@
 name: pysprint-dev
 channels:
   - conda-forge
+  - anaconda
 dependencies:
   # required and optional
   - python=3.8
@@ -18,10 +19,12 @@ dependencies:
   - nbsphinx
   - recommonmark
   - sphinx_rtd_theme
+  - nbconvert
 
   # Strictly speaking this is not neseccary, but better safe than sorry
   - cython>=0.29.16
   - ipython>=7.11.1
+  - jupyter
   - ipykernel
   - ipywidgets
   - nbformat

@@ -30,7 +30,7 @@ before_install:
 install:
   - conda env create -f environment.yml
   - activate pysprint-dev
-  - conda install flake8 codecov pytest coverage
+  - conda install flake8 codecov pytest coverage nbconvert
   - conda install conda-build anaconda-client
   - python setup.py install
 
