@@ -43,6 +43,7 @@ script:
   - cd doc
   - jupyter nbconvert --to script hu_*.ipynb
   - python test_notebooks.py .
+  - cat notebooktest.log
   - cd ..
   - cd pysprint/tests
   - coverage run --source=pysprint -m pytest
