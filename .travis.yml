@@ -40,8 +40,8 @@ before_script:
   - flake8 pysprint/ --count --select=E9,F63,F72,F82 --show-source --statistics
 
 script:
-  - jupyter nbconvert --version
   - cd doc
+  - jupyter nbconvert --to script hu_*.ipynb
   - python test_notebooks.py .
   - cd ..
   - cd pysprint/tests

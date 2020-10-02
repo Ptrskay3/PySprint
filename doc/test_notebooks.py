@@ -7,7 +7,7 @@ from contextlib import contextmanager
 import glob
 import os
 import pathlib
-import subprocess
+# import subprocess
 import sys
 import traceback
 
@@ -70,7 +70,7 @@ def redirected_output(new_stdout=None, new_stderr=None):
 def exec_notebooks(test_dir, log_path='notebooktest.log'):
     # Convert notebooks to .py files
     # This shouldn't be subprocess.call, we should use nbconvert the API.
-    subprocess.call(f"jupyter nbconvert --to script {test_dir}/hu_*.ipynb")
+    # subprocess.call(f"jupyter nbconvert --to script hu_*.ipynb")
 
     # find the converted files
     test_files = glob.glob(os.path.join(test_dir, 'hu_*.py'))
@@ -160,6 +160,8 @@ hooks = ExitHooks()
 hooks.hook()
 
 if __name__ == '__main__':
+
+    print("Started working..")
 
     # Do a cleanup if outside CI services
     if "CI" not in os.environ.keys() and 'TF_BUILD' not in os.environ.keys():
