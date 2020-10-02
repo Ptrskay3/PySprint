@@ -7,13 +7,15 @@ from contextlib import contextmanager
 import glob
 import os
 import pathlib
-# import subprocess
+import subprocess
 import sys
 import traceback
 
 HEADER = "import matplotlib\nmatplotlib.use('Agg')\n"
 
 SKIP_NAMES = ("doc_requirements.txt",)
+
+IN_CI = "CI" in os.environ.keys() or 'TF_BUILD' in os.environ.keys()
 
 
 class MplBackendRewriter(ast.NodeTransformer):
@@ -70,7 +72,8 @@ def redirected_output(new_stdout=None, new_stderr=None):
 def exec_notebooks(test_dir, log_path='notebooktest.log'):
     # Convert notebooks to .py files
     # This shouldn't be subprocess.call, we should use nbconvert the API.
-    # subprocess.call(f"jupyter nbconvert --to script hu_*.ipynb")
+    if not IN_CI:
+        subprocess.call(f"jupyter nbconvert --to script hu_*.ipynb")
 
     # find the converted files
     test_files = glob.glob(os.path.join(test_dir, 'hu_*.py'))
@@ -161,10 +164,8 @@ hooks.hook()
 
 if __name__ == '__main__':
 
-    print("Started working..")
-
     # Do a cleanup if outside CI services
-    if "CI" not in os.environ.keys() and 'TF_BUILD' not in os.environ.keys():
+    if not IN_CI:
         atexit.register(cleanup, test_path=sys.argv[1:])
 
     sys.exit(exec_notebooks(*sys.argv[1:]))
