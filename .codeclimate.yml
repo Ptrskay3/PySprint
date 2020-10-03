@@ -32,3 +32,5 @@ checks:
       threshold: 40
 exclude_patterns:
   - "**/tests/"
+  - "versioneer.py"
+  - "pysprint/_version.py"
