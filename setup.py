@@ -11,14 +11,12 @@ except ImportError:
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-MAJOR = 0
-MINOR = 12
-MICRO = 5
-VERSION = f"{MAJOR}.{MINOR}.{MICRO}"
+import versioneer
 
 setup(
     name="pysprint",
-    version=VERSION,
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     author="Péter Leéh",
     author_email="leeh123peter@gmail.com",
     description="Spectrally refined interferometry for Python",

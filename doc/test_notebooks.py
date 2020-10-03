@@ -71,9 +71,9 @@ def redirected_output(new_stdout=None, new_stderr=None):
 
 def exec_notebooks(test_dir, log_path='notebooktest.log'):
     # Convert notebooks to .py files
-    # This shouldn't be subprocess.call, we should use nbconvert the API.
+    # This shouldn't be subprocess.call, we should use nbconvert API.
     if not IN_CI:
-        subprocess.call(f"jupyter nbconvert --to script hu_*.ipynb")
+        subprocess.call(f"jupyter nbconvert --to script {test_dir}\\hu_*.ipynb")
 
     # find the converted files
     test_files = glob.glob(os.path.join(test_dir, 'hu_*.py'))

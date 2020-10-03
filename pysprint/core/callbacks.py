@@ -8,7 +8,7 @@ def defaultcallback(broadcaster, listener=None):
     The default recorder for SPP data.
     """
     if listener is not None:
-        listener.listen(*broadcaster.emit())
+        listener._container[broadcaster] = broadcaster.emit()
 
 
 def eager_executor(reference_point=None, order=None, cleanup=True, **kwds):

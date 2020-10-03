@@ -211,8 +211,8 @@ def spp_method(delays, omegas, ref_point=0, fit_order=4):
     bf: array-like
         best fitting curve for plotting
     """
-    if fit_order not in range(6):
-        raise ValueError("fit order must be in [1, 5]")
+    if fit_order not in range(7):
+        raise ValueError("fit order must be in [1, 6]")
 
     omegas = np.asarray(omegas).astype(np.float64)
 

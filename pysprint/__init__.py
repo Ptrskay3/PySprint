@@ -11,7 +11,6 @@ warnings.filterwarnings("ignore", message="invalid value encountered in sqrt")
 warnings.filterwarnings("ignore", message="divide by zero encountered in true_divide")
 warnings.filterwarnings("ignore", message="Casting complex values to real discards the imaginary part")
 
-__version__ = "0.12.5"
 __author__ = "Leéh Péter"
 
 from .core import *
@@ -71,3 +70,7 @@ def set_interactive(backend=default_backend, figsize=(15, 5)):
             "change to an appropriate GUI backend. (Matplotlib 3.3.1 "
             "is broken. In that case use backend='TkAgg')."
         ) from err
+
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions

@@ -124,16 +124,6 @@ class TestEvaluate(unittest.TestCase):
                 np.array([1, 2, 3]), np.array([4, 5, 6]), fit_order=4, ref_point=2.355,
             )
 
-    def test_spp_from_raw_api(self):
-        with patch("matplotlib.pyplot.show") as mock_show:
-            ifgs = SPPMethod("")
-            ifgs.listen(self.delays, self.omegas)
-            d, ds, _ = ifgs.calculate(2.355, 3, show_graph=True)
-            np.testing.assert_array_equal(
-                d, [-258.84297727172856, 21.572879102888976, 100426.4054547129],
-            )
-            mock_show.assert_called()
-
 
 if __name__ == "__main__":
     unittest.main()

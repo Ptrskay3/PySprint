@@ -203,8 +203,7 @@ class Phase:
 
             if self.GD_mode:
                 _, idx = find_nearest(self.x, reference_point)
-
-                dispersion = np.insert(dispersion, 0, self.y[idx])
+                dispersion = np.insert(dispersion, 0, self.fitted_curve[idx])
                 dispersion_std = np.insert(dispersion_std, 0, 0)
 
             return dispersion, dispersion_std, fit_report

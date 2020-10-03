@@ -97,9 +97,30 @@ class SPPMethod(metaclass=_DatasetBase):
             "keep_default_na": self.keep_default_na
         }
 
-        self._delay = {}
-        self._positions = {}
-        self._info = f"Progress: {len(self._delay)}/{len(self)}"
+        self._container = {}
+        self._info = f"Progress: {len(self._container)}/{len(self)}"
+
+
+    def _collect(self):
+
+        # Maybe the dictionary struct can be dropped at this point..
+        local_delays = {}
+        local_positions = {}
+
+        for idx, (delay, position) in enumerate(self._container.values()):
+            if idx != 0 and delay.flat[0] in np.concatenate(
+                    [a.ravel() for a in local_delays.values()]
+            ):
+                raise ValueError(
+                    f"Duplicated delay values found. Delay {delay.flat[0]} fs was previously seen."
+                )
+            local_delays[idx] = delay
+            local_positions[idx] = position
+
+        delays = np.concatenate([a.ravel() for a in local_delays.values()])
+        positions = np.concatenate([a.ravel() for a in local_positions.values()])
+
+        return delays, positions
 
     def append(self, newifg, newsam=None, newref=None):
         """
@@ -195,6 +216,7 @@ class SPPMethod(metaclass=_DatasetBase):
     def __len__(self):
         return len(self.ifg_names)
 
+    # TODO
     def __str__(self):
         return f"{type(self).__name__}\nInterferogram count : {len(self)}"
 
@@ -222,33 +244,10 @@ class SPPMethod(metaclass=_DatasetBase):
         </tr>
         <tr>
         <td style="text-align:center"><b>Data recorded from<b></td>
-            <td style="text-align:center"> {len(self._delay)}</td>
+            <td style="text-align:center"> {len(self._container)}</td>
         </tr>
         """
         return s
-
-    # Maybe we don't even need this.. __getitem__ seems enough
-    # def __iter__(self):
-    #     try:
-    #         for i, j, k in zip_longest(
-    #                 self.ifg_names, self.sam_names, self.ref_names
-    #         ):
-    #             d = Dataset.parse_raw(
-    #                 i,
-    #                 j,
-    #                 k,
-    #                 **self.load_dict,
-    #                 parent=self
-    #             )
-    #             yield d
-    #     except TypeError:
-    #         for i in self.ifg_names:
-    #             d = Dataset.parse_raw(
-    #                 i,
-    #                 **self.load_dict,
-    #                 parent=self
-    #             )
-    #             yield d
 
     @lru_cache()
     def __getitem__(self, key):
@@ -281,28 +280,12 @@ class SPPMethod(metaclass=_DatasetBase):
                 if not os.path.exists(ref):
                     raise FileNotFoundError(f"""File named '{ref}' is not found.""")
 
-    def listen(self, delay, position):
-        """
-        Function which records SPP data when received.
-        """
-        currlen = len(self._delay)
-
-        # TODO: Store them with id's. PRIORITY: VERY HIGH
-        # if currlen + 1 > len(self.ifg_names):
-        #     warnings.warn(
-        #         "Overwriting previous values, use `flush` to remove the last used values.",
-        #         PySprintWarning
-        #     )
-        self._delay[currlen] = delay
-        self._positions[currlen] = position
-
     def flush(self):
         """
         Reset the state of recorded delays and positions, even on
         active objects that have been constructed on the runtime.
         """
-        self._delay = {}
-        self._positions = {}
+        self._container = {}
         for ifg in self:
             ifg._delay = None
             ifg.delay = None
@@ -321,10 +304,9 @@ class SPPMethod(metaclass=_DatasetBase):
         """
         if not filename.endswith(".txt"):
             filename += ".txt"
-        delay = np.concatenate([_ for _ in self._delay.values()]).ravel()
-        position = np.concatenate([_ for _ in self._positions.values()]).ravel()
+        delays, positions = self._collect()
         np.savetxt(
-            f"{filename}", np.transpose(np.array([position, delay])), delimiter=",",
+            f"{filename}", np.transpose(np.array([positions, delays])), delimiter=",",
         )
 
     @staticmethod
@@ -365,7 +347,7 @@ class SPPMethod(metaclass=_DatasetBase):
         )
         return dispersion, dispersion_std, ""
 
-    def calculate(self, reference_point, order=2, show_graph=False):
+    def calculate(self, reference_point, order, show_graph=False):
         """
         This function should be used after setting the SPP data in
         the interactive matplotlib editor or other way.
@@ -376,7 +358,6 @@ class SPPMethod(metaclass=_DatasetBase):
             The reference point on the x axis.
         order : int, optional
             Maximum dispersion order to look for. Must be in [2, 6].
-            Default is 2.
         show_graph : bool, optional
             Shows a the final graph of the spectral phase and fitted curve.
             Default is False.
@@ -398,8 +379,7 @@ class SPPMethod(metaclass=_DatasetBase):
             raise ValueError(
                 "Order should be greater than 1. Cannot fit constant function to data."
             )
-        delays = np.concatenate([_ for _ in self._delay.values()]).ravel()
-        positions = np.concatenate([_ for _ in self._positions.values()]).ravel()
+        delays, positions = self._collect()
 
         x, y, dispersion, dispersion_std, bf = spp_method(
             delays, positions, ref_point=reference_point, fit_order=order - 1
@@ -421,7 +401,7 @@ class SPPMethod(metaclass=_DatasetBase):
         """
         Return how many interferograms where processed.
         """
-        self._info = f"Progress: {len(self._delay)}/{len(self)}"
+        self._info = f"Progress: {len(self._container)}/{len(self)}"
         return self._info
 
     @property
