@@ -18,19 +18,19 @@ class FitOptimizer:
         self.ref = ref
         self.sam = sam
         if not isinstance(self.x, np.ndarray):
-            self.x = np.asarray(self.x)
+            self.x = np.asarray(self.x, dtype=np.float64)
         if not isinstance(self.y, np.ndarray):
-            self.y = np.asarray(self.y)
+            self.y = np.asarray(self.y, dtype=np.float64)
         if not isinstance(self.ref, np.ndarray):
             try:
-                self.ref = np.asarray(self.ref)
+                self.ref = np.asarray(self.ref, dtype=np.float64)
             except (ValueError, TypeError):
                 pass
                 # we ignore because it might be optional
                 # if y is already normalized
         if not isinstance(self.sam, np.ndarray):
             try:
-                self.sam = np.asarray(self.sam)
+                self.sam = np.asarray(self.sam, dtype=np.float64)
             except (ValueError, TypeError):
                 pass
                 # we ignore because it might be optional

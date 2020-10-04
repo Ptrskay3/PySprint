@@ -99,7 +99,7 @@ class SPPMethod(metaclass=_DatasetBase):
 
         self._container = {}
         self._info = f"Progress: {len(self._container)}/{len(self)}"
-
+        self.GD = None  # TODO: integrate ps.core.phase.Phase
 
     def _collect(self):
 
@@ -128,6 +128,8 @@ class SPPMethod(metaclass=_DatasetBase):
         """
         # ensure padding before trying to append, and also
         # we better prevent infinite loop
+
+        # TODO
         self.ifg_names.append(newifg)
         if newsam is not None:
             if self.sam_names is not None:
@@ -166,12 +168,10 @@ class SPPMethod(metaclass=_DatasetBase):
         dispersion : array-like
             The dispersion coefficients in the form of:
             [GD, GDD, TOD, FOD, QOD, SOD]
-
         dispersion_std : array-like
             Standard deviations due to uncertainty of the fit.
             It is only calculated if lmfit is installed. The form is:
             [GD_std, GDD_std, TOD_std, FOD_std, QOD_std, SOD_std]
-
         fit_report : str
             If lmfit is available returns the fit report, else returns an
             empty string.
@@ -246,6 +246,7 @@ class SPPMethod(metaclass=_DatasetBase):
         <td style="text-align:center"><b>Data recorded from<b></td>
             <td style="text-align:center"> {len(self._container)}</td>
         </tr>
+        </table>
         """
         return s
 
@@ -399,13 +400,16 @@ class SPPMethod(metaclass=_DatasetBase):
     @property
     def info(self):
         """
-        Return how many interferograms where processed.
+        Return how many interferograms were processed.
         """
         self._info = f"Progress: {len(self._container)}/{len(self)}"
         return self._info
 
     @property
     def is_eager(self):
+        """
+        Returns if eager execution is enabled.
+        """
         # TODO
         if self.cb.__name__ == "inner":
             return True

@@ -39,7 +39,6 @@ class DatasetError(Exception):
     This error is raised when invalid type of data encountered
     when initializing a dataset or inherited object.
     """
-
     pass
 
 

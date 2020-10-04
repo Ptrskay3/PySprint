@@ -109,8 +109,8 @@ def exec_notebooks(test_dir, log_path='notebooktest.log'):
                     print(f">>> Executing '{fname}.'")
 
                     exec(
-                        compile(
-                            tree, filename="out", mode="exec"), {"__name__": "__main__"}
+                        compile(tree, filename="out", mode="exec"),
+                        {"__name__": "__main__"}
                     )
 
                     print(f">>> Passed {fname}.")
@@ -152,6 +152,7 @@ def cleanup(test_path):
             print(
                 f"exec_notebooks exited with non-zero ({hooks.exit_code}) exit status. Failed."
             )
+            return hooks.exit_code
     elif hooks.exception is not None:
         print(f"Process terminated by exception: {hooks.exception}")
         return 1
