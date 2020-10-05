@@ -3,12 +3,12 @@ import warnings
 from functools import lru_cache
 
 import numpy as np
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # noqa
 import matplotlib.cbook as cbook
 
 from pysprint.core.bases.dataset import Dataset
 from pysprint.core.bases._dataset_base import _DatasetBase
-from pysprint.core._evaluate import spp_method
+from pysprint.core.phase import Phase
 from pysprint.utils.exceptions import DatasetError
 from pysprint.core.callbacks import defaultcallback
 
@@ -99,7 +99,7 @@ class SPPMethod(metaclass=_DatasetBase):
 
         self._container = {}
         self._info = f"Progress: {len(self._container)}/{len(self)}"
-        self.GD = None  # TODO: integrate ps.core.phase.Phase
+        self.GD = None
 
     def _collect(self):
 
@@ -108,7 +108,7 @@ class SPPMethod(metaclass=_DatasetBase):
         local_positions = {}
 
         for idx, (delay, position) in enumerate(self._container.values()):
-            if idx != 0 and delay.flat[0] in np.concatenate(
+            if idx != 0 and delay.size > 0 and delay.flat[0] in np.concatenate(
                     [a.ravel() for a in local_delays.values()]
             ):
                 raise ValueError(
@@ -189,7 +189,7 @@ class SPPMethod(metaclass=_DatasetBase):
 
         for idx, ifg in enumerate(ifg_list):
             delay, position = ifg.emit()
-            if idx != 0 and delay.flat[0] in np.concatenate(
+            if idx != 0 and delay.size > 0 and delay.flat[0] in np.concatenate(
                     [a.ravel() for a in local_delays.values()]
             ):
                 raise ValueError(
@@ -199,19 +199,13 @@ class SPPMethod(metaclass=_DatasetBase):
             local_positions[idx] = position
         delays = np.concatenate([a.ravel() for a in local_delays.values()])
         positions = np.concatenate([a.ravel() for a in local_positions.values()])
-        x, y, dispersion, dispersion_std, bf = spp_method(
-            delays, positions, ref_point=reference_point, fit_order=order - 1
-        )
-        if show_graph:
-            plt.plot(x, y, "o")
-            try:
-                plt.plot(x, bf, "r--", zorder=1)
-            except Exception as e:
-                print(e)
-            plt.grid()
-            plt.show(block=True)
+        GD = Phase(positions, delays, GD_mode=True)
+        d, ds, s = GD._fit(reference_point=reference_point, order=order)
 
-        return dispersion, dispersion_std, bf
+        if show_graph:
+            GD.plot()
+
+        return d, ds, s
 
     def __len__(self):
         return len(self.ifg_names)
@@ -250,7 +244,7 @@ class SPPMethod(metaclass=_DatasetBase):
         """
         return s
 
-    @lru_cache()
+    @lru_cache(500)
     def __getitem__(self, key):
         try:
             dataframe = Dataset.parse_raw(
@@ -270,15 +264,15 @@ class SPPMethod(metaclass=_DatasetBase):
 
     def _validate(self):
         for filename in self.ifg_names:
-            if not os.path.exists(filename):
+            if filename is not None and not os.path.exists(filename):
                 raise FileNotFoundError(f"""File named '{filename}' is not found.""")
         if self.sam_names:
             for sam in self.sam_names:
-                if not os.path.exists(sam):
+                if sam is not None and not os.path.exists(sam):
                     raise FileNotFoundError(f"""File named '{sam}' is not found.""")
         if self.ref_names:
             for ref in self.ref_names:
-                if not os.path.exists(ref):
+                if ref is not None and not os.path.exists(ref):
                     raise FileNotFoundError(f"""File named '{ref}' is not found.""")
 
     def flush(self):
@@ -307,11 +301,11 @@ class SPPMethod(metaclass=_DatasetBase):
             filename += ".txt"
         delays, positions = self._collect()
         np.savetxt(
-            f"{filename}", np.transpose(np.array([positions, delays])), delimiter=",",
+            f"{filename}", np.column_stack((positions, delays)), delimiter=",",
         )
 
     @staticmethod
-    def calculate_from_raw(omegas, delays, reference_point, order):
+    def calculate_from_raw(omegas, delays, reference_point, order, show_graph=False):
         """
         Calculate the dispersion from matching pairs of delays and SPP positions.
 
@@ -325,6 +319,8 @@ class SPPMethod(metaclass=_DatasetBase):
             The reference point on the x axis.
         order : int
             Maximum dispersion order to look for. Must be in [2, 6].
+        show_graph : bool, optional
+            Whether to show the fitting.
 
         Returns
         -------
@@ -343,10 +339,14 @@ class SPPMethod(metaclass=_DatasetBase):
             raise ValueError(
                 "Order should be greater than 1. Cannot fit constant function to data."
             )
-        x, y, dispersion, dispersion_std, bf = spp_method(
-            delays, omegas, ref_point=reference_point, fit_order=order - 1
-        )
-        return dispersion, dispersion_std, ""
+
+        GD = Phase(omegas, delays, GD_mode=True)
+        d, ds, s = GD._fit(reference_point=reference_point, order=order)
+
+        if show_graph:
+            GD.plot()
+
+        return d, ds, s
 
     def calculate(self, reference_point, order, show_graph=False):
         """
@@ -382,20 +382,13 @@ class SPPMethod(metaclass=_DatasetBase):
             )
         delays, positions = self._collect()
 
-        x, y, dispersion, dispersion_std, bf = spp_method(
-            delays, positions, ref_point=reference_point, fit_order=order - 1
-        )
+        self.GD = Phase(positions, delays, GD_mode=True)
+        d, ds, s = self.GD._fit(reference_point=reference_point, order=order)
+
         if show_graph:
-            plt.plot(x, y, "o")
-            try:
-                plt.plot(x, bf, "r--", zorder=1)
-            except Exception as e:
-                print(e)
-            plt.grid()
+            self.GD.plot()
 
-            plt.show(block=True)
-
-        return dispersion, dispersion_std, ""
+        return d, ds, s
 
     @property
     def info(self):

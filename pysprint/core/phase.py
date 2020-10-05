@@ -1,6 +1,7 @@
 import warnings
 import logging
 from math import factorial
+from collections import namedtuple
 
 import numpy as np
 from scipy.optimize import curve_fit
@@ -60,6 +61,40 @@ class Phase:
         self.is_coeff = False
         self.fitorder = None
         self.GD_mode = GD_mode
+
+        # Make coeffs available after fitting
+        self.coef_temp = namedtuple('coef_temp', ['GD', 'GDD', 'TOD', 'FOD', 'QOD', 'SOD'])
+        self.coef_array = None
+
+    @property
+    def GD(self):
+        if self.coef_array is not None:
+            return self.coef_array.GD
+
+    @property
+    def GDD(self):
+        if self.coef_array is not None:
+            return self.coef_array.GDD
+
+    @property
+    def TOD(self):
+        if self.coef_array is not None:
+            return self.coef_array.TOD
+
+    @property
+    def FOD(self):
+        if self.coef_array is not None:
+            return self.coef_array.FOD
+
+    @property
+    def QOD(self):
+        if self.coef_array is not None:
+            return self.coef_array.QOD
+
+    @property
+    def SOD(self):
+        if self.coef_array is not None:
+            return self.coef_array.SOD
 
     def __call__(self, value):
         if self.poly:
@@ -205,6 +240,11 @@ class Phase:
                 _, idx = find_nearest(self.x, reference_point)
                 dispersion = np.insert(dispersion, 0, self.fitted_curve[idx])
                 dispersion_std = np.insert(dispersion_std, 0, 0)
+
+                # The below line must have 7 elements, so slice these redundant coeffs..
+                dispersion, dispersion_std = dispersion[:-1], dispersion_std[:-1]
+
+            self.coef_array = self.coef_temp(*dispersion)
 
             return dispersion, dispersion_std, fit_report
 

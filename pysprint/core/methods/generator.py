@@ -157,14 +157,14 @@ class Generator(metaclass=_DatasetBase):
         if path is None:
             np.savetxt(
                 f"{name}",
-                np.transpose([self.x, self.y, self.ref, self.sam]),
+                np.column_stack((self.x, self.y, self.ref, self.sam)),
                 delimiter=",",
             )
             print(f"Successfully saved as {name}.")
         else:
             np.savetxt(
                 f"{path}/{name}",
-                np.transpose([self.x, self.y, self.ref, self.sam]),
+                np.column_stack((self.x, self.y, self.ref, self.sam)),
                 delimiter=",",
             )
             print(f"Successfully saved as {name}.")

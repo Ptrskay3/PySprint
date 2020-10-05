@@ -1214,7 +1214,7 @@ class Dataset(metaclass=_DatasetBase):
         if filename:
             if not filename.endswith(".txt"):
                 filename += ".txt"
-            np.savetxt(filename, np.transpose([self.x, self.y]), delimiter=",")
+            np.savetxt(filename, np.column_stack((self.x, self.y)), delimiter=",")
             print(f"Successfully saved as {filename}.")
         return self
 
