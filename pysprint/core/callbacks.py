@@ -102,7 +102,10 @@ def eager_executor(reference_point=None, order=None, logfile=None, verbosity=Non
     cleanup : bool, optional
         Whether to flush the output and override previous results.
     logfile : string or None, optional
-        If given, a logfile will be created with each iteration
+        If given, a logfile will be created each iteration.
+    verbosity : int or None, optional
+        The verbosity level for the logfile. If 0 or None then it
+        won't write the data used for fitting, else it will.
     """
     if not reference_point or not order:
         raise RuntimeError(

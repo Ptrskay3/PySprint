@@ -31,8 +31,8 @@ steps:
     python -m pip install --upgrade pip
     pip install -r requirements.txt
     pip install lmfit numba flake8 coverage codecov pytest nbconvert jupyter
-    python setup.py install
-  displayName: 'Install dependencies'
+    pip install -e .
+  displayName: 'Install'
 
 - script: |
     flake8 pysprint/ --count --select=E9,F63,F72,F82 --show-source --statistics
@@ -41,5 +41,5 @@ steps:
     cd ..
     cd pysprint/tests
     pytest
-  displayName: 'unittest'
+  displayName: 'Unittest'
 
