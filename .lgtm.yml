@@ -1,4 +1,5 @@
 path_classifiers:
-  generated:
-    - exclude: versioneer.py
-    - exclude: pysprint/_version.py
+  examples:
+    # Exclude the versioneer stuff.
+    - versioneer.py
+    - pysprint/_version.py

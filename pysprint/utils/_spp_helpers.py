@@ -3,6 +3,7 @@ import numpy as np
 __all__ = ["correct_sign"]
 
 
+# TODO: rewrite or deprecate this.
 def correct_sign(x, flip_increasing=True):
     if not isinstance(x, np.ndarray):
         x = np.asarray(x)

@@ -95,7 +95,7 @@ def print_info():
     print("\n      ADDITIONAL")
     print("----------------------")
     try:
-        ip = __IPYTHON__
+        ip = __IPYTHON__  # noqa
     except NameError:
         ip = None
     nm = "IPython"

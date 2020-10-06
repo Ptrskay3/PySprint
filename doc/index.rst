@@ -31,6 +31,7 @@ Guide
    hu_fft.ipynb
    hu_wft.ipynb
    hu_minmax.ipynb
+   hu_misc.ipynb
 
 PySprint API reference
 ======================
@@ -49,8 +50,7 @@ PySprint API reference
 TODO, incoming features
 =======================
 * WFT improvement
-* Clean code
-* More testing
+* Testing
 
 References
 ==========

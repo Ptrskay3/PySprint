@@ -122,10 +122,10 @@ def exec_notebooks(test_dir, log_path='notebooktest.log'):
                     failed.append(fname)
 
     print(f">>> Passed {len(passed)}/2")
-    print(f">>> Expected to fail {len(failed)}/5")
+    print(f">>> Expected to fail {len(failed)}/6")
     print(f">>> Log created at {log_path}.")
 
-    if len(passed) != 2 or len(failed) != 5:
+    if len(passed) != 2 or len(failed) != 6:
         return 1
     print(f">>> Notebook tests passed.")
     return 0
