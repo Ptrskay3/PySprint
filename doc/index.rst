@@ -17,7 +17,7 @@ software and this document are works in progress. See the project at
 Try it online:
 
 .. image:: https://mybinder.org/badge_logo.svg
- :target: https://mybinder.org/v2/gh/Ptrskay3/PySprint/6db5b492a16603cb487be237ad55b20f6a2b40e1?filepath=index.ipynb
+ :target: https://mybinder.org/v2/gh/Ptrskay3/PySprint/master?filepath=index.ipynb
 
 Guide
 =====
