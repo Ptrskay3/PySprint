@@ -37,3 +37,4 @@ dependencies:
   - pytest>=5.0.1
   - codecov
   - coverage
+  - tox
