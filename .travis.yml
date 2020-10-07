@@ -33,7 +33,7 @@ install:
   - conda install flake8 codecov pytest coverage nbconvert
   - conda install conda-build anaconda-client
   # Force a refresh, because test_spp_features fails with old dependencies.
-  - python -m pip install --upgrade dask[distributed] numpy scipy lmfit --force-reinstall
+  - python -m pip install --upgrade numpy scipy lmfit --force-reinstall --ignore-installed
   - python -m pip install -e .
 
 before_script:
