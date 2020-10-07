@@ -28,11 +28,13 @@ before_install:
 install:
   - conda env create -f environment.yml
   - activate pysprint-dev
-  -  conda install -c anaconda jupyter
+  - conda install -c anaconda jupyter
   - conda install -c anaconda notebook
   - conda install flake8 codecov pytest coverage nbconvert
   - conda install conda-build anaconda-client
-  - python setup.py install
+  # Force a refresh, because test_spp_features fails with old dependencies.
+  - python -m pip install --upgrade dask[distributed] numpy scipy lmfit --force-reinstall
+  - python -m pip install -e .
 
 before_script:
   - flake8 pysprint/ --count --select=E9,F63,F72,F82 --show-source --statistics
