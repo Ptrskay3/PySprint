@@ -262,7 +262,7 @@ class FFTMethod(Dataset):
         Decorated with pprint_disp, so the results are immediately
         printed without explicitly saying so.
 
-        Developer commentary
+        Developer-commentary
         --------------------
         Currently the x-axis transformation is sloppy, because we cache the
         original x axis and not transforming it	backwards.
