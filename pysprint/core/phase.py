@@ -5,9 +5,10 @@ from collections import namedtuple
 
 import numpy as np
 from scipy.optimize import curve_fit
-import matplotlib.pyplot as plt
+from scipy.signal import savgol_filter, medfilt
+from scipy.ndimage import gaussian_filter1d
 
-from pysprint.config import _get_config_value
+import matplotlib.pyplot as plt
 
 try:
     from lmfit import Model
@@ -16,17 +17,17 @@ try:
 except ImportError:
     _has_lmfit = False
 
+from pysprint.config import _get_config_value
 from pysprint.core._functions import _fit_config
 from pysprint.core._preprocess import cut_data
-from pysprint.utils import (
-    pprint_disp,
-    transform_lmfit_params_to_dispersion,
-    transform_cf_params_to_dispersion,
-    _unpack_lmfit,
-    find_nearest,
-    inplacify,
-    NotCalculatedException,
-)
+from pysprint.utils import pprint_disp
+from pysprint.utils import transform_lmfit_params_to_dispersion
+from pysprint.utils import transform_cf_params_to_dispersion
+from pysprint.utils import _unpack_lmfit
+from pysprint.utils import find_nearest
+from pysprint.utils import inplacify
+from pysprint.utils import NotCalculatedException
+
 
 logger = logging.getLogger(__name__)
 FORMAT = "[ %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
@@ -63,8 +64,15 @@ class Phase:
         self.GD_mode = GD_mode
 
         # Make coeffs available after fitting
-        self.coef_temp = namedtuple('coef_temp', ['GD', 'GDD', 'TOD', 'FOD', 'QOD', 'SOD'])
+        self.coef_temp = namedtuple(
+            'coef_temp', ['GD', 'GDD', 'TOD', 'FOD', 'QOD', 'SOD']
+        )
+        self.coef_std_temp = namedtuple(
+            'coef_std_temp', ['GD_err', 'GDD_err', 'TOD_err', 'FOD_err', 'QOD_err', 'SOD_err']
+        )
+
         self.coef_array = None
+        self.coef_std_array = None
 
     @property
     def GD(self):
@@ -95,6 +103,36 @@ class Phase:
     def SOD(self):
         if self.coef_array is not None:
             return self.coef_array.SOD
+
+    @property
+    def GD_err(self):
+        if self.coef_std_array is not None:
+            return self.coef_std_array.GD_err
+
+    @property
+    def GDD_err(self):
+        if self.coef_std_array is not None:
+            return self.coef_std_array.GDD_err
+
+    @property
+    def TOD_err(self):
+        if self.coef_std_array is not None:
+            return self.coef_std_array.TOD_err
+
+    @property
+    def FOD_err(self):
+        if self.coef_std_array is not None:
+            return self.coef_std_array.FOD_err
+
+    @property
+    def QOD_err(self):
+        if self.coef_std_array is not None:
+            return self.coef_std_array.QOD_err
+
+    @property
+    def SOD_err(self):
+        if self.coef_std_array is not None:
+            return self.coef_std_array.SOD_err
 
     def __call__(self, value):
         if self.poly:
@@ -149,7 +187,7 @@ class Phase:
             return self.poly.__str__()
         raise NotImplementedError("Before calling, a polynomial must be fitted.")
 
-    def plot(self, ax=None, **kwargs):
+    def plot(self, ax=None, marker=None, linestyle=None, **kwargs):
         """
         Plot the phase and the fitted curve (if there's any).
 
@@ -171,12 +209,11 @@ class Phase:
             # if we keep it unsorted
             idx = np.argsort(self.x)
             x, y = self.x[idx], self.y[idx]
-            ax.plot(x, y, **kwargs)
+            marker = marker or kwargs.pop("marker", ".")
+            linestyle = linestyle or kwargs.pop("linestyle", "None")
+            ax.plot(x, y, marker=marker, linestyle=linestyle, **kwargs)
             if self.fitted_curve is not None:
                 ax.plot(x, self.fitted_curve[idx], "r--")
-            else:
-                # ax.plot(x, self.poly(x)[idx], **kwargs)
-                pass
 
     @pprint_disp
     def fit(self, reference_point, order):
@@ -245,6 +282,7 @@ class Phase:
                 dispersion, dispersion_std = dispersion[:-1], dispersion_std[:-1]
 
             self.coef_array = self.coef_temp(*dispersion)
+            self.coef_std_array = self.coef_std_temp(*dispersion_std)
 
             return dispersion, dispersion_std, fit_report
 
@@ -310,6 +348,8 @@ class Phase:
             idx = np.where(self.x <= value)[0]
         elif side == "right":
             idx = np.where(self.x >= value)[0]
+        else:
+            idx = np.array([])
 
         x_to_flip, y_to_flip = self.x[idx], self.y[idx]
 
@@ -347,6 +387,9 @@ class Phase:
         """
         return self.fitorder + 1 if self.GD_mode else self.fitorder
 
+    # TODO : For consistency, this should return a pd.DataFrame.
+    # Because we hardwired this into other functions it's not safe to rewrite,
+    # but this definitely should be corrected in the future.
     @property
     def data(self):
         """
@@ -372,6 +415,48 @@ class Phase:
         """
         return self._get_r_squared()
 
-    # TODO
-    def del_range(self, start, stop):
-        pass
+    @inplacify
+    def remove_range(self, start=None, stop=None):
+        """
+        Remove a part of the phase for x that satisfies
+        start <= x <= stop. Leaving start (stop) as `None`
+        will remove from the beginning (end).
+        """
+        if start is None:
+            start = np.min(self.x)
+        if stop is None:
+            stop = np.max(self.x)
+
+        mask = ((self.x <= stop) & (self.x >= start))
+        self.x, self.y = self.x[~mask], self.y[~mask]
+        return self
+
+    @inplacify
+    def smooth(self, method="gaussian_filter1d", sigma=10, **kwargs):
+        """
+        Smooth the phase with a piecewise cubic polynomial
+        which is twice continuously differentiable.
+        """
+        if method not in ("savitzky-golay", "convolve", "medfilt", "gaussian_filter1d"):
+            raise ValueError(
+                "method must be 'savitzky-golay', 'medfilt', 'gaussian_filter1d' or 'convolve'"
+            )
+
+        window_length = kwargs.pop("window_lenth", 51)
+
+        if method == "savitzky-golay":
+            poly_order = kwargs.pop("poly_order", 3)
+            self.y = savgol_filter(self.y, window_length, poly_order, **kwargs)
+
+        elif method == "convolve":
+            box = np.ones(window_length) / window_length
+            self.y = np.convolve(self.y, box, mode=kwargs.get("mode", "same"))
+
+        elif method == "medfilt":
+            self.y = medfilt(self.y, kwargs.get("kernel_size", 5))
+
+        elif method == "gaussian_filter1d":
+            sigma = sigma or kwargs.pop("sigma", 10)
+            self.y = gaussian_filter1d(self.y, sigma=sigma, **kwargs)
+
+        return self

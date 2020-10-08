@@ -348,6 +348,16 @@ class SPPMethod(metaclass=_DatasetBase):
 
         return d, ds, s
 
+    def build_GD(self):
+        """
+        Build the GD and return it. It will rebuild every time
+        this function is called.
+        """
+        delays, positions = self._collect()
+
+        self.GD = Phase(positions, delays, GD_mode=True)
+        return self.GD
+
     def calculate(self, reference_point, order, show_graph=False):
         """
         This function should be used after setting the SPP data in
@@ -380,9 +390,7 @@ class SPPMethod(metaclass=_DatasetBase):
             raise ValueError(
                 "Order should be greater than 1. Cannot fit constant function to data."
             )
-        delays, positions = self._collect()
-
-        self.GD = Phase(positions, delays, GD_mode=True)
+        self.build_GD()
         d, ds, s = self.GD._fit(reference_point=reference_point, order=order)
 
         if show_graph:
