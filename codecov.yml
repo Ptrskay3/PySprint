@@ -1,0 +1,4 @@
+ignore:
+  - "versioneer.py"
+  - "pysprint/_version.py"
+

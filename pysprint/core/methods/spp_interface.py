@@ -246,6 +246,8 @@ class SPPMethod(metaclass=_DatasetBase):
 
     @lru_cache(500)
     def __getitem__(self, key):
+        if isinstance(key, slice):
+            raise TypeError("Slices are not acceptable.")
         try:
             dataframe = Dataset.parse_raw(
                 self.ifg_names[key],

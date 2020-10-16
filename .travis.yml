@@ -52,10 +52,12 @@ script:
 after_success:
   - codecov
 
-before_deploy:
-  - cd ..
-  - cd ..
-  - bash .ci/conda_upload.sh
+# suppress anaconda deployment until we find out why it's failing with 3.8 and 3.6 Python version.
+
+#before_deploy:
+#  - cd ..
+#  - cd ..
+#  - bash .ci/conda_upload.sh
 
 deploy:
   - provider: pypi
