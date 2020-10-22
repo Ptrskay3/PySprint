@@ -22,7 +22,7 @@ class SPPMethod(metaclass=_DatasetBase):
     Interface for Stationary Phase Point Method.
     """
 
-    def __init__(self, ifg_names, sam_names=None, ref_names=None, errors="raise", **kwargs):
+    def __init__(self, ifg_names, sam_names=None, ref_names=None, errors="raise", implementer=None, **kwargs):
         """
         SPPMethod constructor.
 
@@ -41,6 +41,14 @@ class SPPMethod(metaclass=_DatasetBase):
             raise ValueError("errors must be `raise` or `ignore`.")
 
         self.ifg_names = ifg_names
+
+        if implementer is None:
+            self.implementer = Dataset
+        else:
+            if issubclass(implementer, Dataset):
+                self.implementer = implementer
+            else:
+                raise TypeError("implementer must subclass `pysprint.Dataset`.")
 
         if sam_names:
             self.sam_names = sam_names
@@ -249,7 +257,7 @@ class SPPMethod(metaclass=_DatasetBase):
         if isinstance(key, slice):
             raise TypeError("Slices are not acceptable.")
         try:
-            dataframe = Dataset.parse_raw(
+            dataframe = self.implementer.parse_raw(
                 self.ifg_names[key],
                 self.sam_names[key],
                 self.ref_names[key],
@@ -257,7 +265,7 @@ class SPPMethod(metaclass=_DatasetBase):
                 parent=self
             )
         except (TypeError, ValueError):
-            dataframe = Dataset.parse_raw(
+            dataframe = self.implementer.parse_raw(
                 self.ifg_names[key],
                 **self.load_dict,
                 parent=self
