@@ -13,6 +13,8 @@ dependencies:
   - lmfit
   - Jinja2
   - dask
+  - setuptools_rust
+  - wheel
 
   # docs
   - sphinx

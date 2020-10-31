@@ -7,6 +7,9 @@ core/__pycache__/
 *$py.class
 
 # Local files
+third_party/
+target/
+.eggs/
 mightneed/
 .idea/*
 doc/.ipynb_checkpoints/*

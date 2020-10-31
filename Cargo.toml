@@ -1,0 +1,14 @@
+[package]
+authors = ["Leéh Péter <leeh123peter@gmail.com>"]
+name = "pysprint"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies.pyo3]
+version = "0.12.3"
+features = ["extension-module"]
+path = "third_party/"
+
+[lib]
+name = "pysprint"
+crate-type = ["cdylib"]
