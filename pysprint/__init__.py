@@ -1,3 +1,5 @@
+﻿import sys
+
 import warnings
 from contextlib import contextmanager
 
@@ -6,6 +8,13 @@ import matplotlib.pyplot as plt  # noqa
 
 import pysprint.core.init_config
 from pysprint.utils.misc import run_from_ipython
+
+try:
+    from .pysprint import blank
+except:
+    def blank(*args, **kwargs):
+        raise ImportError("Rust Extensions aren't built.")
+
 
 warnings.filterwarnings("ignore", message="invalid value encountered in sqrt")
 warnings.filterwarnings("ignore", message="divide by zero encountered in true_divide")
