@@ -30,8 +30,8 @@ steps:
 - script: |
     python -m pip install --upgrade pip
     pip install -r requirements.txt
-    pip install wheel lmfit numba flake8 coverage codecov pytest nbconvert jupyter
-    pip install -e .
+    pip install wheel lmfit numba flake8 coverage codecov pytest nbconvert jupyter setuptools wheel setuptools-rust
+    pip install -e . --no-build-isolation
   displayName: 'Install'
 
 - script: |
@@ -40,6 +40,6 @@ steps:
     python test_notebooks.py .
     cd ..
     cd pysprint/tests
-    pytest
+    pytest -vv
   displayName: 'Unittest'
 

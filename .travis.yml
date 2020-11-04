@@ -4,10 +4,14 @@ dist: xenial
 services:
   - xvfb
 
-language: python
+language: rust
+  rust:
+    - nightly
+  jobs:
+    allow_failures:
+      - rust: nightly
+    fast_finish: true
 
-python:
-  - 3.8
 
 addons:
   apt:
@@ -24,6 +28,7 @@ before_install:
   - conda config --add channels conda-forge
   - conda config --add channels ptrskay
   - conda info -a
+  - git clone https://github.com/PyO3/pyo3.git third_party
 
 install:
   - conda env create -f environment.yml
@@ -34,7 +39,7 @@ install:
   - conda install conda-build anaconda-client
   # Force a refresh, because test_spp_features fails with old dependencies.
   - python -m pip install --upgrade numpy scipy lmfit --force-reinstall --ignore-installed
-  - python -m pip install -e .
+  - python -m pip install -e . --no-build-isolation
 
 before_script:
   - flake8 pysprint/ --count --select=E9,F63,F72,F82 --show-source --statistics

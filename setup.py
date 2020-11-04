@@ -3,6 +3,8 @@ import sys
 
 import versioneer
 
+cmdclass = versioneer.get_cmdclass()
+
 if sys.version_info[:2] < (3, 6):
     raise RuntimeError("Python version >= 3.6 required.")
 
@@ -27,7 +29,7 @@ except ImportError:
         from setuptools_rust import RustExtension, Binding
 
 
-_VersioneerSdist = versioneer.get_cmdclass()['sdist']
+_VersioneerSdist = cmdclass['sdist']
 
 class CargoModifiedSdist(_VersioneerSdist):
     """Modifies Cargo.toml to use an absolute rather than a relative path
@@ -65,7 +67,7 @@ class CargoModifiedSdist(_VersioneerSdist):
             toml.dump(cargo_toml, f)
 
 
-cmdclass = {**versioneer.get_cmdclass(), **{"sdist": CargoModifiedSdist}}
+cmdclass["sdist"] = CargoModifiedSdist
 
 setup(
     name="pysprint",
