@@ -49,8 +49,8 @@ def test_collection(construct_ifg_sequence):
     disp, _, _ = SPPMethod.calculate_from_ifg(
         [d1, d2, d3, d4], reference_point=2, order=5
     )
-    np.testing.assert_almost_equal(15.272952, disp[0], decimal=5)
-    np.testing.assert_almost_equal(-12.27234, disp[1], decimal=5)
+    np.testing.assert_almost_equal(9.6067619, disp[0], decimal=5)
+    np.testing.assert_almost_equal(-12.272306, disp[1], decimal=5)
     np.testing.assert_almost_equal(0.76698, disp[2], decimal=5)
     np.testing.assert_almost_equal(-0.02171, disp[3], decimal=5)
     np.testing.assert_almost_equal(0.00014, disp[4], decimal=5)
@@ -79,8 +79,8 @@ def test_ambiguous_positions(construct_ifg_sequence):
     disp, _, _ = SPPMethod.calculate_from_ifg(
         [d1, d2, d3, d6], reference_point=2, order=5
     )
-    np.testing.assert_almost_equal(15.272952, disp[0], decimal=5)
-    np.testing.assert_almost_equal(-12.27234, disp[1], decimal=5)
+    np.testing.assert_almost_equal(9.606761, disp[0], decimal=5)
+    np.testing.assert_almost_equal(-12.272306, disp[1], decimal=5)
     np.testing.assert_almost_equal(0.76698, disp[2], decimal=5)
     np.testing.assert_almost_equal(-0.02171, disp[3], decimal=5)
     np.testing.assert_almost_equal(0.00014, disp[4], decimal=5)
