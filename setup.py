@@ -1,6 +1,8 @@
 import os
 import sys
 
+import versioneer
+
 if sys.version_info[:2] < (3, 6):
     raise RuntimeError("Python version >= 3.6 required.")
 
@@ -24,7 +26,10 @@ except ImportError:
     else:
         from setuptools_rust import RustExtension, Binding
 
-class CargoModifiedSdist(SdistCommand):
+
+_VersioneerSdist = versioneer.get_cmdclass()['sdist']
+
+class CargoModifiedSdist(_VersioneerSdist):
     """Modifies Cargo.toml to use an absolute rather than a relative path
 
     The current implementation of PEP 517 in pip always does builds in an
@@ -59,7 +64,6 @@ class CargoModifiedSdist(SdistCommand):
         with open(cargo_loc, "w") as f:
             toml.dump(cargo_toml, f)
 
-import versioneer
 
 cmdclass = {**versioneer.get_cmdclass(), **{"sdist": CargoModifiedSdist}}
 
