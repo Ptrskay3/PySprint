@@ -5,3 +5,4 @@ include versioneer.py
 include pysprint/_version.py
 include pyproject.toml Cargo.toml
 recursive-include src *
+recursive-include pysprint *.pyd
