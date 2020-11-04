@@ -248,6 +248,8 @@ class Phase:
 
             x, y = np.copy(self.x), np.copy(self.y)
             x -= reference_point
+            idx = np.argsort(x)
+            x, y = x[idx], y[idx]
 
             if _has_lmfit:
 
@@ -264,13 +266,15 @@ class Phase:
                 fit_report = result.fit_report()
                 self.fitted_curve = result.best_fit
             else:
+                # IMPORTANT! We must take a copy of `popt`, because that's modified
+                # inplace. This caused wrong plots when `lmfit` wasn't installed.
+                # version fixed: 0.13.2
                 dispersion, dispersion_std = transform_cf_params_to_dispersion(
-                    popt, drop_first=True, dof=1
+                    np.copy(popt), drop_first=True, dof=1
                 )
                 fit_report = (
                     "To display detailed results you must have `lmfit` installed."
                 )
-
                 self.fitted_curve = _function(x, *popt)
 
             if self.GD_mode:
@@ -388,8 +392,8 @@ class Phase:
         return self.fitorder + 1 if self.GD_mode else self.fitorder
 
     # TODO : For consistency, this should return a pd.DataFrame.
-    # Because we hardwired this into other functions it's not safe to rewrite,
-    # but this definitely should be corrected in the future.
+    # Because we hardwired this into other functions it's not safe
+    # to rewrite, but this definitely should be corrected in the future.
     @property
     def data(self):
         """
