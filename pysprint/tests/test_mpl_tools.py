@@ -37,8 +37,8 @@ def test_insert(mock_show):
     mck = mock_event(xdata=50, ydata=50, button="i", key="i", fig=obj.figure, canvas=obj.figure.canvas, inaxes=True)
     obj.on_clicked(event=mck)
     a, b = obj.get_dat
-    np.testing.assert_array_equal(a, np.array([4, 5, 50]))
-    np.testing.assert_array_equal(b, np.array([4, 5, 50]))
+    np.testing.assert_array_almost_equal(a, np.array([4, 5, 50]), decimal=5)
+    np.testing.assert_array_almost_equal(b, np.array([4, 5, 50]), decimal=5)
     mock_show.assert_called()
 
 

@@ -102,7 +102,8 @@ def print_info():
     is_spyder = any("SPYDER" in name for name in os.environ)
     rust_ext = "Rust-ext"
     try:
-        from pysprint import fast_wft
+        from pysprint import blank
+
         blank(1)
         is_built = True
     except ImportError:

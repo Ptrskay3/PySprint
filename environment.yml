@@ -13,8 +13,13 @@ dependencies:
   - lmfit
   - Jinja2
   - dask
+
+  # dev
+  - rust
+  - rust-nightly
   - setuptools-rust
   - wheel
+  - pip==18
 
   # docs
   - sphinx
@@ -31,7 +36,7 @@ dependencies:
   - ipywidgets
   - nbformat
   - notebook>=5.7.5
-  - pip==18
+
 
   # code checks
   - black

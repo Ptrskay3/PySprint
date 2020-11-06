@@ -113,7 +113,7 @@ class MinMaxMethod(Dataset):
             order,
             SPP_callbacks=None,
             show_graph=False,
-            allow_parallel=False
+            scan=False
     ):
         """
         MinMaxMethod's calculate function.
@@ -154,10 +154,10 @@ class MinMaxMethod(Dataset):
             left_phase = phase.slice(None, reference_point, inplace=False)
             right_phase = phase.slice(reference_point, None, inplace=False)
         else:
-            allow_parallel = False
-            logger.info("Parallel is disabled, reference_point is on the border.")
+            scan = False
+            logger.info("Scan is disabled, reference_point is on the border.")
 
-        if allow_parallel:
+        if scan:
             left_d, left_ds, left_fit_report = left_phase._fit(reference_point, order)
             right_d, right_ds, right_fit_report = right_phase._fit(reference_point, order)
 
