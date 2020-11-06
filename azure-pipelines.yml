@@ -1,6 +1,6 @@
 trigger:
 - master
-- WFT
+- rust-ext
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -30,8 +30,8 @@ steps:
 - script: |
     python -m pip install --upgrade pip
     pip install -r requirements.txt
-    pip install wheel lmfit numba flake8 coverage codecov pytest nbconvert jupyter setuptools wheel setuptools-rust
-    pip install -e . --no-build-isolation
+    pip install wheel lmfit numba flake8 coverage codecov pytest nbconvert jupyter setuptools wheel setuptools-rust pip==18
+    pip install -e .
   displayName: 'Install'
 
 - script: |

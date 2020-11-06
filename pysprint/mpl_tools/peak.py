@@ -38,7 +38,6 @@ matplotlib.backend_tools.ToolBase.__init__ = tb_init
 
 # ----------------------------------------------------------------------------
 
-
 from matplotlib.backend_tools import ToolToggleBase
 from pysprint.utils import _get_closest
 
@@ -56,7 +55,7 @@ class SelectButton(ToolToggleBase):
         super().__init__(*args, **kwargs)
 
 
-class EditPeak(object):
+class EditPeak:
     """
     This class helps to record and delete peaks from a dataset.
     Right clicks will delete the closest extremal point found
@@ -80,11 +79,14 @@ class EditPeak(object):
         plt.plot(self.x, self.y, "r")
         self.x_extremal = x_extremal
         self.y_extremal = y_extremal
-        if not len(self.x_extremal) == len(self.y_extremal):
-            raise ValueError("Data shapes are different")
         self.press()
+        if self.x_extremal is not None and self.y_extremal is not None:
+            if not len(self.x_extremal) == len(self.y_extremal):
+                raise ValueError("Data shapes are different")
+        else:
+            self.x_extremal, self.y_extremal = [], []
         (self.lins,) = self.ax.plot(
-            self.x_extremal, self.y_extremal, "ko", markersize=6, zorder=99
+            self.x_extremal, self.y_extremal, "ko", markersize=8, zorder=99, alpha=0.5
         )
         self.ax.grid(alpha=0.7)
         # adding the button to navigation toolbar
@@ -97,20 +99,50 @@ class EditPeak(object):
         plt.sca(self.ax)
         plt.show(block=True)
 
+
     def on_clicked(self, event):
-        """ Function to record and discard points on plot."""
+        """
+        Function to record and discard points on plot.
+        This function is kind of expensive, but we must work in pixel
+        coordinates, because otherwise when the axes are differently scaled the
+        result will be catastrophicly unintuitive to work with.
+        """
         ix, iy = event.xdata, event.ydata
+        
+        # change the cursor's position to pixels
+        xy_pixels = self.ax.transData.transform(np.vstack([ix, iy]).T)
+        ix, iy = xy_pixels.T
+
+        # compute the current pixel positions of the curve
+        xy_pixels = self.ax.transData.transform(np.vstack([self.x, self.y]).T)
+        x_pix, y_pix = xy_pixels.T
+
         if event.inaxes is None:
             return
         if self.my_select_button.toggled:
             if event.key == "d":
-                ix, iy, idx = _get_closest(ix, iy, self.x_extremal, self.y_extremal)
+                # compute extremals's pixel coords
+                extr_pixels = self.ax.transData.transform(np.vstack([self.x_extremal, self.y_extremal]).T)
+                extr_x, extr_y = extr_pixels.T
+                
+                # get the closest extremal to the cursor in pixels
+                ix, iy, idx = _get_closest(ix, iy, extr_x, extr_y)
+
+                # delete the corresponding index in original array
                 self.x_extremal = np.delete(self.x_extremal, idx)
                 self.y_extremal = np.delete(self.y_extremal, idx)
+
             elif event.key == "i":
-                ix, iy, idx = _get_closest(ix, iy, self.x, self.y)
-                self.x_extremal = np.append(self.x_extremal, ix)
-                self.y_extremal = np.append(self.y_extremal, iy)
+                # compute the closest point to the cursor in pixels
+                ix, iy, idx = _get_closest(ix, iy, x_pix, y_pix)
+
+                # change back to data coords and append
+                pixels = self.ax.transData.inverted().transform(np.vstack([ix, iy]).T)
+                x_data, y_data = pixels.T
+
+                self.x_extremal = np.append(self.x_extremal, x_data)
+                self.y_extremal = np.append(self.y_extremal, y_data)
+
             self.lins.set_data(self.x_extremal, self.y_extremal)
             plt.draw()
             return
