@@ -5,11 +5,11 @@ channels:
 dependencies:
   # required and optional
   - python=3.8
-  - numpy>=1.15,<1.19.0
+  - numpy>=1.15
   - matplotlib
   - pandas
   - scipy
-  - numba>=0.46.0
+  - numba
   - lmfit
   - Jinja2
   - dask
@@ -18,7 +18,7 @@ dependencies:
   - setuptools-rust
   - setuptools
   - wheel
-  - pip==18
+  - pip
 
   # docs
   - sphinx
@@ -28,19 +28,18 @@ dependencies:
   - nbconvert
 
   # Strictly speaking this is not neseccary, but better safe than sorry
-  - cython>=0.29.16
-  - ipython>=7.11.1
+  - ipython
   - jupyter
   - ipykernel
   - ipywidgets
   - nbformat
-  - notebook>=5.7.5
+  - notebook
 
 
   # code checks
   - black
   - flake8
-  - pytest>=5.0.1
+  - pytest
   - codecov
   - coverage
   - tox
