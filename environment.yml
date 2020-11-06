@@ -15,9 +15,8 @@ dependencies:
   - dask
 
   # dev
-  - rust
-  - rust-nightly
   - setuptools-rust
+  - setuptools
   - wheel
   - pip==18
 
