@@ -24,9 +24,8 @@ before_install:
   - conda config --add channels conda-forge
   - conda config --add channels ptrskay
   - conda install -c anaconda rust
-  - conda install -c anaconda rust-nightly
+  - conda install -c powerai rust-nightly
   - conda info -a
-  - rustup default nightly
   - cargo version
   - git clone --depth 1 https://github.com/PyO3/pyo3.git third_party
 
