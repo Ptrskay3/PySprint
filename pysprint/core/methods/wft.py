@@ -522,6 +522,9 @@ class WFTMethod(FFTMethod):
         self.GD = Phase(delay, omega, GD_mode=True)
         return self.GD
 
+    def build_phase(self):
+        raise NotImplementedError("Use `build_GD` instead.")
+
     def _predict_ideal_window_fwhm(self):
         pass
 

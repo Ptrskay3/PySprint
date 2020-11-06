@@ -1,9 +1,6 @@
 import os
 import sys
 
-import versioneer
-
-cmdclass = versioneer.get_cmdclass()
 
 if sys.version_info[:2] < (3, 6):
     raise RuntimeError("Python version >= 3.6 required.")
@@ -28,7 +25,9 @@ except ImportError:
     else:
         from setuptools_rust import RustExtension, Binding
 
+from versioneer import get_cmdclass, get_version
 
+cmdclass = get_cmdclass()
 _VersioneerSdist = cmdclass['sdist']
 
 class CargoModifiedSdist(_VersioneerSdist):
@@ -47,7 +46,6 @@ class CargoModifiedSdist(_VersioneerSdist):
     def make_release_tree(self, base_dir, files):
         """Stages the files to be included in archives"""
         super().make_release_tree(base_dir, files)
-
         import toml
 
         # Cargo.toml is now staged and ready to be modified
@@ -60,18 +58,16 @@ class CargoModifiedSdist(_VersioneerSdist):
         rel_pyo3_path = cargo_toml["dependencies"]["pyo3"]["path"]
         base_path = os.path.dirname(__file__)
         abs_pyo3_path = os.path.abspath(os.path.join(base_path, rel_pyo3_path))
-        print("PATH TO PYO3", abs_pyo3_path)
         cargo_toml["dependencies"]["pyo3"]["path"] = abs_pyo3_path
 
         with open(cargo_loc, "w") as f:
             toml.dump(cargo_toml, f)
 
-
 cmdclass["sdist"] = CargoModifiedSdist
 
 setup(
     name="pysprint",
-    version=versioneer.get_version(),
+    version=get_version(),
     cmdclass=cmdclass,
     author="Péter Leéh",
     author_email="leeh123peter@gmail.com",
@@ -92,7 +88,9 @@ setup(
     install_requires=["numpy>=1.16.6", "scipy", "matplotlib", "pandas", "Jinja2"],
     setup_requires=["setuptools-rust>=0.10.1", "wheel"],
     extras_require={"optional": ["numba", "lmfit", "pytest", "dask"]},
-    rust_extensions=[RustExtension("pysprint.numerics", "Cargo.toml", debug=False, binding=Binding.PyO3)],
+    rust_extensions=[
+        RustExtension("pysprint.numerics", "Cargo.toml", debug=False, binding=Binding.PyO3),
+        ],
     entry_points={
         'console_scripts': [
             'pysprint = pysprint.templates.build:main',

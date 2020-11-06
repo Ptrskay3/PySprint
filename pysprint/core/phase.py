@@ -248,8 +248,8 @@ class Phase:
 
             x, y = np.copy(self.x), np.copy(self.y)
             x -= reference_point
-            idx = np.argsort(x)
-            x, y = x[idx], y[idx]
+            # idx = np.argsort(x)
+            # x, y = x[idx], y[idx]
 
             if _has_lmfit:
 
@@ -406,9 +406,15 @@ class Phase:
         Calculate the R^2 value.
         """
         if self.fitted_curve is not None:
-            residuals = self.y - self.fitted_curve
+            try:
+                residuals = self.y - self.fitted_curve
+            except ValueError as e:
+                msg = "Original data was modified, cannot broadcast shape with the fitted curve."
+                raise msg from e
             ss_res = np.sum(residuals ** 2)
             ss_tot = np.sum((self.y - np.mean(self.y)) ** 2)
+            if ss_res == 0 or ss_tot == 0:
+                warnings.warn("R squared could not be computed properly.")
             return 1 - (ss_res / ss_tot)
         raise NotCalculatedException
 
@@ -464,3 +470,25 @@ class Phase:
             self.y = gaussian_filter1d(self.y, sigma=sigma, **kwargs)
 
         return self
+
+    # TODO: Remove the duplicated logic. This function is in pysprint's init.py
+    # and we can't circular import it. It should be moved to a separate file.
+    def plot_outside(self, *args, **kwargs):
+        """
+        Plot the current dataset out of the notebook. For detailed
+        parameters see `Dataset.plot` function.
+        """
+        backend = kwargs.pop("backend", "Qt5Agg")
+        original_backend = plt.get_backend()
+        try:
+            plt.switch_backend(backend)
+            self.plot(*args, **kwargs)
+            plt.show(block=True)
+        except (AttributeError, ImportError, ModuleNotFoundError) as err:
+            raise ValueError(
+                f"Couldn't set backend {backend}, you should manually "
+                "change to an appropriate GUI backend. (Matplotlib 3.3.1 "
+                "is broken. In that case use backend='TkAgg')."
+            ) from err
+        finally:
+            plt.switch_backend(original_backend)

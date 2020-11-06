@@ -99,7 +99,7 @@ def _between(val, except_around):
 
 def _unpack_lmfit(r):
     dispersion, dispersion_std = [], []
-    for name, par in r:
+    for _, par in r:
         dispersion.append(par.value)
         dispersion_std.append(par.stderr)
     return dispersion, dispersion_std

@@ -49,8 +49,8 @@ def test_collection(construct_ifg_sequence):
     disp, _, _ = SPPMethod.calculate_from_ifg(
         [d1, d2, d3, d4], reference_point=2, order=5
     )
-    np.testing.assert_almost_equal(9.6067619, disp[0], decimal=5)
-    np.testing.assert_almost_equal(-12.272306, disp[1], decimal=5)
+    np.testing.assert_almost_equal(15.27295290117039, disp[0], decimal=5)
+    np.testing.assert_almost_equal(-12.2723459, disp[1], decimal=5)
     np.testing.assert_almost_equal(0.76698, disp[2], decimal=5)
     np.testing.assert_almost_equal(-0.02171, disp[3], decimal=5)
     np.testing.assert_almost_equal(0.00014, disp[4], decimal=5)
@@ -66,7 +66,7 @@ def test_duplicate_entries(construct_ifg_sequence):
     Here we test that duplicated delay values (apart from multiple SPP positions)
     are correctly identified and ValueError is raised.
     """
-    d1, d2, d3, d4, d5, d6 = construct_ifg_sequence
+    d1, d2, d3, d4, d5, _ = construct_ifg_sequence
     with pytest.raises(ValueError):
         SPPMethod.calculate_from_ifg([d1, d2, d3, d4, d5], reference_point=2, order=4)
 
@@ -75,12 +75,12 @@ def test_ambiguous_positions(construct_ifg_sequence):
     """
     Here we test if ambiguous positions (defining them as tuple) are handled correctly.
     """
-    d1, d2, d3, d4, d5, d6 = construct_ifg_sequence
+    d1, d2, d3, _, _, d6 = construct_ifg_sequence
     disp, _, _ = SPPMethod.calculate_from_ifg(
         [d1, d2, d3, d6], reference_point=2, order=5
     )
-    np.testing.assert_almost_equal(9.606761, disp[0], decimal=5)
-    np.testing.assert_almost_equal(-12.272306, disp[1], decimal=5)
+    np.testing.assert_almost_equal(15.27295290117039, disp[0], decimal=5)
+    np.testing.assert_almost_equal(-12.2723459, disp[1], decimal=5)
     np.testing.assert_almost_equal(0.76698, disp[2], decimal=5)
     np.testing.assert_almost_equal(-0.02171, disp[3], decimal=5)
     np.testing.assert_almost_equal(0.00014, disp[4], decimal=5)

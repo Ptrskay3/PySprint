@@ -3,16 +3,16 @@ This file implements the Dataset class with all the functionality
 that an interferogram should have in general.
 """
 import base64
-import warnings
-import numbers
-import re
 from collections.abc import Iterable
 from contextlib import suppress
 from io import BytesIO
-from textwrap import dedent
-from math import factorial
-import json  # for pretty printing dict
+import json
 import logging
+from math import factorial
+import numbers
+import re
+from textwrap import dedent
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -21,7 +21,8 @@ from scipy.interpolate import interp1d
 from jinja2 import Template
 
 from pysprint.config import _get_config_value
-from pysprint.core.bases._dataset_base import _DatasetBase, C_LIGHT
+from pysprint.core.bases._dataset_base import _DatasetBase
+from pysprint.core.bases._dataset_base import C_LIGHT
 from pysprint.core.bases._apply import _DatasetApply
 from pysprint.core._evaluate import is_inside
 from pysprint.core._evaluate import ifft_method
@@ -1110,6 +1111,28 @@ class Dataset(metaclass=_DatasetBase):
             pos_x = np.array(pos_x)
             pos_y = np.array(pos_y)
         return pos_x, pos_y
+
+    # TODO: Remove the duplicated logic. This function is in pysprint's init.py
+    # and we can't circular import it. It should be moved to a separate file.
+    def plot_outside(self, *args, **kwargs):
+        """
+        Plot the current dataset out of the notebook. For detailed
+        parameters see `Dataset.plot` function.
+        """
+        backend = kwargs.pop("backend", "Qt5Agg")
+        original_backend = plt.get_backend()
+        try:
+            plt.switch_backend(backend)
+            self.plot(*args, **kwargs)
+            plt.show(block=True)
+        except (AttributeError, ImportError, ModuleNotFoundError) as err:
+            raise ValueError(
+                f"Couldn't set backend {backend}, you should manually "
+                "change to an appropriate GUI backend. (Matplotlib 3.3.1 "
+                "is broken. In that case use backend='TkAgg')."
+            ) from err
+        finally:
+            plt.switch_backend(original_backend)
 
     def plot(self, ax=None, title=None, xlim=None, ylim=None, **kwargs):
         """
