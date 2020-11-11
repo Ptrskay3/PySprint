@@ -6,6 +6,13 @@ def is_nonnegative_int(value):
         return True
     raise ValueError
 
+def is_normalized_float(value):
+    if isinstance(value, (float, int)):
+        if 0 <= value <= 1:
+            return True
+        return False
+    return False
+
 
 _precision_doc = """
 : int
@@ -20,3 +27,12 @@ _verbosity_doc = """
 """
 
 cfg.register_config_value("verbosity", 0, doc=_verbosity_doc, validator=is_nonnegative_int)
+
+_scan_threshold_doc = """
+: float
+    Determines the maximum relative distance between any calculated dispersion coefficient.
+    If the relative distance is bigger than this value, the two calculated values will be
+    treated as distinct: the two sides won't be averaged out.
+"""
+
+cfg.register_config_value("scan_threshold", 0.5, doc=_scan_threshold_doc, validator=is_normalized_float)

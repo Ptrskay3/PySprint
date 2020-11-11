@@ -817,7 +817,7 @@ class Dataset(metaclass=_DatasetBase):
             self.original_x = self.x
         return self
 
-    def detect_peak_cwt(self, widths, floor_thres=0.05):
+    def detect_peak_cwt(self, widths, floor_thres=0.05, side="both"):
         """
         Basic algorithm to find extremal points in data
         using ``scipy.signal.find_peaks_cwt``.
@@ -828,6 +828,9 @@ class Dataset(metaclass=_DatasetBase):
             The widths passed to `find_peaks_cwt`.
         floor_thres : float
             Will be removed.
+        side : str
+            The side to use. Must be "both", "max" or "min".
+            Default is "both".
 
         Returns
         -------
@@ -839,14 +842,37 @@ class Dataset(metaclass=_DatasetBase):
             x coordinates of the minimums
         ymin : `array-like`
             y coordinates of the minimums
+
+        Note
+        ----
+        When using "min" or "max" as side, all the detected minimal and
+        maximal values will be returned, but only the given side will be
+        recorded for further calculation.
         """
+        if side not in ("both", "min", "max"):
+            raise ValueError("Side must be 'both', 'min' or 'max'.")
+            
+        if hasattr(self, "_is_onesided"):
+            self._is_onesided = side != "both"
+
         x, y, ref, sam = self._safe_cast()
         xmax, ymax, xmin, ymin = cwt(
             x, y, ref, sam, widths=widths, floor_thres=floor_thres
         )
         self.xmax = xmax
         self.xmin = xmin
-        logger.info(f"{len(xmax)} max values and {len(xmin)} min values found.")
+
+        if side == "both":
+            self.xmax = xmax
+            self.xmin = xmin
+
+        elif side == "min":
+            self.xmin = xmin
+
+        elif side == "max":
+            self.xmax = xmax
+
+        logger.info(f"{len(xmax)} max values and {len(xmin)} min values were found.")
         return xmax, ymax, xmin, ymin
 
     def savgol_fil(self, window=5, order=3):
@@ -975,7 +1001,9 @@ class Dataset(metaclass=_DatasetBase):
         setattr(self, "y_norm", ynew)
         return self
 
-    def detect_peak(self, pmax=0.1, pmin=0.1, threshold=0.1, except_around=None):
+    def detect_peak(
+        self, pmax=0.1, pmin=0.1, threshold=0.1, except_around=None, side="both"
+        ):
         """
         Basic algorithm to find extremal points in data
         using ``scipy.signal.find_peaks``.
@@ -998,6 +1026,9 @@ class Dataset(metaclass=_DatasetBase):
             Overwrites the threshold to be 0 at the given interval.
             format is `(lower, higher)` or `[lower, higher]`.
             Default is None.
+        side : str
+            The side to use. Must be "both", "max" or "min".
+            Default is "both".
 
         Returns
         -------
@@ -1009,7 +1040,19 @@ class Dataset(metaclass=_DatasetBase):
             x coordinates of the minimums
         ymin : `array-like`
             y coordinates of the minimums
+        
+        Note
+        ----
+        When using "min" or "max" as side, all the detected minimal and
+        maximal values will be returned, but only the given side will be
+        recorded for further calculation.
         """
+        if side not in ("both", "min", "max"):
+            raise ValueError("Side must be 'both', 'min' or 'max'.")
+
+        if hasattr(self, "_is_onesided"):
+            self._is_onesided = side != "both"
+
         x, y, ref, sam = self._safe_cast()
         xmax, ymax, xmin, ymin = find_peak(
             x,
@@ -1021,9 +1064,17 @@ class Dataset(metaclass=_DatasetBase):
             threshold=threshold,
             except_around=except_around,
         )
-        self.xmax = xmax
-        self.xmin = xmin
-        logger.info(f"{len(xmax)} max values and {len(xmin)} min values found.")
+        if side == "both":
+            self.xmax = xmax
+            self.xmin = xmin
+
+        elif side == "min":
+            self.xmin = xmin
+
+        elif side == "max":
+            self.xmax = xmax
+
+        logger.info(f"{len(xmax)} max values and {len(xmin)} min values were found.")
         return xmax, ymax, xmin, ymin
 
     def _plot_SPP_if_valid(self, ax=None, **kwargs):

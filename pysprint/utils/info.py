@@ -104,8 +104,10 @@ def print_info():
     try:
         from pysprint import blank
 
-        blank(1)
-        is_built = True
+        if blank(1) == 2: 
+            is_built = True
+        else:
+            is_built = False
     except ImportError:
         is_built = False
 

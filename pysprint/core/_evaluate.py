@@ -71,7 +71,7 @@ def _split_on_SPP(a: np.ndarray, val: Union[List, np.ndarray]) -> List[np.ndarra
         return np.split(a[idx], np.where(np.diff(idx) != 1)[0] + 1)
     elif isinstance(val, (list, np.ndarray)):
         real_callbacks = []
-        for i, v in enumerate(val):
+        for _, v in enumerate(val):
             if not np.any(a == v):
                 if is_inside(v, a):
                     value, _ = find_nearest(a, v)
@@ -90,7 +90,8 @@ def _split_on_SPP(a: np.ndarray, val: Union[List, np.ndarray]) -> List[np.ndarra
 def _build_single_phase_data(
         x: np.ndarray,
         SPP_callbacks: NumericLike = None,
-        flip=False
+        flip=False,
+        onesided=False,
 ) -> Tuple[np.ndarray, np.ndarray]:
 
     y = np.array([])
@@ -103,16 +104,28 @@ def _build_single_phase_data(
     if flip:
         x.insert(0, [])
     logger.info(f"x was split to {len(x)} pieces (including the flip).")
-    for index, i in enumerate(x):
-        arr = np.asarray(i)
-        if index % 2 == 0:
-            y = np.append(y, lastval + np.pi * np.arange(1, len(arr) + 1))
-        elif index % 2 == 1:
-            y = np.append(y, lastval - np.pi * np.arange(1, len(arr) + 1))
-        try:
-            lastval = y[-1]
-        except IndexError:
-            lastval = 0
+    if not onesided:
+        for index, i in enumerate(x):
+            arr = np.asarray(i)
+            if index % 2 == 0:
+                y = np.append(y, lastval + np.pi * np.arange(1, len(arr) + 1))
+            elif index % 2 == 1:
+                y = np.append(y, lastval - np.pi * np.arange(1, len(arr) + 1))
+            try:
+                lastval = y[-1]
+            except IndexError:
+                lastval = 0
+    else:
+        for index, i in enumerate(x):
+            arr = np.asarray(i)
+            if index % 2 == 0:
+                y = np.append(y, lastval + 2 * np.pi * np.arange(1, len(arr) + 1))
+            elif index % 2 == 1:
+                y = np.append(y, lastval - 2 * np.pi * np.arange(1, len(arr) + 1))
+            try:
+                lastval = y[-1]
+            except IndexError:
+                lastval = 0
 
     return np.concatenate(x), y
 
@@ -126,6 +139,7 @@ def min_max_method(
         maxx=None,
         minx=None,
         SPP_callbacks=None,
+        onesided=False,
 ):
     """
     Build the phase from extremal positions and SPP_callbacks.
@@ -163,7 +177,9 @@ def min_max_method(
     neg_freq = np.sort(np.append(max_freq[max_freq < 0], min_freq[min_freq < 0]))[::-1]
     pos_freq = np.sort(np.append(max_freq[max_freq >= 0], min_freq[min_freq >= 0]))
 
-    pos_data_x, pos_data_y = _build_single_phase_data(-pos_freq, SPP_callbacks=SPP_callbacks)
+    pos_data_x, pos_data_y = _build_single_phase_data(
+        -pos_freq, SPP_callbacks=SPP_callbacks, onesided=onesided
+        )
 
     # if we fail, the whole negative half is empty
     try:
@@ -175,7 +191,9 @@ def min_max_method(
     except IndexError:
         flip = False
 
-    neq_data_x, neq_data_y = _build_single_phase_data(-neg_freq, SPP_callbacks=SPP_callbacks, flip=flip)
+    neq_data_x, neq_data_y = _build_single_phase_data(
+        -neg_freq, SPP_callbacks=SPP_callbacks, flip=flip, onesided=onesided
+        )
 
     x_s = np.insert(neq_data_x, np.searchsorted(neq_data_x, pos_data_x), pos_data_x)
     y_s = np.insert(neq_data_y, np.searchsorted(neq_data_x, pos_data_x), pos_data_y)

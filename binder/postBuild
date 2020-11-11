@@ -2,4 +2,10 @@
 
 set -ex
 
-pip install .
+conda install -c powerai rust-nightly
+
+git clone --depth 1 https://github.com/PyO3/pyo3.git third_party
+
+# use install instead of develop to build rust extension
+# in release mode in order to increase performance
+python setup.py install

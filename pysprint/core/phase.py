@@ -185,7 +185,7 @@ class Phase:
     def __str__(self):
         if self.poly is not None:
             return self.poly.__str__()
-        raise NotImplementedError("Before calling, a polynomial must be fitted.")
+        return super().__str__()
 
     def plot(self, ax=None, marker=None, linestyle=None, **kwargs):
         """
@@ -487,8 +487,7 @@ class Phase:
         except (AttributeError, ImportError, ModuleNotFoundError) as err:
             raise ValueError(
                 f"Couldn't set backend {backend}, you should manually "
-                "change to an appropriate GUI backend. (Matplotlib 3.3.1 "
-                "is broken. In that case use backend='TkAgg')."
+                "change to an appropriate GUI backend."
             ) from err
         finally:
             plt.switch_backend(original_backend)

@@ -17,3 +17,6 @@ dependencies:
   - nbformat
   - notebook>=5.7.5
   - pip
+  - setuptools-rust
+  - setuptools
+  - wheel

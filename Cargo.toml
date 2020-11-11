@@ -9,6 +9,9 @@ version = "0.12.3"
 features = ["extension-module"]
 path = "third_party/"
 
+[dependencies]
+rayon = "1.5"
+
 [lib]
 name = "pysprint"
 crate-type = ["cdylib"]

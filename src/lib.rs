@@ -1,5 +1,6 @@
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
+use rayon::prelude::*;
 
 
 #[pyfunction]
@@ -9,7 +10,7 @@ fn blank(a: usize) -> usize {
 
 #[pyfunction]
 fn dot(a: Vec<i32>, b: Vec<i32>) -> i32 {
-    a.iter().zip(b.iter()).map(|(x, y)| x * y).sum()
+    a.par_iter().zip(b.par_iter()).map(|(x, y)| x * y).sum()
 }
 
 #[pymodule]

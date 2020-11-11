@@ -1,7 +1,9 @@
 import logging
+import warnings
 
 import numpy as np
 
+from pysprint.config import _get_config_value
 from pysprint.core.bases.dataset import Dataset
 from pysprint.mpl_tools.peak import EditPeak
 from pysprint.core.phase import Phase
@@ -10,6 +12,8 @@ from pysprint.utils import (
     _maybe_increase_before_cwt,
     _calc_envelope,
 )
+from pysprint.utils import PySprintWarning
+
 
 logger = logging.getLogger(__name__)
 FORMAT = "[ %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
@@ -26,6 +30,7 @@ class MinMaxMethod(Dataset):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.phase = None
+        self._is_onesided = False
 
     def init_edit_session(self, engine="normal", **kwargs):
         """
@@ -46,15 +51,18 @@ class MinMaxMethod(Dataset):
             pmax, pmin, threshold, except_around, width
         """
         engines = ("cwt", "normal", "slope")
+
         if engine not in engines:
             raise ValueError(f"Engine must be in {str(engines)}")
+
         if engine == "normal":
             pmax = kwargs.pop("pmax", 0.1)
             pmin = kwargs.pop("pmin", 0.1)
             threshold = kwargs.pop("threshold", 0.1)
             except_around = kwargs.pop("except_around", None)
+            side = kwargs.pop("side", "both")
             _x, _y, _xx, _yy = self.detect_peak(
-                pmax=pmax, pmin=pmin, threshold=threshold, except_around=except_around,
+                pmax=pmax, pmin=pmin, threshold=threshold, except_around=except_around, side=side
             )
 
             # just for validation purposes
@@ -62,6 +70,7 @@ class MinMaxMethod(Dataset):
             _ = kwargs.pop("floor_thres", 0.05)
 
         elif engine == "slope":
+            self._is_onesided = kwargs.pop("side", "both") != "both"
             x, _, _, _ = self._safe_cast()
             y = np.copy(self.y_norm)
             if _maybe_increase_before_cwt(y):
@@ -75,9 +84,10 @@ class MinMaxMethod(Dataset):
 
         elif engine == "cwt":
             widths = kwargs.pop("widths", np.arange(1, 20))
+            side = kwargs.pop("side", "both")
             floor_thres = kwargs.pop("floor_thres", 0.05)
             _x, _y, _xx, _yy = self.detect_peak_cwt(
-                widths=widths, floor_thres=floor_thres
+                widths=widths, floor_thres=floor_thres, side=side
             )
 
             # just for validation purposes
@@ -86,8 +96,15 @@ class MinMaxMethod(Dataset):
             _ = kwargs.pop("threshold", 0.1)
             _ = kwargs.pop("except_around", None)
 
-        _xm = np.append(_x, _xx)
-        _ym = np.append(_y, _yy)
+        if side == "both":
+            _xm = np.append(_x, _xx)
+            _ym = np.append(_y, _yy)
+        elif side == "min":
+            _xm, _ym = _xx, _yy
+        elif side == "max":
+            _xm, _ym = _x, _y
+        else:
+            raise ValueError("Side must be 'both', 'min' or 'max'.")
 
         if kwargs:
             raise TypeError(f"Invalid argument:{kwargs}")
@@ -97,11 +114,10 @@ class MinMaxMethod(Dataset):
         except ValueError:
             _editpeak = EditPeak(self.x, self.y, _xm, _ym)
         # Automatically propagate these points to the mins and maxes.
-        # Better distribute these points _between min and max, just in case
+        # Distribute these points between min and max, just in case
         # the default argrelextrema is definitely not called
         # in `pysprint.core.evaluate.min_max_method`.
 
-        # out it's a min or max.
         self.xmin = _editpeak.get_dat[0][:len(_editpeak.get_dat[0]) // 2]
         self.xmax = _editpeak.get_dat[0][len(_editpeak.get_dat[0]) // 2:]
         print(f"{len(_editpeak.get_dat[0])} extremal points were recorded.")
@@ -113,7 +129,8 @@ class MinMaxMethod(Dataset):
             order,
             SPP_callbacks=None,
             show_graph=False,
-            scan=False
+            scan=False,
+            onesided=False,
     ):
         """
         MinMaxMethod's calculate function.
@@ -129,6 +146,10 @@ class MinMaxMethod(Dataset):
             if there's any SPP position set on the object.
         show_graph : bool, optional
             Shows a the final graph of the spectral phase and fitted curve.
+            Default is False.
+        onesided : bool
+            Use only minimums or maximums to build the phase. It also works for
+            one characteristic point per oscillation period (e.g. zero-crossings).
             Default is False.
 
         Returns
@@ -148,7 +169,9 @@ class MinMaxMethod(Dataset):
         immediately printed without explicitly saying so.
         """
 
-        phase = self.build_phase(reference_point=reference_point, SPP_callbacks=SPP_callbacks)
+        phase = self.build_phase(
+            reference_point=reference_point, SPP_callbacks=SPP_callbacks, onesided=onesided
+            )
 
         if is_inside(reference_point, phase.x):
             left_phase = phase.slice(None, reference_point, inplace=False)
@@ -169,7 +192,9 @@ class MinMaxMethod(Dataset):
 
             diffs = np.abs(np.trim_zeros(right_d) - np.trim_zeros(left_d)) / np.trim_zeros(left_d)
 
-            if (diffs[~np.isnan(diffs)] > 0.5).any():
+            thres = _get_config_value("scan_threshold")
+
+            if (np.abs(diffs[~np.isnan(diffs)]) > thres).any():
                 dispersion = left_d if len(left_phase.x) >= len(right_phase.x) else right_d
                 dispersion_std = left_ds if len(left_phase.x) >= len(right_phase.x) else right_ds
                 fit_report = left_fit_report if len(left_phase.x) >= len(right_phase.x) else right_fit_report
@@ -201,7 +226,7 @@ class MinMaxMethod(Dataset):
 
         return dispersion, dispersion_std, fit_report
 
-    def build_phase(self, reference_point, SPP_callbacks=None):
+    def build_phase(self, reference_point, SPP_callbacks=None, onesided=False):
         """
         Build **only the phase** using reference point and SPP positions.
 
@@ -212,6 +237,10 @@ class MinMaxMethod(Dataset):
         SPP_callbacks : number, or numeric list-like
             The positions of SPP's on the interferogram. If not given it will check
             if there's any SPP position set on the object.
+        onesided : bool
+            If `True`, use only the minimums or maximums to build the phase. It also
+            works for one characteristic point per oscillation period (e.g. zero-crossings).
+            Default is False.
 
         Returns
         -------
@@ -221,6 +250,18 @@ class MinMaxMethod(Dataset):
         if SPP_callbacks is None and self._positions is not None:
             SPP_callbacks = np.array(self._positions)
 
+        if onesided and not self._is_onesided:
+            warnings.warn(
+                "Trying to build phase as two-sided, but the detection was one-sided. Use `onesided=True`.",
+                PySprintWarning
+                )
+        
+        if not onesided and self._is_onesided:
+            warnings.warn(
+                "Trying to build phase as one-sided, but the detection was two-sided. Use `onesided=False`.",
+                PySprintWarning
+                )
+
         x, y = min_max_method(
             self.x,
             self.y,
@@ -229,7 +270,8 @@ class MinMaxMethod(Dataset):
             ref_point=reference_point,
             maxx=self.xmax,
             minx=self.xmin,
-            SPP_callbacks=SPP_callbacks
+            SPP_callbacks=SPP_callbacks,
+            onesided=onesided,
         )
         self.phase = Phase(x, y)
         return self.phase

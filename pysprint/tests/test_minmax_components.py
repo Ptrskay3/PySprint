@@ -69,19 +69,27 @@ def test_splitting_multiple_nearest_outside():
     np.testing.assert_array_equal(splitted[-1], [5, 6, 9.1])
     assert len(splitted) == 2
 
-
-def test_build_single_phase_data():
+@pytest.mark.parametrize("onesided", [True, False])
+def test_build_single_phase_data(onesided):
     x = np.arange(11)
-    retx, rety = _build_single_phase_data(x)
-    np.testing.assert_array_equal(x, retx)
-    np.testing.assert_array_equal(np.arange(1, 12) * np.pi, rety)
+    retx, rety = _build_single_phase_data(x, onesided=onesided)
+    if not onesided:
+        np.testing.assert_array_equal(x, retx)
+        np.testing.assert_array_equal(np.arange(1, 12) * np.pi, rety)
+    else:
+        np.testing.assert_array_equal(x, retx)
+        np.testing.assert_array_equal(np.arange(1, 12) * np.pi * 2, rety)
 
-
-def test_build_single_phase_data_cb():
+@pytest.mark.parametrize("onesided", [True, False])
+def test_build_single_phase_data_cb(onesided):
     x = np.arange(11)
-    retx, rety = _build_single_phase_data(x, SPP_callbacks=[0])
-    np.testing.assert_array_equal(np.arange(1, 11), retx)
-    np.testing.assert_array_equal(np.arange(1, 11) * -np.pi, rety)
+    retx, rety = _build_single_phase_data(x, SPP_callbacks=[0], onesided=onesided)
+    if not onesided:
+        np.testing.assert_array_equal(np.arange(1, 11), retx)
+        np.testing.assert_array_equal(np.arange(1, 11) * -np.pi, rety)
+    else:
+        np.testing.assert_array_equal(np.arange(1, 11), retx)
+        np.testing.assert_array_equal(np.arange(1, 11) * -np.pi * 2, rety)
 
 
 def test_build_single_phase_data_cb2():
