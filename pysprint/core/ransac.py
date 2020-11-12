@@ -56,7 +56,7 @@ def run_regressor(phase, degree, **kwds):
 
     _, ax = plt.subplots()
     phase.plot(ax=ax)
-    ax.plot(phase.x[inlier_mask], phase.y[inlier_mask], "k+", label="inliners")
+    ax.plot(phase.x[inlier_mask], phase.y[inlier_mask], "k+", label="inliers")
     ax.plot(phase.x, y_hat, 'r--', label='estimated curve')
     plt.legend()
     return phase.x[inlier_mask], phase.y[inlier_mask]

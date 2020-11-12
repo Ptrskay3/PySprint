@@ -22,6 +22,7 @@ SUPPORTED_VERSIONS = {
     "pytest": "5.0.1",
     "jinja2": "2.11.1",
     "dask": '2.21.0',
+    "sklearn": "0.23.2"
 }
 
 
@@ -66,7 +67,8 @@ def get_dep_info():
         "numba",
         "IPython",
         "jinja2",
-        "dask"
+        "dask",
+        "sklearn",
     ]
     deps.extend(list(SUPPORTED_VERSIONS))
     result = {}
