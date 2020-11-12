@@ -20,3 +20,4 @@ dependencies:
   - setuptools-rust
   - setuptools
   - wheel
+  - scikit-learn

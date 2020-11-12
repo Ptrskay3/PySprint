@@ -70,7 +70,8 @@ class MinMaxMethod(Dataset):
             _ = kwargs.pop("floor_thres", 0.05)
 
         elif engine == "slope":
-            self._is_onesided = kwargs.pop("side", "both") != "both"
+            side = kwargs.pop("side", "both")
+            self._is_onesided = side != "both"
             x, _, _, _ = self._safe_cast()
             y = np.copy(self.y_norm)
             if _maybe_increase_before_cwt(y):

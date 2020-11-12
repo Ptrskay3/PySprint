@@ -27,16 +27,6 @@ PySprint provides an interface for Spectrally resolved interferometry in Python.
 * ✓ Windowed Fourier transform method
 * ✓ Stationary phase point method
 
-### There's many more to work on..
-* SPP detection
-* WFT ridge detection improvement
-* Better SPP interface: make the constructor accept `~pysprint.Dataset` objects.
-* Improve file parsing
-* Clean up utils, evaluate methods, preprocess methods
-* Clean up plot utilities
-* Integrate `~pysprint.core.phase.Phase` into methods.
-* Write understandable and consistent docstrings
-
 This is a work-in-progress version of the package.
 
 ### Installation
@@ -49,7 +39,7 @@ Install with
 pip install pysprint
 ```
 
-or install on Anaconda with:
+or install on Anaconda with (CURRENTLY NOT AVAILABLE):
 ```sh
 conda install -c ptrskay pysprint -c conda-forge
 ```
@@ -59,10 +49,13 @@ Requirements:
 * scipy
 * matplotlib 
 * pandas
+* Jinja2
+* scikit-learn
 
 Optional packages: 
 * lmfit - for detailed curve fitting results
 * numba - to speed up non uniform FFT calculation
+* dask - for parallel WFT run
 
 
 ## Documentation

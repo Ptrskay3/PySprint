@@ -85,7 +85,7 @@ setup(
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Physics",
     ],
-    install_requires=["numpy>=1.16.6", "scipy", "matplotlib", "pandas", "Jinja2"],
+    install_requires=["numpy>=1.16.6", "scipy", "matplotlib", "pandas", "Jinja2", "scikit-learn"],
     setup_requires=["setuptools-rust>=0.10.1", "wheel"],
     extras_require={"optional": ["numba", "lmfit", "pytest", "dask"]},
     rust_extensions=[

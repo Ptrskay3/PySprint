@@ -13,6 +13,7 @@ dependencies:
   - lmfit
   - Jinja2
   - dask
+  - scikit-learn
 
   # dev
   - setuptools-rust

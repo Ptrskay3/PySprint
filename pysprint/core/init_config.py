@@ -10,8 +10,8 @@ def is_normalized_float(value):
     if isinstance(value, (float, int)):
         if 0 <= value <= 1:
             return True
-        return False
-    return False
+        raise ValueError
+    raise ValueError
 
 
 _precision_doc = """

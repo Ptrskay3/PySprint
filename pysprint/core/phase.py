@@ -20,6 +20,7 @@ except ImportError:
 from pysprint.config import _get_config_value
 from pysprint.core._functions import _fit_config
 from pysprint.core._preprocess import cut_data
+from pysprint.core.ransac import run_regressor
 from pysprint.utils import pprint_disp
 from pysprint.utils import transform_lmfit_params_to_dispersion
 from pysprint.utils import transform_cf_params_to_dispersion
@@ -62,6 +63,8 @@ class Phase:
         self.is_coeff = False
         self.fitorder = None
         self.GD_mode = GD_mode
+        self._filtered_x = None
+        self._filtered_y = None
 
         # Make coeffs available after fitting
         self.coef_temp = namedtuple(
@@ -491,3 +494,35 @@ class Phase:
             ) from err
         finally:
             plt.switch_backend(original_backend)
+
+    def ransac_filter(self, order=None, **kwds):
+        """
+        Perform a RANSAC (RANdom SAmple Consensus) filter to the dataset,
+        which detects outliers. This function will *only* plot the results.
+        To actually apply it, use the `apply_filter` method.
+        
+        Parameters
+        ----------
+        order : int, optional
+            The degree of polynomial to estimate the shape of the curve.
+            This argument must be given if no fitting was performed before.
+        kwds : dict, optional
+            Other arguments to pass to sklearn.linear_model.RANSACRegressor.
+            The most important is `residual_threshold`, which measures how
+            distant points should be filtered out.
+        """
+        if order is None and self.fitorder is not None:
+            order = self.fitorder
+        if order is None and self.fitorder is None:
+            raise ValueError("Must specify fit order for RANSAC filtering.")
+        self._filtered_x, self._filtered_y = run_regressor(self, degree=order, **kwds)
+
+    @inplacify
+    def apply_filter(self):
+        """
+        Apply the RANSAC filter.
+        """
+        if self._filtered_x is None or self._filtered_y is None:
+            raise ValueError("There's nothing to apply.")
+        self.x, self.y = self._filtered_x, self._filtered_y
+        return self

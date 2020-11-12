@@ -20,6 +20,7 @@ warnings.filterwarnings("ignore", message="invalid value encountered in sqrt")
 warnings.filterwarnings("ignore", message="divide by zero encountered in true_divide")
 warnings.filterwarnings("ignore", message="Casting complex values to real discards the imaginary part")
 
+
 __author__ = "Leéh Péter"
 
 from .core import *
