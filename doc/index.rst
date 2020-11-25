@@ -47,11 +47,6 @@ PySprint API reference
    pysprint.utils
 
 
-TODO, incoming features
-=======================
-* WFT improvement
-* Testing
-
 References
 ==========
 .. toctree::

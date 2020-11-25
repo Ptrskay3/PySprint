@@ -27,7 +27,10 @@ before_install:
   - conda install -c powerai rust-nightly
   - conda info -a
   - cargo version
-  - git clone --depth 1 https://github.com/PyO3/pyo3.git third_party
+  - git clone https://github.com/PyO3/pyo3.git third_party
+  - cd third_party
+  - git checkout 38af32e  # checkout a stable release
+  - cd ..
 
 install:
   - conda env create -f environment.yml
