@@ -495,17 +495,19 @@ class Phase:
         finally:
             plt.switch_backend(original_backend)
 
-    def ransac_filter(self, order=None, **kwds):
+    def ransac_filter(self, order=None, plot=False, **kwds):
         """
         Perform a RANSAC (RANdom SAmple Consensus) filter to the dataset,
         which detects outliers. This function will *only* plot the results.
         To actually apply it, use the `apply_filter` method.
-        
+
         Parameters
         ----------
         order : int, optional
             The degree of polynomial to estimate the shape of the curve.
             This argument must be given if no fitting was performed before.
+        plot : bool, optional
+            Whether to plot the result. Default is False.
         kwds : dict, optional
             Other arguments to pass to sklearn.linear_model.RANSACRegressor.
             The most important is `residual_threshold`, which measures how
@@ -515,7 +517,9 @@ class Phase:
             order = self.fitorder
         if order is None and self.fitorder is None:
             raise ValueError("Must specify fit order for RANSAC filtering.")
-        self._filtered_x, self._filtered_y = run_regressor(self, degree=order, **kwds)
+        self._filtered_x, self._filtered_y = run_regressor(
+            self, degree=order, plot=plot, **kwds
+        )
 
     @inplacify
     def apply_filter(self):

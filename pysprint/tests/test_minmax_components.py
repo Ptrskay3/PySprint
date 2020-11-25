@@ -69,6 +69,7 @@ def test_splitting_multiple_nearest_outside():
     np.testing.assert_array_equal(splitted[-1], [5, 6, 9.1])
     assert len(splitted) == 2
 
+
 @pytest.mark.parametrize("onesided", [True, False])
 def test_build_single_phase_data(onesided):
     x = np.arange(11)
@@ -79,6 +80,7 @@ def test_build_single_phase_data(onesided):
     else:
         np.testing.assert_array_equal(x, retx)
         np.testing.assert_array_equal(np.arange(1, 12) * np.pi * 2, rety)
+
 
 @pytest.mark.parametrize("onesided", [True, False])
 def test_build_single_phase_data_cb(onesided):

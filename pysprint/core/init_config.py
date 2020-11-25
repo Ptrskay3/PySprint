@@ -6,6 +6,7 @@ def is_nonnegative_int(value):
         return True
     raise ValueError
 
+
 def is_normalized_float(value):
     if isinstance(value, (float, int)):
         if 0 <= value <= 1:

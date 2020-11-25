@@ -106,7 +106,7 @@ def print_info():
     try:
         from pysprint import blank
 
-        if blank(1) == 2: 
+        if blank(1) == 2:
             is_built = True
         else:
             is_built = False

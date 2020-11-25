@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import RANSACRegressor
 
+
 def make_regression_class(degree):
     class PolynomialModel:
         def __init__(self, degree=degree, coeffs=None):
@@ -37,7 +38,7 @@ def make_regression_class(degree):
     return PolynomialModel
 
 
-def run_regressor(phase, degree, **kwds):
+def run_regressor(phase, degree, plot=True, **kwds):
     # this is the most important argument for us, so we isolate it
     residual_threshold = kwds.pop("residual_threshold", 0.5) * np.std(phase.y)
 
@@ -51,12 +52,13 @@ def run_regressor(phase, degree, **kwds):
     )
     ransac.fit(phase.x[:, np.newaxis], phase.y)
     inlier_mask = ransac.inlier_mask_
-    
+
     y_hat = ransac.predict(phase.x[:, np.newaxis])
 
-    _, ax = plt.subplots()
-    phase.plot(ax=ax)
-    ax.plot(phase.x[inlier_mask], phase.y[inlier_mask], "k+", label="inliers")
-    ax.plot(phase.x, y_hat, 'r--', label='estimated curve')
-    plt.legend()
+    if plot:
+        _, ax = plt.subplots()
+        phase.plot(ax=ax)
+        ax.plot(phase.x[inlier_mask], phase.y[inlier_mask], "k+", label="inliers")
+        ax.plot(phase.x, y_hat, 'r--', label='estimated curve')
+        plt.legend()
     return phase.x[inlier_mask], phase.y[inlier_mask]

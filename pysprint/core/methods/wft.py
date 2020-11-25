@@ -382,6 +382,31 @@ class WFTMethod(FFTMethod):
             self.window_seq.pop(center, None)
         return self
 
+    @inplacify
+    @_mutually_exclusive_args("std", "fwhm")
+    def cover(self, N, fwhm=None, std=None, order=2):
+        """
+        Cover the whole domain with `N` number of windows
+        uniformly built with the given parameters.
+
+        N : float
+            The number of Gaussian windows.
+        std : float, optional
+            The standard deviation of the Gaussian window
+            in units of the x axis of the interferogram.
+            You must specify exactly one of std and fwhm.
+        fwhm : float, optional
+            The full width at half max of the Gaussian window
+            in units of the x axis of the interferogram.
+            You must specify exactly one of std and fwhm.
+        order : int, optional
+            The order of Gaussian window. Must be even.
+            The default is 2.
+        """
+        self.add_window_linspace(
+            np.min(self.x), np.max(self.x), N, fwhm=fwhm, std=std, order=order
+        )
+
     def calculate(
             self,
             reference_point,
@@ -392,7 +417,9 @@ class WFTMethod(FFTMethod):
             fastmath=True,
             usenifft=False,
             parallel=False,
-            errors="ignore"
+            ransac=False,
+            errors="ignore",
+            **kwds
     ):
         """
         Calculates the dispersion.
@@ -419,9 +446,14 @@ class WFTMethod(FFTMethod):
         parallel : bool, optional
             Whether to use parallel computation. Only availabe if `Dask`
             is installed. The speedup is about 50-70%. Default is False.
+        ransac : bool, optional
+            Whether to use RANSAC filtering on the detected peaks. Default
+            is False.
         errors : str, optional
             Whether to raise an error is the algorithm couldn't find the
-            center of the peak.
+            center of the peak. Default is "ignore".
+        kwds : optional
+            Other keyword arguments to pass to RANSAC filter.
 
         Raises
         ------
@@ -448,7 +480,12 @@ class WFTMethod(FFTMethod):
         self.cachedlen = len(self.window_seq)
 
         if order == 1:
-            raise ValueError("Cannot fit constant function to data. Order must be in [2, 6].")
+            raise ValueError("Trying to fit constant function. Order must be in [2, 6].")
+
+        if ransac:
+            print("Running RANSAC-filter..")
+            self.GD.ransac_filter(order=order, plot=show_graph, **kwds)
+            self.GD.apply_filter()
 
         d, ds, fr = self.GD._fit(
             reference_point=reference_point, order=order
@@ -509,7 +546,7 @@ class WFTMethod(FFTMethod):
                 omega = np.fromiter([c for c in computed if c is not None], dtype=float)
 
                 if not silent:
-                    print(f"Errors found: {len(self.window_seq) - sum(1 for _ in filter(None.__ne__, computed))}")
+                    print(f"Skipped: {len(self.window_seq) - sum(1 for _ in filter(None.__ne__, computed))}")
 
         else:
             self.fastmath = fastmath
@@ -566,7 +603,7 @@ class WFTMethod(FFTMethod):
                 sys.stdout.write('\r')
                 j = (idx + 1) / winlen
                 sys.stdout.write(
-                    "Progress : [%-30s] %d%% (Errors: %d)" % ('=' * int(30 * j), 100 * j, self.errorcounter)
+                    "Progress : [%-30s] %d%% (Skipped: %d)" % ('=' * int(30 * j), 100 * j, self.errorcounter)
                 )
                 sys.stdout.flush()
 

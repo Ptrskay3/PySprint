@@ -99,7 +99,6 @@ class EditPeak:
         plt.sca(self.ax)
         plt.show(block=True)
 
-
     def on_clicked(self, event):
         """
         Function to record and discard points on plot.
@@ -108,7 +107,7 @@ class EditPeak:
         result will be catastrophicly unintuitive to work with.
         """
         ix, iy = event.xdata, event.ydata
-        
+
         # change the cursor's position to pixels
         xy_pixels = self.ax.transData.transform(np.vstack([ix, iy]).T)
         ix, iy = xy_pixels.T
@@ -124,7 +123,7 @@ class EditPeak:
                 # compute extremals's pixel coords
                 extr_pixels = self.ax.transData.transform(np.vstack([self.x_extremal, self.y_extremal]).T)
                 extr_x, extr_y = extr_pixels.T
-                
+
                 # get the closest extremal to the cursor in pixels
                 ix, iy, idx = _get_closest(ix, iy, extr_x, extr_y)
 

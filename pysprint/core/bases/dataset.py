@@ -851,7 +851,7 @@ class Dataset(metaclass=_DatasetBase):
         """
         if side not in ("both", "min", "max"):
             raise ValueError("Side must be 'both', 'min' or 'max'.")
-            
+
         if hasattr(self, "_is_onesided"):
             self._is_onesided = side != "both"
 
@@ -1003,7 +1003,7 @@ class Dataset(metaclass=_DatasetBase):
 
     def detect_peak(
         self, pmax=0.1, pmin=0.1, threshold=0.1, except_around=None, side="both"
-        ):
+    ):
         """
         Basic algorithm to find extremal points in data
         using ``scipy.signal.find_peaks``.
@@ -1040,7 +1040,7 @@ class Dataset(metaclass=_DatasetBase):
             x coordinates of the minimums
         ymin : `array-like`
             y coordinates of the minimums
-        
+
         Note
         ----
         When using "min" or "max" as side, all the detected minimal and

@@ -18,16 +18,18 @@
 |__License__| [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) |
 
 
-## Description & Features
-PySprint provides an interface for Spectrally resolved interferometry in Python.
+## Description
+PySprint provides an interface for Spectrally resolved interferometry in Python. 
+PySprint implements all the evaluation methods described in the literature, however
+the API and the software itself might change over time. Documentation is sparse
+and not complete yet and the testing is in *very early stage*. We have a currently
+pointless Rust extension module, which might turn into something useful later.
 
 * ✓ Minimum-maximum method
 * ✓ Phase modulated cosine function fit method
 * ✓ Fourier method
 * ✓ Windowed Fourier transform method
 * ✓ Stationary phase point method
-
-This is a work-in-progress version of the package.
 
 ### Installation
 
@@ -39,9 +41,9 @@ Install with
 pip install pysprint
 ```
 
-or install on Anaconda with (CURRENTLY NOT AVAILABLE):
+or install on Anaconda with:
 ```sh
-conda install -c ptrskay pysprint -c conda-forge
+(CURRENTLY NOT AVAILABLE) conda install -c ptrskay pysprint -c conda-forge
 ```
 
 Requirements: 
@@ -61,5 +63,3 @@ Optional packages:
 ## Documentation
 
 The documentation is hosted on readthedocs.io.
-
-

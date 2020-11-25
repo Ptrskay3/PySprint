@@ -179,7 +179,7 @@ def min_max_method(
 
     pos_data_x, pos_data_y = _build_single_phase_data(
         -pos_freq, SPP_callbacks=SPP_callbacks, onesided=onesided
-        )
+    )
 
     # if we fail, the whole negative half is empty
     try:
@@ -193,7 +193,7 @@ def min_max_method(
 
     neq_data_x, neq_data_y = _build_single_phase_data(
         -neg_freq, SPP_callbacks=SPP_callbacks, flip=flip, onesided=onesided
-        )
+    )
 
     x_s = np.insert(neq_data_x, np.searchsorted(neq_data_x, pos_data_x), pos_data_x)
     y_s = np.insert(neq_data_y, np.searchsorted(neq_data_x, pos_data_x), pos_data_y)

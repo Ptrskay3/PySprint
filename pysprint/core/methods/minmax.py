@@ -172,7 +172,7 @@ class MinMaxMethod(Dataset):
 
         phase = self.build_phase(
             reference_point=reference_point, SPP_callbacks=SPP_callbacks, onesided=onesided
-            )
+        )
 
         if is_inside(reference_point, phase.x):
             left_phase = phase.slice(None, reference_point, inplace=False)
@@ -255,13 +255,13 @@ class MinMaxMethod(Dataset):
             warnings.warn(
                 "Trying to build phase as two-sided, but the detection was one-sided. Use `onesided=True`.",
                 PySprintWarning
-                )
-        
+            )
+
         if not onesided and self._is_onesided:
             warnings.warn(
                 "Trying to build phase as one-sided, but the detection was two-sided. Use `onesided=False`.",
                 PySprintWarning
-                )
+            )
 
         x, y = min_max_method(
             self.x,
