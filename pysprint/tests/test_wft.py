@@ -67,34 +67,34 @@ def test_window_generic(mock_show):
         w.get_GD()
 
 
-@pytest.mark.skipif(
-    importlib.util.find_spec('dask') is None,
-    reason="dask is required"
-)
-@pytest.mark.slow
-def test_basic_parallel():
-    g = Generator(
-        1,
-        3,
-        2,
-        3000,
-        GDD=400,
-        TOD=4000,
-        FOD=4000,
-        QOD=50000,
-        pulse_width=5,
-        resolution=0.01
-    )
+# @pytest.mark.skipif(
+#     importlib.util.find_spec('dask') is None,
+#     reason="dask is required"
+# )
+# @pytest.mark.slow
+# def test_basic_parallel():
+#     g = Generator(
+#         1,
+#         3,
+#         2,
+#         3000,
+#         GDD=400,
+#         TOD=4000,
+#         FOD=4000,
+#         QOD=50000,
+#         pulse_width=5,
+#         resolution=0.01
+#     )
 
-    g.generate()
+#     g.generate()
 
-    f = WFTMethod(*g.data)
-    f.add_window_linspace(1.25, 2.75, 350, fwhm=0.017)
+#     f = WFTMethod(*g.data)
+#     f.add_window_linspace(1.25, 2.75, 350, fwhm=0.017)
 
-    d, _, _ = f.calculate(
-        reference_point=2, order=5, fastmath=False, parallel=True, silent=True
-    )
+#     d, _, _ = f.calculate(
+#         reference_point=2, order=5, fastmath=False, parallel=True, silent=True
+#     )
 
-    np.testing.assert_array_almost_equal(
-        d, [2999.16249, 399.94162, 3998.03069, 3991.45663, 49894.96710], decimal=1
-    )
+#     np.testing.assert_array_almost_equal(
+#         d, [2999.16249, 399.94162, 3998.03069, 3991.45663, 49894.96710], decimal=1
+#     )
