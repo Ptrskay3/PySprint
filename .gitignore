@@ -13,6 +13,7 @@ target/
 mightneed/
 .idea/*
 .ipynb_checkpoints/*
+.ipynb_checkpoints
 venv/
 Cargo.lock
 .vscode/
