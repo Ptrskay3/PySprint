@@ -17,7 +17,6 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath('../pysprint'))
-sys.path.insert(0, os.path.abspath('../pysprint/core'))
 sys.path.insert(0, os.path.abspath('../pysprint/core/bases'))
 sys.path.insert(0, os.path.abspath('../pysprint/core/methods'))
 sys.path.insert(0, os.path.abspath('../pysprint/utils'))

@@ -11,6 +11,7 @@ path = "third_party/"
 
 [dependencies]
 rayon = "1.5"
+ndarray = "0.13.0"
 
 [lib]
 name = "pysprint"
