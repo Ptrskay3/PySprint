@@ -12,6 +12,9 @@ autodoc_mock_imports = [
     'numba',
     'matplotlib.rcParams',
     'sklearn',
+    'numerics',
+    'blank',
+    'dot',
 ]
 
 import os
