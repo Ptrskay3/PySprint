@@ -10,7 +10,8 @@ autodoc_mock_imports = [
     'lmfit',
     'matplotlib',
     'numba',
-    'matplotlib.rcParams'
+    'matplotlib.rcParams',
+    'sklearn',
 ]
 
 import os
