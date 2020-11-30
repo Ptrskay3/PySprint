@@ -389,6 +389,8 @@ class WFTMethod(FFTMethod):
         Cover the whole domain with `N` number of windows
         uniformly built with the given parameters.
 
+        Parameters
+        ----------
         N : float
             The number of Gaussian windows.
         std : float, optional

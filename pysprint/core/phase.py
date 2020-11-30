@@ -412,7 +412,7 @@ class Phase:
             try:
                 residuals = self.y - self.fitted_curve
             except ValueError as e:
-                msg = "Original data was modified, cannot broadcast shape with the fitted curve."
+                msg = ValueError("Original data was modified, cannot broadcast shape with the fitted curve.")
                 raise msg from e
             ss_res = np.sum(residuals ** 2)
             ss_tot = np.sum((self.y - np.mean(self.y)) ** 2)

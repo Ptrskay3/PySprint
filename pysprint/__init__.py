@@ -11,7 +11,7 @@ from pysprint.utils.misc import run_from_ipython
 
 try:
     from .numerics import blank, dot
-except:
+except Exception:
     def blank(*args, **kwargs):
         raise ImportError("Rust Extensions aren't built.")
 
