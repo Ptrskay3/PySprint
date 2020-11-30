@@ -120,7 +120,7 @@ class EditPeak:
             return
         if self.my_select_button.toggled:
             if event.key == "d":
-                # compute extremals's pixel coords
+                # compute extremals' pixel coords
                 extr_pixels = self.ax.transData.transform(np.vstack([self.x_extremal, self.y_extremal]).T)
                 extr_x, extr_y = extr_pixels.T
 

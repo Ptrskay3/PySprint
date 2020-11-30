@@ -253,13 +253,13 @@ class MinMaxMethod(Dataset):
 
         if onesided and not self._is_onesided:
             warnings.warn(
-                "Trying to build phase as two-sided, but the detection was one-sided. Use `onesided=True`.",
+                "Trying to build phase as one-sided, but the detection was two-sided. Use `onesided=False`.",
                 PySprintWarning
             )
 
         if not onesided and self._is_onesided:
             warnings.warn(
-                "Trying to build phase as one-sided, but the detection was two-sided. Use `onesided=False`.",
+                "Trying to build phase as two-sided, but the detection was one-sided. Use `onesided=True`.",
                 PySprintWarning
             )
 
