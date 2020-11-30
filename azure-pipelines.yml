@@ -20,17 +20,11 @@ steps:
     versionSpec: '$(python.version)'
   displayName: 'Use Python $(python.version)'
 
-strategy:
-  matrix:
-    nightly:
-      rustup_toolchain: nightly
 
-steps:
-  - script: |
-      curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUSTUP_TOOLCHAIN
-      echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
-    displayName: Install rust
-
+- script: |
+    curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly
+    echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
+  displayName: 'Install rust nighly'
 
 - script: |
     sudo cp .ci/.azure-pipelines/xvfb.init /etc/init.d/xvfb
