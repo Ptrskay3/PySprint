@@ -164,8 +164,8 @@ class MinMaxMethod(Dataset):
         fit_report : str
             lmfit report if installed, else empty string.
 
-        Notes
-        ------
+        Note
+        ----
         Decorated with pprint_disp, so the results are
         immediately printed without explicitly saying so.
         """

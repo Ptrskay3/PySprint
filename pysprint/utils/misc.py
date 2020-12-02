@@ -143,10 +143,9 @@ def measurement(array, confidence=0.95, silent=False):
     >>> interval
     (120.35397798230359, 125.88002201769642)
 
-    Notes
-    -----
-
-    I decided to print the results immediately, because people often don't use
+    Note
+    ----
+    The results are printed immediately, because people often don't use
     it for further code. Of course, they are also returned if needed.
     """
     precision = _get_config_value("precision")

@@ -64,7 +64,6 @@ class EditPeak:
     Returns the x coordinates of the selected points.
     Note that this class shouldn't be explicitly called by the user.
     """
-
     def __init__(self, x, y, x_extremal=None, y_extremal=None):
 
         # This is here because we do not want other figures

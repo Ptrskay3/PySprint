@@ -100,8 +100,8 @@ class Dataset(metaclass=_DatasetBase):
             The object which handles the callback function. In most cases
             the user should leave this empty.
 
-        Notes
-        -----
+        Note
+        ----
         To load in data by files, see the other constructor `parse_raw`.
         """
         super().__init__()
@@ -890,8 +890,8 @@ class Dataset(metaclass=_DatasetBase):
             Usually it's a good idea to stay with a low degree, e.g 3 or 5.
             Default is 3.
 
-        Notes
-        ------
+        Note
+        ----
         If arms were given, it will merge them into the `self.y` and
         `self.y_norm` variables. Also applies a linear interpolation o
         n dataset (and raises warning).
@@ -924,8 +924,8 @@ class Dataset(metaclass=_DatasetBase):
             Note that giving `None` will leave original maximum untouched too.
             Default is `None`.
 
-        Notes
-        -----
+        Note
+        ----
         If arms were given, it will merge them into the `self.y` and
         `self.y_norm` variables. After this operation, the arms' spectra
         cannot be retrieved.
@@ -955,8 +955,8 @@ class Dataset(metaclass=_DatasetBase):
             Standard deviation of the gaussian window.
             Default is `20`.
 
-        Notes
-        -----
+        Note
+        ----
         If arms were given, it will merge them into the `self.y` and
         `self.y_norm` variables.
         Also applies a linear interpolation on dataset.
@@ -1203,8 +1203,8 @@ class Dataset(metaclass=_DatasetBase):
         kwargs : dict, optional
             Additional keyword arguments to pass to plot function.
 
-        Notes
-        -----
+        Note
+        ----
         If SPP positions are correctly set, it will mark them on plot.
         """
         datacolor = kwargs.pop("color", "red")
@@ -1373,8 +1373,8 @@ class Dataset(metaclass=_DatasetBase):
             the dataset's range. Note that in most cases you should avoid using
             this option. Default is `False`.
 
-        Notes
-        -----
+        Note
+        ----
         Every position given must be in the current dataset's range, otherwise
         `ValueError` is raised. Be careful to change domain to frequency before
         feeding values into this function.

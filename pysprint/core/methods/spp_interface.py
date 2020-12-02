@@ -11,6 +11,7 @@ from pysprint.core.bases._dataset_base import _DatasetBase
 from pysprint.core.phase import Phase
 from pysprint.utils.exceptions import DatasetError
 from pysprint.core.callbacks import defaultcallback
+from pysprint.utils.exceptions import PySprintWarning
 
 __all__ = ["SPPMethod"]
 
@@ -119,8 +120,9 @@ class SPPMethod(metaclass=_DatasetBase):
             if idx != 0 and delay.size > 0 and delay.flat[0] in np.concatenate(
                     [a.ravel() for a in local_delays.values()]
             ):
-                raise ValueError(
-                    f"Duplicated delay values found. Delay {delay.flat[0]} fs was previously seen."
+                warnings.warn(
+                    f"Duplicated delay values found. Delay {delay.flat[0]} fs was previously seen.",
+                    PySprintWarning
                 )
             local_delays[idx] = delay
             local_positions[idx] = position
@@ -200,8 +202,9 @@ class SPPMethod(metaclass=_DatasetBase):
             if idx != 0 and delay.size > 0 and delay.flat[0] in np.concatenate(
                     [a.ravel() for a in local_delays.values()]
             ):
-                raise ValueError(
-                    f"Duplicated delay values found. Delay {delay.flat[0]} fs was previously seen."
+                warnings.warn(
+                    f"Duplicated delay values found. Delay {delay.flat[0]} fs was previously seen.",
+                    PySprintWarning
                 )
             local_delays[idx] = delay
             local_positions[idx] = position

@@ -148,8 +148,8 @@ def nuifft(x, y, gl, df=1.0, epsilon=1e-12, exponent="positive"):
     F_k : ndarray
         The complex discrete Fourier transform
 
-    Notes
-    -----
+    Note
+    ----
     If numba is not installed it's approximately 5x times slower.
     """
     if exponent not in ("positive", "negative"):

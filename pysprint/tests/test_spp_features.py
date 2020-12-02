@@ -4,6 +4,7 @@ import numpy as np
 
 from pysprint.core.methods import SPPMethod
 from pysprint.core.bases import Dataset
+from pysprint.utils.exceptions import PySprintWarning
 
 
 @pytest.fixture()
@@ -67,7 +68,7 @@ def test_duplicate_entries(construct_ifg_sequence):
     are correctly identified and ValueError is raised.
     """
     d1, d2, d3, d4, d5, _ = construct_ifg_sequence
-    with pytest.raises(ValueError):
+    with pytest.warns(PySprintWarning):
         SPPMethod.calculate_from_ifg([d1, d2, d3, d4, d5], reference_point=2, order=4)
 
 

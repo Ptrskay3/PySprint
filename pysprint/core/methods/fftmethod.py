@@ -107,8 +107,8 @@ class FFTMethod(Dataset):
             if 'positive', compute the transform with a positive exponent.
             Default is `positive`.
 
-        Notes
-        -----
+        Note
+        ----
         The basic scheme is ifft -> windowing -> fft, so you should call
         these functions in this order. Otherwise the transforms may be
         inconsistent.
@@ -257,19 +257,10 @@ class FFTMethod(Dataset):
             If lmfit is available returns the fit report, else returns an
             empty string.
 
-        Notes
-        -----
+        Note
+        ----
         Decorated with pprint_disp, so the results are immediately
         printed without explicitly saying so.
-
-        Developer-commentary
-        --------------------
-        Currently the x-axis transformation is sloppy, because we cache the
-        original x axis and not transforming it	backwards.
-        In addition we need to keep track of interpolation and
-        zero-padding too. Currently the transforms are correct only if
-        first ifft was used. For now it's doing okay: giving good results.
-        For consistency we should still implement that a better way later.
         """
         self.build_phase()
         dispersion, dispersion_std, fit_report = self.phase._fit(

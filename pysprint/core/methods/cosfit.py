@@ -124,8 +124,8 @@ class CosFitMethod(Dataset):
         fit_report : str
             Not implemented yet. It returns an empty string for the time being.
 
-        Notes
-        ------
+        Note
+        ----
         Decorated with pprint_disp, so the results are
         immediately printed without explicitly saying so.
         """
@@ -223,8 +223,8 @@ class CosFitMethod(Dataset):
             If True show the fitting results when finished.
             Default is True.
 
-        Notes
-        -----
+        Note
+        ----
         If the fit fails some parameters must be tweaked in order to
         achieve results. There is a list below with issues,
         its suspected reasons and solutions.
