@@ -24,8 +24,9 @@ before_install:
   - conda update -q conda
   - conda config --add channels conda-forge
   - conda config --add channels ptrskay
-  - conda install -c anaconda rust
-  - conda install -c powerai rust-nightly
+  # download rust
+  - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
+  - export PATH="$HOME/.cargo/bin:$PATH"
   - conda info -a
   - cargo version
   - git clone https://github.com/PyO3/pyo3.git third_party
