@@ -3,12 +3,14 @@
 
 [![Build Status](https://travis-ci.org/Ptrskay3/PySprint.svg?branch=master)](https://travis-ci.org/Ptrskay3/pysprint)
 [![Build Status](https://dev.azure.com/leehpeter/PySprint/_apis/build/status/Ptrskay3.PySprint?branchName=master)](https://dev.azure.com/leehpeter/PySprint/_build/latest?definitionId=3&branchName=master)
+![Build status](https://ci.appveyor.com/api/projects/status/ntruwstinov7pv87?svg=true)](https://ci.appveyor.com/project/Ptrskay3/pysprint)
 [![Maintainability](https://api.codeclimate.com/v1/badges/4e876c4899af3c4435b0/maintainability)](https://codeclimate.com/github/Ptrskay3/PySprint/maintainability)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Ptrskay3/PySprint.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Ptrskay3/PySprint/context:python)
 [![codecov](https://codecov.io/gh/Ptrskay3/PySprint/branch/master/graph/badge.svg)](https://codecov.io/gh/Ptrskay3/PySprint)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Documentation Status](https://readthedocs.org/projects/pysprint/badge/?version=latest)](https://pysprint.readthedocs.io/en/latest/?badge=latest)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Ptrskay3/PySprint/master?filepath=index.ipynb)
+
 | | |
 |-|-|
 |__Name__| PySprint|
@@ -33,7 +35,7 @@ pointless Rust extension module, which might turn into something useful later.
 
 ### Installation
 
-PySprint requires at least [Python 3.6](https://www.python.org/downloads/) to run.
+PySprint requires at least [Python 3.7](https://www.python.org/downloads/) to run.
 
 Install with
 

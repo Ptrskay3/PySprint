@@ -5,7 +5,7 @@ environment:
     # See: http://stackoverflow.com/a/13751649/163740
     CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\appveyor\\run_with_env.cmd"
     TWINE_USERNAME: Ptrskay
-    # Note: TWINE_PASSWORD is set in Appveyor settings
+    # TWINE_PASSWORD is set in Appveyor settings
     CIBW_BEFORE_BUILD: pip install setuptools-rust
   matrix:
     - channel: nightly
@@ -40,8 +40,6 @@ install:
   - set PATH=%PYTHON%\\Scripts;%PATH%
 
 build_script:
-  # Set pip 18 until we figure out why it's failing >18.
-  - "%PYTHON%\\python.exe -m pip install pip==18"
   # Install python dependencies for compiling
   # the dynamic library and run the tests
   - "%PYTHON%\\python.exe -m pip install -r requirements.txt"

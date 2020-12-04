@@ -1,80 +1,89 @@
-os: linux
-dist: xenial
+env:
+  global:
+    - TWINE_USERNAME=Ptrskay
+    - DOCKER_IMAGE_LINUX_32=daald/ubuntu32:xenial
+    - DOCKER_CONTAINER_LINUX_32=ubuntu32_container
 
+stages:
+  - Testing
+  # Architectures supported:
+  # - manylinux1_x86_64 py3.7, 3.8
+  # - osx py3.7, 3.8
+  - name: Deploying
+    if: tag IS present
 
-services:
-  - xvfb
+jobs:
+  include:
+    - stage: Test
+      name: "Python=3.7 linux x86_64"
+      os: linux
+      python: 3.7
+      env:
+        - PIP=pip
+        - PYTHON=python
+      install:
+        - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
+        - export PATH="$HOME/.cargo/bin:$PATH"
+        - $PIP install -r requirements.txt
+        - $PIP install lmfit dask numba pytest coverage codecov
+        - $PIP install setuptools setuptools_rust
+        - $PYTHON setup.py develop
+      script:
+        - cd pysprint/tests
+        - coverage run --source=pysprint -m pytest
+        - coverage report -m
+        - cd ..
+        - cd ..
+ 
+    - name: "Python=3.7 OSX"
+      os: osx
+      python: 3.7
+      language: generic
+      env:
+        - PIP=pip3
+        - PYTHON=python3
+      install:
+        - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
+        - export PATH="$HOME/.cargo/bin:$PATH"
+        - $PIP install -r requirements.txt
+        - $PIP install lmfit dask numba pytest coverage codecov
+        - $PIP install setuptools setuptools_rust
+        - $PYTHON setup.py develop
+      script:
+        - cd pysprint/tests
+        - pytest -vv
+        - cd ..
+        - cd ..
 
-language: python
-
-python:
-  - 3.8
-
-addons:
-  apt:
-    packages:
-    - libxkbcommon-x11-0
-
-before_install:
-  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  - conda config --add channels conda-forge
-  - conda config --add channels ptrskay
-  # download rust
-  - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
-  - export PATH="$HOME/.cargo/bin:$PATH"
-  - conda info -a
-  - cargo version
-  - git clone https://github.com/PyO3/pyo3.git third_party
-  - cd third_party
-  - git checkout 38af32e  # checkout a stable release
-  - cd ..
-
-install:
-  - conda env create -f environment.yml
-  - activate pysprint-dev
-  - conda install -c anaconda jupyter
-  - conda install -c anaconda notebook
-  - conda install flake8 codecov pytest coverage nbconvert
-  - conda install conda-build anaconda-client
-  # Force a refresh, because test_spp_features fails with old dependencies.
-  - python -m pip install --upgrade numpy scipy lmfit numba dask scikit-learn --force-reinstall --ignore-installed
-  - python setup.py develop
-
-before_script:
-  - flake8 pysprint/ --count --select=E9,F63,F72,F82 --show-source --statistics
-  - python -c "import pysprint;pysprint.print_info()"
-
-script:
-  - cd doc
-  - jupyter nbconvert --to script hu_*.ipynb
-  - python test_notebooks.py .
-  - cat notebooktest.log
-  - cd ..
-  - cd pysprint/tests
-  - coverage run --source=pysprint -m pytest
-  - coverage report -m
-
-after_success:
-  - codecov
-
-# suppress anaconda deployment until we find out why it's failing with 3.8 and 3.6 Python version.
-
-before_deploy:
-  - cd ..
-  - cd ..
-#  - bash .ci/conda_upload.sh
-
-deploy:
-  - provider: pypi
-    username: "__token__"
-    password:
-      secure: Iq4AIzY+TfLPMrhOgEXrlOvBUkGehbDfzqYYGbvumWp0JrJlCYfrF9RepJ3PFelatGrsRuVDcr4UBVC8USCPH1QfFoOPYXk/tI2EmrwcRfkECp8yTrnuyfztG7KYQi6F6TtiQsZAbGY21L5j23x/OXxgH1B/v1ZZhW2oMiGZC/aT7Jr6VfLBdk3jKsU1WGz9YD4/EaleFLdjKxu1rJf7FmC7rmGKLLBhL8/FwO/KTGvL1XOSBi5KJDT28yj6N/JSqqprdC6GVuy81HpRI/+K7RuEPWtMMkHsEi5DE1zlC1DkWMWH+moCG2qqzwungENC/334vMW70pbtjgV2wDSXDwv3QfwgXM/xGBysVboNXT42QRu8wWe2YFWEAtV1qQKXHE5bfTi+swQSclXIkw4aSBiw+ZHtMA2MyN3Bxej4rhQh+BVVAFnpf0FMqs0PI8ztgbsNtdAMrSwhAxhkLXNuaGY7fSE6A0Ovs2u7iU+S53Tj9ulZYTn1fdRb0r2fQdbWLGJiYHNotwoCIeP8r6cMG0/6qy5cKo25cHewUwlWybJZVPZUJwsWThIxzBmtfjpzdQnyXLuJTu28VwIujbunSNcnlJILTFzQht33i/dDd6uEJLzvuoRXpDPNbNSkeAWMTb47YoDQFhmEc8sBs4ZGLldwYBfvxrFaLLqg01W0NWE=
-    on:
-      tags: true
-    distributions: "sdist bdist_wheel"
-    skip_existing: true
+    - stage: Deploying
+    - name: "manylinux_x86_64"
+      # Job generating the wheels for Linux 64-bit platforms
+      os: linux
+      sudo: required
+      env:
+        - CIBW_SKIP="*manylinux_i686* cp27-* cp34-* pp27-*"
+        - PIP=pip
+        - PYTHON=python3
+      services:
+        - docker
+      script: .ci/deploy.sh
+    - name: "manylinux_i686"
+      # Job generating the wheels for Linux 32-bit platforms
+      os: linux
+      sudo: required
+      env:
+        - CIBW_SKIP="*manylinux_x86_64* cp34-* cp27-*"
+        - PIP=pip
+        - PYTHON=python3
+      services:
+        - docker
+      script: .ci/deployi686.sh
+    - name: "OSX"
+      os: osx
+      sudo: required
+      language: generic
+      env:
+        - CIBW_SKIP="cp27-* cp34-*"
+        - PIP=pip2
+        - PYTHON=python2
+      script: .ci/deploy.sh
