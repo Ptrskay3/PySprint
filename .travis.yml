@@ -18,6 +18,8 @@ jobs:
       name: "Python=3.7 linux x86_64"
       os: linux
       python: 3.7
+      services:
+      - xvfb
       env:
         - PIP=pip
         - PYTHON=python
@@ -39,6 +41,8 @@ jobs:
       os: osx
       python: 3.7
       language: generic
+      services:
+      - xvfb
       env:
         - PIP=pip3
         - PYTHON=python3
