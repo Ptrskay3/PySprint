@@ -13,6 +13,8 @@ stages:
     if: tag IS present
 
 jobs:
+  allow_failures:
+    - os: osx
   include:
     - stage: Test
       name: "Python=3.7 linux x86_64"
