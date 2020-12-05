@@ -28,6 +28,7 @@ jobs:
         - which python
         - which python3
         - which pip3
+        - pyenv global 3.7.1
         - pip3 install -r requirements.txt
         - pip3 install lmfit dask numba pytest coverage codecov
         - pip3 install setuptools setuptools_rust
