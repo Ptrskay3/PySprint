@@ -22,16 +22,13 @@ jobs:
       python: 3.7
       services:
       - xvfb
-      env:
-        - PIP=pip3
-        - PYTHON=python3
       install:
         - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
         - export PATH="$HOME/.cargo/bin:$PATH"
-        - $PYTHON -m $PIP install -r requirements.txt
-        - $PYTHON -m $PIP install lmfit dask numba pytest coverage codecov
-        - $PYTHON -m $PIP install setuptools setuptools_rust
-        - $PYTHON setup.py develop
+        - python -m pip install -r requirements.txt
+        - python -m pip install lmfit dask numba pytest coverage codecov
+        - python -m pip install setuptools setuptools_rust
+        - python setup.py develop
       script:
         - cd pysprint/tests
         - coverage run --source=pysprint -m pytest
