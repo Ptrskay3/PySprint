@@ -25,9 +25,12 @@ jobs:
       install:
         - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
         - export PATH="$HOME/.cargo/bin:$PATH"
-        - python3 -m pip install -r requirements.txt
-        - python3 -m pip install lmfit dask numba pytest coverage codecov
-        - python3 -m pip install setuptools setuptools_rust
+        - which python
+        - which python3
+        - which pip3
+        - python3 -m pip3 install -r requirements.txt
+        - python3 -m pip3 install lmfit dask numba pytest coverage codecov
+        - python3 -m pip3 install setuptools setuptools_rust
         - python3 setup.py develop
       script:
         - cd pysprint/tests
