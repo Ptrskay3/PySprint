@@ -23,8 +23,8 @@ jobs:
       services:
       - xvfb
       env:
-        - PIP=pip
-        - PYTHON=python
+        - PIP=pip3
+        - PYTHON=python3
       install:
         - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
         - export PATH="$HOME/.cargo/bin:$PATH"
@@ -68,7 +68,7 @@ jobs:
       sudo: required
       env:
         - CIBW_SKIP="*manylinux_i686* cp27-* cp34-* pp27-*"
-        - PIP=pip
+        - PIP=pip3
         - PYTHON=python3
       services:
         - docker
@@ -79,7 +79,7 @@ jobs:
       sudo: required
       env:
         - CIBW_SKIP="*manylinux_x86_64* cp34-* cp27-*"
-        - PIP=pip
+        - PIP=pip3
         - PYTHON=python3
       services:
         - docker
@@ -90,6 +90,6 @@ jobs:
       language: generic
       env:
         - CIBW_SKIP="cp27-* cp34-*"
-        - PIP=pip2
-        - PYTHON=python2
+        - PIP=pip3
+        - PYTHON=python3
       script: .ci/deploy.sh
