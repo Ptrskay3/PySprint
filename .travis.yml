@@ -28,9 +28,9 @@ jobs:
         - which python
         - which python3
         - which pip3
-        - python3 -m pip3 install -r requirements.txt
-        - python3 -m pip3 install lmfit dask numba pytest coverage codecov
-        - python3 -m pip3 install setuptools setuptools_rust
+        - pip3 install -r requirements.txt
+        - pip3 install lmfit dask numba pytest coverage codecov
+        - pip3 install setuptools setuptools_rust
         - python3 setup.py develop
       script:
         - cd pysprint/tests
