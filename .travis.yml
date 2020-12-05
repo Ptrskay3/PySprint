@@ -23,7 +23,7 @@ jobs:
       services:
       - xvfb
       env:
-        - PIP=pip
+        - PIP=pip3
         - PYTHON=python3
       install:
         - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
