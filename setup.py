@@ -1,5 +1,6 @@
 import os
 import sys
+import versioneer
 
 
 if sys.version_info[:2] < (3, 6):
@@ -25,9 +26,6 @@ except ImportError:
     else:
         from setuptools_rust import RustExtension, Binding
 
-from versioneer import get_cmdclass, get_version
-
-cmdclass = get_cmdclass()
 # _VersioneerSdist = cmdclass['sdist']
 
 # class CargoModifiedSdist(_VersioneerSdist):
@@ -67,8 +65,8 @@ cmdclass = get_cmdclass()
 
 setup(
     name="pysprint",
-    version=get_version(),
-    cmdclass=cmdclass,
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     author="Péter Leéh",
     author_email="leeh123peter@gmail.com",
     description="Spectrally refined interferometry for Python",
