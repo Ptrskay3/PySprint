@@ -2,13 +2,8 @@
 
 set -ex
 
-conda install -c powerai rust-nightly
 
-git clone https://github.com/PyO3/pyo3.git third_party
-cd third_party
-git checkout 38af32e  # a stable release version
-cd ..
+curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
+export PATH="$HOME/.cargo/bin:$PATH"
 
-# use install instead of develop to build rust extension
-# in release mode in order to increase performance
 python setup.py install
