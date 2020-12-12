@@ -6,12 +6,14 @@ References:
 https://en.wikipedia.org/wiki/Random_sample_consensus
 https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RANSACRegressor.html
 """
+import warnings
 
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import RANSACRegressor
 
+warnings.simplefilter('ignore', np.RankWarning)
 
 def make_regression_class(degree):
     class PolynomialModel:
@@ -57,8 +59,8 @@ def run_regressor(phase, degree, plot=True, **kwds):
 
     if plot:
         _, ax = plt.subplots()
+        ax.clear()
         phase.plot(ax=ax)
         ax.plot(phase.x[inlier_mask], phase.y[inlier_mask], "k+", label="inliers")
-        ax.plot(phase.x, y_hat, 'r--', label='estimated curve')
-        plt.legend()
+        ax.plot(phase.x, y_hat, 'g--', label='RANSAC estimated curve')
     return phase.x[inlier_mask], phase.y[inlier_mask]

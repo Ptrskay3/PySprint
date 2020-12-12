@@ -136,7 +136,7 @@ class Generator(metaclass=_DatasetBase):
             except Exception:  # TODO: better exception case
                 self.plotwidget.plot(self.x, self.y, "r")
         self.plotwidget.grid()
-        self.plotwidget.show()
+        self.plotwidget.show(block=True)
 
     # TODO: rewrite this in a more intelligent manner, this is deprecated
     def save(self, name, path=None):
@@ -212,7 +212,7 @@ class Generator(metaclass=_DatasetBase):
         self.ax[1].set(xlabel="Frequency/Wavelength", ylabel=r"$\Phi $[rad]")
         self.ax[0].grid()
         self.ax[1].grid()
-        self.plotwidget.show()
+        self.plotwidget.show(block=True)
 
     @property
     def data(self):
@@ -224,3 +224,21 @@ class Generator(metaclass=_DatasetBase):
         if len(self.ref) == 0:
             return self.x, self.y
         return self.x, self.y, self.ref, self.sam
+
+    # def pulse_shape(self):
+    #     """
+    #     Plot the shape of the pulse in the time domain.
+    #     """
+    #     if not self.normalize:
+    #         raise ValueError("Must set normalize=True.")
+    #     x_spaced = np.linspace(
+    #         self.x[0], self.x[-1], len(self.x)
+    #     )
+    #     y_phase = self._phase(x_spaced)
+    #     timestep = np.diff(x_spaced)[0]
+    #     E_field = np.sqrt(self.sam) * np.exp(-1j * y_phase)
+    #     E_pulse = np.abs(np.fft.ifft(E_field)) ** 2
+    #     x_axis = np.fft.fftfreq(len(self.x), d=timestep / (2 * np.pi))
+    #     self.plotwidget.fill_between(x_axis, E_pulse, np.zeros_like(E_pulse), color="red")
+    #     self.plotwidget.show(block=True)
+    #     return x_axis, E_pulse

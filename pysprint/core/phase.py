@@ -216,7 +216,7 @@ class Phase:
             linestyle = linestyle or kwargs.pop("linestyle", "None")
             ax.plot(x, y, marker=marker, linestyle=linestyle, **kwargs)
             if self.fitted_curve is not None:
-                ax.plot(x, self.fitted_curve[idx], "r--")
+                ax.plot(x, self.fitted_curve[idx], "r--", label="Current fit")
 
     @pprint_disp
     def fit(self, reference_point, order):
@@ -528,5 +528,9 @@ class Phase:
         """
         if self._filtered_x is None or self._filtered_y is None:
             raise ValueError("There's nothing to apply.")
+        prec = _get_config_value("precision")
+        if len(self.x) != len(self._filtered_x):
+            r = len(self.x) - len(self._filtered_x)
+            print(f"Values dropped: {r} ({(r / len(self.x) * 100):.{prec}f} % of total)")
         self.x, self.y = self._filtered_x, self._filtered_y
         return self

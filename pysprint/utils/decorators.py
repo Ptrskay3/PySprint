@@ -69,7 +69,8 @@ def _build_doc(method, param):
 def inplacify(method):
     """
     Decorator used to allow a class function to be called
-    as `inplace` as well.
+    as `inplace` as well. It will invalidate the parent
+    object to have **only one** reference to it.
     """
     _update_doc(method, _inplace_doc)
 
@@ -79,7 +80,13 @@ def inplacify(method):
         if inplace:
             method(self, *args, **kwds)
         else:
-            return method(copy(self), *args, **kwds)
+            new_ds = method(copy(self), *args, **kwds)
+            
+            # invalidate parent for the original obj.
+            if self.parent is not None:
+                self.parent._container.pop(self, None)
+                self.parent = None
+            return new_ds
 
     return wrapper
 

@@ -383,7 +383,6 @@ class WFTMethod(FFTMethod):
         return self
 
     @inplacify
-    @_mutually_exclusive_args("std", "fwhm")
     def cover(self, N, fwhm=None, std=None, order=2):
         """
         Cover the whole domain with `N` number of windows
@@ -405,9 +404,16 @@ class WFTMethod(FFTMethod):
             The order of Gaussian window. Must be even.
             The default is 2.
         """
-        self.add_window_linspace(
-            np.min(self.x), np.max(self.x), N, fwhm=fwhm, std=std, order=order
-        )
+        if fwhm is not None:
+            self.add_window_linspace(
+                np.min(self.x), np.max(self.x), N, fwhm=fwhm, order=order
+            )
+        elif std is not None:
+            self.add_window_linspace(
+                np.min(self.x), np.max(self.x), N, std=std, order=order
+            )
+        else:
+            raise ValueError
 
     def calculate(
             self,
@@ -601,7 +607,7 @@ class WFTMethod(FFTMethod):
                     self.found_centers[_center] = None
                 else:
                     raise err
-            if not silent:  # This creates about 5-15% overhead..
+            if not silent:  # This creates about 5-15% overhead.. maybe create a buffer
                 sys.stdout.write('\r')
                 j = (idx + 1) / winlen
                 sys.stdout.write(
@@ -658,8 +664,8 @@ class WFTMethod(FFTMethod):
         if not silent:
             if winlen != usefullen:
                 print(
-                    f"\nIn total {abs(winlen-usefullen)} out of {winlen} datapoints "
-                    f"were thrown away due to ambiguous peak positions."
+                    f"\n{abs(winlen-usefullen)} points skipped "
+                    f"due to ambiguous peak position."
                 )
 
     def errorplot(self, *args, **kwargs):
