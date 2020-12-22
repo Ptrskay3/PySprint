@@ -2,6 +2,7 @@ from math import factorial
 
 import numpy as np
 
+from pysprint.core.phase import Phase
 from pysprint.config import _get_config_value
 from pysprint.core.bases.dataset import Dataset
 from pysprint.core._optimizer import FitOptimizer
@@ -25,6 +26,7 @@ class CosFitMethod(Dataset):
         self.mt = 8000
         self.f = None
         self.r_squared = None
+        self.phase = None
 
     def set_max_tries(self, value):
         """
@@ -142,6 +144,12 @@ class CosFitMethod(Dataset):
         self.r_squared = self._get_r_squared()
         pprint_math_or_default(f"R^2 = {self.r_squared:.{precision}f}\n")
         dispersion = pad_with_trailing_zeros(dispersion, 6)
+
+        # TODO: This should produce the same result, but it does not.
+
+        self.phase = Phase.from_dispersion_array(dispersion, domain=self.x)
+        # trigger a fit to have disp calculated
+        self.phase._fit(reference_point, order=np.max(np.flatnonzero(self.params)) - 2)
         return (
             dispersion,
             [0, 0, 0, 0, 0, 0],
@@ -288,5 +296,11 @@ class CosFitMethod(Dataset):
         )
         disp = disp[3:]
         retval = [disp[i] * factorial(i + 1) for i in range(len(disp))]
+
+        # TODO: This should produce the same result, but it does not.
+
+        self.phase = Phase.from_dispersion_array(retval, domain=self.x)
+        # trigger a fit to have disp calculated
+        self.phase._fit(reference_point, order=order)
         self._dispersion_array = retval
         return retval

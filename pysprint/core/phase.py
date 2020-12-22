@@ -1,7 +1,10 @@
-import warnings
-import logging
-from math import factorial
+import os
+import ast
+import errno
 from collections import namedtuple
+import logging
+import warnings
+from math import factorial
 
 import numpy as np
 from scipy.optimize import curve_fit
@@ -24,11 +27,10 @@ from pysprint.core.ransac import run_regressor
 from pysprint.utils import pprint_disp
 from pysprint.utils import transform_lmfit_params_to_dispersion
 from pysprint.utils import transform_cf_params_to_dispersion
-from pysprint.utils import _unpack_lmfit
 from pysprint.utils import find_nearest
 from pysprint.utils import inplacify
 from pysprint.utils import NotCalculatedException
-
+from pysprint.utils.misc import _unpack_lmfit
 
 logger = logging.getLogger(__name__)
 FORMAT = "[ %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
@@ -76,6 +78,10 @@ class Phase:
 
         self.coef_array = None
         self.coef_std_array = None
+
+    @classmethod
+    def from_log(cls, filename, **kwargs):
+        return cls(*[_to_array(x) for x in _lastlines(filename, 2)])
 
     @property
     def GD(self):
@@ -164,13 +170,15 @@ class Phase:
         return self
 
     @classmethod
-    def from_disperion_array(cls, dispersion_array, domain=None):
+    def from_dispersion_array(cls, dispersion_array, domain=None):
         cls.is_dispersion_array = True
+        print(dispersion_array)
         if domain is None:
             x = np.linspace(2, 4, num=2000)
         else:
             x = np.asarray(domain)
-        coeffs = [i / factorial(i + 1) for i in dispersion_array]
+        coeffs = [0] + [v / factorial(i + 1) for i, v in enumerate(dispersion_array)]
+        print(coeffs)
         cls.poly = np.poly1d(coeffs[::-1])
         return cls(x, cls.poly(x))
 
@@ -182,7 +190,7 @@ class Phase:
             x = np.asarray(domain)
 
         cls.is_coeff = True
-        cls.poly = np.poly1d([SOD, QOD, FOD, TOD, GDD, GD])
+        cls.poly = np.poly1d([SOD, QOD, FOD, TOD, GDD, GD, 0])
         return cls(x, cls.poly(x))
 
     def __str__(self):
@@ -534,3 +542,56 @@ class Phase:
             print(f"Values dropped: {r} ({(r / len(self.x) * 100):.{prec}f} % of total)")
         self.x, self.y = self._filtered_x, self._filtered_y
         return self
+
+
+def _lastlines(file, n, bsize=2048):
+    '''
+    Return the last `n` lines of the log file **efficiently**.
+    https://stackoverflow.com/a/12295054/11751294
+    '''
+    # get newlines type, open in universal mode to find it
+    with open(file, 'r') as hfile:
+        if not hfile.readline():
+            return  # empty, no point
+        sep = hfile.newlines.encode()
+#     assert isinstance(sep, str), 'multiple newline types found, aborting'
+
+    # find a suitable seek position in binary mode
+    with open(file, 'rb') as hfile:
+        hfile.seek(0, os.SEEK_END)
+        linecount = 0
+        pos = 0
+
+        while linecount <= n + 1:
+            # read at least n lines + 1 more; we need to skip a partial line later on
+            try:
+                hfile.seek(-bsize, os.SEEK_CUR)           # go backwards
+                linecount += hfile.read(bsize).count(sep) # count newlines
+                hfile.seek(-bsize, os.SEEK_CUR)           # go back again
+            except IOError as e:
+                if e.errno == errno.EINVAL:
+                    # Attempted to seek past the start, can't go further
+                    bsize = hfile.tell()
+                    hfile.seek(0, os.SEEK_SET)
+                    pos = 0
+                    linecount += hfile.read(bsize).count(sep)
+                    break
+                raise  # Some other I/O exception, re-raise
+            pos = hfile.tell()
+
+    # Re-open in text mode
+    with open(file, 'r') as hfile:
+        hfile.seek(pos, os.SEEK_SET)  # our file position from above
+
+        for line in hfile:
+            # We've located n lines *or more*, so skip if needed
+            if linecount > n:
+                linecount -= 1
+                continue
+            # The rest we yield
+            yield line
+
+def _to_array(x):
+    y = x.split(': ')[-1].strip('\n')
+    return np.array(ast.literal_eval(y))
+

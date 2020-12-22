@@ -81,6 +81,13 @@ def inplacify(method):
             method(self, *args, **kwds)
         else:
             new_ds = method(copy(self), *args, **kwds)
+
+            # trigger a callback to ensure that relevant values
+            # aren't dropped
+            try:
+                new_ds.callback(new_ds, new_ds.parent)
+            except (TypeError, ValueError):
+                pass
             
             # invalidate parent for the original obj.
             if self.parent is not None:

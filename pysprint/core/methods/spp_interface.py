@@ -12,6 +12,7 @@ from pysprint.core.phase import Phase
 from pysprint.utils.exceptions import DatasetError
 from pysprint.core.callbacks import defaultcallback
 from pysprint.utils.exceptions import PySprintWarning
+from pysprint.utils import from_pat
 
 __all__ = ["SPPMethod"]
 
@@ -23,7 +24,7 @@ class SPPMethod(metaclass=_DatasetBase):
     Interface for Stationary Phase Point Method.
     """
 
-    def __init__(self, ifg_names, sam_names=None, ref_names=None, errors="raise", implementer=None, **kwargs):
+    def __init__(self, ifg_names, sam_names=None, ref_names=None, errors="raise", implements=None, **kwargs):
         """
         SPPMethod constructor.
 
@@ -43,11 +44,11 @@ class SPPMethod(metaclass=_DatasetBase):
 
         self.ifg_names = ifg_names
 
-        if implementer is None:
-            self.implementer = Dataset
+        if implements is None:
+            self.implements = Dataset
         else:
-            if issubclass(implementer, Dataset):
-                self.implementer = implementer
+            if issubclass(implements, Dataset):
+                self.implements = implements
             else:
                 raise TypeError("implementer must subclass `pysprint.Dataset`.")
 
@@ -110,6 +111,29 @@ class SPPMethod(metaclass=_DatasetBase):
         self._info = f"Progress: {len(self._container)}/{len(self)}"
         self.GD = None
 
+    @classmethod
+    def from_pattern(cls, pattern, mod=None, **kwargs):
+        """
+        Load all files matching a pattern, then optinally sort them
+        by modulo 3 if there are arms' spectra.
+        
+        Parameters
+        ----------
+        pattern : str
+            The pattern to match. For example to load all txt files in the
+            current directory, use `"*.txt"`.
+        mod : int, optional
+            The modulus to sort files by. Set this option to 3 if you have
+            consecutive measurements, which contain arms' spectra. The option
+            mod = -1 will group by modulo 3, but it will only include every 
+            third file.
+        kwargs :
+            Additional keyword arguments for the original constructor, for
+            example loading options.
+        """
+        return cls(**from_pat(pattern, mod), **kwargs)
+
+
     def _collect(self):
 
         # Maybe the dictionary struct can be dropped at this point..
@@ -139,7 +163,7 @@ class SPPMethod(metaclass=_DatasetBase):
         # ensure padding before trying to append, and also
         # we better prevent infinite loop
 
-        # TODO
+        # TODO: This seems wrong..
         self.ifg_names.append(newifg)
         if newsam is not None:
             if self.sam_names is not None:
@@ -244,12 +268,12 @@ class SPPMethod(metaclass=_DatasetBase):
             <td style="text-align:center"> {len(alive)}</td>
         </tr>
         <tr>
-        <td style="text-align:center"><b>Eagerly calculating<b></td>
-            <td style="text-align:center"> {self.is_eager}</td>
-        </tr>
-        <tr>
         <td style="text-align:center"><b>Data recorded from<b></td>
             <td style="text-align:center"> {len(self._container)}</td>
+        </tr>
+        <tr>
+        <td style="text-align:center"><b>Eagerly calculating<b></td>
+            <td style="text-align:center"> {self.is_eager}</td>
         </tr>
         </table>
         """
@@ -258,9 +282,11 @@ class SPPMethod(metaclass=_DatasetBase):
     @lru_cache(500)
     def __getitem__(self, key):
         if isinstance(key, slice):
-            raise TypeError("Slices are not acceptable.")
+            raise TypeError(
+                "Slices are not acceptable, but will be in the future versions."
+            )
         try:
-            dataframe = self.implementer.parse_raw(
+            dataframe = self.implements.parse_raw(
                 self.ifg_names[key],
                 self.sam_names[key],
                 self.ref_names[key],
@@ -268,7 +294,7 @@ class SPPMethod(metaclass=_DatasetBase):
                 parent=self
             )
         except (TypeError, ValueError):
-            dataframe = self.implementer.parse_raw(
+            dataframe = self.implements.parse_raw(
                 self.ifg_names[key],
                 **self.load_dict,
                 parent=self
@@ -294,11 +320,21 @@ class SPPMethod(metaclass=_DatasetBase):
         active objects that have been constructed on the runtime.
         """
         self._container = {}
+
         for ifg in self:
             ifg._delay = None
             ifg.delay = None
             ifg._positions = None
             ifg.positions = None
+        
+        # Clean up all other instances which might have been omitted due to inplace ops.
+        alive = [i for i in Dataset._get_instances() if i.parent == self]
+        for ifg in alive:
+            ifg._delay = None
+            ifg.delay = None
+            ifg._positions = None
+            ifg.positions = None
+
 
     def save_data(self, filename):
         """
