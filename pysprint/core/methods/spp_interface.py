@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt  # noqa
 import matplotlib.cbook as cbook
 
 from pysprint.core.bases.dataset import Dataset
+from pysprint.core.bases.dataset import MimickedDataset
 from pysprint.core.bases._dataset_base import _DatasetBase
 from pysprint.core.phase import Phase
 from pysprint.utils.exceptions import DatasetError
@@ -41,7 +42,7 @@ class SPPMethod(metaclass=_DatasetBase):
         """
         if errors not in ("raise", "ignore"):
             raise ValueError("errors must be `raise` or `ignore`.")
-
+        
         self.ifg_names = ifg_names
 
         if implements is None:
@@ -110,6 +111,8 @@ class SPPMethod(metaclass=_DatasetBase):
         self._container = {}
         self._info = f"Progress: {len(self._container)}/{len(self)}"
         self.GD = None
+        self._mimicked = False
+        self._mimicked_set = []
 
     @classmethod
     def from_pattern(cls, pattern, mod=None, **kwargs):
@@ -133,6 +136,43 @@ class SPPMethod(metaclass=_DatasetBase):
         """
         return cls(**from_pat(pattern, mod), **kwargs)
 
+    @classmethod
+    def from_log(cls, logfile, **kwargs):
+        """
+        Restore a checkpoint from logfile. It creates MimickedDataset
+        objects, which has no x-y values set, only contains delay and
+        SPP position values. These values can be set without restrictions.
+
+        Parameters
+        ----------
+        logfile : str
+            The logfile created by pysprint with verbosity level 1 or greater.
+        kwargs : optional
+            Additional keyword arguments to pass to MimickedDataset (for example
+            callback might be important).
+        """
+        callback = kwargs.pop("callback", defaultcallback)
+        instance = cls([], callback=callback)
+        _mimicked_set = []
+        GD = Phase.from_log(logfile, GD_mode=True)
+        xx, yy = _group_multiple_positions(GD.x, GD.y)
+        for pos, delay in zip(xx, yy):
+            ds = MimickedDataset(
+                delay=delay[0],
+                positions=pos,
+                parent=instance,
+                callback=callback,
+                **kwargs
+            )
+            _mimicked_set.append(ds)
+        instance._mimicked = True
+        instance._mimicked_set = _mimicked_set
+        return instance
+
+    def _mimicked_index(self, member):
+        for i, ds in enumerate(self):
+            if ds == member:
+                return i
 
     def _collect(self):
 
@@ -281,25 +321,28 @@ class SPPMethod(metaclass=_DatasetBase):
 
     @lru_cache(500)
     def __getitem__(self, key):
-        if isinstance(key, slice):
-            raise TypeError(
-                "Slices are not acceptable, but will be in the future versions."
-            )
-        try:
-            dataframe = self.implements.parse_raw(
-                self.ifg_names[key],
-                self.sam_names[key],
-                self.ref_names[key],
-                **self.load_dict,
-                parent=self
-            )
-        except (TypeError, ValueError):
-            dataframe = self.implements.parse_raw(
-                self.ifg_names[key],
-                **self.load_dict,
-                parent=self
-            )
-        return dataframe
+        if not self._mimicked:
+            if isinstance(key, slice):
+                raise TypeError(
+                    "Slices are not acceptable, but will be in the future versions."
+                )
+            try:
+                dataframe = self.implements.parse_raw(
+                    self.ifg_names[key],
+                    self.sam_names[key],
+                    self.ref_names[key],
+                    **self.load_dict,
+                    parent=self
+                )
+            except (TypeError, ValueError):
+                dataframe = self.implements.parse_raw(
+                    self.ifg_names[key],
+                    **self.load_dict,
+                    parent=self
+                )
+            return dataframe
+        else:
+            return self._mimicked_set[key]
 
     def _validate(self):
         for filename in self.ifg_names:
@@ -464,3 +507,9 @@ class SPPMethod(metaclass=_DatasetBase):
         if self.cb.__name__ == "inner":
             return True
         return False
+
+
+def _group_multiple_positions(x, y):
+    ys = np.split(y, np.where(np.diff(y) != 0)[0] + 1)
+    xs = np.split(x, np.where(np.diff(y) != 0)[0] + 1)
+    return xs, ys

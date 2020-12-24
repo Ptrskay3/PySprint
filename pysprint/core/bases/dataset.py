@@ -4,7 +4,7 @@ that an interferogram should have in general.
 """
 import base64
 from collections.abc import Iterable
-from contextlib import suppress
+from contextlib import suppress, contextmanager
 from io import BytesIO
 import json
 import logging
@@ -1388,3 +1388,90 @@ class Dataset(metaclass=_DatasetBase):
                 self._positions = positions
         else:
             self.positions = positions
+        # trigger the callback here too
+        try:
+            self.callback(self, self.parent)
+        except ValueError:
+            pass
+
+
+class MimickedDataset(Dataset):
+    '''
+    Class that pretends to be a dataset, but its x-y values are missing.
+    It allows to set delay and SPP positions arbitrarily.
+    '''
+    def __init__(self, delay, positions, *args, **kwargs):
+        if delay is None or positions is None:
+            raise ValueError("must specify SPP data.")
+
+        x = np.empty(1)
+        y = np.empty(1)
+
+        super().__init__(x=x, y=y, *args, **kwargs)
+
+        self.set_SPP_data(delay=delay, positions=positions, force=True)
+
+    @contextmanager
+    def _suppress_callbacks(self):
+        try:
+            self.restore_parent = self.parent
+            self.restore_callback = self.callback
+            self.parent = None
+            self.callback = lambda x, y: (_ for _ in ()).throw(ValueError('mimicked'))
+            yield
+        finally:
+            self.parent, self.callback = self.restore_parent, self.restore_callback
+
+    def plot(self, *args, **kwargs):
+        if self.x.size == 1:
+            self.plt.text(0.31, 0.5, 'Dataset is missing.', size=15)
+  
+    # Redefine getter-setter without boundscheck
+    @property
+    def positions(self):
+        return self._positions
+
+    @positions.setter
+    def positions(self, value):
+        if isinstance(value, np.ndarray) or isinstance(value, Iterable):
+            for val in value:
+                if not isinstance(val, numbers.Number):
+                    raise ValueError(
+                        f"Expected numeric values, got {type(val)} instead."
+                    )
+
+        self._positions = value
+        try:
+            self.callback(self, self.parent)
+        except ValueError:
+            pass  # delay or position is missing
+
+    def to_dataset(self, x, y=None, ref=None, sam=None, parse=True, **kwargs):
+        if parse:
+            if y is not None:
+                raise ValueError("cannot specify `y` explicitly if `parse=True`.")
+            self.parent.ifg_names.append(x)
+            if ref is not None and sam is not None:
+                self.parent.sam_names.append(sam)
+                self.parent.ref_names.append(ref)
+
+            ds = Dataset.parse_raw(x, ref=ref, sam=sam, callback=self.callback, parent=self.parent, **kwargs)
+
+        else:
+            ds = Dataset(x=x, y=y, ref=ref, sam=sam, callback=self.callback, parent=self.parent, **kwargs)
+
+        # replace the MimickedDataset with the real one
+        # FIXME: need to invalidate 1 item in cache, not all
+
+        idx = self.parent._mimicked_index(self)
+        ds.parent._mimicked_set[idx] = ds
+        ds.parent.__getitem__.cache_clear()
+
+        # drop the reference
+        self.parent._container.pop(self, None)
+        self.parent = None
+        self.callback = lambda x, y: (_ for _ in ()).throw(ValueError('mimicked'))
+
+        # with self._suppress_callbacks():
+        ds.set_SPP_data(delay=self.delay, positions=self.positions, force=True)
+        return ds
