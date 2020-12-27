@@ -109,7 +109,6 @@ class SPPMethod(metaclass=_DatasetBase):
         }
 
         self._container = {}
-        self._info = f"Progress: {len(self._container)}/{len(self)}"
         self.GD = None
         self._mimicked = False
         self._mimicked_set = []
@@ -283,7 +282,9 @@ class SPPMethod(metaclass=_DatasetBase):
         return d, ds, s
 
     def __len__(self):
-        return len(self.ifg_names)
+        l = len(self.ifg_names)
+        g = len(self._mimicked_set)
+        return max([l, g])
 
     # TODO
     def __str__(self):

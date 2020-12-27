@@ -487,8 +487,8 @@ class WFTMethod(FFTMethod):
 
         self.cachedlen = len(self.window_seq)
 
-        if order == 1:
-            raise ValueError("Trying to fit constant function. Order must be in [2, 6].")
+        if order == 1 or order > 6:
+            raise ValueError("Order must be in [2, 6].")
 
         if ransac:
             print("Running RANSAC-filter..")
