@@ -17,6 +17,8 @@ from pysprint.utils.decorators import inplacify
 from pysprint.utils import NotCalculatedException
 from pysprint.utils import PySprintWarning
 from pysprint.utils.misc import find_nearest
+from pysprint.core.window import GaussianWindow
+from pysprint.core.window import WindowBase
 
 try:
     from dask import delayed, compute
@@ -26,68 +28,18 @@ except ImportError:
     CAN_PARALLELIZE = False
 
     def delayed(func=None, *args, **kwargs):
-        """Define delayed as identity deco."""
         if isfunction(func):
             return func
 
 
-class Window:
-    """
-    Basic class that implements functionality related to Gaussian
-    windows with caching the y values.
-    """
-
-    def __init__(self, x, center, fwhm, order=2):
-        self.x = x
-        self.center = center
-        self.fwhm = fwhm
-        self.order = order
-
-    @_lazy_property
-    def y(self):
-        """
-        The y values of the given window. It's a "lazy_property".
-        """
-        return gaussian_window(self.x, self.center, self.fwhm, self.order)
-
-    @classmethod
-    def from_std(cls, x, center, std, order=2):
-        """
-        Build the Gaussian window from standard deviation instead of fwhm.
-        """
-        _fwhm = std * 2 * np.log(2) ** (1 / order)
-        return cls(x, center, _fwhm, order)
-
-    def __str__(self):
-        precision = _get_config_value("precision")
-        return f"Window(center={self.center:.{precision}f}, fwhm={self.fwhm}, order={self.order})"
-
-    def plot(self, ax=None, scalefactor=1, zorder=90, **kwargs):
-        """
-        Plot the window.
-
-        Parameters
-        ----------
-        ax : matplotlib.axes.Axes, optional
-            The axis to plot on. If not given, plot on the last axis.
-        scalefactor : float, optional
-            Number describing how much a given window should be scaled up ONLY
-            for visibility.
-        zorder : float, optional
-            The drawing order of artists is determined by their zorder attribute, which is
-            a floating point number. Artists with higher zorder are drawn on top. You can
-            change the order for individual artists by setting their zorder. The default
-            value depends on the type of the Artist.
-        """
-        if ax is None:
-            ax = plt
-        ax.plot(self.x, self.y * scalefactor, zorder=zorder, **kwargs)
-
-
 class WFTMethod(FFTMethod):
-    """Basic interface for Windowed Fourier Transform Method."""
+    """Basic interface for Windowed Fourier Transform Method.
+    The `window_class` attribuite can be set up for custom windowing.
+    """
 
     def __init__(self, *args, **kwargs):
+        self.window_class = kwargs.pop("window_class", GaussianWindow)
+        assert issubclass(self.window_class, WindowBase), "window_class must subclass pysprint.core.window.WindowBase"
         super().__init__(*args, **kwargs)
         self.window_seq = {}
         self.found_centers = {}
@@ -100,8 +52,7 @@ class WFTMethod(FFTMethod):
         self.errorcounter = 0
 
     @inplacify
-    @_mutually_exclusive_args("std", "fwhm")
-    def add_window(self, center, std=None, fwhm=None, order=2):
+    def add_window(self, center, **kwargs):
         """
         Add a Gaussian window to the interferogram.
 
@@ -109,29 +60,10 @@ class WFTMethod(FFTMethod):
         ----------
         center : float
             The center of the Gaussian window.
-        std : float, optional
-            The standard deviation of the Gaussian window
-            in units of the x axis of the interferogram.
-            You must specify exactly one of std and fwhm.
-        fwhm : float, optional
-            The full width at half max of the Gaussian window
-            in units of the x axis of the interferogram.
-            You must specify exactly one of std and fwhm.
-        order : int, optional
-            The order of Gaussian window. Must be even.
-            The default is 2.
+        kwargs : dict
+            Keyword arguments to pass to the `window_class`.
         """
-        if not np.min(self.x) <= center <= np.max(self.x):
-            raise ValueError(
-                f"Cannot add window at {center}, because "
-                f"it is out of the dataset's range (from {np.min(self.x):.3f} to {np.max(self.x):.3f})."
-            )
-        if std:
-            window = Window.from_std(
-                self.x, center=center, std=std, order=order
-            )
-        else:
-            window = Window(self.x, center=center, fwhm=fwhm, order=order)
+        window = self.window_class(self.x, center=center, **kwargs)
         self.window_seq[center] = window
         return self
 
@@ -144,8 +76,7 @@ class WFTMethod(FFTMethod):
         return self.window_seq.keys()
 
     @inplacify
-    @_mutually_exclusive_args("std", "fwhm")
-    def add_window_generic(self, array, std=None, fwhm=None, order=2):
+    def add_window_generic(self, array, **kwargs):
         """
         Build a window sequence of given parameters with centers
         specified with ``array`` argument.
@@ -154,32 +85,17 @@ class WFTMethod(FFTMethod):
         ----------
         array : list, np.ndarray
             The array containing the centers of windows.
-        std : float, optional
-            The standard deviation of the Gaussian window
-            in units of the x axis of the interferogram.
-            You must specify exactly one of std and fwhm.
-        fwhm : float, optional
-            The full width at half max of the Gaussian window
-            in units of the x axis of the interferogram.
-            You must specify exactly one of std and fwhm.
-        order : int, optional
-            The order of Gaussian window. Must be even.
-            The default is 2.
+        kwargs : dict
+            Keyword arguments to pass to the `window_class`.
         """
         if not isinstance(array, (list, np.ndarray)):
             raise TypeError("Expected list-like as ``array``.")
         for center in array:
-            if std:
-                self.add_window(center=center, std=std, order=order)
-            else:
-                self.add_window(center=center, fwhm=fwhm, order=order)
+            self.add_window(center=center, **kwargs)
         return self
 
     @inplacify
-    @_mutually_exclusive_args("std", "fwhm")
-    def add_window_arange(
-        self, start, stop, step, std=None, fwhm=None, order=2
-    ):
+    def add_window_arange(self, start, stop, step, **kwargs):
         """
         Build a window sequence of given parameters to apply on ifg.
         Works similar to numpy.arange.
@@ -192,31 +108,16 @@ class WFTMethod(FFTMethod):
             The end value of the center
         step : float
             The step value to increment center.
-        std : float, optional
-            The standard deviation of the Gaussian window
-            in units of the x axis of the interferogram.
-            You must specify exactly one of std and fwhm.
-        fwhm : float, optional
-            The full width at half max of the Gaussian window
-            in units of the x axis of the interferogram.
-            You must specify exactly one of std and fwhm.
-        order : int, optional
-            The order of Gaussian window. Must be even.
-            The default is 2.
+        kwargs : dict
+            Keyword arguments to pass to the `window_class`.
         """
         arr = np.arange(start, stop, step)
         for cent in arr:
-            if std:
-                self.add_window(center=cent, std=std, order=order)
-            else:
-                self.add_window(center=cent, fwhm=fwhm, order=order)
+            self.add_window(center=cent, **kwargs)
         return self
 
     @inplacify
-    @_mutually_exclusive_args("std", "fwhm")
-    def add_window_linspace(
-        self, start, stop, num, std=None, fwhm=None, order=2
-    ):
+    def add_window_linspace(self, start, stop, num, **kwargs):
         """
         Build a window sequence of given parameters to apply on ifg.
         Works similar to numpy.linspace.
@@ -229,31 +130,16 @@ class WFTMethod(FFTMethod):
             The end value of the center
         num : float
             The number of Gaussian windows.
-        std : float, optional
-            The standard deviation of the Gaussian window
-            in units of the x axis of the interferogram.
-            You must specify exactly one of std and fwhm.
-        fwhm : float, optional
-            The full width at half max of the Gaussian window
-            in units of the x axis of the interferogram.
-            You must specify exactly one of std and fwhm.
-        order : int, optional
-            The order of Gaussian window. Must be even.
-            The default is 2.
+        kwargs : dict
+            Keyword arguments to pass to the `window_class`.
         """
         arr = np.linspace(start, stop, num)
         for cent in arr:
-            if std:
-                self.add_window(center=cent, std=std, order=order)
-            else:
-                self.add_window(center=cent, fwhm=fwhm, order=order)
+            self.add_window(center=cent, **kwargs)
         return self
 
     @inplacify
-    @_mutually_exclusive_args("std", "fwhm")
-    def add_window_geomspace(
-        self, start, stop, num, std=None, fwhm=None, order=2
-    ):
+    def add_window_geomspace(self, start, stop, num, **kwargs):
         """
         Build a window sequence of given parameters to apply on ifg.
         Works similar to numpy.geomspace.
@@ -266,24 +152,12 @@ class WFTMethod(FFTMethod):
             The end value of the center
         num : float
             The number of Gaussian windows.
-        std : float, optional
-            The standard deviation of the Gaussian window
-            in units of the x axis of the interferogram.
-            You must specify exactly one of std and fwhm.
-        fwhm : float, optional
-            The full width at half max of the Gaussian window
-            in units of the x axis of the interferogram.
-            You must specify exactly one of std and fwhm.
-        order : int, optional
-            The order of Gaussian window. Must be even.
-            The default is 2.
+        kwargs : dict
+            Keyword arguments to pass to the `window_class`.
         """
         arr = np.geomspace(start, stop, num)
         for cent in arr:
-            if std:
-                self.add_window(center=cent, std=std, order=order)
-            else:
-                self.add_window(center=cent, fwhm=fwhm, order=order)
+            self.add_window(center=cent, **kwargs)
         return self
 
     def view_windows(self, ax=None, maxsize=80, **kwargs):
@@ -383,7 +257,7 @@ class WFTMethod(FFTMethod):
         return self
 
     @inplacify
-    def cover(self, N, fwhm=None, std=None, order=2):
+    def cover(self, N, **kwargs):
         """
         Cover the whole domain with `N` number of windows
         uniformly built with the given parameters.
@@ -392,28 +266,11 @@ class WFTMethod(FFTMethod):
         ----------
         N : float
             The number of Gaussian windows.
-        std : float, optional
-            The standard deviation of the Gaussian window
-            in units of the x axis of the interferogram.
-            You must specify exactly one of std and fwhm.
-        fwhm : float, optional
-            The full width at half max of the Gaussian window
-            in units of the x axis of the interferogram.
-            You must specify exactly one of std and fwhm.
-        order : int, optional
-            The order of Gaussian window. Must be even.
-            The default is 2.
+        kwargs : dict
+            Keyword arguments to pass to the `window_class`.
         """
-        if fwhm is not None:
-            self.add_window_linspace(
-                np.min(self.x), np.max(self.x), N, fwhm=fwhm, order=order
-            )
-        elif std is not None:
-            self.add_window_linspace(
-                np.min(self.x), np.max(self.x), N, std=std, order=order
-            )
-        else:
-            raise ValueError
+
+        self.add_window_linspace(np.min(self.x), np.max(self.x), N, **kwargs)
 
     def calculate(
             self,

@@ -69,7 +69,8 @@ class Dataset(metaclass=_DatasetBase):
             meta=None,
             errors="raise",
             callback=None,
-            parent=None
+            parent=None,
+            **kwargs
     ):
         """
         Base constructor for Dataset.
@@ -99,6 +100,9 @@ class Dataset(metaclass=_DatasetBase):
         parent : any class, optional
             The object which handles the callback function. In most cases
             the user should leave this empty.
+        kwargs : dict, optional
+            The window class to use in WFTMethod. Has no effect while using other
+            methods. Must be a subclass of pysprint.core.windows.WindowBase.
 
         Note
         ----
@@ -571,6 +575,7 @@ class Dataset(metaclass=_DatasetBase):
         errors="raise",
         callback=None,
         parent=None,
+        **kwargs
     ):
         """
         Dataset object alternative constructor.
@@ -649,6 +654,9 @@ class Dataset(metaclass=_DatasetBase):
         parent : any class, optional
             The object which handles the callback function. In most cases
             the user should leave this empty.
+        kwargs : dict, optional
+            The window class to use in WFTMethod. Has no effect while using other
+            methods. Must be a subclass of pysprint.core.windows.WindowBase.
         """
 
         parsed = _parse_raw(
@@ -669,7 +677,7 @@ class Dataset(metaclass=_DatasetBase):
             meta_len=meta_len
         )
 
-        return cls(**parsed, errors=errors, callback=callback, parent=parent)
+        return cls(**parsed, errors=errors, callback=callback, parent=parent, **kwargs)
 
     def __str__(self):
         _unit = self._render_unit(self.unit)
