@@ -5,14 +5,10 @@ from inspect import isfunction
 import numpy as np
 import matplotlib.pyplot as plt
 
-from pysprint.config import _get_config_value
 from pysprint.core.methods.fftmethod import FFTMethod
 from pysprint.core.phase import Phase
-from pysprint.core._evaluate import gaussian_window
 from pysprint.core._fft_tools import find_roi
 from pysprint.core._fft_tools import find_center
-from pysprint.utils.decorators import _mutually_exclusive_args
-from pysprint.utils.decorators import _lazy_property
 from pysprint.utils.decorators import inplacify
 from pysprint.utils import NotCalculatedException
 from pysprint.utils import PySprintWarning

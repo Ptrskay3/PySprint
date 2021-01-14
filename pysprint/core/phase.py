@@ -172,13 +172,13 @@ class Phase:
     @classmethod
     def from_dispersion_array(cls, dispersion_array, domain=None):
         cls.is_dispersion_array = True
-        print(dispersion_array)
+        # print(dispersion_array)
         if domain is None:
             x = np.linspace(2, 4, num=2000)
         else:
             x = np.asarray(domain)
         coeffs = [0] + [v / factorial(i + 1) for i, v in enumerate(dispersion_array)]
-        print(coeffs)
+        # print(coeffs)
         cls.poly = np.poly1d(coeffs[::-1])
         return cls(x, cls.poly(x))
 
