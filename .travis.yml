@@ -1,15 +1,15 @@
 language: python
 
-python:
-  - "3.6"
-  - "3.7"
-  - "3.8"
-  - "3.9"
+env:
+  global:
+    - CIBW_BUILD: cp36-* cp37-* cp38-*
 
 jobs:
   include:
     # perform a linux build
-    - services: docker
+    - services:
+        - docker
+        - xvfb
     # and a mac build
     - os: osx
       language: shell
