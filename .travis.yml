@@ -1,100 +1,43 @@
-env:
-  global:
-    - TWINE_USERNAME=Ptrskay
-    - DOCKER_IMAGE_LINUX_32=daald/ubuntu32:xenial
-    - DOCKER_CONTAINER_LINUX_32=ubuntu32_container
+language: python
 
-stages:
-  - Testing
-  # Architectures supported:
-  # - manylinux1_x86_64 py3.7, 3.8
-  # - osx py3.7, 3.8
-  - name: Deploying
-    if: tag IS present
+python:
+  - "3.6"
+  - "3.7"
+  - "3.8"
+  - "3.9"
 
 jobs:
-  allow_failures:
-    - os: osx
   include:
-    - stage: Test
-      name: "Python=3.7 linux x86_64"
-      os: linux
-      python: 3.7
-      services:
-        - xvfb
-      install:
-        - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
-        - export PATH="$HOME/.cargo/bin:$PATH"
-        - which python
-        - which python3
-        - which pip3
-        - pyenv global 3.7.1
-        - pip3 install --upgrade pip
-        - pip3 install -r requirements.txt
-        - pip3 install lmfit dask pytest coverage codecov
-        - pip3 install setuptools setuptools_rust
-        - python3 setup.py develop
-      script:
-        - cd pysprint/tests
-        - coverage run --source=pysprint -m pytest
-        - coverage report -m
-        - cd ..
-        - cd ..
+    # perform a linux build
+    - services: docker
+    # and a mac build
+    - os: osx
+      language: shell
 
-    - name: "Python=3.7 OSX"
-      os: osx
-      python: 3.7
-      language: generic
-      services:
-        - xvfb
-      env:
-        - PIP=pip3
-        - PYTHON=python3
-      install:
-        - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
-        - export PATH="$HOME/.cargo/bin:$PATH"
-        - $PIP install -r requirements.txt
-        - $PIP install lmfit dask numba pytest coverage codecov
-        - $PIP install setuptools setuptools_rust
-        - $PYTHON setup.py develop
-      script:
-        - cd pysprint/tests
-        - pytest -vv
-        - cd ..
-        - cd ..
+install:
+  - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
+  - export PATH="$HOME/.cargo/bin:$PATH"
+  - python3 -m pip install cibuildwheel==1.8.0
+  - pip3 install --upgrade pip
+  - pip3 install -r requirements.txt
+  - pip3 install lmfit dask pytest coverage codecov
+  - pip3 install setuptools setuptools_rust
+  - python3 setup.py develop
 
-    - stage: Deploying
-    - name: "manylinux_x86_64"
-      # Job generating the wheels for Linux 64-bit platforms
-      os: linux
-      sudo: required
-      env:
-        - CIBW_SKIP="*manylinux_i686* cp27-* cp34-* pp27-*"
-        - PIP=pip3
-        - PYTHON=python3
-      services:
-        - docker
-      before_script: chmod +x .ci/build.sh
-      script: .ci/deploy.sh
-    - name: "manylinux_i686"
-      # Job generating the wheels for Linux 32-bit platforms
-      os: linux
-      sudo: required
-      env:
-        - CIBW_SKIP="*manylinux_x86_64* cp34-* cp27-*"
-        - PIP=pip3
-        - PYTHON=python3
-      services:
-        - docker
-      before_script: chmod +x .ci/deployi686.sh
-      script: .ci/deployi686.sh
-    - name: "OSX"
-      os: osx
-      sudo: required
-      language: generic
-      env:
-        - CIBW_SKIP="cp27-* cp34-*"
-        - PIP=pip3
-        - PYTHON=python3
-      before_script: chmod +x .ci/build.sh
-      script: .ci/deploy.sh
+script:
+  - cd pysprint/tests
+  - coverage run --source=pysprint -m pytest
+  - coverage report -m
+  - cd ..
+  - cd ..
+  # build the wheels, put them into './wheelhouse'
+  - python3 -m cibuildwheel --output-dir wheelhouse
+
+deploy:
+  provider: pypi
+  username: "__token__"
+  skip_cleanup: true
+  on:
+    tags: true
+  password:
+    secure: Iq4AIzY+TfLPMrhOgEXrlOvBUkGehbDfzqYYGbvumWp0JrJlCYfrF9RepJ3PFelatGrsRuVDcr4UBVC8USCPH1QfFoOPYXk/tI2EmrwcRfkECp8yTrnuyfztG7KYQi6F6TtiQsZAbGY21L5j23x/OXxgH1B/v1ZZhW2oMiGZC/aT7Jr6VfLBdk3jKsU1WGz9YD4/EaleFLdjKxu1rJf7FmC7rmGKLLBhL8/FwO/KTGvL1XOSBi5KJDT28yj6N/JSqqprdC6GVuy81HpRI/+K7RuEPWtMMkHsEi5DE1zlC1DkWMWH+moCG2qqzwungENC/334vMW70pbtjgV2wDSXDwv3QfwgXM/xGBysVboNXT42QRu8wWe2YFWEAtV1qQKXHE5bfTi+swQSclXIkw4aSBiw+ZHtMA2MyN3Bxej4rhQh+BVVAFnpf0FMqs0PI8ztgbsNtdAMrSwhAxhkLXNuaGY7fSE6A0Ovs2u7iU+S53Tj9ulZYTn1fdRb0r2fQdbWLGJiYHNotwoCIeP8r6cMG0/6qy5cKo25cHewUwlWybJZVPZUJwsWThIxzBmtfjpzdQnyXLuJTu28VwIujbunSNcnlJILTFzQht33i/dDd6uEJLzvuoRXpDPNbNSkeAWMTb47YoDQFhmEc8sBs4ZGLldwYBfvxrFaLLqg01W0NWE=
