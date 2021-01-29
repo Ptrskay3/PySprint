@@ -8,8 +8,7 @@ env:
     - TWINE_USERNAME: Ptrskay
     - DOCKER_IMAGE_LINUX_32: daald/ubuntu32:xenial
     - DOCKER_CONTAINER_LINUX_32: ubuntu32_container
-    - CIBW_BEFORE_BUILD: 'curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y'
-    - CIBW_ENVIRONMENT: 'PATH="$HOME/.cargo/bin:$PATH"'
+
 
 jobs:
   allow_failures:
@@ -39,6 +38,8 @@ script:
   - coverage report -m
   - cd ..
   - cd ..
+  - export CIBW_BEFORE_BUILD='pip install setuptools-rust && curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y'
+  - export CIBW_ENVIRONMENT='PATH="$HOME/.cargo/bin:$PATH"'
   # build the wheels, put them into './wheelhouse'
   - python3 -m cibuildwheel --output-dir wheelhouse
 
