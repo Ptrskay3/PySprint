@@ -3,7 +3,7 @@ language: python
 env:
   global:
     - CIBW_BUILD: cp3*-*
-    - CIBW_SKIP: "*win32* cp27-* cp33-* cp34-* cp35-*"
+    - CIBW_SKIP: "cp35-*"
 
 jobs:
   allow_failures:
