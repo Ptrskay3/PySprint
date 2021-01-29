@@ -53,9 +53,9 @@ test_script:
   - "%PYTHON%\\python.exe -m pytest -vv"
   - cd ..
   - cd ..
-  - cd doc
-  - "%PYTHON%\\python.exe test_notebooks.py ."
-  - cd ..
+  # - cd doc
+  # - "%PYTHON%\\python.exe test_notebooks.py ."
+  # - cd ..
 
 after_test:
   - ps: |
