@@ -6,11 +6,14 @@ When reporting issues please include as much detail as possible about your
 operating system, numpy, scipy, matplotlib, PyQt5 version and python version. Whenever possible,
 please also include a brief, self-contained code/screenshot example that demonstrates the problem.
 Pysprint has a built-in `print_info` function which holds all the relevant information. Use it as follows:
+
 ```python
 import pysprint as ps
 ps.print_info()
 ```
+
 This outputs something like this:
+
 ```python
 PYSPRINT ANALYSIS TOOL
 
@@ -43,13 +46,12 @@ Conda env  : False
 IPython    : True
 Spyder     : False
 ```
+
 Make sure you include this in every issue.
 
-
-## Contributing code 
+## Contributing code
 
 Thanks for your interest in contributing code to PySprint!
 
-This repository is strongly connected to my thesis, and to avoid any kind of copyright issues contributing is temporaly rejected.
+This repository is strongly connected to my thesis, and to avoid any kind of copyright issues contributing is rejected until 2021 July.
 Later on - when it's released - contributing will be available.
-

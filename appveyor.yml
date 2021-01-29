@@ -53,6 +53,9 @@ test_script:
   - "%PYTHON%\\python.exe -m pytest -vv"
   - cd ..
   - cd ..
+  - cd doc
+  - "%PYTHON%\\python.exe -m test_notebooks.py"
+  - cd ..
 
 after_test:
   - ps: |
@@ -67,4 +70,3 @@ after_test:
 artifacts:
   - path: "dist\\*.whl"
     name: Wheels
-

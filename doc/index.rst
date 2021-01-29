@@ -11,8 +11,11 @@ Pysprint provides a high-level interface for evaluating measurements
 relying on spectrally resolved interferometry.
 
 The Pysprint package is free software, using an Open Source MIT license. The
-software and this document are works in progress. See the project at
+software and this document are works in progress. See the full project at
 `pysprint GitHub repository`_.
+
+Due to the narrow use cases of the software, the guide below in written in
+Hungarian, but someday in the future I will translate it to English.
 
 Try it online:
 

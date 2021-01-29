@@ -31,7 +31,7 @@ project = 'Pysprint'
 copyright = '2020, Peter Leeh'
 author = 'Peter Leeh'
 
-release = '0.12.4'
+release = '0.15.0'
 
 autodoc_default_options = {
     'special-members': '__init__'
