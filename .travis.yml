@@ -74,6 +74,7 @@ jobs:
         - PYTHON=python3
       services:
         - docker
+      before_script: chmod +x .ci/build.sh
       script: .ci/deploy.sh
     - name: "manylinux_i686"
       # Job generating the wheels for Linux 32-bit platforms
@@ -85,6 +86,7 @@ jobs:
         - PYTHON=python3
       services:
         - docker
+      before_script: chmod +x .ci/deployi686.sh
       script: .ci/deployi686.sh
     - name: "OSX"
       os: osx
@@ -94,4 +96,5 @@ jobs:
         - CIBW_SKIP="cp27-* cp34-*"
         - PIP=pip3
         - PYTHON=python3
+      before_script: chmod +x .ci/build.sh
       script: .ci/deploy.sh
