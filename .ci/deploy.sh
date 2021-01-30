@@ -8,4 +8,4 @@ cibuildwheel --output-dir dist
 ### Upload the wheels to PyPI ###
 # If the commit is tagged
 $PIP install twine
-$PYTHON -m twine upload --repository-url https://upload.pypi.org/legacy/ dist/*.whl --skip-existing
+$PYTHON -m twine upload wheelhouse/*.whl --skip-existing

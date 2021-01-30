@@ -42,11 +42,5 @@ script:
   # build the wheels, put them into './wheelhouse'
   - python3 -m cibuildwheel --output-dir wheelhouse
 
-deploy:
-  provider: pypi
-  username: "__token__"
-  skip_cleanup: true
-  on:
-    tags: true
-  password:
-    secure: Iq4AIzY+TfLPMrhOgEXrlOvBUkGehbDfzqYYGbvumWp0JrJlCYfrF9RepJ3PFelatGrsRuVDcr4UBVC8USCPH1QfFoOPYXk/tI2EmrwcRfkECp8yTrnuyfztG7KYQi6F6TtiQsZAbGY21L5j23x/OXxgH1B/v1ZZhW2oMiGZC/aT7Jr6VfLBdk3jKsU1WGz9YD4/EaleFLdjKxu1rJf7FmC7rmGKLLBhL8/FwO/KTGvL1XOSBi5KJDT28yj6N/JSqqprdC6GVuy81HpRI/+K7RuEPWtMMkHsEi5DE1zlC1DkWMWH+moCG2qqzwungENC/334vMW70pbtjgV2wDSXDwv3QfwgXM/xGBysVboNXT42QRu8wWe2YFWEAtV1qQKXHE5bfTi+swQSclXIkw4aSBiw+ZHtMA2MyN3Bxej4rhQh+BVVAFnpf0FMqs0PI8ztgbsNtdAMrSwhAxhkLXNuaGY7fSE6A0Ovs2u7iU+S53Tj9ulZYTn1fdRb0r2fQdbWLGJiYHNotwoCIeP8r6cMG0/6qy5cKo25cHewUwlWybJZVPZUJwsWThIxzBmtfjpzdQnyXLuJTu28VwIujbunSNcnlJILTFzQht33i/dDd6uEJLzvuoRXpDPNbNSkeAWMTb47YoDQFhmEc8sBs4ZGLldwYBfvxrFaLLqg01W0NWE=
+after_script:
+  - if [[ "$TRAVIS_TAG" != "" ]]; then pip3 install twine && python3 -m twine upload wheelhouse/*.whl --skip-existing
