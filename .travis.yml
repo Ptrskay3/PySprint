@@ -28,7 +28,7 @@ install:
   - pip3 install --upgrade pip
   - pip3 install -r requirements.txt
   - pip3 install lmfit dask pytest coverage codecov
-  - pip3 install setuptools setuptools_rust
+  - pip3 install setuptools setuptools_rust twine==2.0
   - python3 setup.py develop
 
 script:
@@ -43,6 +43,6 @@ script:
   - python3 -m cibuildwheel --output-dir wheelhouse
 
 after_script:
-  - if [[ "$TRAVIS_TAG" != "" ]]; then 
+  - if [[ "$TRAVIS_TAG" != "" ]]; then
     python3 -m twine upload wheelhouse/*.whl --skip-existing;
     fi;
