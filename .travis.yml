@@ -37,7 +37,7 @@ script:
   # - coverage report -m
   # - cd ..
   # - cd ..
-  - export CIBW_BEFORE_BUILD='pip install setuptools-rust twine && curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y'
+  - export CIBW_BEFORE_BUILD='pip install setuptools-rust twine==2.0 && curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y'
   - export CIBW_ENVIRONMENT='PATH="$HOME/.cargo/bin:$PATH"'
   # build the wheels, put them into './wheelhouse'
   - python3 -m cibuildwheel --output-dir wheelhouse
