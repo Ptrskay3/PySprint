@@ -1,3 +1,7 @@
+// This file is just a placeholder, which show how to expose Rust
+// functions to Python, and also the deployment is set up around
+// this.
+
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
 use rayon::prelude::*;

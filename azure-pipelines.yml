@@ -1,55 +1,51 @@
 trigger:
-- master
-- rust-ext
+  - master
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: "ubuntu-latest"
 strategy:
   matrix:
     Python36:
-      python.version: '3.6'
+      python.version: "3.6"
     Python37:
-      python.version: '3.7'
+      python.version: "3.7"
     Python38:
-      python.version: '3.8'
-
+      python.version: "3.8"
 
 steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '$(python.version)'
-  displayName: 'Use Python $(python.version)'
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: "$(python.version)"
+    displayName: "Use Python $(python.version)"
 
+  - script: |
+      curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly
+      echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
+    displayName: "Install rust nighly"
 
-- script: |
-    curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly
-    echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
-  displayName: 'Install rust nighly'
+  - script: |
+      sudo cp .ci/.azure-pipelines/xvfb.init /etc/init.d/xvfb
+      sudo chmod +x /etc/init.d/xvfb
+      sudo update-rc.d xvfb defaults
+      sudo service xvfb start
+    displayName: "Start X Virtual Frame Buffer"
 
-- script: |
-    sudo cp .ci/.azure-pipelines/xvfb.init /etc/init.d/xvfb
-    sudo chmod +x /etc/init.d/xvfb
-    sudo update-rc.d xvfb defaults
-    sudo service xvfb start
-  displayName: 'Start X Virtual Frame Buffer'
+  - script: |
+      git clone https://github.com/PyO3/pyo3.git third_party
+      cd third_party
+      git checkout 38af32e  # checkout a stable release
+      cd ..
+      python -m pip install --upgrade pip
+      pip install -r requirements.txt
+      pip install wheel lmfit numba flake8 coverage codecov pytest nbconvert jupyter setuptools wheel setuptools-rust
+      python setup.py develop
+    displayName: "Install"
 
-- script: |
-    git clone https://github.com/PyO3/pyo3.git third_party
-    cd third_party
-    git checkout 38af32e  # checkout a stable release
-    cd ..
-    python -m pip install --upgrade pip
-    pip install -r requirements.txt
-    pip install wheel lmfit numba flake8 coverage codecov pytest nbconvert jupyter setuptools wheel setuptools-rust
-    python setup.py develop
-  displayName: 'Install'
-
-- script: |
-    flake8 pysprint/ --count --select=E9,F63,F72,F82 --show-source --statistics
-    cd doc
-    python test_notebooks.py .
-    cd ..
-    cd pysprint/tests
-    pytest -vv
-  displayName: 'Unittest'
-
+  - script: |
+      flake8 pysprint/ --count --select=E9,F63,F72,F82 --show-source --statistics
+      cd doc
+      python test_notebooks.py .
+      cd ..
+      cd pysprint/tests
+      pytest -vv
+    displayName: "Unittest"

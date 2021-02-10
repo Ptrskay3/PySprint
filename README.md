@@ -37,7 +37,7 @@ pointless Rust extension module, which might turn into something useful later.
 
 ### Installation
 
-PySprint requires at least [Python 3.7](https://www.python.org/downloads/) to run.
+PySprint requires at least [Python 3.6](https://www.python.org/downloads/) to run.
 
 Install with
 
