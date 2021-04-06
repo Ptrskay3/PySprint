@@ -13,19 +13,25 @@ environment:
       PYTHON: "C:\\Python37"
       PYTHON_VERSION: "3.7.x"
       PYTHON_ARCH: "32"
-      CIBW_SKIP: "*win_amd64* cp27-* cp33-* cp34-* cp35-* cp36-* cp38-*"
+      CIBW_SKIP: "*win_amd64* cp27-* cp33-* cp34-* cp35-* cp36-* cp38-* cp39-*"
     - channel: nightly
       target: x86_64-pc-windows-msvc
       PYTHON: "C:\\Python37-x64"
       PYTHON_VERSION: "3.7.x"
       PYTHON_ARCH: "64"
-      CIBW_SKIP: "*win32* cp27-* cp33-* cp34-* cp35-* cp36-* cp38-*"
+      CIBW_SKIP: "*win32* cp27-* cp33-* cp34-* cp35-* cp36-* cp38-* cp39-*"
     - channel: nightly
       target: x86_64-pc-windows-msvc
       PYTHON: "C:\\Python38-x64"
       PYTHON_VERSION: "3.8.x"
       PYTHON_ARCH: "64"
-      CIBW_SKIP: "*win32* cp27-* cp33-* cp34-* cp35-* cp36-* cp37-*"
+      CIBW_SKIP: "*win32* cp27-* cp33-* cp34-* cp35-* cp36-* cp37-* cp39-*"
+    - channel: nightly
+      target: x86_64-pc-windows-msvc
+      PYTHON: "C:\\Python39-x64"
+      PYTHON_VERSION: "3.9.x"
+      PYTHON_ARCH: "64"
+      CIBW_SKIP: "*win32* cp27-* cp33-* cp34-* cp35-* cp36-* cp37-* cp38-*"
 
 install:
   # Install cargo. See: https://github.com/starkat99/appveyor-rust/blob/master/appveyor.yml

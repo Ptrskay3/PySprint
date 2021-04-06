@@ -37,8 +37,8 @@ class _DatasetBase(type):
                 if attr_name == "calculate" or attr_name.startswith("calculate"):
                     attrs[attr_name] = pprint_disp(attr_value)
             else:
-                if attr_name == "calculate" or attr_name.startswith("calculate"):
-                    if isinstance(attr_value, staticmethod):
+                if isinstance(attr_value, staticmethod):
+                    if attr_name == "calculate" or attr_name.startswith("calculate"):
                         attrs[attr_name] = staticmethod(pprint_disp(attr_value.__func__))
 
         return super(_DatasetBase, cls).__new__(cls, name, bases, attrs)

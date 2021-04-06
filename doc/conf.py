@@ -14,7 +14,7 @@ autodoc_mock_imports = [
     'sklearn',
     'numerics',
     'blank',
-    'dot',
+    'set_panic_hook',
 ]
 
 import os
@@ -31,7 +31,7 @@ project = 'Pysprint'
 copyright = '2020, Peter Leeh'
 author = 'Peter Leeh'
 
-release = '0.28.0'
+release = '0.29.0'
 
 autodoc_default_options = {
     'special-members': '__init__'

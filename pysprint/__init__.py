@@ -10,7 +10,9 @@ import pysprint.core.init_config
 from pysprint.utils.misc import run_from_ipython
 
 try:
-    from .numerics import blank, dot, dot2
+    from .numerics import blank, set_panic_hook
+    # setup a global ctrl-c handler
+    set_panic_hook()
 except Exception:
     def blank(*args, **kwargs):
         raise ImportError("Rust Extensions aren't built.")
@@ -24,6 +26,7 @@ warnings.filterwarnings("ignore", message="Casting complex values to real discar
 __author__ = "Leéh Péter"
 
 from .core import *
+import pysprint.devices
 from .utils import print_info
 
 default_backend = "Qt5Agg" if getattr(matplotlib, "__version__", None) != "3.3.1" else "TkAgg"
@@ -52,8 +55,7 @@ def interactive(backend=default_backend, figsize=(15, 5)):
     except (AttributeError, ImportError, ModuleNotFoundError) as err:
         raise ValueError(
             f"Couldn't set backend {backend}, you should manually "
-            "change to an appropriate GUI backend. (Matplotlib 3.3.1 "
-            "is broken. In that case use backend='TkAgg')."
+            "change to an appropriate GUI backend."
         ) from err
     finally:
         plt.switch_backend(original_backend)
@@ -77,8 +79,7 @@ def set_interactive(backend=default_backend, figsize=(15, 5)):
     except (AttributeError, ImportError, ModuleNotFoundError) as err:
         raise ValueError(
             f"Couldn't set backend {backend}, you should manually "
-            "change to an appropriate GUI backend. (Matplotlib 3.3.1 "
-            "is broken. In that case use backend='TkAgg')."
+            "change to an appropriate GUI backend."
         ) from err
 
 from ._version import get_versions

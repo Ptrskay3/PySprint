@@ -86,11 +86,11 @@ def inplacify(method):
             # aren't dropped
             try:
                 new_ds.callback(new_ds, new_ds.parent)
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, AttributeError):
                 pass
             
             # invalidate parent for the original obj.
-            if self.parent is not None:
+            if hasattr(self, "parent") and self.parent is not None:
                 self.parent._container.pop(self, None)
                 self.parent = None
             return new_ds

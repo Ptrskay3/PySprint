@@ -9,8 +9,7 @@ version = "0.12.3"
 features = ["extension-module"]
 
 [dependencies]
-rayon = "1.5"
-ndarray = "0.13.0"
+ctrlc = "3.1"
 
 [lib]
 name = "pysprint"
