@@ -268,6 +268,53 @@ class WFTMethod(FFTMethod):
 
         self.add_window_linspace(np.min(self.x), np.max(self.x), N, **kwargs)
 
+    def _calculate(
+        self,
+        reference_point,
+        order,
+        show_graph=False,
+        silent=False,
+        force_recalculate=False,
+        fastmath=True,
+        usenifft=False,
+        parallel=False,
+        ransac=False,
+        errors="ignore",
+        **kwds
+    ):
+        if len(self.window_seq) == 0:
+            raise ValueError("Before calculating a window sequence must be set.")
+
+        if self.cachedlen != len(self.window_seq) or fastmath != self.fastmath:
+            force_recalculate = True
+        self.fastmath = fastmath
+        if force_recalculate:
+            self.found_centers.clear()
+            self.build_GD(
+                silent=silent, fastmath=fastmath, usenifft=usenifft, parallel=parallel, errors=errors
+            )
+        if self.GD is None:
+            self.build_GD(
+                silent=silent, fastmath=fastmath, usenifft=usenifft, parallel=parallel, errors=errors
+            )
+
+        self.cachedlen = len(self.window_seq)
+
+        if order == 1 or order > 6:
+            raise ValueError("Order must be in [2, 6].")
+
+        if ransac:
+            print("Running RANSAC-filter..")
+            self.GD.ransac_filter(order=order, plot=show_graph, **kwds)
+            self.GD.apply_filter()
+
+        d, ds, fr = self.GD._fit(
+            reference_point=reference_point, order=order
+        )
+        if show_graph:
+            self.GD.plot()
+        return d, ds, fr
+
     def calculate(
             self,
             reference_point,
@@ -322,38 +369,19 @@ class WFTMethod(FFTMethod):
         ValueError, if order is 1.
         ModuleNotFoundError, if `Dask` is not available when using parallel=True.
         """
-        if len(self.window_seq) == 0:
-            raise ValueError("Before calculating a window sequence must be set.")
-
-        if self.cachedlen != len(self.window_seq) or fastmath != self.fastmath:
-            force_recalculate = True
-        self.fastmath = fastmath
-        if force_recalculate:
-            self.found_centers.clear()
-            self.build_GD(
-                silent=silent, fastmath=fastmath, usenifft=usenifft, parallel=parallel, errors=errors
-            )
-        if self.GD is None:
-            self.build_GD(
-                silent=silent, fastmath=fastmath, usenifft=usenifft, parallel=parallel, errors=errors
-            )
-
-        self.cachedlen = len(self.window_seq)
-
-        if order == 1 or order > 6:
-            raise ValueError("Order must be in [2, 6].")
-
-        if ransac:
-            print("Running RANSAC-filter..")
-            self.GD.ransac_filter(order=order, plot=show_graph, **kwds)
-            self.GD.apply_filter()
-
-        d, ds, fr = self.GD._fit(
-            reference_point=reference_point, order=order
+        return self._calculate(
+            reference_point,
+            order,
+            show_graph,
+            silent,
+            force_recalculate,
+            fastmath,
+            usenifft,
+            parallel,
+            ransac,
+            errors,
+            **kwds
         )
-        if show_graph:
-            self.GD.plot()
-        return d, ds, fr
 
     def build_GD(self, silent=False, fastmath=True, usenifft=False, parallel=False, errors="ignore"):
         """
@@ -412,7 +440,7 @@ class WFTMethod(FFTMethod):
         else:
             self.fastmath = fastmath
             self._apply_window_sequence(silent=silent, fastmath=fastmath, usenifft=usenifft)
-            self._clean_centers()
+            self._clean_centers(silent=silent)
 
             delay = np.fromiter(self.found_centers.keys(), dtype=float)
             omega = np.fromiter(self.found_centers.values(), dtype=float)
