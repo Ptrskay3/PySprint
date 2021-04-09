@@ -27,9 +27,9 @@ Guide
 .. toctree::
    :maxdepth: 2
 
-   hu_intro.ipynb
-   hu_dataset.ipynb
-   hu_spp.ipynb
+   1. Bevezetés <hu_intro.ipynb>
+   2. Dataset osztály <hu_dataset.ipynb>
+   3. Állandó fázisú pont módszere, SPPMethod <hu_spp.ipynb>
    hu_phase.ipynb
    hu_fft.ipynb
    hu_wft.ipynb
