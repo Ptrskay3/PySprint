@@ -12,7 +12,6 @@ autodoc_mock_imports = [
     'numba',
     'matplotlib.rcParams',
     'sklearn',
-    'numerics',
     'blank',
     'set_panic_hook',
 ]

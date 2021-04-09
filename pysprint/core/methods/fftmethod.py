@@ -262,6 +262,9 @@ class FFTMethod(Dataset):
         Decorated with pprint_disp, so the results are immediately
         printed without explicitly saying so.
         """
+        return self._calculate(reference_point, order, show_graph)
+
+    def _calculate(self, reference_point, order, show_graph=False):
         self.build_phase()
         dispersion, dispersion_std, fit_report = self.phase._fit(
             reference_point=reference_point, order=order
@@ -343,7 +346,7 @@ class FFTMethod(Dataset):
                 y = np.unwrap(np.angle(self.y), axis=0)
                 self.phase = Phase(self.x, y)
                 return self.phase
-            self.calculate(
+            self._calculate(
                 reference_point=reference_point, order=order, show_graph=True
             )
         else:

@@ -125,13 +125,13 @@ class MinMaxMethod(Dataset):
         return _editpeak.get_dat[0]  # we should return None
 
     def calculate(
-            self,
-            reference_point,
-            order,
-            SPP_callbacks=None,
-            show_graph=False,
-            scan=False,
-            onesided=False,
+        self,
+        reference_point,
+        order,
+        SPP_callbacks=None,
+        show_graph=False,
+        scan=False,
+        onesided=False,
     ):
         """
         MinMaxMethod's calculate function.
@@ -170,6 +170,24 @@ class MinMaxMethod(Dataset):
         immediately printed without explicitly saying so.
         """
 
+        return self._calculate(
+            reference_point,
+            order,
+            SPP_callbacks,
+            show_graph,
+            scan,
+            onesided
+        )
+
+    def _calculate(
+            self,
+            reference_point,
+            order,
+            SPP_callbacks=None,
+            show_graph=False,
+            scan=False,
+            onesided=False,
+    ):
         phase = self.build_phase(
             reference_point=reference_point, SPP_callbacks=SPP_callbacks, onesided=onesided
         )
