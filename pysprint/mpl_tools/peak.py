@@ -42,7 +42,7 @@ from matplotlib.backend_tools import ToolToggleBase
 from pysprint.utils import _get_closest
 
 
-class SelectButton(ToolToggleBase):
+class SelectButton(ToolToggleBase): # lgtm [py/missing-call-to-init]
     """
     Toggle button on matplotlib toolbar.
     """
