@@ -12,7 +12,7 @@ from pysprint.core._functions import _cosfit_config, cos_fit1
 class FitOptimizer:
     """Class to help achieve better fitting results."""
 
-    def __init__(self, x, y, ref, sam, reference_point, max_order=3):
+    def __init__(self, x, y, ref, sam, reference_point, max_order=3, nofigure=False):
         self.x = x
         self.y = y
         self.ref = ref
@@ -51,7 +51,9 @@ class FitOptimizer:
         self.curr_order = 1
         self.max_order = max_order
         self.rest = None
-        self.figure = plt.figure()
+        self.nofigure = nofigure
+        if not self.nofigure:
+            self.figure = plt.figure()
 
     def set_final_guess(self, GD, GDD=None, TOD=None, FOD=None, QOD=None, SOD=None):
         self.p0[3] = GD
@@ -182,6 +184,9 @@ class FitOptimizer:
 
     @_progress
     def run(self, r_extend_by, r_threshold, max_tries=5000, show_endpoint=True):
+        return self._run(r_extend_by, r_threshold, max_tries, show_endpoint)
+        
+    def _run(self, r_extend_by, r_threshold, max_tries=5000, show_endpoint=True):
         precision = _get_config_value("precision")
         if not self._init_set:
             raise ValueError("Set the initial conditions.")
@@ -199,8 +204,8 @@ class FitOptimizer:
                 if show_endpoint:
                     self.update_plot()
                     # self.figure.savefig(f'{self.counter}.eps')
-
-                self.result_wrapper()
+                if not self.nofigure:
+                    self.result_wrapper()
                 if run_from_ipython():
                     from IPython.display import display, Math # noqa
 

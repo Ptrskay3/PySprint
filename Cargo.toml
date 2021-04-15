@@ -5,8 +5,8 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies.pyo3]
-version = "0.12.3"
-features = ["extension-module"]
+version = "0.13.2"
+features = ["extension-module", "abi3"]
 
 [dependencies]
 ctrlc = "3.1"

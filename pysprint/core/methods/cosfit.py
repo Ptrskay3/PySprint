@@ -278,9 +278,33 @@ class CosFitMethod(Dataset):
         Adjust the coef_threshold value. Note that it's highly
         recommended not to set a higher value than 0.6.
         """
+        return self._optimizer(
+            reference_point,
+            order,
+            initial_region_ratio,
+            extend_by,
+            coef_threshold,
+            max_tries,
+            show_endpoint,
+            nofigure=False,
+        )
+
+
+    def _optimizer(
+        self,
+        reference_point,
+        order=3,
+        initial_region_ratio=0.1,
+        extend_by=0.1,
+        coef_threshold=0.3,
+        max_tries=5000,
+        show_endpoint=True,
+        nofigure=False
+    ):
+       
         x, y, ref, sam = self._safe_cast()
         self.f = FitOptimizer(
-            x, y, ref, sam, reference_point=reference_point, max_order=order
+            x, y, ref, sam, reference_point=reference_point, max_order=order, nofigure=nofigure
         )
         self.f.set_initial_region(initial_region_ratio)
         self.f.set_final_guess(
@@ -291,9 +315,14 @@ class CosFitMethod(Dataset):
             QOD=self.params[7],
             SOD=self.params[8]
         )  # we can pass it higher params safely, they are ignored.
-        disp = self.f.run(
-            extend_by, coef_threshold, max_tries=max_tries, show_endpoint=show_endpoint,
-        )
+        if nofigure:
+            disp = self.f._run(
+                extend_by, coef_threshold, max_tries=max_tries, show_endpoint=show_endpoint,
+            )
+        else:
+            disp = self.f.run(
+                extend_by, coef_threshold, max_tries=max_tries, show_endpoint=show_endpoint,
+            )
         disp = disp[3:]
         retval = [disp[i] * factorial(i + 1) for i in range(len(disp))]
 

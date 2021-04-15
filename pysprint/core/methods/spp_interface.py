@@ -77,10 +77,10 @@ class SPPMethod(metaclass=_DatasetBase):
 
         self.skiprows = kwargs.pop("skiprows", 0)
         self.decimal = kwargs.pop("decimal", ",")
-        self.sep = kwargs.pop("sep", ";")
+        self.delimiter = kwargs.pop("delimiter", ";")
         self.meta_len = kwargs.pop("meta_len", 1)
         self.cb = kwargs.pop("callback", defaultcallback)
-        self.delimiter = kwargs.pop("delimiter", None)
+        self.sep = kwargs.pop("sep", None)
         self.comment = kwargs.pop("comment", None)
         self.usecols = kwargs.pop("usecols", None)
         self.names = kwargs.pop("names", None)

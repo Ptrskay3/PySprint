@@ -19,7 +19,7 @@ fn set_panic_hook() {
 }
 
 #[pymodule]
-fn numerics(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+fn internals(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(blank, m)?)?;
     m.add_function(wrap_pyfunction!(set_panic_hook, m)?)?;
     Ok(())

@@ -47,10 +47,10 @@ setup(
         "Topic :: Scientific/Engineering :: Physics",
     ],
     install_requires=["numpy>=1.16.6", "scipy", "matplotlib", "pandas", "Jinja2", "scikit-learn"],
-    setup_requires=["setuptools-rust>=0.10.1", "wheel"],
+    setup_requires=["setuptools-rust>=0.11.4", "wheel"],
     extras_require={"optional": ["numba", "lmfit", "pytest", "dask"]},
     rust_extensions=[
-        RustExtension("pysprint.numerics", "Cargo.toml", debug=False, binding=Binding.PyO3),
+        RustExtension("pysprint.internals", "Cargo.toml", debug=False, binding=Binding.PyO3, py_limited_api=True),
         ],
     entry_points={
         'console_scripts': [

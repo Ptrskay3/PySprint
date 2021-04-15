@@ -10,7 +10,7 @@ import pysprint.core.init_config
 from pysprint.utils.misc import run_from_ipython
 
 try:
-    from .numerics import blank, set_panic_hook
+    from .internals import blank, set_panic_hook
     # setup a global ctrl-c handler
     set_panic_hook()
 except Exception:
