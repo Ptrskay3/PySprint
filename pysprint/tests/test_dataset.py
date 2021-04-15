@@ -10,6 +10,7 @@ import pandas as pd
 from pysprint import Dataset
 from pysprint.utils.exceptions import DatasetError, PySprintWarning, InterpolationWarning
 from pysprint.config import setting
+from .conftest import no_osx
 
 
 class TestEvaluate(unittest.TestCase):
@@ -78,6 +79,7 @@ class TestEvaluate(unittest.TestCase):
         after = ifg.x
         np.testing.assert_array_almost_equal(before, after)
 
+    @no_osx
     @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Fails on Azure")
     @patch("matplotlib.pyplot.show")
     def test_normalize(self, mock_show):
