@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from pysprint import MinMaxMethod
+from .conftest import no_osx
 
 
 class TestEvaluate(unittest.TestCase):
@@ -17,6 +18,7 @@ class TestEvaluate(unittest.TestCase):
     def tearDown(self):
         pass
 
+    @no_osx
     @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure Pipelines fails this.")
     @patch("matplotlib.pyplot.show")
     def test_edit_session(self, mock_show):
@@ -37,6 +39,7 @@ class TestEvaluate(unittest.TestCase):
         with self.assertRaises(TypeError):
             ifg.init_edit_session(engine="normal", invalidkwarg=3)
 
+    @no_osx
     @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Fails on azure.")
     @patch("matplotlib.pyplot.show")
     def test_edit_session4(self, mock_show):

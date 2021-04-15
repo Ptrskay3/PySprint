@@ -8,7 +8,7 @@ from matplotlib import rcParams
 from pysprint.mpl_tools.peak import EditPeak
 from pysprint.mpl_tools.spp_editor import SPPEditor
 from pysprint.mpl_tools.normalize import DraggableEnvelope
-
+from .conftest import no_osx
 
 rcParams['figure.max_open_warning'] = 30
 
@@ -27,7 +27,7 @@ def mock_event(xdata, ydata, button, key, fig, canvas, inaxes=True):
 
     return event
 
-
+@no_osx
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_insert(mock_show):
@@ -41,7 +41,7 @@ def test_insert(mock_show):
     np.testing.assert_array_almost_equal(b, np.array([4, 5, 50]), decimal=5)
     mock_show.assert_called()
 
-
+@no_osx
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_delete(mock_show):
@@ -55,7 +55,7 @@ def test_delete(mock_show):
     np.testing.assert_array_equal(b, np.array([4]))
     mock_show.assert_called()
 
-
+@no_osx
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_not_inaxes(mock_show):
@@ -69,7 +69,7 @@ def test_not_inaxes(mock_show):
     np.testing.assert_array_equal(b, yy)
     mock_show.assert_called()
 
-
+@no_osx
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_lock(mock_show):
@@ -84,7 +84,7 @@ def test_lock(mock_show):
     np.testing.assert_array_equal(b, yy)
     mock_show.assert_called()
 
-
+@no_osx
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_lock2(mock_show):
@@ -104,7 +104,7 @@ def test_inconsistent_length():
     with pytest.raises(ValueError):
         EditPeak(range(500), range(500), x_extremal=[1], y_extremal=[2, 3])
 
-
+@no_osx
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_normalize_btn_release(mock_show):
@@ -115,7 +115,7 @@ def test_normalize_btn_release(mock_show):
     y_transform = obj.get_data()
     np.testing.assert_allclose(y_transform[100:9900], np.ones(9800), atol=1, rtol=1)
 
-
+@no_osx
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_normalize_keypress_cb(mock_show):
@@ -125,7 +125,7 @@ def test_normalize_keypress_cb(mock_show):
     mck = mock_event(xdata=50, ydata=50, button="d", key="d", fig=obj.fig, canvas=obj.fig.canvas, inaxes=True)
     obj.key_press_callback(event=mck)
 
-
+@no_osx
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_normalize_keypress_cb2(mock_show):
@@ -136,7 +136,7 @@ def test_normalize_keypress_cb2(mock_show):
     obj.key_press_callback(event=mck)
     mock_show.assert_called()
 
-
+@no_osx
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_normalize_keypress_cb3(mock_show):
@@ -145,7 +145,7 @@ def test_normalize_keypress_cb3(mock_show):
     with pytest.raises(ValueError):
         DraggableEnvelope(x, y, mode="invalid")
 
-
+@no_osx
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_normalize_button_press_cb(mock_show):
@@ -156,7 +156,7 @@ def test_normalize_button_press_cb(mock_show):
     obj.button_press_callback(event=mck)
     mock_show.assert_called()
 
-
+@no_osx
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_normalize_k_press_cb2(mock_show):
@@ -174,7 +174,7 @@ def test_normalize_k_press_cb2(mock_show):
     assert 0.5 not in obj.y_env
     mock_show.assert_called()
 
-
+@no_osx
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_normalize_keypress_cb4(mock_show):
@@ -187,7 +187,7 @@ def test_normalize_keypress_cb4(mock_show):
     assert 0.5 in obj.y_env
     mock_show.assert_called()
 
-
+@no_osx
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_normalize_motion_notify_cb(mock_show):
@@ -198,7 +198,7 @@ def test_normalize_motion_notify_cb(mock_show):
     obj.motion_notify_callback(event=mck)
     mock_show.assert_called()
 
-
+@no_osx
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_sppeditor_submit(mock_show):
@@ -208,7 +208,7 @@ def test_sppeditor_submit(mock_show):
     obj.submit("dsa50.dsa4")
     assert obj.delay == 50.4
 
-
+@no_osx
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_sppeditor_text_change(mock_show):
@@ -218,7 +218,7 @@ def test_sppeditor_text_change(mock_show):
     obj.text_change("dsa50.dsa4")
     assert obj.delay == 50.4
 
-
+@no_osx
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_sppeditor_btn_release(mock_show):
@@ -229,7 +229,7 @@ def test_sppeditor_btn_release(mock_show):
     obj.button_release_callback(event=mck)
     assert obj._ind is None
 
-
+@no_osx
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_sppeditor_get_ind(mock_show):
@@ -241,7 +241,7 @@ def test_sppeditor_get_ind(mock_show):
     mck = mock_event(xdata=1.5, ydata=1.3, button=1, key=1, fig=obj.fig, canvas=obj.fig.canvas, inaxes=obj.ax)
     obj.get_ind_under_point(event=mck)
 
-
+@no_osx
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_sppeditor_keypress_cb(mock_show):
@@ -255,7 +255,7 @@ def test_sppeditor_keypress_cb(mock_show):
     np.testing.assert_array_equal(obj.x_pos, np.array([1, 2, 2]))
     np.testing.assert_array_equal(obj.y_pos, np.array([1, 2, 0]))
 
-
+@no_osx
 @pytest.mark.skip(reason="Index can't be set..")
 @mock.patch("matplotlib.pyplot.show")
 def test_sppeditor_keypress_cb2(mock_show):
