@@ -51,4 +51,3 @@ def from_pat(pat, mod=None):
         raise ValueError(
             f"mod = {mod} is ambigous. Consider using your own logic for selecting files."
         )
-    

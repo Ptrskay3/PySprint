@@ -15,6 +15,7 @@ from sklearn.linear_model import RANSACRegressor
 
 warnings.simplefilter('ignore', np.RankWarning)
 
+
 def make_regression_class(degree):
     class PolynomialModel:
         def __init__(self, degree=degree, coeffs=None):

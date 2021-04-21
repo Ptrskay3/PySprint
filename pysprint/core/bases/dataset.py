@@ -1433,7 +1433,7 @@ class MimickedDataset(Dataset):
     def plot(self, *args, **kwargs):
         if self.x.size == 1:
             self.plt.text(0.31, 0.5, 'Dataset is missing.', size=15)
-  
+
     # Redefine getter-setter without boundscheck
     @property
     def positions(self):

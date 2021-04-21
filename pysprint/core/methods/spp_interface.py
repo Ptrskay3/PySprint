@@ -42,7 +42,7 @@ class SPPMethod(metaclass=_DatasetBase):
         """
         if errors not in ("raise", "ignore"):
             raise ValueError("errors must be `raise` or `ignore`.")
-        
+
         self.ifg_names = ifg_names
 
         if implements is None:
@@ -118,7 +118,7 @@ class SPPMethod(metaclass=_DatasetBase):
         """
         Load all files matching a pattern, then optinally sort them
         by modulo 3 if there are arms' spectra.
-        
+
         Parameters
         ----------
         pattern : str
@@ -127,7 +127,7 @@ class SPPMethod(metaclass=_DatasetBase):
         mod : int, optional
             The modulus to sort files by. Set this option to 3 if you have
             consecutive measurements, which contain arms' spectra. The option
-            mod = -1 will group by modulo 3, but it will only include every 
+            mod = -1 will group by modulo 3, but it will only include every
             third file.
         kwargs :
             Additional keyword arguments for the original constructor, for
@@ -282,9 +282,7 @@ class SPPMethod(metaclass=_DatasetBase):
         return d, ds, s
 
     def __len__(self):
-        l = len(self.ifg_names)
-        g = len(self._mimicked_set)
-        return max([l, g])
+        return max([len(self.ifg_names), len(self._mimicked_set)])
 
     # TODO
     def __str__(self):
@@ -370,7 +368,7 @@ class SPPMethod(metaclass=_DatasetBase):
             ifg.delay = None
             ifg._positions = None
             ifg.positions = None
-        
+
         # Clean up all other instances which might have been omitted due to inplace ops.
         alive = [i for i in Dataset._get_instances() if i.parent == self]
         for ifg in alive:
@@ -378,7 +376,6 @@ class SPPMethod(metaclass=_DatasetBase):
             ifg.delay = None
             ifg._positions = None
             ifg.positions = None
-
 
     def save_data(self, filename):
         """

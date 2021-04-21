@@ -51,7 +51,7 @@ setup(
     extras_require={"optional": ["numba", "lmfit", "pytest", "dask"]},
     rust_extensions=[
         RustExtension("pysprint.internals", "Cargo.toml", debug=False, binding=Binding.PyO3, py_limited_api=True),
-        ],
+    ],
     entry_points={
         'console_scripts': [
             'pysprint = pysprint.templates.build:main',

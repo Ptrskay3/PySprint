@@ -185,7 +185,7 @@ class FitOptimizer:
     @_progress
     def run(self, r_extend_by, r_threshold, max_tries=5000, show_endpoint=True):
         return self._run(r_extend_by, r_threshold, max_tries, show_endpoint)
-        
+
     def _run(self, r_extend_by, r_threshold, max_tries=5000, show_endpoint=True):
         precision = _get_config_value("precision")
         if not self._init_set:

@@ -565,9 +565,9 @@ def _lastlines(file, n, bsize=2048):
         while linecount <= n + 1:
             # read at least n lines + 1 more; we need to skip a partial line later on
             try:
-                hfile.seek(-bsize, os.SEEK_CUR)           # go backwards
-                linecount += hfile.read(bsize).count(sep) # count newlines
-                hfile.seek(-bsize, os.SEEK_CUR)           # go back again
+                hfile.seek(-bsize, os.SEEK_CUR)            # go backwards
+                linecount += hfile.read(bsize).count(sep)  # count newlines
+                hfile.seek(-bsize, os.SEEK_CUR)            # go back again
             except IOError as e:
                 if e.errno == errno.EINVAL:
                     # Attempted to seek past the start, can't go further
@@ -591,7 +591,7 @@ def _lastlines(file, n, bsize=2048):
             # The rest we yield
             yield line
 
+
 def _to_array(x):
     y = x.split(': ')[-1].strip('\n')
     return np.array(ast.literal_eval(y))
-

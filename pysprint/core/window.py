@@ -39,7 +39,7 @@ class WindowBase(ABC):
                                  f" but it must implement all of the following: {', '.join(POPARGS[1:])}.")
 
         parameters = [p for p in init_signature.parameters.values()
-                      if p.name not in POPARGS 
+                      if p.name not in POPARGS
                       and (p.kind == p.VAR_KEYWORD or p.kind == p.VAR_POSITIONAL)]
         for p in parameters:
             raise RuntimeError("Window classes should always "
@@ -51,11 +51,9 @@ class WindowBase(ABC):
         # Extract argument names excluding POPARGS
         return sorted([p.name for p in parameters])
 
-
     def __init__(self, x, center, **kwargs):
         self.x = x
         self.center = center
-
 
     def plot(self, ax=None, scalefactor=1, zorder=90, **kwargs):
         """

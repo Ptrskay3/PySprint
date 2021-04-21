@@ -27,7 +27,6 @@ class LogWriter:
         if not self.file.endswith((".log", ".txt")):
             self.file += ".log"
 
-
         self.phase = phase
         self.verbosity = verbosity or _get_config_value("verbosity")
 
@@ -65,7 +64,7 @@ class LogWriter:
                     linewidth=np.inf,
                     precision=precision,
             ):
-                output +=  f'''
+                output += f'''
                 Values:
                 x: {np.array2string(self.phase.x, separator=", ")}
                 y: {np.array2string(self.phase.y, separator=", ")}

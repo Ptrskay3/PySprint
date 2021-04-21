@@ -289,7 +289,6 @@ class CosFitMethod(Dataset):
             nofigure=False,
         )
 
-
     def _optimizer(
         self,
         reference_point,
@@ -301,7 +300,7 @@ class CosFitMethod(Dataset):
         show_endpoint=True,
         nofigure=False
     ):
-       
+
         x, y, ref, sam = self._safe_cast()
         self.f = FitOptimizer(
             x, y, ref, sam, reference_point=reference_point, max_order=order, nofigure=nofigure

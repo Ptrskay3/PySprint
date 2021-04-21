@@ -82,6 +82,7 @@ def set_interactive(backend=default_backend, figsize=(15, 5)):
             "change to an appropriate GUI backend."
         ) from err
 
+
 from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions

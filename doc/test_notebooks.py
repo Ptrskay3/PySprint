@@ -105,7 +105,7 @@ def exec_notebooks(test_dir, log_path='notebooktest.log'):
                     MplBackendRewriter().visit(tree)
                     ast.fix_missing_locations(tree)
 
-                    print(f">>> Rewrite done.")
+                    print(">>> Rewrite done.")
                     print(f">>> Executing '{fname}.'")
 
                     exec(
@@ -127,7 +127,7 @@ def exec_notebooks(test_dir, log_path='notebooktest.log'):
 
     if len(passed) != 2 or len(failed) != 6:
         return 1
-    print(f">>> Notebook tests passed.")
+    print(">>> Notebook tests passed.")
     return 0
 
 
