@@ -1,0 +1,3 @@
+[submodule "pysprint-cli"]
+	path = pysprint-cli
+	url = https://github.com/Ptrskay3/pysprint-cli

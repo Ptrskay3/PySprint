@@ -22,6 +22,7 @@
 
 ## Description
 
+
 PySprint provides an interface for Spectrally resolved interferometry in Python.
 PySprint implements all the evaluation methods described in the literature, however
 the API and the software itself might change over time. Documentation is sparse and due
