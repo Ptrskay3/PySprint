@@ -105,6 +105,11 @@ class EditPeak:
         coordinates, because otherwise when the axes are differently scaled the
         result will be catastrophicly unintuitive to work with.
         """
+        # The basic idea here is to work in two different coordinate systems,
+        # namely data coordinates and pixel coordinates. The concept of `distance`
+        # is not intuitive (using data coordinates) when the x and y coordinates are
+        # differently scaled. However, in pixel coordinates the `distance` always 
+        # work as you expect.
         ix, iy = event.xdata, event.ydata
 
         # change the cursor's position to pixels
@@ -134,7 +139,7 @@ class EditPeak:
                 # compute the closest point to the cursor in pixels
                 ix, iy, idx = _get_closest(ix, iy, x_pix, y_pix)
 
-                # change back to data coords and append
+                # transform back to data coords and append
                 pixels = self.ax.transData.inverted().transform(np.vstack([ix, iy]).T)
                 x_data, y_data = pixels.T
 

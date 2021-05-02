@@ -30,6 +30,7 @@ from pysprint.utils import transform_cf_params_to_dispersion
 from pysprint.utils import find_nearest
 from pysprint.utils import inplacify
 from pysprint.utils import NotCalculatedException
+from pysprint.utils import pad_with_trailing_zeros
 from pysprint.utils.misc import _unpack_lmfit
 
 logger = logging.getLogger(__name__)
@@ -171,16 +172,16 @@ class Phase:
 
     @classmethod
     def from_dispersion_array(cls, dispersion_array, domain=None):
-        cls.is_dispersion_array = True
-        # print(dispersion_array)
         if domain is None:
             x = np.linspace(2, 4, num=2000)
         else:
             x = np.asarray(domain)
-        coeffs = [0] + [v / factorial(i + 1) for i, v in enumerate(dispersion_array)]
-        # print(coeffs)
-        cls.poly = np.poly1d(coeffs[::-1])
-        return cls(x, cls.poly(x))
+        cls.poly = np.poly1d(dispersion_array[::-1])
+        instance = cls(x, cls.poly(x))
+        instance.is_dispersion_array = True
+        dispersion_padded = pad_with_trailing_zeros(dispersion_array, shape=6)
+        instance.coef_array = instance.coef_temp(*dispersion_padded)
+        return instance
 
     @classmethod
     def from_coeff(cls, GD=0, GDD=0, TOD=0, FOD=0, QOD=0, SOD=0, domain=None):
@@ -249,7 +250,7 @@ class Phase:
         """
         if self.is_coeff or self.is_dispersion_array:
             warnings.warn("No need to fit another curve.")
-            return
+            return self.coef_array
         else:
             if self.GD_mode:
                 order -= 1

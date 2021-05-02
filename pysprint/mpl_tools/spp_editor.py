@@ -68,7 +68,6 @@ class SPPEditor:
         except ValueError:
             pass
 
-    # TODO: Config should decide how to treat missing values.
     def get_data(self):
         positions, _ = self.points.get_data()
         if not hasattr(self, "delay"):

@@ -108,4 +108,4 @@ class GaussianWindow(WindowBase):
 
     def __str__(self):
         precision = _get_config_value("precision")
-        return f"Window(center={self.center:.{precision}f}, fwhm={self.fwhm}, order={self.order})"
+        return f"GaussianWindow(center={self.center:.{precision}f}, fwhm={self.fwhm}, order={self.order})"

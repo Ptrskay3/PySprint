@@ -51,6 +51,6 @@ def _write_or_update_json_fragment(filename, new_ifg, new_ifg_name):
     data[new_ifg_name] = new_ifg[new_ifg_name]
 
     # reopen in write mode (the cursor is at the end of the file
-    # after read)
+    # after read, it's just easier to reopen)
     with open(filename, "w") as json_file:
         json_file.write(json.dumps(data, indent=2))

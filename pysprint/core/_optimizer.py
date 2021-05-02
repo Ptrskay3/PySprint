@@ -211,7 +211,8 @@ class FitOptimizer:
 
                     display(Math(f"with \\ R^2 = {(self._fit_goodness()):.{precision}f}."))
                 else:
-                    print(f"with R^2 = {(self._fit_goodness()):.{precision}f}.")
+                    if not self.nofigure:
+                        print(f"with R^2 = {(self._fit_goodness()):.{precision}f}.")
                 return self.popt
             if self.counter == max_tries:
                 if show_endpoint:
