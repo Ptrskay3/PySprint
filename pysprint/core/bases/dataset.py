@@ -1356,8 +1356,8 @@ class Dataset(metaclass=_DatasetBase):
         if self.delay is None:
             raise ValueError("Delay value is missing.")
         # Important: Use underscored variables to avoid invoking the
-        # setter again, which might result in RecursionError and crashes
-        # the interpreter.
+        # setter again, which invokes the callback again, resulting in
+        # a never-ending cycle.
         if not isinstance(self._positions, np.ndarray):
             self._positions = np.asarray(self.positions)
         if not isinstance(self.delay, np.ndarray):
