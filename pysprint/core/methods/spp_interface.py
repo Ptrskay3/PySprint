@@ -1,6 +1,7 @@
 import os
 import warnings
 from functools import lru_cache
+from inspect import getfullargspec
 
 import numpy as np
 import matplotlib.pyplot as plt  # noqa
@@ -172,6 +173,19 @@ class SPPMethod(metaclass=_DatasetBase):
         for i, ds in enumerate(self):
             if ds == member:
                 return i
+
+    def transform_delay(self, func, *args, **kwargs):
+        """
+        Transform the delay values of the evaluation.
+
+        Parameters
+        ----------
+        func : callable
+            The function which maps old delay to new delay values. It's first argument must be `x`.
+        """
+        assert(getfullargspec(func).args[0] == "x"), "Function signature must contain x as its first parameter."
+        new_dom = {k: (func(v[0], *args, **kwargs), v[1]) for k, v in self._container.items()}
+        self._container = new_dom
 
     def _collect(self):
 

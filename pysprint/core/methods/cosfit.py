@@ -324,10 +324,7 @@ class CosFitMethod(Dataset):
             )
         disp = disp[3:]
         retval = [disp[i] * factorial(i + 1) for i in range(len(disp))]
-        # TODO: This should produce the same result, but it does not.
 
         self.phase = Phase.from_dispersion_array(retval, domain=self.x)
-        # trigger a fit to have disp calculated
-        # self.phase._fit(reference_point, order=order)
         self._dispersion_array = retval
         return retval

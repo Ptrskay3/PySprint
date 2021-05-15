@@ -403,7 +403,7 @@ class Phase:
         """
         return self.fitorder + 1 if self.GD_mode else self.fitorder
 
-    # TODO : For consistency, this should return a pd.DataFrame.
+    # TODO: For consistency, this should return a pd.DataFrame.
     # Because we hardwired this into other functions it's not safe
     # to rewrite, but this definitely should be corrected in the future.
     @property
@@ -555,7 +555,6 @@ def _lastlines(file, n, bsize=2048):
         if not hfile.readline():
             return  # empty, no point
         sep = hfile.newlines.encode()
-#     assert isinstance(sep, str), 'multiple newline types found, aborting'
 
     # find a suitable seek position in binary mode
     with open(file, 'rb') as hfile:

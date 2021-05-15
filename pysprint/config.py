@@ -142,7 +142,7 @@ class setting(ContextDecorator):
         self.ops = list(zip(args[::2], args[1::2]))
 
     def __enter__(self):
-        self.restore = [(pattern, _get_config_value(pattern)) for pattern, val in self.ops]
+        self.restore = [(pattern, _get_config_value(pattern)) for pattern, _ in self.ops]
 
         for pattern, val in self.ops:
             _set_config_value(pattern, val)

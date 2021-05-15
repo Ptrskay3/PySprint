@@ -108,7 +108,7 @@ class EditPeak:
         # The basic idea here is to work in two different coordinate systems,
         # namely data coordinates and pixel coordinates. The concept of `distance`
         # is not intuitive (using data coordinates) when the x and y coordinates are
-        # differently scaled. However, in pixel coordinates the `distance` always 
+        # differently scaled. However, in pixel coordinates the `distance` always
         # work as you expect.
         ix, iy = event.xdata, event.ydata
 
