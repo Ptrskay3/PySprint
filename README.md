@@ -1,6 +1,6 @@
 # PySprint
 
-### Spectrally Refined Interferometry for Python
+### Spectrally Resolved Interferometry for Python
 
 [![Build Status](https://travis-ci.org/Ptrskay3/PySprint.svg?branch=master)](https://travis-ci.org/Ptrskay3/pysprint)
 [![Build Status](https://dev.azure.com/leehpeter/PySprint/_apis/build/status/Ptrskay3.PySprint?branchName=master)](https://dev.azure.com/leehpeter/PySprint/_build/latest?definitionId=3&branchName=master)
@@ -12,29 +12,28 @@
 [![Documentation Status](https://readthedocs.org/projects/pysprint/badge/?version=latest)](https://pysprint.readthedocs.io/en/latest/?badge=latest)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Ptrskay3/PySprint/master?filepath=index.ipynb)
 
-|                        |                                                                                                                             |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| **Name**               | PySprint                                                                                                                    |
-| **PyPI package**       | [![PyPI version](https://badge.fury.io/py/pysprint.svg)](https://badge.fury.io/py/pysprint)                                 |
-| **Anaconda package**   | [![Anaconda-Server Badge](https://anaconda.org/ptrskay/pysprint/badges/version.svg)](https://anaconda.org/ptrskay/pysprint) |
-| **Development status** | Beta                                                                                                                        |
-| **License**            | [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)                 |
+| Name                      | PySprint                                                                                                                                                                  |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PyPI package              | [![PyPI version](https://badge.fury.io/py/pysprint.svg)](https://badge.fury.io/py/pysprint)                                                                               |
+| Anaconda package          | [![Not Maintained](https://img.shields.io/badge/Maintenance%20Level-Not%20Maintained-yellow.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d) |
+| Development status        | Beta                                                                                                                                                                      |
+| License                   | [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)                                                               |
+| Languages                 | Python, Rust                                                                                                                                                              |
+| Supported Python versions | [![PyPI pyversions](https://img.shields.io/pypi/pyversions/pysprint.svg)](https://pypi.python.org/pypi/pysprint/)                                                         |
 
 ## Description
-
 
 PySprint provides an interface for Spectrally resolved interferometry in Python.
 PySprint implements all the evaluation methods described in the literature, however
 the API and the software itself might change over time. Documentation is sparse and due
 to the narrow use case of the software its written in Hungarian, however it will be
-translated to English in the future. The testing is in _very early stage_, and we have a currently
-pointless Rust extension module, which might turn into something useful later.
+translated to English in the future. The testing is in _very early stages_.
 
-- ✓ Minimum-maximum method
-- ✓ Phase modulated cosine function fit method
-- ✓ Fourier method
-- ✓ Windowed Fourier transform method
-- ✓ Stationary phase point method
+- Minima-maxima method
+- Phase modulated cosine function fit method
+- Fourier method
+- Windowed Fourier transform method
+- Stationary phase point method
 
 ### Installation
 
@@ -44,12 +43,6 @@ Install with
 
 ```sh
 pip install pysprint
-```
-
-or install on Anaconda with:
-
-```sh
-(CURRENTLY NOT AVAILABLE) conda install -c ptrskay pysprint -c conda-forge
 ```
 
 Requirements:
@@ -69,4 +62,4 @@ Optional packages:
 
 ## Documentation
 
-The documentation is hosted on readthedocs.io.
+The documentation is hosted on readthedocs.io. You may try the software without installing on [binder](https://mybinder.org/v2/gh/Ptrskay3/PySprint/master?filepath=index.ipynb).
