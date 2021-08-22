@@ -1,6 +1,7 @@
 // This file basically sets up the panic hook for PySprint-CLI.
 // Currently the other functions are just for testing purposes.
 
+use pyo3::ffi::Py_FinalizeEx;
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
 
@@ -11,11 +12,19 @@ fn blank(a: usize) -> usize {
 }
 
 /// This function sets up the CTRL+C exit hook, which may be used
-/// with PySprint-CLI. Note that this terminates immediately,
-/// so no destructors will be run at all.
+/// with PySprint-CLI. This calls `Py_FinalizeEx`, which makes sure
+/// that all Python interpreters are destroyed correctly.
 #[pyfunction]
 fn set_panic_hook() {
-    ctrlc::set_handler(|| std::process::exit(130)).unwrap();
+    ctrlc::set_handler(|| {
+        // destroy all (sub)interpreters, and free all the memory allocated
+        // by the Python interpreter
+        unsafe {
+            Py_FinalizeEx();
+        }
+        std::process::exit(130)
+    })
+    .unwrap();
 }
 
 #[pymodule]
