@@ -17,7 +17,7 @@ except Exception:
     def blank(*args, **kwargs):
         raise ImportError("Rust Extensions aren't built.")
 
-
+# Warnings related to FFT.. They should be ignored in 99% of cases.
 warnings.filterwarnings("ignore", message="invalid value encountered in sqrt")
 warnings.filterwarnings("ignore", message="divide by zero encountered in true_divide")
 warnings.filterwarnings("ignore", message="Casting complex values to real discards the imaginary part")
