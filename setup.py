@@ -8,7 +8,6 @@ if sys.version_info[:2] < (3, 6):
 
 
 from setuptools import setup, find_packages
-from setuptools.command.sdist import sdist as SdistCommand
 
 
 with open("README.md", "r") as fh:
