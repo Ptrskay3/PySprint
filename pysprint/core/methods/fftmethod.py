@@ -280,7 +280,7 @@ class FFTMethod(Dataset):
         reference_point=None,
         order=None,
         *,
-        enable_printing=True,
+        enable_printing=False,
         skip_domain_check=False,
         only_phase=False,
         show_graph=True,
@@ -305,7 +305,7 @@ class FFTMethod(Dataset):
             Default is False (also not giving enough information for curve fitting
             will automatically activate it).
         enable_printing : bool, optional
-            If True enable printing the detailed results. Default is True.
+            If True enable printing the detailed results. Default is False.
         skip_domain_check : bool, optional
             If True skip the interferogram domain check and force the algorithm
             to perform actions without changing domain. If False, check for potential

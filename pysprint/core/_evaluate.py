@@ -335,7 +335,7 @@ def fft_method(x, y):
 
 def gaussian_window(t, tau, fwhm, order):
     """
-    Returns a simple gaussian window of given parameters evaulated at t.
+    Returns a simple gaussian window of given parameters evaluated at t.
 
     Parameters
     ----------

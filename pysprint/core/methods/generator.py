@@ -11,7 +11,7 @@ class Generator(metaclass=_DatasetBase):
     """
     Basic dataset generator.
     """
-    def __init__(  # TODO : add docstring.
+    def __init__(
         self,
         start,
         stop,
@@ -52,7 +52,6 @@ class Generator(metaclass=_DatasetBase):
     def __str__(self):
         return self.__repr__()
 
-    # TODO: PEP8 that horrible line below
     def __repr__(self):
         return f"Generator({self.start}, {self.stop}, {self.center}, delay={self.delay}, GD={self.GD}, GDD={self.GDD}, TOD={self.TOD}, FOD={self.FOD}, QOD={self.QOD}, SOD={self.SOD}, resolution={self.resolution}, pulse_width={self.pulse_width}, normalize={self.normalize})"
 
@@ -138,17 +137,15 @@ class Generator(metaclass=_DatasetBase):
         self.plotwidget.grid()
         self.plotwidget.show(block=True)
 
-    # TODO: rewrite this in a more intelligent manner, this is deprecated
     def save(self, name, path=None):
         """
         Saves the generated dataset with numpy.savetxt.
 
         Parameters
         ----------
-
-        name: string
+        name : string
             Name of the output file. You shouldn't include the .txt at the end.
-        path: string, default is None
+        path : string, default is None
             You can also specify the save path.
             e.g path='C:/examplefolder'
             """

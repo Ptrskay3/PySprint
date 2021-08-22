@@ -145,8 +145,6 @@ class CosFitMethod(Dataset):
         pprint_math_or_default(f"R^2 = {self.r_squared:.{precision}f}\n")
         dispersion = pad_with_trailing_zeros(dispersion, 6)
 
-        # TODO: This should produce the same result, but it does not.
-
         self.phase = Phase.from_dispersion_array(dispersion, domain=self.x)
         # trigger a fit to have disp calculated
         self.phase._fit(reference_point, order=np.max(np.flatnonzero(self.params)) - 2)

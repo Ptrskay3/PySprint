@@ -8,7 +8,7 @@ from pysprint.config import _get_config_value
 
 def signaltonoise(a, axis=0, ddof=0):
     """
-    Reimplementation of the deprecated
+    Re-implementation of the deprecated
     signaltonoise function from scipy.
     """
     a = np.asanyarray(a)

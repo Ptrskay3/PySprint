@@ -38,6 +38,11 @@ class SPPMethod(metaclass=_DatasetBase):
             The list containing the filenames of the sample arm's spectra.
         ref_names : list, optinal
             The list containing the filenames of the reference arm's spectra.
+        errors : str, optional
+            Whether to raise errors or silently pass. Default is "raise".
+        implements : object, optional
+            The method class that each interferogram implements. Must be a
+            subclass of pysprint.Dataset.
         kwargs :
             Additional keyword arguments to pass to `parse_raw` function.
         """

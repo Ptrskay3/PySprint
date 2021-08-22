@@ -147,7 +147,7 @@ class Phase:
     def __call__(self, value):
         if self.poly:
             return self.poly.__call__(value)
-        raise NotImplementedError("Before calling, a polinomial must be fitted.")
+        raise NotImplementedError("Before calling, a polynomial must be fitted.")
 
     @inplacify
     def slice(self, start=None, stop=None):

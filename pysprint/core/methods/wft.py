@@ -30,7 +30,7 @@ except ImportError:
 
 class WFTMethod(FFTMethod):
     """Basic interface for Windowed Fourier Transform Method.
-    The `window_class` attribuite can be set up for custom windowing.
+    The `window_class` attribute can be set up for custom windowing.
     """
 
     def __init__(self, *args, **kwargs):
@@ -349,7 +349,7 @@ class WFTMethod(FFTMethod):
             Whether to build additional arrays to display heatmap.
             Default is True.
         usenifft : bool, optional
-            Whether to use Non-unfirom FFT when calculating GD.
+            Whether to use Non-unifrom FFT when calculating GD.
             Default is False. **Not stable.**
         parallel : bool, optional
             Whether to use parallel computation. Only availabe if `Dask`
@@ -395,7 +395,7 @@ class WFTMethod(FFTMethod):
             Whether to build additional arrays to display heatmap.
             Default is True.
         usenifft : bool, optional
-            Whether to use Non-unfirom FFT when calculating GD.
+            Whether to use Non-unifrom FFT when calculating GD.
             Default is False. **Not stable.**
         parallel : bool, optional
             Whether to use parallel computation. Only availabe if `Dask`
