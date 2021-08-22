@@ -242,15 +242,15 @@ class CosFitMethod(Dataset):
 
         Reasons:
         Completely wrong initial GD guess (or lack of guessing).
-        Too broad inital region, so that the optimizer cannot find a
+        Too broad initial region, so that the optimizer cannot find a
         suitable fit.
 
         This usually happens when the used data is large, or the spectral
         resolution is high.
 
         Solution:
-        Provide better inital guess for GD.
-        Lower the inital_region_ratio.
+        Provide better initial guess for GD.
+        Lower the initial_region_ratio.
 
         **SciPy raises OptimizeWarning and the affected area is bigger**
 
