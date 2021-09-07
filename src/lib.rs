@@ -1,5 +1,6 @@
 // This file basically sets up the panic hook for PySprint-CLI.
 // Currently the other functions are just for testing purposes.
+#![warn(clippy::all, clippy::pedantic)]
 
 use pyo3::ffi::Py_FinalizeEx;
 use pyo3::prelude::*;
