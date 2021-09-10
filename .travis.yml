@@ -5,6 +5,7 @@ env:
   global:
     # - CIBW_BUILD: cp3*-*
     # - CIBW_SKIP: "cp35-*"
+    - CIBW_BEFORE_ALL: "rm -rf target/release && rm -rf pysprint/internals.abi3.so"
     - TWINE_USERNAME: Ptrskay
     - DOCKER_IMAGE_LINUX_32: daald/ubuntu32:xenial
     - DOCKER_CONTAINER_LINUX_32: ubuntu32_container
