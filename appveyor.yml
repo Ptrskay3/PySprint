@@ -26,6 +26,12 @@ environment:
       PYTHON_VERSION: "3.8.x"
       PYTHON_ARCH: "64"
       CIBW_SKIP: "*win32* cp27-* cp33-* cp34-* cp35-* cp36-* cp37-* cp39-*"
+    - channel: nightly
+      target: x86_64-pc-windows-msvc
+      PYTHON: "C:\\Python39-x64"
+      PYTHON_VERSION: "3.9.x"
+      PYTHON_ARCH: "64"
+      CIBW_SKIP: "*win32* cp27-* cp33-* cp34-* cp35-* cp36-* cp37-* cp38-*"
 
 install:
   # Install cargo. See: https://github.com/starkat99/appveyor-rust/blob/master/appveyor.yml
@@ -35,7 +41,7 @@ install:
   - rustc -vV
   - cargo -vV
   # Set the path so that the good python version is chosen
-  - "%PYTHON%\\python.exe -m pip install cibuildwheel==1.1.0"
+  - "%PYTHON%\\python.exe -m pip install cibuildwheel"
   - set PATH=%PYTHON%;%PATH%
   - set PATH=%PYTHON%\\Scripts;%PATH%
 
@@ -51,8 +57,7 @@ build_script:
 test_script:
   - cd pysprint/tests
   - "%PYTHON%\\python.exe -m pytest -vv"
-  - cd ..
-  - cd ..
+  - cd ../..
   # - cd doc
   # - "%PYTHON%\\python.exe test_notebooks.py ."
   # - cd ..

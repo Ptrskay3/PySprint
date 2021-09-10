@@ -24,7 +24,7 @@ jobs:
 install:
   - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
   - export PATH="$HOME/.cargo/bin:$PATH"
-  - python3 -m pip install cibuildwheel==1.8.0
+  - python3 -m pip install cibuildwheel
   - pip3 install --upgrade pip
   - pip3 install -r requirements.txt
   - pip3 install lmfit dask pytest coverage codecov
