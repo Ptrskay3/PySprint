@@ -3,8 +3,8 @@ language: python
 
 env:
   global:
-    # - CIBW_BUILD: cp3*-*
-    # - CIBW_SKIP: "cp35-*"
+    - CIBW_BUILD: cp3*-*
+    - CIBW_SKIP: "cp35-*"
     - TWINE_USERNAME: Ptrskay
     - DOCKER_IMAGE_LINUX_32: daald/ubuntu32:xenial
     - DOCKER_CONTAINER_LINUX_32: ubuntu32_container
@@ -24,7 +24,7 @@ jobs:
 install:
   - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
   - export PATH="$HOME/.cargo/bin:$PATH"
-  - python3 -m pip install cibuildwheel
+  - python3 -m pip install cibuildwheel=1.12
   - pip3 install --upgrade pip
   - pip3 install -r requirements.txt
   - pip3 install lmfit dask pytest coverage codecov
