@@ -49,7 +49,7 @@ setup(
     setup_requires=["setuptools-rust>=0.11.4", "wheel"],
     extras_require={"optional": ["numba", "lmfit", "pytest", "dask"]},
     rust_extensions=[
-        RustExtension("pysprint.internals", "Cargo.toml", debug=False, binding=Binding.PyO3, py_limited_api=True),
+        RustExtension("pysprint.internals", "Cargo.toml", debug=False, binding=Binding.PyO3),
     ],
     entry_points={
         'console_scripts': [
