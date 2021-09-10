@@ -3,8 +3,8 @@ language: python
 
 env:
   global:
-    - CIBW_BUILD: cp3*-*
-    - CIBW_SKIP: "cp35-*"
+    # - CIBW_BUILD: cp3*-*
+    # - CIBW_SKIP: "cp35-*"
     - TWINE_USERNAME: Ptrskay
     - DOCKER_IMAGE_LINUX_32: daald/ubuntu32:xenial
     - DOCKER_CONTAINER_LINUX_32: ubuntu32_container
@@ -35,7 +35,7 @@ script:
   - cd pysprint/tests
   - coverage run --source=pysprint -m pytest
   - coverage report -m
-  - cd .. && cd ..
+  - cd ../..
   - export CIBW_BEFORE_BUILD='pip install setuptools-rust twine==2.0 && curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y'
   - export CIBW_ENVIRONMENT='PATH="$HOME/.cargo/bin:$PATH"'
   # build the wheels, put them into './wheelhouse'
