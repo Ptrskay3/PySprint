@@ -49,7 +49,7 @@ build_script:
   # Install python dependencies for compiling
   # the dynamic library and run the tests
   - "%PYTHON%\\python.exe -m pip install -r requirements.txt"
-  - "%PYTHON%\\python.exe -m pip install lmfit numba dask pytest wheel"
+  - "%PYTHON%\\python.exe -m pip install lmfit numba dask pytest wheel nbconvert jupyter"
   # Compile the dynamic library
   - "%PYTHON%\\python.exe -m pip install setuptools setuptools_rust"
   - "%PYTHON%\\python.exe -m pip install -e ."
