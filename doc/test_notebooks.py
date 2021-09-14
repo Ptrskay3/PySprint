@@ -156,7 +156,8 @@ def cleanup(test_path):
     elif hooks.exception is not None:
         print(f"Process terminated by exception: {hooks.exception}")
         return 1
-    return 1
+    else:
+        return 1
 
 
 hooks = ExitHooks()
