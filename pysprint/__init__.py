@@ -1,4 +1,12 @@
-﻿import sys
+﻿try:
+    from .pysprint import blank, set_panic_hook
+    # setup a global ctrl-c handler
+    set_panic_hook()
+except Exception:
+    def blank(*args, **kwargs):
+        raise ImportError("Rust Extensions aren't built.")
+
+import sys
 
 import warnings
 from contextlib import contextmanager
@@ -9,13 +17,6 @@ import matplotlib.pyplot as plt  # noqa
 import pysprint.core.init_config
 from pysprint.utils.misc import run_from_ipython
 
-try:
-    from .internals import blank, set_panic_hook
-    # setup a global ctrl-c handler
-    set_panic_hook()
-except Exception:
-    def blank(*args, **kwargs):
-        raise ImportError("Rust Extensions aren't built.")
 
 # Warnings related to FFT.. They should be ignored in 99% of cases.
 warnings.filterwarnings("ignore", message="invalid value encountered in sqrt")
