@@ -11,6 +11,8 @@ jobs:
     container: quay.io/pypa/manylinux2010_x86_64
     steps:
       - uses: actions/checkout@v1
+        with:
+          fetch-depth: 0
       - name: Build wheels
         run: |
           curl https://sh.rustup.rs -sSf | sh -s -- -y
@@ -27,7 +29,7 @@ jobs:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          twine upload wheelhouse/*
+          twine upload wheelhouse/* --skip-existing
 
   osx-wheels:
     runs-on: macos-latest
@@ -36,6 +38,8 @@ jobs:
         python-version: [3.6, 3.7, 3.8, 3.9]
     steps:
       - uses: actions/checkout@v1
+        with:
+          fetch-depth: 0
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
@@ -57,12 +61,15 @@ jobs:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          twine upload target/wheels/*
+          python3 -m pip install twine
+          twine upload target/wheels/* --skip-existing
 
   windows-wheels:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v1
+        with:
+          fetch-depth: 0
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
@@ -82,4 +89,4 @@ jobs:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          twine upload target/wheels/*
+          twine upload target/wheels/* --skip-existing
