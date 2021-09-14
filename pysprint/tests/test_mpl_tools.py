@@ -8,7 +8,7 @@ from matplotlib import rcParams
 from pysprint.mpl_tools.peak import EditPeak
 from pysprint.mpl_tools.spp_editor import SPPEditor
 from pysprint.mpl_tools.normalize import DraggableEnvelope
-from .conftest import no_osx
+from .conftest import no_osx, no_mpl
 
 rcParams['figure.max_open_warning'] = 30
 
@@ -28,6 +28,7 @@ def mock_event(xdata, ydata, button, key, fig, canvas, inaxes=True):
     return event
 
 @no_osx
+@no_mpl
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_insert(mock_show):
@@ -42,6 +43,7 @@ def test_insert(mock_show):
     mock_show.assert_called()
 
 @no_osx
+@no_mpl
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_delete(mock_show):
@@ -56,6 +58,7 @@ def test_delete(mock_show):
     mock_show.assert_called()
 
 @no_osx
+@no_mpl
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_not_inaxes(mock_show):
@@ -70,6 +73,7 @@ def test_not_inaxes(mock_show):
     mock_show.assert_called()
 
 @no_osx
+@no_mpl
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_lock(mock_show):
@@ -85,6 +89,7 @@ def test_lock(mock_show):
     mock_show.assert_called()
 
 @no_osx
+@no_mpl
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_lock2(mock_show):
@@ -105,6 +110,7 @@ def test_inconsistent_length():
         EditPeak(range(500), range(500), x_extremal=[1], y_extremal=[2, 3])
 
 @no_osx
+@no_mpl
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_normalize_btn_release(mock_show):
@@ -116,6 +122,7 @@ def test_normalize_btn_release(mock_show):
     np.testing.assert_allclose(y_transform[100:9900], np.ones(9800), atol=1, rtol=1)
 
 @no_osx
+@no_mpl
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_normalize_keypress_cb(mock_show):
@@ -126,6 +133,7 @@ def test_normalize_keypress_cb(mock_show):
     obj.key_press_callback(event=mck)
 
 @no_osx
+@no_mpl
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_normalize_keypress_cb2(mock_show):
@@ -137,6 +145,7 @@ def test_normalize_keypress_cb2(mock_show):
     mock_show.assert_called()
 
 @no_osx
+@no_mpl
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_normalize_keypress_cb3(mock_show):
@@ -146,6 +155,7 @@ def test_normalize_keypress_cb3(mock_show):
         DraggableEnvelope(x, y, mode="invalid")
 
 @no_osx
+@no_mpl
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_normalize_button_press_cb(mock_show):
@@ -157,6 +167,7 @@ def test_normalize_button_press_cb(mock_show):
     mock_show.assert_called()
 
 @no_osx
+@no_mpl
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_normalize_k_press_cb2(mock_show):
@@ -175,6 +186,7 @@ def test_normalize_k_press_cb2(mock_show):
     mock_show.assert_called()
 
 @no_osx
+@no_mpl
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_normalize_keypress_cb4(mock_show):
@@ -188,6 +200,7 @@ def test_normalize_keypress_cb4(mock_show):
     mock_show.assert_called()
 
 @no_osx
+@no_mpl
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_normalize_motion_notify_cb(mock_show):
@@ -199,6 +212,7 @@ def test_normalize_motion_notify_cb(mock_show):
     mock_show.assert_called()
 
 @no_osx
+@no_mpl
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_sppeditor_submit(mock_show):
@@ -209,6 +223,7 @@ def test_sppeditor_submit(mock_show):
     assert obj.delay == 50.4
 
 @no_osx
+@no_mpl
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_sppeditor_text_change(mock_show):
@@ -219,6 +234,7 @@ def test_sppeditor_text_change(mock_show):
     assert obj.delay == 50.4
 
 @no_osx
+@no_mpl
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_sppeditor_btn_release(mock_show):
@@ -230,6 +246,7 @@ def test_sppeditor_btn_release(mock_show):
     assert obj._ind is None
 
 @no_osx
+@no_mpl
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_sppeditor_get_ind(mock_show):
@@ -242,6 +259,7 @@ def test_sppeditor_get_ind(mock_show):
     obj.get_ind_under_point(event=mck)
 
 @no_osx
+@no_mpl
 @pytest.mark.skipif("TF_BUILD" in os.environ, reason="Azure fails this.")
 @mock.patch("matplotlib.pyplot.show")
 def test_sppeditor_keypress_cb(mock_show):
@@ -256,6 +274,7 @@ def test_sppeditor_keypress_cb(mock_show):
     np.testing.assert_array_equal(obj.y_pos, np.array([1, 2, 0]))
 
 @no_osx
+@no_mpl
 @pytest.mark.skip(reason="Index can't be set..")
 @mock.patch("matplotlib.pyplot.show")
 def test_sppeditor_keypress_cb2(mock_show):
