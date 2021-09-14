@@ -60,8 +60,8 @@ setup(
             "Cargo.toml",
             debug=False,
             binding=Binding.PyO3,
-            py_limited_api=True,
-            features=["pyo3/abi3"],
+            # py_limited_api=True,
+            # features=["pyo3/abi3"],
         ),
     ],
     entry_points={
