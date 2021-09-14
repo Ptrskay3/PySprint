@@ -37,7 +37,7 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
           /opt/python/cp38-cp38/bin/pip install twine
-          twine upload wheelhouse/* --skip-existing
+          /opt/python/cp38-cp38/bin -m twine upload wheelhouse/* --skip-existing
 
   osx-wheels:
     runs-on: macos-latest
