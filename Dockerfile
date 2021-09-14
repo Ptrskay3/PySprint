@@ -25,4 +25,4 @@ RUN apt-get update && apt-get install -y \
     && apt-get autoremove -y \
     && apt-get clean -y
 
-RUN python3 -m pip install -e .[optional] && python -c "import pysprint;pysprint.print_info()"
+RUN python3 -m pip install maturin && maturin develop

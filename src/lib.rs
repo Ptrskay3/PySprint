@@ -29,8 +29,27 @@ fn set_panic_hook() {
 }
 
 #[pymodule]
-fn internals(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+fn pysprint(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(blank, m)?)?;
     m.add_function(wrap_pyfunction!(set_panic_hook, m)?)?;
     Ok(())
 }
+
+// This definitely needs a little bit of extra work to be able to test like this..
+
+// #[test]
+// fn test_blank_embedded() {
+//     let gil = Python::acquire_gil();
+//     let py = gil.python();
+//     let result = py.eval("blank(1)", None, None).unwrap();
+//     assert_eq!(result.extract::<usize>().unwrap(), 2);
+// }
+
+// #[test]
+// #[should_panic]
+// fn test_blank_embedded_panic() {
+//     let gil = Python::acquire_gil();
+//     let py = gil.python();
+//     let result = py.eval("blank('notvalid')", None, None).unwrap();
+//     assert_eq!(result.extract::<usize>().unwrap(), 2);
+// }

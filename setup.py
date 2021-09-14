@@ -1,4 +1,3 @@
-import os
 import sys
 import versioneer
 
@@ -45,15 +44,29 @@ setup(
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Physics",
     ],
-    install_requires=["numpy>=1.16.6", "scipy", "matplotlib", "pandas", "Jinja2", "scikit-learn"],
+    install_requires=[
+        "numpy>=1.16.6",
+        "scipy",
+        "matplotlib",
+        "pandas",
+        "Jinja2",
+        "scikit-learn",
+    ],
     setup_requires=["setuptools-rust>=0.11.4", "wheel"],
     extras_require={"optional": ["numba", "lmfit", "pytest", "dask"]},
     rust_extensions=[
-        RustExtension("pysprint.internals", "Cargo.toml", debug=False, binding=Binding.PyO3),
+        RustExtension(
+            "pysprint.internals",
+            "Cargo.toml",
+            debug=False,
+            binding=Binding.PyO3,
+            # py_limited_api=True,
+            # features=["pyo3/abi3"],
+        ),
     ],
     entry_points={
-        'console_scripts': [
-            'pysprint = pysprint.templates.build:main',
+        "console_scripts": [
+            "pysprint = pysprint.templates.build:main",
         ],
     },
     zip_safe=False,

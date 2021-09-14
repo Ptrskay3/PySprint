@@ -1,0 +1,102 @@
+name: publish-pysprint
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  linux-wheels:
+    runs-on: ubuntu-latest
+    container: quay.io/pypa/manylinux2010_x86_64
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 0
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: Print tag info
+        run: |
+          echo $RELEASE_VERSION
+          echo ${{ env.RELEASE_VERSION }}
+      - name: Build wheels
+        run: |
+          git fetch --prune
+          curl https://sh.rustup.rs -sSf | sh -s -- -y
+          source $HOME/.cargo/env
+          rustup default nightly
+          bash .github/workflows/build-wheels.sh
+      - uses: actions/upload-artifact@v1
+        with:
+          name: linux-wheels
+          path: wheelhouse/
+      - name: Publish package to PyPI
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          /opt/python/cp38-cp38/bin/pip install twine
+          /opt/python/cp38-cp38/bin/python -m twine upload wheelhouse/* --skip-existing
+
+  osx-wheels:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8, 3.9]
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 0
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          default: true
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Build wheels
+        run: |
+          git fetch --prune
+          python3 -m pip install maturin setuptools_rust twine
+          maturin build --release
+      - uses: actions/upload-artifact@v1
+        with:
+          name: osx-${{ matrix.python-version }}-wheel
+          path: target/wheels
+      - name: Publish package to PyPI
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          python3 -m pip install twine
+          twine upload target/wheels/* --skip-existing
+
+  windows-wheels:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 0
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          default: true
+      - uses: actions/setup-python@v2
+      - name: Build wheels
+        run: |
+          git fetch --prune
+          python -m pip install maturin setuptools_rust twine
+          maturin build --release
+      - uses: actions/upload-artifact@v1
+        with:
+          name: windows-wheels
+          path: target/wheels
+      - name: Publish package to PyPI
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          twine upload target/wheels/* --skip-existing

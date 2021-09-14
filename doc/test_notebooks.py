@@ -140,13 +140,13 @@ def cleanup(test_path):
             print("Removing .py files:")
             for file in pyfiles:
                 file.unlink()
-                print(f"Removed {file}.")
+                print(f"Unlinked {file}.")
 
             print("Removing .txt files:")
             for file in txtfiles:
                 if file.name not in SKIP_NAMES:
                     file.unlink()
-                    print(f"Removed {file}.")
+                    print(f"Unlinked {file}.")
             return 0
         else:
             print(

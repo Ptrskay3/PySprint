@@ -1,3 +1,44 @@
 [build-system]
-requires = ["setuptools>=41.0.0", "wheel", "setuptools_rust>=0.11.4", "toml", "versioneer-518"]
-build-backend = "setuptools.build_meta"
+requires = ["maturin>=0.11,<0.12", "wheel", "setuptools_rust>=0.11.4", "toml", "versioneer-518"]
+build-backend = "maturin"
+
+[project]
+name = "pysprint"
+version = "0.30.0"
+description = "Spectrally refined interferometry for Python"
+readme = "README.md"
+requires-python = ">=3.6"
+license = {file = "LICENSE"}
+authors = [
+  {email = "leeh123peter@gmail.com"},
+  {name = "Peter Leeh"}
+]
+
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Rust",
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Education",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Physics"
+]
+
+dependencies = [
+  "numpy>=1.16.6",
+  "scipy",
+  "matplotlib",
+  "pandas",
+  "Jinja2",
+  "scikit-learn"
+]
+
+[project.optional-dependencies]
+test = [
+  "numba",
+  "lmfit",
+  "pytest",
+  "dask"
+]
+
+[project.urls]
+repository = "https://github.com/Ptrskay3/PySprint"
