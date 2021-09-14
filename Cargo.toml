@@ -2,7 +2,7 @@
 authors = ["Leéh Péter <leeh123peter@gmail.com>"]
 name = "pysprint"
 version = "0.1.0"
-edition = "2021"
+edition = "2018"
 
 [dependencies.pyo3]
 version = "0.14.2"
