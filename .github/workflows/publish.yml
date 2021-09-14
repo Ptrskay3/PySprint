@@ -30,6 +30,7 @@ jobs:
         with:
           name: linux-wheels
           path: wheelhouse/
+      - uses: actions/setup-python@v2
       - name: Publish package to PyPI
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         env:
