@@ -46,10 +46,10 @@ install:
   - set PATH=%PYTHON%\\Scripts;%PATH%
 
 build_script:
-  # Install python dependencies for compiling
+  # Install python dependencies needed for compiling
   # the dynamic library and run the tests
   - "%PYTHON%\\python.exe -m pip install -r requirements.txt"
-  - "%PYTHON%\\python.exe -m pip install lmfit numba dask pytest wheel nbconvert jupyter"
+  - "%PYTHON%\\python.exe -m pip install lmfit numba dask pytest wheel nbconvert ipython"
   # Compile the dynamic library
   - "%PYTHON%\\python.exe -m pip install setuptools setuptools_rust"
   - "%PYTHON%\\python.exe -m pip install -e ."
@@ -59,6 +59,7 @@ test_script:
   - "%PYTHON%\\python.exe -m pytest -vv"
   - cd ../../doc
   - "%PYTHON%\\python.exe test_notebooks.py ."
+  - cat notebooktest.log | head -n 50 # sanity check..
   - cd ..
 
 after_test:

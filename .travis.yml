@@ -28,7 +28,7 @@ install:
   - python3 -m pip install cibuildwheel==1.8.0
   - pip3 install --upgrade pip
   - pip3 install -r requirements.txt
-  - pip3 install lmfit dask pytest coverage codecov nbconvert jupyter
+  - pip3 install lmfit dask pytest coverage codecov nbconvert ipython
   - pip3 install setuptools setuptools_rust twine==2.0
   - python3 setup.py develop
 
