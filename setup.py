@@ -56,7 +56,7 @@ setup(
     extras_require={"optional": ["numba", "lmfit", "pytest", "dask"]},
     rust_extensions=[
         RustExtension(
-            "pysprint.internals",
+            "pysprint.pysprint",
             "Cargo.toml",
             debug=False,
             binding=Binding.PyO3,

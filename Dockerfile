@@ -25,4 +25,4 @@ RUN apt-get update && apt-get install -y \
     && apt-get autoremove -y \
     && apt-get clean -y
 
-RUN python3 -m pip install maturin && maturin develop
+RUN python3 -m pip install maturin && maturin build
