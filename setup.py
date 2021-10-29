@@ -64,10 +64,5 @@ setup(
             # features=["pyo3/abi3"],
         ),
     ],
-    entry_points={
-        "console_scripts": [
-            "pysprint = pysprint.templates.build:main",
-        ],
-    },
     zip_safe=False,
 )
