@@ -1,4 +1,6 @@
 nbsphinx
+# https://github.com/sphinx-doc/sphinx/issues/9788
+docutils<0.18
 recommonmark
 # needed to avoid https://github.com/sphinx-doc/sphinx/issues/8198
 pygments>=2.4.1
